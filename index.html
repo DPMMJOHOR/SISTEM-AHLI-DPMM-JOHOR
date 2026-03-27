@@ -2093,6 +2093,8 @@ function showPage(id) {
   if (tla) { tla.innerHTML = ''; }
   if (id === 'backup') { renderBackupPage(); loadSupabaseBackups(); }
   if (id === 'admin') renderAdminPage();
+  if (id === 'ssm') renderSSMPage();
+  if (id === 'followup') renderFollowUpPage();
   closeSidebar();
 }
 
@@ -2589,7 +2591,7 @@ function renderSSMPage() {
   setSSM('ssm-kpi-expired', exp);
   setSSM('ssm-kpi-expiring', expiring);
   setSSM('ssm-kpi-ok', ok);
-  set('ssm-kpi-total', ssmM.length);
+  setSSM('ssm-kpi-total', ssmM.length);
   var tbody = document.getElementById('ssm-tbody');
   if (tbody) {
     var groups = [
