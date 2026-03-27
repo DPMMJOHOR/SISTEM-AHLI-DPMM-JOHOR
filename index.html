@@ -388,6 +388,14 @@ input, select, textarea, button { font-family: var(--sans); }
 .btn-gold:hover { background: #e8952a; transform: translateY(-1px); }
 .btn-success { background: #1a7a4a; color: var(--white); box-shadow: 0 4px 14px rgba(26,122,74,.25); }
 .btn-success:hover { background: #155f39; transform: translateY(-1px); }
+.faq-item { border-bottom: 1px solid var(--gray1); }
+.faq-item:last-child { border-bottom: none; }
+.faq-q { padding: 13px 16px; font-size: 13px; font-weight: 700; color: var(--navy); cursor: pointer; user-select: none; transition: background .15s; }
+.faq-q:hover { background: var(--navy-lt); border-radius: 6px; }
+.faq-q.open { color: var(--primary); }
+.faq-q.open::first-letter { }
+.faq-a { padding: 0 16px 14px 32px; font-size: 12.5px; line-height: 1.75; color: #444; display: none; }
+.faq-a.open { display: block; }
 .btn-outline { background: transparent; color: var(--primary); border: 1.5px solid var(--primary); }
 .btn-outline:hover { background: var(--primary-lt); }
 .btn-outline-red { background: transparent; color: var(--danger); border: 1.5px solid var(--danger); }
@@ -981,6 +989,10 @@ tr.row-unpaid { background: #fff0f0 !important; }
       <span class="nav-icon">&#x1F4BE;</span>
       <span class="nav-text">BACK UP</span>
     </div>
+    <div class="nav-item" onclick="showPage('faq')">
+      <span class="nav-icon">&#x2753;</span>
+      <span class="nav-text">PANDUAN & FAQ</span>
+    </div>
     <div class="nav-item" id="admin-nav-item" onclick="showPage('admin')" style="display:none;">
       <span class="nav-icon">&#x2699;</span>
       <span class="nav-text">PANEL ADMIN</span>
@@ -1418,6 +1430,155 @@ tr.row-unpaid { background: #fff0f0 !important; }
     </div>
   </div>
 
+  <!-- ══ FAQ ══ -->
+  <div id="page-faq" class="page">
+    <div style="max-width:860px;margin:0 auto;">
+
+      <!-- Quick Reference Cards -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px;">
+        <div class="sec-card" style="border-top:3px solid var(--primary);text-align:center;padding:16px;">
+          <div style="font-size:28px;">📋</div>
+          <div style="font-weight:800;color:var(--primary);font-size:13px;margin-top:6px;">Urus Ahli</div>
+          <div style="font-size:11.5px;color:var(--muted);margin-top:4px;">Tambah, edit, cari & eksport rekod ahli</div>
+        </div>
+        <div class="sec-card" style="border-top:3px solid var(--gold);text-align:center;padding:16px;">
+          <div style="font-size:28px;">💰</div>
+          <div style="font-weight:800;color:var(--gold);font-size:13px;margin-top:6px;">Urus Yuran</div>
+          <div style="font-size:11.5px;color:var(--muted);margin-top:4px;">Track yuran tahunan, jana laporan</div>
+        </div>
+        <div class="sec-card" style="border-top:3px solid #1a7a4a;text-align:center;padding:16px;">
+          <div style="font-size:28px;">📲</div>
+          <div style="font-weight:800;color:#1a7a4a;font-size:13px;margin-top:6px;">Follow Up WA</div>
+          <div style="font-size:11.5px;color:var(--muted);margin-top:4px;">Hantar notis melalui WhatsApp</div>
+        </div>
+      </div>
+
+      <!-- User Guide -->
+      <div class="sec-card" style="margin-bottom:18px;">
+        <div class="sec-head"><h3>📖 Panduan Penggunaan Sistem</h3></div>
+        <div class="sec-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 24px;">
+
+            <div>
+              <div style="font-weight:800;color:var(--primary);font-size:13px;border-bottom:2px solid var(--primary);padding-bottom:4px;margin-bottom:10px;">🏠 DASHBOARD</div>
+              <p style="font-size:12.5px;line-height:1.7;color:#333;margin-bottom:8px;">Papan pemuka utama menunjukkan ringkasan keseluruhan — jumlah ahli, status yuran, SSM kritikal, dan graf peratusan.</p>
+              <ul style="font-size:12px;line-height:1.9;color:#444;padding-left:18px;margin-bottom:14px;">
+                <li>Klik <strong>"Jana Laporan"</strong> untuk hasilkan laporan PDF lengkap</li>
+                <li>Klik <strong>"FOLLOW UP"</strong> untuk lihat ahli yang perlu tindakan segera</li>
+                <li>Kad KPI di atas boleh diklik untuk navigasi pantas</li>
+              </ul>
+
+              <div style="font-weight:800;color:var(--primary);font-size:13px;border-bottom:2px solid var(--primary);padding-bottom:4px;margin-bottom:10px;">👥 SENARAI AHLI</div>
+              <ul style="font-size:12px;line-height:1.9;color:#444;padding-left:18px;margin-bottom:14px;">
+                <li>Klik baris ahli untuk lihat butiran penuh</li>
+                <li>Butang <strong>"✏ Edit Ahli"</strong> dalam modal untuk kemaskini maklumat</li>
+                <li>Gunakan bar carian dan penapis daerah/fasal untuk tapis rekod</li>
+                <li>Butang <strong>"📤 Eksport"</strong> untuk muat turun sebagai CSV, PDF atau Imej</li>
+                <li>Butang <strong>"+ Tambah Ahli"</strong> untuk daftar ahli baharu</li>
+              </ul>
+
+              <div style="font-weight:800;color:var(--primary);font-size:13px;border-bottom:2px solid var(--primary);padding-bottom:4px;margin-bottom:10px;">💰 YURAN TRACKER</div>
+              <ul style="font-size:12px;line-height:1.9;color:#444;padding-left:18px;margin-bottom:14px;">
+                <li>Lihat status bayaran yuran mengikut fasal dan daerah</li>
+                <li>Rekod bertanda <span style="background:#fce8e8;color:#c0392b;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:700;">BELUM BAYAR</span> perlu tindakan susulan</li>
+                <li>Klik nama ahli untuk terus ke modal butiran dan rekod bayaran</li>
+              </ul>
+            </div>
+
+            <div>
+              <div style="font-weight:800;color:var(--primary);font-size:13px;border-bottom:2px solid var(--primary);padding-bottom:4px;margin-bottom:10px;">📅 SSM TRACKER</div>
+              <ul style="font-size:12px;line-height:1.9;color:#444;padding-left:18px;margin-bottom:14px;">
+                <li>Rekod SSM disusun mengikut kumpulan: <span style="color:#c0392b;font-weight:700;">🔴 LUPUT</span>, <span style="color:#b07800;font-weight:700;">🟡 HAMPIR LUPUT</span>, <span style="color:#1a7a4a;font-weight:700;">🟢 SAH</span></li>
+                <li>Tempoh <strong>"Hampir Luput"</strong> = dalam masa 180 hari</li>
+                <li>Klik baris ahli untuk kemaskini tarikh SSM melalui butang Edit</li>
+              </ul>
+
+              <div style="font-weight:800;color:var(--primary);font-size:13px;border-bottom:2px solid var(--primary);padding-bottom:4px;margin-bottom:10px;">🔔 FOLLOW UP</div>
+              <ul style="font-size:12px;line-height:1.9;color:#444;padding-left:18px;margin-bottom:14px;">
+                <li>Tiga senarai tindakan: Yuran Belum Bayar, SSM Kritikal, Data Tidak Lengkap</li>
+                <li>Klik <strong>"WA"</strong> untuk hantar mesej WhatsApp dengan template pilihan</li>
+                <li>Klik <strong>"Salin Mesej"</strong> untuk salin teks ke clipboard</li>
+                <li>Butang <strong>"📤 Eksport"</strong> hasilkan laporan Follow Up dalam format landskap A4</li>
+              </ul>
+
+              <div style="font-weight:800;color:var(--primary);font-size:13px;border-bottom:2px solid var(--primary);padding-bottom:4px;margin-bottom:10px;">💬 TEMPLATE MESEJ</div>
+              <ul style="font-size:12px;line-height:1.9;color:#444;padding-left:18px;margin-bottom:14px;">
+                <li>Klik <strong>"✏ Edit"</strong> pada mana-mana kad template untuk ubahsuai</li>
+                <li>Klik <strong>"+ Tambah Template"</strong> untuk cipta template baharu</li>
+                <li>Placeholder yang tersedia: <code style="background:#f0f0f0;padding:1px 5px;border-radius:3px;">[NAMA PIC]</code>, <code style="background:#f0f0f0;padding:1px 5px;border-radius:3px;">[NO. AHLI]</code>, <code style="background:#f0f0f0;padding:1px 5px;border-radius:3px;">[NAMA SYARIKAT]</code>, <code style="background:#f0f0f0;padding:1px 5px;border-radius:3px;">[TARIKH LUPUT SSM]</code></li>
+                <li>Template disimpan secara automatik dalam pelayar (localStorage)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FAQ -->
+      <div class="sec-card">
+        <div class="sec-head"><h3>❓ Soalan Lazim (FAQ)</h3></div>
+        <div class="sec-body" id="faq-accordion">
+
+          <div class="faq-item">
+            <div class="faq-q" onclick="toggleFaq(this)">▶ &nbsp;Data ahli tidak kelihatan / kosong selepas log masuk</div>
+            <div class="faq-a">Sistem akan cuba memuat data dari pangkalan data Supabase. Sekiranya sambungan gagal, ralat akan dipaparkan di skrin log masuk. Pastikan anda mempunyai sambungan internet yang stabil. Cuba muat semula halaman (F5) dan log masuk semula. Sekiranya masalah berterusan, hubungi pentadbir sistem.</div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q" onclick="toggleFaq(this)">▶ &nbsp;Bagaimana cara kemaskini yuran ahli selepas bayaran diterima?</div>
+            <div class="faq-a">Klik pada baris ahli dalam Senarai Ahli → klik butang <strong>"✏ Edit Ahli"</strong> → tukar status "Yuran Tahunan" kepada <strong>"Telah Bayar"</strong> → klik "Simpan". Rekod pembayaran akan dikemaskini secara automatik berserta tarikh hari ini.</div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q" onclick="toggleFaq(this)">▶ &nbsp;Apakah perbezaan antara Fasal 6.2.1 dan 6.2.4?</div>
+            <div class="faq-a"><strong>Fasal 6.2.1</strong> adalah untuk ahli bertaraf Enterprise (ENT) — yuran tahunan RM 50. <strong>Fasal 6.2.4</strong> adalah untuk ahli bertaraf Syarikat Sendirian Berhad (Sdn Bhd) — yuran tahunan RM 150. Status ini menentukan yuran pendaftaran dan yuran tahunan secara automatik.</div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q" onclick="toggleFaq(this)">▶ &nbsp;Mengapa SSM ahli tidak muncul dalam SSM Tracker?</div>
+            <div class="faq-a">SSM Tracker hanya memaparkan ahli yang mempunyai <strong>No. SSM</strong> DAN <strong>Tarikh Luput SSM</strong> yang diisi. Sekiranya salah satu medan ini kosong, ahli tersebut tidak akan tersenarai. Kemaskini maklumat SSM melalui butang Edit dalam modal butiran ahli.</div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q" onclick="toggleFaq(this)">▶ &nbsp;Bagaimana cara menghantar mesej WhatsApp secara pukal kepada ahli?</div>
+            <div class="faq-a">Pergi ke tab <strong>Follow Up</strong> → pilih senarai ahli yang dikehendaki → klik butang <strong>"WA"</strong> pada baris ahli → pilih template mesej → semak kandungan → klik <strong>"Buka WhatsApp"</strong>. Mesej perlu dihantar satu persatu secara manual melalui WhatsApp Web atau aplikasi WhatsApp.</div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q" onclick="toggleFaq(this)">▶ &nbsp;Adakah data disimpan secara selamat?</div>
+            <div class="faq-a">Data ahli disimpan dalam pangkalan data Supabase yang dilindungi dengan enkripsi SSL. Template mesej dan log aktiviti disimpan dalam localStorage pelayar anda — data ini hanya boleh diakses dari peranti yang sama. Lakukan Backup secara berkala melalui tab <strong>Back Up</strong> untuk memastikan data selamat.</div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q" onclick="toggleFaq(this)">▶ &nbsp;Bagaimana cara menambah pengguna baharu?</div>
+            <div class="faq-a">Hanya <strong>Admin</strong> boleh menambah pengguna. Log masuk sebagai admin → pergi ke <strong>Panel Admin</strong> → klik <strong>"+ Tambah Pengguna"</strong> → isi ID, nama, kata laluan, dan peranan → klik "Simpan". Pengguna baharu boleh terus log masuk dengan kelayakan tersebut.</div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q" onclick="toggleFaq(this)">▶ &nbsp;Apakah yang perlu dilakukan jika laporan PDF tidak dapat dicetak?</div>
+            <div class="faq-a">Pastikan pelayar anda membenarkan pop-up dari aplikasi ini. Di Chrome: klik ikon 🔒 di bar alamat → Tetapan Tapak → Pop-up dan ubah hala → Benarkan. Kemudian cuba jana laporan semula. Untuk hasil terbaik, gunakan Google Chrome atau Microsoft Edge.</div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q" onclick="toggleFaq(this)">▶ &nbsp;Bagaimana cara membuat Backup data?</div>
+            <div class="faq-a">Pergi ke tab <strong>Back Up</strong> → klik <strong>"🔄 Backup Sekarang"</strong> untuk muat turun salinan data dalam format JSON. Simpan fail ini di lokasi yang selamat. Sekiranya data hilang, hubungi pentadbir sistem untuk pulihkan dari Supabase.</div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q" onclick="toggleFaq(this)">▶ &nbsp;Adakah sistem ini boleh digunakan pada telefon bimbit?</div>
+            <div class="faq-a">Ya, sistem ini responsif dan boleh digunakan pada telefon bimbit. Klik ikon <strong>☰</strong> di bahagian bawah kiri untuk buka menu navigasi. Untuk pengalaman terbaik, disyorkan menggunakan tablet atau komputer desktop terutamanya untuk operasi seperti menjana laporan dan eksport PDF.</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Placeholder & version info -->
+      <div style="text-align:center;margin-top:16px;padding:12px;font-size:11.5px;color:var(--muted);">
+        Sistem Pengurusan Ahli DPMM Negeri Johor &nbsp;·&nbsp; Versi 2.0 &nbsp;·&nbsp;
+        Untuk sokongan teknikal, hubungi pentadbir sistem.
+      </div>
+    </div>
+  </div>
+
 </div><!-- /#app -->
 
 <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
@@ -1564,7 +1725,7 @@ tr.row-unpaid { background: #fff0f0 !important; }
 <div class="modal-overlay" id="add-user-modal">
   <div class="modal" style="max-width:500px;">
     <div class="modal-head">
-      <h3>Tambah Pengguna Baru</h3>
+      <h3 id="add-user-modal-title">Tambah Pengguna Baru</h3>
       <button class="modal-close" onclick="closeModal('add-user-modal')">✕</button>
     </div>
     <div class="modal-body">
@@ -2077,6 +2238,7 @@ var PAGE_META = {
   ssm:       ['SSM TRACKER',''],
   followup:  ['FOLLOW UP',''],
   templates: ['TEMPLATE MESEJ',''],
+  faq:       ['PANDUAN & SOALAN LAZIM','Rujukan penggunaan sistem'],
   workflow:  ['WORKFLOW',''],
   backup:    ['BACK UP',''],
   admin:     ['PANEL ADMIN',''],
@@ -2110,6 +2272,7 @@ function showPage(id) {
   if (id === 'ssm') renderSSMPage();
   if (id === 'followup') renderFollowUpPage();
   if (id === 'templates') renderTemplates();
+  if (id === 'faq') { /* static page, no render needed */ }
   closeSidebar();
 }
 
@@ -3210,44 +3373,113 @@ function clearUserLog() {
   renderAdminPage();
 }
 
+var EDIT_USER_ID = null;
+
 function renderAdminPage() {
   var userList = document.getElementById('user-list');
   if (userList) {
+    var allLogs = _loadUserLogs();
     userList.innerHTML = USERS.map(function(u){
-      var allLogs = _loadUserLogs();
       var uLogs = allLogs[u.id] || [];
       var lastLogin = '—';
       for (var k=0; k<uLogs.length; k++) {
         if (uLogs[k].msg && uLogs[k].msg.indexOf('Log masuk') === 0) { lastLogin = uLogs[k].time; break; }
       }
       var totalAct = uLogs.length;
+      var isAdmin = u.role === 'admin';
       return '<div class="user-row" style="cursor:pointer;" onclick="openUserLog(\'' + u.id + '\')">'
-        + '<div class="user-avatar">' + (u.id[0]||'?').toUpperCase() + '</div>'
+        + '<div class="user-avatar">' + (u.name[0]||'?').toUpperCase() + '</div>'
         + '<div style="flex:1;">'
         + '<div class="user-name">' + u.name + ' <span style="font-size:10px;color:var(--muted);font-weight:400;">— klik untuk lihat log</span></div>'
-        + '<div class="user-role">' + (u.role==='admin'?'🔑 Admin':'👤 Pengguna Biasa') + ' &nbsp;|&nbsp; ' + u.id + '</div>'
-        + '<div style="font-size:11px;color:var(--muted);margin-top:3px;">Log masuk terakhir: <strong>' + lastLogin + '</strong> &nbsp;|&nbsp; Jumlah aktiviti: <strong>' + totalAct + '</strong></div>'
+        + '<div class="user-role">' + (isAdmin?'🔑 Admin':'👤 Pengguna Biasa') + ' &nbsp;|&nbsp; <span style="font-family:var(--mono);">' + u.id + '</span></div>'
+        + '<div style="font-size:11px;color:var(--muted);margin-top:3px;">Log masuk terakhir: <strong>' + lastLogin + '</strong> &nbsp;|&nbsp; Jumlah aktiviti: <strong style="color:var(--primary);">' + totalAct + '</strong></div>'
         + '</div>'
-        + (u.role!=='admin'?'<button class="btn btn-outline-red btn-sm" onclick="event.stopPropagation();removeUser(\'' + u.id + '\')">Padam</button>':'')
+        + '<div style="display:flex;gap:6px;">'
+        + '<button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openEditUserModal(\'' + u.id + '\')" title="Edit pengguna">✏ Edit</button>'
+        + (!isAdmin ? '<button class="btn btn-outline-red btn-sm" onclick="event.stopPropagation();removeUser(\'' + u.id + '\')">Padam</button>' : '')
+        + '</div>'
         + '</div>';
     }).join('');
   }
+  // Merge ALL logs from localStorage + current in-memory session, newest first
   var logDiv = document.getElementById('activity-log');
-  if (logDiv) logDiv.innerHTML = activityLogs.map(function(l){ return '<div class="log-entry">[' + l.time + '] ' + l.user + ': ' + l.msg + '</div>'; }).join('') || '<div class="log-entry">Tiada rekod log.</div>';
+  if (logDiv) {
+    var allLogs2 = _loadUserLogs();
+    var merged = {};
+    Object.keys(allLogs2).forEach(function(uid) {
+      (allLogs2[uid]||[]).forEach(function(l){ if (l.ts) merged[l.ts + '|' + (l.user||uid)] = l; });
+    });
+    activityLogs.forEach(function(l){ if (l.ts) merged[l.ts + '|' + (l.user||'')] = l; });
+    var sorted = Object.keys(merged).sort().reverse().map(function(k){ return merged[k]; });
+    if (!sorted.length) {
+      logDiv.innerHTML = '<div class="log-entry">Tiada rekod log.</div>';
+    } else {
+      logDiv.innerHTML = sorted.map(function(l){
+        var ml = (l.msg||'').toLowerCase();
+        var col = 'var(--muted)';
+        if (ml.indexOf('log masuk')===0)                                 col='var(--success)';
+        else if (ml.indexOf('log keluar')===0)                           col='var(--crimson)';
+        else if (ml.indexOf('padam')!==-1)                               col='var(--danger)';
+        else if (ml.indexOf('tambah')!==-1||ml.indexOf('baru')!==-1)     col='var(--navy2)';
+        else if (ml.indexOf('kemaskini')!==-1||ml.indexOf('edit')!==-1)  col='var(--gold)';
+        return '<div class="log-entry">'
+          + '<span style="color:var(--muted);font-size:10.5px;">[' + l.time + ']</span> '
+          + '<span style="color:var(--primary);font-weight:700;font-family:var(--mono);">' + (l.user||'?') + '</span>: '
+          + '<span style="color:' + col + ';">' + (l.msg||'—') + '</span></div>';
+      }).join('');
+    }
+  }
+}
+
+function openEditUserModal(uid) {
+  EDIT_USER_ID = uid;
+  var u = null;
+  for (var i=0;i<USERS.length;i++) { if(USERS[i].id===uid){u=USERS[i];break;} }
+  if (!u) return;
+  var titleEl = document.getElementById('add-user-modal-title');
+  if (titleEl) titleEl.textContent = '✏ Edit Pengguna';
+  var idEl = document.getElementById('nu-id');
+  idEl.value = u.id; idEl.disabled = true;
+  document.getElementById('nu-name').value = u.name;
+  document.getElementById('nu-pass').value = u.pass;
+  document.getElementById('nu-role').value = u.role;
+  document.getElementById('add-user-modal').classList.add('show');
 }
 
 function openAddUserModal() {
-  ['nu-id','nu-name','nu-pass'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
+  EDIT_USER_ID = null;
+  var titleEl = document.getElementById('add-user-modal-title');
+  if (titleEl) titleEl.textContent = 'Tambah Pengguna Baru';
+  var idEl = document.getElementById('nu-id');
+  idEl.value = ''; idEl.disabled = false;
+  ['nu-name','nu-pass'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
   document.getElementById('nu-role').value='user';
   document.getElementById('add-user-modal').classList.add('show');
 }
 
 function saveNewUser() {
-  var uid = document.getElementById('nu-id').value.trim().toLowerCase();
+  var uid  = document.getElementById('nu-id').value.trim().toLowerCase();
   var name = document.getElementById('nu-name').value.trim();
   var pass = document.getElementById('nu-pass').value;
   var role = document.getElementById('nu-role').value;
   if (!uid||!name||!pass) { alert('Sila lengkapkan semua maklumat.'); return; }
+  if (EDIT_USER_ID) {
+    /* Edit mode */
+    for (var i=0;i<USERS.length;i++) {
+      if (USERS[i].id===EDIT_USER_ID) {
+        USERS[i].name = name;
+        USERS[i].pass = pass;
+        USERS[i].role = role;
+        break;
+      }
+    }
+    document.getElementById('nu-id').disabled = false;
+    EDIT_USER_ID = null;
+    closeModal('add-user-modal');
+    addLog('Pengguna dikemaskini: ' + uid);
+    renderAdminPage();
+    return;
+  }
   var exists = false;
   for (var i=0; i<USERS.length; i++) { if (USERS[i].id===uid) { exists=true; break; } }
   if (exists) { alert('ID pengguna sudah wujud.'); return; }
@@ -3349,6 +3581,22 @@ function exportCurrentPage(fmt) {
 }
 
 // ── GENERATE REPORT ─────────────────────────────────────
+function toggleFaq(el) {
+  var isOpen = el.classList.contains('open');
+  // Close all others
+  document.querySelectorAll('#faq-accordion .faq-q').forEach(function(q){
+    q.classList.remove('open');
+    var a = q.nextElementSibling;
+    if (a) { a.classList.remove('open'); q.textContent = q.textContent.replace('▼','▶'); }
+  });
+  if (!isOpen) {
+    el.classList.add('open');
+    var ans = el.nextElementSibling;
+    if (ans) ans.classList.add('open');
+    el.textContent = el.textContent.replace('▶','▼');
+  }
+}
+
 function generateReport() {
   var now = new Date();
   var dateStr = now.toLocaleDateString('ms-MY', {day:'2-digit', month:'long', year:'numeric'});
@@ -3463,6 +3711,19 @@ function generateReport() {
       + '<td style="' + C + 'font-weight:800;' + (isExp?'color:#c0392b;':'color:#b07800;') + '">' + (isExp?'LUPUT':'HAMPIR LUPUT') + '</td></tr>';
   }).join('');
 
+  var incompleteList = MEMBERS.filter(function(m){ return getIncomplete(m).length > 0; });
+  var incompleteRows = incompleteList.map(function(m, i){
+    var issues = getIncomplete(m);
+    return '<tr' + (i%2===0 ? ' style="background:#f5f5f5;"' : '') + '>'
+      + '<td style="' + CC + '">' + (i+1) + '</td>'
+      + '<td style="' + C + 'font-family:monospace;font-weight:700;">' + (m.id||'—') + '</td>'
+      + '<td style="font-weight:600;">' + (m.namaSyarikat||'—') + '</td>'
+      + '<td>' + (m.namaPIC||'—') + '</td>'
+      + '<td style="' + C + '">' + (m.daerah||'—') + '</td>'
+      + '<td>' + issues.map(function(iss){ return '<span style="background:#fce8e8;color:#c0392b;padding:1px 5px;border-radius:3px;font-size:10px;font-weight:700;margin:1px;display:inline-block;">' + iss + '</span>'; }).join(' ') + '</td>'
+      + '</tr>';
+  }).join('');
+
   var css = '@page{size:A4 portrait;margin:8mm 10mm 8mm}'
     + '*{box-sizing:border-box;margin:0;padding:0}'
     + 'body{font-family:"Segoe UI",Arial,sans-serif;font-size:13px;color:#1a1a2e;-webkit-print-color-adjust:exact;print-color-adjust:exact;line-height:1.45}'
@@ -3575,6 +3836,18 @@ function generateReport() {
       : '<p style="font-size:12.5px;padding:4px 0;color:#444;">Tiada SSM yang luput atau hampir luput pada tarikh laporan ini dijana.</p>')
     + '</div>'
 
+    + (incompleteList.length > 0
+      ? '<div class="sec">' + h2('Senarai Ahli — Data Tidak Lengkap (' + incompleteList.length + ' ahli)')
+        + '<table><thead><tr>'
+        + '<th style="' + CC + '">#</th>'
+        + '<th style="' + C + '">No. Ahli</th>'
+        + '<th>Nama Syarikat</th>'
+        + '<th>Nama PIC</th>'
+        + '<th style="' + C + '">Daerah</th>'
+        + '<th>Data Yang Tiada</th>'
+        + '</tr></thead><tbody>' + incompleteRows + '</tbody></table></div>'
+      : '')
+
     + '<div class="footer">DEWAN PERNIAGAAN MELAYU MALAYSIA NEGERI JOHOR &nbsp;&mdash;&nbsp; Laporan Keanggotaan ' + YURAN_YEAR + ' &nbsp;&mdash;&nbsp; ' + dateStr + ', ' + timeStr + ' &nbsp;&mdash;&nbsp; SULIT / UNTUK KEGUNAAN DALAMAN SAHAJA</div>'
     + '</body></html>';
 
@@ -3620,7 +3893,7 @@ function pageExport(pageId, fmt) {
     var old = document.getElementById(styleId);
     if (old) old.remove();
 
-    var isLandscape = (pageId === 'senarai');
+    var isLandscape = (pageId === 'senarai' || pageId === 'followup' || pageId === 'ssm');
     var printStyle = document.createElement('style');
     printStyle.id = styleId;
     var rules = [
@@ -3652,6 +3925,12 @@ function pageExport(pageId, fmt) {
         '  .row-unpaid { background: #fce8e8 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }',
         '  .row-unknown { background: #fce8e8 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }',
         '  strong { font-weight: 700; }',
+      '  .fu-counters { display:flex !important; gap:10px; margin-bottom:8px; }',
+      '  .fu-counter { border:1px solid #ccc; border-radius:6px; padding:8px 14px; min-width:0; }',
+      '  .fu-count { font-size:22px !important; }',
+      '  .fu-label { font-size:9px !important; }',
+      '  .sec-card { margin-bottom:6px; }',
+      '  .sec-body { padding:0 !important; }',
       ]);
     } else {
       rules = rules.concat([
