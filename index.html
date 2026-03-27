@@ -386,6 +386,8 @@ input, select, textarea, button { font-family: var(--sans); }
 .btn-danger:hover { background: #e85555; transform: translateY(-1px); }
 .btn-gold { background: var(--warning); color: var(--white); box-shadow: 0 4px 14px rgba(255,169,77,.3); }
 .btn-gold:hover { background: #e8952a; transform: translateY(-1px); }
+.btn-success { background: #1a7a4a; color: var(--white); box-shadow: 0 4px 14px rgba(26,122,74,.25); }
+.btn-success:hover { background: #155f39; transform: translateY(-1px); }
 .btn-outline { background: transparent; color: var(--primary); border: 1.5px solid var(--primary); }
 .btn-outline:hover { background: var(--primary-lt); }
 .btn-outline-red { background: transparent; color: var(--danger); border: 1.5px solid var(--danger); }
@@ -1502,6 +1504,12 @@ tr.row-unpaid { background: #fff0f0 !important; }
         <div class="field-grp"><label class="field-label">E-mel</label><input class="field-input" id="fm-emel"></div>
         <div class="field-grp full"><label class="field-label">Alamat</label><input class="field-input" id="fm-alamat"></div>
         <div class="field-grp"><label class="field-label">Daerah</label><input class="field-input" id="fm-daerah"></div>
+        <div class="field-grp"><label class="field-label">Jantina</label>
+          <select class="field-input" id="fm-jantina">
+            <option value="L">Lelaki</option>
+            <option value="W">Wanita</option>
+          </select>
+        </div>
         <div class="field-grp"><label class="field-label">Fasal</label>
           <select class="field-input" id="fm-fasal" onchange="updateDaftarDisplay()">
             <option value="6.2.1">6.2.1 (ENT)</option>
@@ -1725,6 +1733,7 @@ function getYuranTahunan(f){return YURAN_TABLE[f]?YURAN_TABLE[f][1]:0;}
 var currentUser = null;
 var activityLogs = [];
 var sessionStartTime = null;
+var EDIT_MEMBER_ID = null;  // null = tambah baru; string = mode edit ahli
 var viewingLogUser = null;
 
 // ── PERSISTENT PER-USER LOG ──
@@ -2243,7 +2252,8 @@ function openModal(id) {
   }
   fieldsHtml += '</div>';
   document.getElementById('modal-fields').innerHTML = fieldsHtml;
-  var actionsHtml = '<button class="btn btn-primary" onclick="exportContact(\'' + m.id + '\')">Eksport Kenalan</button>';
+  var actionsHtml = '<button class="btn btn-success" onclick="openEditMemberModal(\'' + m.id + '\')">&#x270E; Edit Ahli</button>';
+  actionsHtml += '<button class="btn btn-primary" onclick="exportContact(\'' + m.id + '\')">Eksport Kenalan</button>';
   actionsHtml += '<button class="btn btn-outline" onclick="printContact(\'' + m.id + '\')">Cetak Butiran</button>';
   if (m.hp) actionsHtml += '<button class="btn btn-gold" onclick="openWAModal(\'' + m.id + '\')">&#x1F4AC; WhatsApp</button>';
   if (currentUser && currentUser.role === 'admin') actionsHtml += '<button class="btn btn-outline-red" onclick="deleteMember(\'' + m.id + '\')">Padam Ahli</button>';
@@ -2575,10 +2585,10 @@ function renderSSMPage() {
     var st = ssmStatus(m.ssmDeadline);
     if (st==='expired') exp++; else if (st==='expiring') expiring++; else if(st==='ok') ok++;
   });
-  function set(id,v){ var el=document.getElementById(id); if(el) el.textContent=v; }
-  set('ssm-kpi-expired', exp);
-  set('ssm-kpi-expiring', expiring);
-  set('ssm-kpi-ok', ok);
+  function setSSM(id,v){ var el=document.getElementById(id); if(el) el.textContent=v; }
+  setSSM('ssm-kpi-expired', exp);
+  setSSM('ssm-kpi-expiring', expiring);
+  setSSM('ssm-kpi-ok', ok);
   set('ssm-kpi-total', ssmM.length);
   var tbody = document.getElementById('ssm-tbody');
   if (tbody) {
@@ -2771,19 +2781,132 @@ function renderDistrictMini() {
 }
 
 function openAddMemberModal() {
-  ['fm-id','fm-syarikat','fm-pic','fm-ic','fm-hp','fm-emel','fm-alamat','fm-daerah','fm-ssm','fm-ssm-deadline'].forEach(function(id){
-    var el = document.getElementById(id); if (el) el.value='';
+  EDIT_MEMBER_ID = null;
+  document.getElementById('add-member-title').textContent = 'Tambah Ahli Baru';
+  var idEl = document.getElementById('fm-id');
+  idEl.value = ''; idEl.disabled = false;
+  ['fm-syarikat','fm-pic','fm-ic','fm-hp','fm-emel','fm-alamat','fm-daerah','fm-ssm','fm-ssm-deadline'].forEach(function(fid){
+    var el = document.getElementById(fid); if (el) el.value='';
   });
   document.getElementById('fm-jawatan').value='AHLI';
+  document.getElementById('fm-jantina').value='L';
   document.getElementById('fm-fasal').value='6.2.1';
   document.getElementById('fm-jenis').value='';
   document.getElementById('fm-yuran').value='';
+  updateDaftarDisplay();
+  document.getElementById('add-member-modal').classList.add('show');
+}
+
+function openEditMemberModal(id) {
+  var m = null;
+  for (var i=0; i<MEMBERS.length; i++) { if (MEMBERS[i].id===id) { m=MEMBERS[i]; break; } }
+  if (!m) return;
+  EDIT_MEMBER_ID = id;
+  document.getElementById('add-member-title').textContent = '✏ Edit Ahli: ' + id;
+  var idEl = document.getElementById('fm-id');
+  idEl.value = m.id; idEl.disabled = true;
+  document.getElementById('fm-jawatan').value  = m.jawatan    || 'AHLI';
+  document.getElementById('fm-syarikat').value = m.namaSyarikat || '';
+  document.getElementById('fm-pic').value      = m.namaPIC    || '';
+  document.getElementById('fm-ic').value       = m.ic         || '';
+  document.getElementById('fm-hp').value       = m.hp         || '';
+  document.getElementById('fm-emel').value     = m.emel       || '';
+  document.getElementById('fm-alamat').value   = m.alamat     || '';
+  document.getElementById('fm-daerah').value   = m.daerah     || '';
+  document.getElementById('fm-jantina').value  = m.jantina    || 'L';
+  document.getElementById('fm-fasal').value    = m.fasal      || '6.2.1';
+  document.getElementById('fm-ssm').value      = m.noSSM      || '';
+  document.getElementById('fm-ssm-deadline').value = m.ssmDeadline || '';
+  document.getElementById('fm-jenis').value    = m.jenis      || '';
+  var paidThisYear = (m.yuranTahunanHistory||[]).some(function(e){ return e.tahun===YURAN_YEAR; });
+  document.getElementById('fm-yuran').value    = paidThisYear ? 'paid' : '';
+  updateDaftarDisplay();
+  closeModal('member-modal');
   document.getElementById('add-member-modal').classList.add('show');
 }
 
 function saveMember() {
   var id = document.getElementById('fm-id').value.trim().toUpperCase();
   if (!id) { alert('Sila masukkan No. Ahli.'); return; }
+
+  /* ── EDIT MODE ─────────────────────────────────────────── */
+  if (EDIT_MEMBER_ID) {
+    var target = null;
+    for (var i=0; i<MEMBERS.length; i++) { if (MEMBERS[i].id===EDIT_MEMBER_ID) { target=MEMBERS[i]; break; } }
+    if (!target) { alert('Ahli tidak dijumpai.'); return; }
+    var newFasal = document.getElementById('fm-fasal').value;
+    target.jawatan      = document.getElementById('fm-jawatan').value;
+    target.namaSyarikat = document.getElementById('fm-syarikat').value;
+    target.namaPIC      = document.getElementById('fm-pic').value;
+    target.ic           = document.getElementById('fm-ic').value;
+    target.hp           = document.getElementById('fm-hp').value;
+    target.emel         = document.getElementById('fm-emel').value;
+    target.alamat       = document.getElementById('fm-alamat').value;
+    target.daerah       = document.getElementById('fm-daerah').value || 'Tidak Diketahui';
+    target.jantina      = document.getElementById('fm-jantina').value || 'L';
+    target.jenis        = document.getElementById('fm-jenis').value  || null;
+    target.noSSM        = document.getElementById('fm-ssm').value;
+    target.ssmDeadline  = document.getElementById('fm-ssm-deadline').value;
+    target.fasal        = newFasal;
+    target.status       = (newFasal==='6.2.4'||newFasal==='6.2.5') ? 'SB' : 'ENT';
+    target.yuranTahunanRate = getYuranTahunan(newFasal);
+    /* --- Yuran current year handling --- */
+    var paidNow  = document.getElementById('fm-yuran').value === 'paid';
+    var hist     = (target.yuranTahunanHistory||[]).slice();
+    var existIdx = -1;
+    for (var j=0; j<hist.length; j++) { if (hist[j].tahun===YURAN_YEAR) { existIdx=j; break; } }
+    if (paidNow && existIdx===-1) {
+      var now3=new Date(), todayStr3=String(now3.getDate()).padStart(2,'0')+'.'+String(now3.getMonth()+1).padStart(2,'0')+'.'+now3.getFullYear();
+      hist.push({tahun:YURAN_YEAR, jumlah:getYuranTahunan(newFasal), tarikh:todayStr3, kaedah:'BANK TF', noResit:null});
+    } else if (!paidNow && existIdx!==-1) {
+      hist.splice(existIdx, 1);
+    }
+    target.yuranTahunanHistory    = hist;
+    target.yuranTahun             = paidNow ? getYuranTahunan(newFasal) : null;
+    target.totalTahunanDibayar    = hist.reduce(function(s,e){return s+e.jumlah;},0);
+    target.bilanganTahunDibayar   = hist.length;
+    target.tempohBayar            = hist.length;
+    target.jumlahYuranTahunan     = target.totalTahunanDibayar;
+    target.jumlahYuranKeseluruhan = (target.yuranDaftar||0) + target.totalTahunanDibayar;
+    /* --- Reset form state --- */
+    EDIT_MEMBER_ID = null;
+    document.getElementById('fm-id').disabled = false;
+    closeModal('add-member-modal');
+    addLog('Ahli dikemaskini: ' + target.id);
+    updateSidebarCount();
+    renderAllPages();
+    /* --- Sync to Supabase --- */
+    if (target._dbId) {
+      supabaseClient.from(TABLE_NAME).update({
+        JAWATAN: target.jawatan,
+        NAMA_AHLI: target.namaSyarikat,
+        NAMA: target.namaPIC,
+        KAD_PENGENALAN: target.ic,
+        NO_HP: target.hp,
+        EMEL: target.emel,
+        ALAMAT: target.alamat,
+        DAERAH: target.daerah,
+        JENIS_PERNIAGAAN: target.jenis,
+        NO_SSM: target.noSSM,
+        SSM_DATELINE: target.ssmDeadline,
+        STATUS: target.status,
+        FASAL_AHLI: target.fasal,
+        YURAN_1_TAHUN: target.yuranTahun,
+        JUMLAH_YURAN_TAHUNAN: target.jumlahYuranTahunan,
+        JUMLAH_YURAN_KESELURUHAN: target.jumlahYuranKeseluruhan,
+        TEMPOH_BAYARAN_YURAN: target.bilanganTahunDibayar,
+        TARIKH_BAYARAN_2025: target.yuranTahun ? (hist.find(function(e){return e.tahun===YURAN_YEAR;})||{tarikh:null}).tarikh : null,
+        KAEDAH_BAYARAN: target.yuranTahun ? 'BANK TF' : null
+      }).eq('id', target._dbId).then(function(res){
+        if (res.error) console.error('Supabase update error:', res.error);
+        else console.log('Ahli updated in Supabase:', target.id);
+      });
+    }
+    alert('Ahli ' + target.id + ' berjaya dikemaskini!');
+    return;
+  }
+
+  /* ── TAMBAH BARU MODE ──────────────────────────────────── */
   var exists = false;
   for (var i=0; i<MEMBERS.length; i++) { if (MEMBERS[i].id===id) { exists=true; break; } }
   if (exists) { alert('No. Ahli sudah wujud.'); return; }
