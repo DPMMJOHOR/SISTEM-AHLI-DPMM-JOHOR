@@ -1281,12 +1281,13 @@ tr.row-unpaid { background: #fff0f0 !important; }
 
   <!-- ══ TEMPLATES ══ -->
   <div id="page-templates" class="page">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
-      <div class="sec-card"><div class="sec-head"><h3>Template 1 — Notis Pertama</h3><button class="btn btn-white btn-xs" onclick="editTemplate(1)">Edit</button></div><div class="sec-body"><div class="wa-preview"><div class="wa-bubble" id="wa-preview-1"></div></div></div></div>
-      <div class="sec-card"><div class="sec-head"><h3>Template 2 — Peringatan Kedua</h3><button class="btn btn-white btn-xs" onclick="editTemplate(2)">Edit</button></div><div class="sec-body"><div class="wa-preview"><div class="wa-bubble" id="wa-preview-2"></div></div></div></div>
-      <div class="sec-card"><div class="sec-head"><h3>Template 3 — Notis Akhir</h3><button class="btn btn-white btn-xs" onclick="editTemplate(3)">Edit</button></div><div class="sec-body"><div class="wa-preview"><div class="wa-bubble" id="wa-preview-3"></div></div></div></div>
-      <div class="sec-card"><div class="sec-head"><h3>Template 4 — Peringatan SSM</h3><button class="btn btn-white btn-xs" onclick="editTemplate(4)">Edit</button></div><div class="sec-body"><div class="wa-preview"><div class="wa-bubble" id="wa-preview-4"></div></div></div></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div>
+        <div style="font-size:13px;color:var(--muted);margin-top:2px;">Template digunakan di WhatsApp modal dan Follow Up. Placeholder: <strong>[NAMA PIC]</strong>, <strong>[NO. AHLI]</strong>, <strong>[NAMA SYARIKAT]</strong>, <strong>[TARIKH LUPUT SSM]</strong></div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="openAddTemplateModal()" style="white-space:nowrap;">+ Tambah Template</button>
     </div>
+    <div id="templates-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:18px;"></div>
   </div>
 
   <!-- ══ WORKFLOW ══ -->
@@ -1460,17 +1461,30 @@ tr.row-unpaid { background: #fff0f0 !important; }
 
 <!-- ══ MODAL: EDIT TEMPLATE ══ -->
 <div class="modal-overlay" id="edit-template-modal">
-  <div class="modal" style="max-width:620px;">
+  <div class="modal" style="max-width:660px;">
     <div class="modal-head">
-      <h3 id="edit-template-title">Edit Template</h3>
+      <h3 id="edit-template-title">Template</h3>
       <button class="modal-close" onclick="closeModal('edit-template-modal')">✕</button>
     </div>
     <div class="modal-body">
-      <p style="font-size:12.5px;color:var(--muted);margin-bottom:12px;line-height:1.6;">Guna placeholder: <strong>[NAMA PIC]</strong>, <strong>[NO. AHLI]</strong>, <strong>[NAMA SYARIKAT]</strong>, <strong>[TARIKH LUPUT SSM]</strong></p>
-      <textarea class="tmpl-textarea" id="edit-template-content"></textarea>
-      <div style="margin-top:14px;display:flex;gap:10px;">
-        <button class="btn btn-primary" onclick="saveTemplate()">Simpan Template</button>
-        <button class="btn btn-outline" onclick="closeModal('edit-template-modal')">Batal</button>
+      <div style="margin-bottom:12px;">
+        <label class="field-label">Nama Template</label>
+        <input class="field-input" id="edit-template-name" placeholder="cth: Notis Pertama Yuran" style="margin-top:4px;">
+      </div>
+      <div style="margin-bottom:10px;">
+        <label class="field-label">Kandungan Mesej</label>
+        <div style="font-size:11.5px;color:var(--muted);margin-bottom:6px;line-height:1.6;">Placeholder: <strong>[NAMA PIC]</strong> &nbsp;·&nbsp; <strong>[NO. AHLI]</strong> &nbsp;·&nbsp; <strong>[NAMA SYARIKAT]</strong> &nbsp;·&nbsp; <strong>[TARIKH LUPUT SSM]</strong></div>
+        <textarea class="tmpl-textarea" id="edit-template-content"></textarea>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px;padding:8px 12px;background:var(--navy-lt);border-radius:6px;" id="edit-template-preview-row">
+        <span style="font-weight:700;color:var(--navy);">Pratonton:</span> <span id="edit-template-preview-text" style="white-space:pre-wrap;font-size:11.5px;"></span>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:space-between;align-items:center;">
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-primary" onclick="saveTemplate()">💾 Simpan Template</button>
+          <button class="btn btn-outline" onclick="closeModal('edit-template-modal')">Batal</button>
+        </div>
+        <button class="btn btn-outline-red btn-sm" id="delete-template-btn" onclick="deleteTemplate()" style="display:none;">🗑 Padam Template</button>
       </div>
     </div>
   </div>
@@ -2095,6 +2109,7 @@ function showPage(id) {
   if (id === 'admin') renderAdminPage();
   if (id === 'ssm') renderSSMPage();
   if (id === 'followup') renderFollowUpPage();
+  if (id === 'templates') renderTemplates();
   closeSidebar();
 }
 
@@ -2319,18 +2334,22 @@ function openWAModal(id) {
   if (!waCurrentMember) return;
   var title = document.getElementById('wa-modal-title');
   if (title) title.textContent = 'WhatsApp — ' + (waCurrentMember.namaSyarikat||waCurrentMember.id);
-  waCurrentTemplate = 1;
+  waCurrentTemplate = TEMPLATE_IDS[0] || 1;
   var btnDiv = document.getElementById('wa-template-btns');
-  if (btnDiv) btnDiv.innerHTML = [1,2,3,4].map(function(n){ return '<button class="btn ' + (n===1?'btn-primary':'btn-outline') + ' btn-sm" onclick="selectWATemplate(' + n + ')">Template ' + n + '</button>'; }).join('');
-  selectWATemplate(1);
+  if (btnDiv) btnDiv.innerHTML = TEMPLATE_IDS.map(function(id, idx) {
+    var t = TEMPLATES[id];
+    var label = t ? t.name : ('Template ' + id);
+    return '<button class="btn ' + (idx===0?'btn-primary':'btn-outline') + ' btn-sm" onclick="selectWATemplate(' + id + ')">' + label + '</button>';
+  }).join('');
+  selectWATemplate(TEMPLATE_IDS[0] || 1);
   document.getElementById('wa-modal').classList.add('show');
 }
 
-function selectWATemplate(n) {
-  waCurrentTemplate = n;
-  document.querySelectorAll('#wa-template-btns .btn').forEach(function(b,i){ b.className = 'btn ' + (i+1===n?'btn-primary':'btn-outline') + ' btn-sm'; });
+function selectWATemplate(id) {
+  waCurrentTemplate = id;
+  document.querySelectorAll('#wa-template-btns .btn').forEach(function(b, i){ b.className = 'btn ' + (TEMPLATE_IDS[i]===id?'btn-primary':'btn-outline') + ' btn-sm'; });
   var prev = document.getElementById('wa-preview-full');
-  if (prev) prev.textContent = genWaMsg(waCurrentMember, n);
+  if (prev) prev.textContent = genWaMsg(waCurrentMember, id);
   var time = document.getElementById('wa-preview-time');
   if (time) time.textContent = new Date().toLocaleTimeString('ms-MY',{hour:'2-digit',minute:'2-digit'}) + ' ✓✓';
 }
@@ -2351,48 +2370,165 @@ function waCopyMsg() {
   addLog('Salin mesej WA: ' + (waCurrentMember?waCurrentMember.id:''));
 }
 
+// ── TEMPLATE ENGINE ────────────────────────────────────────────────
+// TEMPLATES = { id: {name, body}, ... }  persisted in localStorage
+// TEMPLATE_IDS = ordered array of ids     TEMPLATE_NEXT_ID = next auto id
+
 var TEMPLATES = {};
-function initTemplates() {
+var TEMPLATE_IDS = [];
+var TEMPLATE_NEXT_ID = 5;  // 1-4 reserved for defaults
+var editingTemplateId = null;  // null = add new
+
+var TMPL_STORAGE_KEY = 'DPMM_TEMPLATES';
+
+function _defaultTemplates() {
   var y = YURAN_YEAR;
-  TEMPLATES[1] = "Assalamualaikum / Selamat Sejahtera [NAMA PIC],\n\nSaya daripada Pihak Pengurusan *DEWAN PERNIAGAAN MELAYU MALAYSIA NEGERI JOHOR* ingin memaklumkan bahawa yuran keahlian tahunan bagi tahun " + y + " perlu dijelaskan.\n\nNo. Ahli: [NO. AHLI]\nNama Syarikat: [NAMA SYARIKAT]\nJumlah Yuran: RM 50 (ENT) / RM 150 (SB)\n\nSila hantar slip pembayaran kepada kami selepas membuat bayaran.\n\nTerima kasih.\n\nSetiausaha Kehormat\nDEWAN PERNIAGAAN MELAYU MALAYSIA NEGERI JOHOR";
-  TEMPLATES[2] = "Assalamualaikum [NAMA PIC],\n\nIni merupakan peringatan kali kedua berkaitan yuran keahlian bagi tahun " + y + " bagi [NAMA SYARIKAT] (No. Ahli: [NO. AHLI]).\n\nSehingga kini, kami belum menerima sebarang bayaran atau maklum balas.\n\nMohon tindakan segera dalam tempoh 7 hari.\n\nTerima kasih.\n\nDEWAN PERNIAGAAN MELAYU MALAYSIA NEGERI JOHOR";
-  TEMPLATES[3] = "NOTIS AKHIR - YURAN KEAHLIAN " + y + "\n\nKepada: [NAMA PIC]\nSyarikat: [NAMA SYARIKAT]\nNo. Ahli: [NO. AHLI]\n\nIni adalah notis akhir berkaitan tunggakan yuran keahlian bagi tahun " + y + ".\n\nKegagalan menjelaskan yuran mungkin mengakibatkan penggantungan keahlian.\n\nHubungi kami segera.\n\nDEWAN PERNIAGAAN MELAYU MALAYSIA NEGERI JOHOR";
-  TEMPLATES[4] = "Assalamualaikum [NAMA PIC],\n\nKami ingin memaklumkan bahawa SSM syarikat anda [NAMA SYARIKAT] akan tamat tempoh pada [TARIKH LUPUT SSM].\n\nSila ambil tindakan segera untuk membaharui SSM anda di SSM Online (https://ezbiz.ssm.com.my).\n\nTerima kasih.\n\nSetiausaha Kehormat\nDEWAN PERNIAGAAN MELAYU MALAYSIA NEGERI JOHOR";
+  return [
+    { id:1, name:'Notis Pertama — Yuran',
+      body:'Assalamualaikum / Selamat Sejahtera [NAMA PIC],\n\nSaya daripada Pihak Pengurusan *DEWAN PERNIAGAAN MELAYU MALAYSIA NEGERI JOHOR* ingin memaklumkan bahawa yuran keahlian tahunan bagi tahun '+y+' perlu dijelaskan.\n\nNo. Ahli: [NO. AHLI]\nNama Syarikat: [NAMA SYARIKAT]\nJumlah Yuran: RM 50 (ENT) / RM 150 (SB)\n\nSila hantar slip pembayaran kepada kami selepas membuat bayaran.\n\nTerima kasih.\n\nSetiausaha Kehormat\nDEWAN PERNIAGAAN MELAYU MALAYSIA NEGERI JOHOR' },
+    { id:2, name:'Peringatan Kedua — Yuran',
+      body:'Assalamualaikum [NAMA PIC],\n\nIni merupakan peringatan kali kedua berkaitan yuran keahlian bagi tahun '+y+' bagi [NAMA SYARIKAT] (No. Ahli: [NO. AHLI]).\n\nSehingga kini, kami belum menerima sebarang bayaran atau maklum balas.\n\nMohon tindakan segera dalam tempoh 7 hari.\n\nTerima kasih.\n\nDEWAN PERNIAGAAN MELAYU MALAYSIA NEGERI JOHOR' },
+    { id:3, name:'Notis Akhir — Yuran',
+      body:'NOTIS AKHIR - YURAN KEAHLIAN '+y+'\n\nKepada: [NAMA PIC]\nSyarikat: [NAMA SYARIKAT]\nNo. Ahli: [NO. AHLI]\n\nIni adalah notis akhir berkaitan tunggakan yuran keahlian bagi tahun '+y+'.\n\nKegagalan menjelaskan yuran mungkin mengakibatkan penggantungan keahlian.\n\nHubungi kami segera.\n\nDEWAN PERNIAGAAN MELAYU MALAYSIA NEGERI JOHOR' },
+    { id:4, name:'Peringatan SSM',
+      body:'Assalamualaikum [NAMA PIC],\n\nKami ingin memaklumkan bahawa SSM syarikat anda [NAMA SYARIKAT] akan tamat tempoh pada [TARIKH LUPUT SSM].\n\nSila ambil tindakan segera untuk membaharui SSM anda di SSM Online (https://ezbiz.ssm.com.my).\n\nTerima kasih.\n\nSetiausaha Kehormat\nDEWAN PERNIAGAAN MELAYU MALAYSIA NEGERI JOHOR' }
+  ];
+}
+
+function _saveTemplatesToStorage() {
+  try {
+    var data = { ids: TEMPLATE_IDS, templates: TEMPLATES, nextId: TEMPLATE_NEXT_ID };
+    localStorage.setItem(TMPL_STORAGE_KEY, JSON.stringify(data));
+  } catch(e) { console.warn('Template save failed:', e); }
+}
+
+function initTemplates() {
+  /* Load from localStorage; fall back to defaults */
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(TMPL_STORAGE_KEY)); } catch(e){}
+  if (saved && saved.ids && saved.templates && saved.ids.length > 0) {
+    TEMPLATE_IDS   = saved.ids;
+    TEMPLATES      = saved.templates;
+    TEMPLATE_NEXT_ID = saved.nextId || (Math.max.apply(null, saved.ids) + 1);
+  } else {
+    var defs = _defaultTemplates();
+    TEMPLATES = {}; TEMPLATE_IDS = [];
+    defs.forEach(function(t){ TEMPLATES[t.id] = {name: t.name, body: t.body}; TEMPLATE_IDS.push(t.id); });
+    TEMPLATE_NEXT_ID = 5;
+    _saveTemplatesToStorage();
+  }
 }
 initTemplates();
-var editingTemplateNum = 1;
 
-function genWaMsg(m, n) {
-  if (!m) return TEMPLATES[n] || '';
-  return (TEMPLATES[n] || '')
-    .replace(/\[NAMA PIC\]/g, m.namaPIC || m.namaSyarikat || '—')
-    .replace(/\[NO\. AHLI\]/g, m.id || '—')
-    .replace(/\[NAMA SYARIKAT\]/g, m.namaSyarikat || '—')
+function genWaMsg(m, id) {
+  var tmpl = TEMPLATES[id];
+  var body = tmpl ? (tmpl.body || tmpl) : '';   // fallback: old string format
+  if (!m) return body;
+  return body
+    .replace(/\[NAMA PIC\]/g,       m.namaPIC || m.namaSyarikat || '—')
+    .replace(/\[NO\. AHLI\]/g,      m.id || '—')
+    .replace(/\[NAMA SYARIKAT\]/g,  m.namaSyarikat || '—')
     .replace(/\[TARIKH LUPUT SSM\]/g, m.ssmDeadline || '—');
 }
 
 function renderTemplates() {
-  for (var i=1; i<=4; i++) {
-    var el = document.getElementById('wa-preview-' + i);
-    if (el) el.textContent = TEMPLATES[i];
-  }
+  var grid = document.getElementById('templates-grid');
+  if (!grid) return;
+  grid.innerHTML = TEMPLATE_IDS.map(function(id) {
+    var t = TEMPLATES[id];
+    var name = t ? t.name : 'Template ' + id;
+    var body = t ? (t.body || t) : '';
+    return '<div class="sec-card">'      + '<div class="sec-head" style="gap:8px;">'      + '<h3 style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13.5px;" title="' + name + '">' + name + '</h3>'      + '<div style="display:flex;gap:6px;flex-shrink:0;">'      + '<button class="btn btn-white btn-xs" onclick="editTemplate(' + id + ')">✏ Edit</button>'      + (TEMPLATE_IDS.length > 1 ? '<button class="btn btn-xs" style="background:rgba(200,0,0,.18);color:#ff8080;" onclick="confirmDeleteTemplate(' + id + ')">✕</button>' : '')      + '</div></div>'      + '<div class="sec-body"><div class="wa-preview"><div class="wa-bubble" id="wa-preview-' + id + '" style="white-space:pre-wrap;">' + body + '</div></div></div>'      + '</div>';
+  }).join('');
 }
 
-function editTemplate(n) {
-  editingTemplateNum = n;
-  var title = document.getElementById('edit-template-title');
-  if (title) title.textContent = 'Edit Template ' + n;
-  var content = document.getElementById('edit-template-content');
-  if (content) content.value = TEMPLATES[n];
+function openAddTemplateModal() {
+  editingTemplateId = null;
+  document.getElementById('edit-template-title').textContent = 'Tambah Template Baru';
+  document.getElementById('edit-template-name').value = '';
+  document.getElementById('edit-template-content').value = '';
+  document.getElementById('edit-template-preview-text').textContent = '';
+  var delBtn = document.getElementById('delete-template-btn');
+  if (delBtn) delBtn.style.display = 'none';
   document.getElementById('edit-template-modal').classList.add('show');
 }
 
+function editTemplate(id) {
+  editingTemplateId = id;
+  var t = TEMPLATES[id];
+  document.getElementById('edit-template-title').textContent = 'Edit Template';
+  document.getElementById('edit-template-name').value = t ? t.name : '';
+  var body = t ? (t.body || t) : '';
+  document.getElementById('edit-template-content').value = body;
+  document.getElementById('edit-template-preview-text').textContent = body.substring(0,120) + (body.length>120?'…':'');
+  var delBtn = document.getElementById('delete-template-btn');
+  if (delBtn) delBtn.style.display = TEMPLATE_IDS.length > 1 ? 'inline-flex' : 'none';
+  document.getElementById('edit-template-modal').classList.add('show');
+}
+
+// Live preview on textarea input
+document.addEventListener('DOMContentLoaded', function() {
+  var ta = document.getElementById('edit-template-content');
+  if (ta) ta.addEventListener('input', function() {
+    var prev = document.getElementById('edit-template-preview-text');
+    if (prev) prev.textContent = ta.value.substring(0,120) + (ta.value.length>120?'…':'');
+  });
+});
+
 function saveTemplate() {
-  var content = document.getElementById('edit-template-content');
-  if (content) TEMPLATES[editingTemplateNum] = content.value;
+  var nameEl = document.getElementById('edit-template-name');
+  var bodyEl = document.getElementById('edit-template-content');
+  var name = nameEl ? nameEl.value.trim() : '';
+  var body = bodyEl ? bodyEl.value : '';
+  if (!name) { alert('Sila masukkan nama template.'); nameEl.focus(); return; }
+  if (!body.trim()) { alert('Sila masukkan kandungan mesej.'); bodyEl.focus(); return; }
+
+  if (editingTemplateId !== null) {
+    /* Edit existing */
+    TEMPLATES[editingTemplateId] = { name: name, body: body };
+  } else {
+    /* Add new */
+    var newId = TEMPLATE_NEXT_ID++;
+    TEMPLATES[newId] = { name: name, body: body };
+    TEMPLATE_IDS.push(newId);
+  }
+  _saveTemplatesToStorage();
   closeModal('edit-template-modal');
   renderTemplates();
-  addLog('Template ' + editingTemplateNum + ' dikemaskini');
+  _syncWAModalButtons();
+  addLog((editingTemplateId ? 'Template dikemaskini: ' : 'Template baru: ') + name);
+  editingTemplateId = null;
+}
+
+function confirmDeleteTemplate(id) {
+  var t = TEMPLATES[id];
+  var name = t ? t.name : 'Template ' + id;
+  if (!confirm('Padam template "'+ name +'"?\nTindakan ini tidak boleh dibuat asal.')) return;
+  deleteTemplate(id);
+}
+
+function deleteTemplate(id) {
+  if (TEMPLATE_IDS.length <= 1) { alert('Sekurang-kurangnya satu template mesti ada.'); return; }
+  if (!id && editingTemplateId) id = editingTemplateId;
+  delete TEMPLATES[id];
+  TEMPLATE_IDS = TEMPLATE_IDS.filter(function(i){ return i !== id; });
+  _saveTemplatesToStorage();
+  closeModal('edit-template-modal');
+  renderTemplates();
+  _syncWAModalButtons();
+  addLog('Template dipadam: ID ' + id);
+}
+
+/* Keep WA modal in sync — call after any template add/edit/delete */
+function _syncWAModalButtons() {
+  var btnDiv = document.getElementById('wa-template-btns');
+  if (!btnDiv || !waCurrentMember) return;
+  btnDiv.innerHTML = TEMPLATE_IDS.map(function(id, idx) {
+    var t = TEMPLATES[id];
+    var label = t ? t.name : 'Template ' + id;
+    return '<button class="btn btn-outline btn-sm" onclick="selectWATemplate(' + id + ')">' + label + '</button>';
+  }).join('');
+  selectWATemplate(TEMPLATE_IDS[0]);
 }
 
 function renderDashboard() {
