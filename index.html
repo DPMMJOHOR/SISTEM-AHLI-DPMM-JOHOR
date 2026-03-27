@@ -2601,7 +2601,7 @@ function renderTemplates() {
     var t = TEMPLATES[id];
     var name = t ? t.name : 'Template ' + id;
     var body = t ? (t.body || t) : '';
-    return '<div class="sec-card">'      + '<div class="sec-head" style="gap:8px;">'      + '<h3 style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13.5px;" title="' + name + '">' + name + '</h3>'      + '<div style="display:flex;gap:6px;flex-shrink:0;">'      + '<button class="btn btn-white btn-xs" onclick="editTemplate(' + id + ')">✏ Edit</button>'      + (TEMPLATE_IDS.length > 1 ? '<button class="btn btn-xs" style="background:rgba(200,0,0,.18);color:#ff8080;" onclick="confirmDeleteTemplate(' + id + ')">✕</button>' : '')      + '</div></div>'      + '<div class="sec-body"><div class="wa-preview"><div class="wa-bubble" id="wa-preview-' + id + '" style="white-space:pre-wrap;">' + body + '</div></div></div>'      + '</div>';
+    return '<div class="sec-card">'      + '<div class="sec-head" style="gap:8px;">'      + '<h3 style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13.5px;" title="' + name + '">' + name + '</h3>'      + '<div style="display:flex;gap:6px;flex-shrink:0;">'      + '<button class="btn btn-outline btn-xs" onclick="editTemplate(' + id + ')">✏ Edit</button>'      + (TEMPLATE_IDS.length > 1 ? '<button class="btn btn-xs" style="background:rgba(200,0,0,.18);color:#ff8080;" onclick="confirmDeleteTemplate(' + id + ')">✕</button>' : '')      + '</div></div>'      + '<div class="sec-body"><div class="wa-preview"><div class="wa-bubble" id="wa-preview-' + id + '" style="white-space:pre-wrap;">' + body + '</div></div></div>'      + '</div>';
   }).join('');
 }
 
@@ -3724,7 +3724,7 @@ function generateReport() {
       + '</tr>';
   }).join('');
 
-  var css = '@page{size:A4 portrait;margin:8mm 10mm 8mm}'
+  var css = '@page{size:A4 landscape;margin:6mm 8mm}'
     + '*{box-sizing:border-box;margin:0;padding:0}'
     + 'body{font-family:"Segoe UI",Arial,sans-serif;font-size:13px;color:#1a1a2e;-webkit-print-color-adjust:exact;print-color-adjust:exact;line-height:1.45}'
     + 'table{width:100%;border-collapse:collapse;table-layout:auto}'
@@ -3925,12 +3925,16 @@ function pageExport(pageId, fmt) {
         '  .row-unpaid { background: #fce8e8 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }',
         '  .row-unknown { background: #fce8e8 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }',
         '  strong { font-weight: 700; }',
-      '  .fu-counters { display:flex !important; gap:10px; margin-bottom:8px; }',
-      '  .fu-counter { border:1px solid #ccc; border-radius:6px; padding:8px 14px; min-width:0; }',
-      '  .fu-count { font-size:22px !important; }',
-      '  .fu-label { font-size:9px !important; }',
-      '  .sec-card { margin-bottom:6px; }',
-      '  .sec-body { padding:0 !important; }',
+      '  .fu-counters { display:flex !important; gap:8px; margin:0 0 6px 0 !important; padding:0 !important; flex-wrap:nowrap; }',
+      '  .fu-counter { border:1px solid #bbb; border-radius:4px; padding:5px 10px; min-width:0; flex:1; }',
+      '  .fu-count { font-size:18px !important; line-height:1.1; }',
+      '  .fu-label { font-size:8px !important; margin-top:1px; }',
+      '  .sec-card { margin:0 0 4px 0 !important; padding:0 !important; box-shadow:none !important; border:none !important; border-radius:0 !important; }',
+      '  .sec-head { padding:3px 0 !important; border-bottom:1.5px solid #1a3f7a !important; margin-bottom:2px !important; background:transparent !important; }',
+      '  .sec-head h3 { font-size:9px !important; color:#1a3f7a !important; margin:0 !important; }',
+      '  .sec-body { padding:0 !important; margin:0 !important; }',
+      '  .sec-count { display:none !important; }',
+      '  .page { padding:0 !important; margin:0 !important; }',
       ]);
     } else {
       rules = rules.concat([
@@ -3958,8 +3962,19 @@ function pageExport(pageId, fmt) {
     }
 
     if (isLandscape) {
-      // Senarai: just the table, no cover page header
-      wrapper.innerHTML = pageEl.innerHTML;
+      // Clone page content, strip no-print controls, add compact header
+      var clone = pageEl.cloneNode(true);
+      // Remove all no-print elements from clone
+      clone.querySelectorAll('.no-print, .page-export-wrap, button, input, select').forEach(function(el){ el.remove(); });
+      // Remove margin-bottom from the (now-empty) first child if it had the export btn div
+      var firstDiv = clone.firstElementChild;
+      if (firstDiv && !firstDiv.textContent.trim()) { firstDiv.remove(); }
+      wrapper.innerHTML =
+        '<div style="font-family:Arial,sans-serif;margin-bottom:6px;padding-bottom:4px;border-bottom:2px solid #1a3f7a;display:flex;justify-content:space-between;align-items:center;">'
+        + '<div><strong style="font-size:13px;color:#1a3f7a;">DPMM NEGERI JOHOR &mdash; ' + title.toUpperCase() + '</strong></div>'
+        + '<div style="font-size:9px;color:#888;">Dijana: ' + datestamp + '</div>'
+        + '</div>'
+        + clone.innerHTML;
     } else {
       wrapper.innerHTML =
         '<div style="font-family:sans-serif;margin-bottom:10px;">'
