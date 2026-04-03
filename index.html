@@ -388,6 +388,60 @@ input, select, textarea, button { font-family: var(--sans); }
 .btn-gold:hover { background: #e8952a; transform: translateY(-1px); }
 .btn-success { background: #1a7a4a; color: var(--white); box-shadow: 0 4px 14px rgba(26,122,74,.25); }
 .btn-success:hover { background: #155f39; transform: translateY(-1px); }
+.dok-tb-btn {
+  padding: 3px 8px; font-size: 11.5px; border: 1px solid var(--gray2);
+  border-radius: 3px; background: #fff; cursor: pointer; color: var(--text);
+  transition: background .15s;
+}
+.dok-tb-btn:hover { background: var(--primary-lt); color: var(--primary); }
+.dok-tb-sel {
+  padding: 3px 6px; font-size: 11.5px; border: 1px solid var(--gray2);
+  border-radius: 3px; background: #fff; color: var(--text); cursor: pointer;
+}
+.dok-card {
+  background: var(--white); border-radius: 10px; border: 1px solid var(--gray1);
+  box-shadow: 0 2px 8px rgba(0,0,0,.06); padding: 0; overflow: hidden;
+  transition: box-shadow .2s, transform .15s; cursor: pointer;
+}
+.dok-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,.12); transform: translateY(-2px); }
+.dok-card-head {
+  padding: 12px 14px 8px; border-bottom: 1px solid var(--gray1);
+  background: linear-gradient(135deg, var(--primary-lt) 0%, #fff 100%);
+}
+.dok-card-kat {
+  font-size: 9.5px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .6px; color: var(--primary); margin-bottom: 4px;
+}
+.dok-card-title {
+  font-size: 13.5px; font-weight: 700; color: var(--text);
+  line-height: 1.3; overflow: hidden; display: -webkit-box;
+  -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+}
+.dok-card-body { padding: 10px 14px; font-size: 11.5px; color: var(--muted); }
+.dok-card-actions {
+  padding: 8px 14px; border-top: 1px solid var(--gray1);
+  display: flex; gap: 6px; background: #fafafa;
+}
+.dok-kat-pill {
+  padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700;
+  cursor: pointer; transition: all .15s; border: 1.5px solid transparent;
+  white-space: nowrap;
+}
+.dok-kat-pill.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+.dok-kat-pill:not(.active) { background: var(--primary-lt); color: var(--primary); border-color: var(--primary-lt); }
+.dok-kat-pill:not(.active):hover { border-color: var(--primary); }
+#dok-editor { caret-color: var(--primary); }
+#dok-editor:focus { outline: none; }
+#dok-editor[contenteditable="true"] {
+  border: 1.5px dashed var(--gray2); border-radius: 6px; padding: 16px;
+  background: #fefefe;
+}
+#dok-editor table { border-collapse: collapse; width: 100%; margin: 8px 0; }
+#dok-editor table td, #dok-editor table th {
+  border: 1px solid #bbb; padding: 6px 10px; font-size: 13px;
+}
+#dok-editor table th { background: #eee; font-weight: 700; }
+
 .faq-item { border-bottom: 1px solid var(--gray1); }
 .faq-item:last-child { border-bottom: none; }
 .faq-q { padding: 13px 16px; font-size: 13px; font-weight: 700; color: var(--navy); cursor: pointer; user-select: none; transition: background .15s; }
@@ -989,6 +1043,10 @@ tr.row-unpaid { background: #fff0f0 !important; }
       <span class="nav-icon">&#x1F4BE;</span>
       <span class="nav-text">BACK UP</span>
     </div>
+    <div class="nav-item" onclick="showPage('dokumen')">
+      <span class="nav-icon">&#x1F4C2;</span>
+      <span class="nav-text">DOKUMEN</span>
+    </div>
     <div class="nav-item" onclick="showPage('faq')">
       <span class="nav-icon">&#x2753;</span>
       <span class="nav-text">PANDUAN & FAQ</span>
@@ -1426,6 +1484,120 @@ tr.row-unpaid { background: #fff0f0 !important; }
       <div class="sec-head"><h3>&#x1F4CB; Log Aktiviti</h3></div>
       <div class="sec-body" style="padding:0;max-height:400px;overflow-y:auto;">
         <div id="activity-log"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ DOKUMEN ══ -->
+  <div id="page-dokumen" class="page">
+
+    <!-- TOP TOOLBAR -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-primary btn-sm" onclick="dokOpenCompose(null)">&#x270F; Cipta Dokumen Baru</button>
+        <div style="position:relative;display:inline-block;">
+          <select id="dok-filter-kat" class="filter-sel" onchange="renderDokumenPage()" style="min-width:180px;">
+            <option value="">Semua Kategori</option>
+            <option value="NOTIS_MESYUARAT">Notis Mesyuarat</option>
+            <option value="MINIT_MESYUARAT">Minit Mesyuarat</option>
+            <option value="BUKU_MESYUARAT">Buku Mesyuarat</option>
+            <option value="LAPORAN_KEWANGAN">Laporan Kewangan</option>
+            <option value="LAPORAN_AKTIVITI">Laporan Aktiviti</option>
+            <option value="PERLEMBAGAAN">Buku Perlembagaan</option>
+            <option value="SURAT_RASMI">Surat Rasmi</option>
+            <option value="LAIN">Lain-lain</option>
+          </select>
+        </div>
+        <input type="text" id="dok-search" class="search-input" placeholder="&#x1F50D; Cari dokumen..." oninput="renderDokumenPage()" style="width:200px;">
+      </div>
+      <div style="font-size:11.5px;color:var(--muted);" id="dok-count-lbl">—</div>
+    </div>
+
+    <!-- CATEGORY PILLS -->
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;" id="dok-cat-pills"></div>
+
+    <!-- DOCUMENT GRID -->
+    <div id="dok-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;"></div>
+
+    <!-- EMPTY STATE -->
+    <div id="dok-empty" style="display:none;text-align:center;padding:60px 20px;color:var(--muted);">
+      <div style="font-size:48px;margin-bottom:12px;">&#x1F4C2;</div>
+      <div style="font-size:16px;font-weight:700;margin-bottom:6px;">Tiada Dokumen Lagi</div>
+      <div style="font-size:13px;">Klik <strong>"Cipta Dokumen Baru"</strong> untuk mula.</div>
+    </div>
+
+  </div>
+
+  <!-- ══ MODAL: COMPOSE / VIEW DOKUMEN ══ -->
+  <div class="modal-overlay" id="dok-modal" style="z-index:1100;">
+    <div class="modal" style="max-width:860px;width:95vw;max-height:92vh;display:flex;flex-direction:column;">
+      <div class="modal-head" style="flex-shrink:0;">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">
+          <span id="dok-modal-kat-badge" style="font-size:10px;font-weight:800;padding:3px 8px;border-radius:4px;background:var(--primary-lt);color:var(--primary);white-space:nowrap;"></span>
+          <h3 id="dok-modal-title" style="margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Dokumen</h3>
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0;">
+          <button class="btn btn-outline btn-sm no-print" id="dok-btn-edit" onclick="dokToggleEdit()" style="display:none;">&#x270F; Edit</button>
+          <button class="btn btn-success btn-sm no-print" id="dok-btn-save" onclick="dokSave()" style="display:none;">&#x1F4BE; Simpan</button>
+          <button class="btn btn-outline btn-sm no-print" onclick="dokPrint()">&#x1F5A8; Cetak PDF</button>
+          <button class="btn btn-outline btn-sm no-print" onclick="dokEmail()">&#x2709; E-mel</button>
+          <button class="modal-close no-print" onclick="closeModal('dok-modal')">&#x2715;</button>
+        </div>
+      </div>
+      <!-- Doc meta bar -->
+      <div id="dok-meta-bar" class="no-print" style="background:var(--primary-lt);padding:8px 20px;font-size:11.5px;color:var(--primary);display:flex;gap:16px;flex-shrink:0;flex-wrap:wrap;border-bottom:1px solid var(--gray1);">
+      </div>
+      <!-- Compose controls (hidden in view mode) -->
+      <div id="dok-compose-bar" class="no-print" style="display:none;padding:8px 20px;border-bottom:1px solid var(--gray1);background:#fafafa;flex-shrink:0;flex-wrap:wrap;gap:6px;align-items:center;">
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+          <select id="dok-kat-sel" class="filter-sel" style="min-width:170px;">
+            <option value="NOTIS_MESYUARAT">Notis Mesyuarat</option>
+            <option value="MINIT_MESYUARAT">Minit Mesyuarat</option>
+            <option value="BUKU_MESYUARAT">Buku Mesyuarat</option>
+            <option value="LAPORAN_KEWANGAN">Laporan Kewangan</option>
+            <option value="LAPORAN_AKTIVITI">Laporan Aktiviti</option>
+            <option value="PERLEMBAGAAN">Buku Perlembagaan</option>
+            <option value="SURAT_RASMI">Surat Rasmi</option>
+            <option value="LAIN">Lain-lain</option>
+          </select>
+          <input type="text" id="dok-tajuk-input" class="field-input" placeholder="Tajuk dokumen..." style="width:280px;padding:6px 10px;">
+        </div>
+        <!-- Rich text toolbar -->
+        <div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:6px;border-top:1px solid var(--gray1);padding-top:6px;width:100%;">
+          <button type="button" class="dok-tb-btn" onclick="dokFmt('bold')" title="Tebal"><strong>B</strong></button>
+          <button type="button" class="dok-tb-btn" onclick="dokFmt('italic')" title="Condong"><em>I</em></button>
+          <button type="button" class="dok-tb-btn" onclick="dokFmt('underline')" title="Garis bawah"><u>U</u></button>
+          <span style="width:1px;background:var(--gray2);margin:0 3px;"></span>
+          <button type="button" class="dok-tb-btn" onclick="dokFmt('justifyLeft')" title="Kiri">&#x2261;</button>
+          <button type="button" class="dok-tb-btn" onclick="dokFmt('justifyCenter')" title="Tengah">&#x2261;</button>
+          <button type="button" class="dok-tb-btn" onclick="dokFmt('justifyRight')" title="Kanan">&#x2261;</button>
+          <span style="width:1px;background:var(--gray2);margin:0 3px;"></span>
+          <button type="button" class="dok-tb-btn" onclick="dokFmt('insertUnorderedList')" title="Senarai">&#x2022; List</button>
+          <button type="button" class="dok-tb-btn" onclick="dokFmt('insertOrderedList')" title="Nombor">1. List</button>
+          <span style="width:1px;background:var(--gray2);margin:0 3px;"></span>
+          <select onchange="dokFmt('fontSize',this.value);this.value='';" class="dok-tb-sel" title="Saiz">
+            <option value="">Saiz</option>
+            <option value="2">Kecil</option>
+            <option value="3">Normal</option>
+            <option value="4">Besar</option>
+            <option value="5">Lebih Besar</option>
+          </select>
+          <select onchange="dokFmt('foreColor',this.value);this.value='';" class="dok-tb-sel" title="Warna">
+            <option value="">Warna</option>
+            <option value="#1a3f7a">Navy</option>
+            <option value="#c0392b">Merah</option>
+            <option value="#1a7a4a">Hijau</option>
+            <option value="#000000">Hitam</option>
+          </select>
+          <span style="width:1px;background:var(--gray2);margin:0 3px;"></span>
+          <button type="button" class="dok-tb-btn" onclick="dokInsertTemplate()" title="Masukkan template">&#x1F4CB; Template</button>
+          <button type="button" class="dok-tb-btn" onclick="dokInsertDate()" title="Tarikh hari ini">&#x1F4C5; Tarikh</button>
+          <button type="button" class="dok-tb-btn" onclick="dokInsertTable()" title="Masukkan jadual">&#x229E; Jadual</button>
+        </div>
+      </div>
+      <!-- Document content area -->
+      <div style="flex:1;overflow-y:auto;padding:20px 24px;" id="dok-content-wrap">
+        <div id="dok-editor" style="min-height:400px;outline:none;font-family:Georgia,serif;font-size:14px;line-height:1.8;color:#111;" spellcheck="true"></div>
       </div>
     </div>
   </div>
@@ -1894,6 +2066,8 @@ async function reloadMembers() {
 }
 
 
+// USERS is loaded from Supabase DPMM_USERS at startup
+// Fallback hardcoded list used if Supabase unreachable
 var USERS = [
   {id:'dpmmnj.pengurusan@gmail.com', name:'Pentadbir DPMM Negeri Johor', pass:'@dmin123', role:'admin'},
   {id:'ydk7431@gmail.com', name:'Yazid Bin Khalid', pass:'@dmin123', role:'user'},
@@ -1902,6 +2076,36 @@ var USERS = [
   {id:'muhdfarihan@gmail.com', name:'Muhammad Farihan Mustaffa', pass:'@dmin123', role:'user'},
   {id:'mohdnizam2020@hotmail.com', name:'Mohd Nizam Bin Kamal', pass:'@dmin123', role:'user'},
 ];
+
+async function _loadUsersFromSupabase() {
+  try {
+    var { data, error } = await supabaseClient
+      .from('DPMM_USERS')
+      .select('*')
+      .eq('aktif', true)
+      .order('id', { ascending: true });
+    if (error || !data || !data.length) return;
+    USERS = data.map(function(row) {
+      return { id: row.user_id, name: row.nama, pass: row.kata_laluan, role: row.peranan };
+    });
+  } catch(e) { console.warn('_loadUsersFromSupabase failed:', e); }
+}
+
+async function _saveUserToSupabase(u, isNew) {
+  var payload = { user_id: u.id, nama: u.name, kata_laluan: u.pass, peranan: u.role, aktif: true, updated_at: new Date().toISOString() };
+  if (isNew) {
+    var res = await supabaseClient.from('DPMM_USERS').insert([payload]);
+    if (res.error) console.warn('User insert error:', res.error.message);
+  } else {
+    var res = await supabaseClient.from('DPMM_USERS').update(payload).eq('user_id', u.id);
+    if (res.error) console.warn('User update error:', res.error.message);
+  }
+}
+
+async function _deleteUserFromSupabase(uid) {
+  var res = await supabaseClient.from('DPMM_USERS').update({ aktif: false }).eq('user_id', uid);
+  if (res.error) console.warn('User delete error:', res.error.message);
+}
 var YURAN_TABLE = {"6.2.1": [50, 50], "6.2.2": [50, 50], "6.2.3": [200, 150], "6.2.4": [200, 150], "6.2.5": [200, 150], "6.2.6": [200, 150], "6.3.1": [500, 100], "6.3.2": [1000, 1000], "6.3.3": [1000, 1000], "6.3.4": [1000, 1000], "6.3.5": [1000, 1000], "6.3.6": [10, 10], "6.4.1": [1000, 500], "6.4.2": [500, 250], "6.5.1": [0, 0]};
 function getYuranDaftar(f){return YURAN_TABLE[f]?YURAN_TABLE[f][0]:0;}
 function getYuranTahunan(f){return YURAN_TABLE[f]?YURAN_TABLE[f][1]:0;}
@@ -1911,22 +2115,72 @@ var sessionStartTime = null;
 var EDIT_MEMBER_ID = null;  // null = tambah baru; string = mode edit ahli
 var viewingLogUser = null;
 
-// ── PERSISTENT PER-USER LOG ──
-function _loadUserLogs() {
-  try { return JSON.parse(localStorage.getItem('dpmm_user_logs') || '{}'); } catch(e) { return {}; }
+// ── PERSISTENT PER-USER LOG — Supabase DPMM_LOGS ──
+// Legacy localStorage functions kept as no-ops (Supabase is source of truth)
+function _loadUserLogs() { return {}; }  // no-op — data lives in Supabase
+function _saveUserLogs(logs) {}           // no-op — writes go direct to Supabase
+
+async function _fetchLogsFromSupabase() {
+  try {
+    var { data, error } = await supabaseClient
+      .from('DPMM_LOGS')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(2000);
+    if (error) throw error;
+    // Group by user_id into the format expected by openUserLog
+    var grouped = {};
+    (data||[]).forEach(function(row) {
+      var uid = row.user_id;
+      if (!grouped[uid]) grouped[uid] = [];
+      grouped[uid].push({
+        ts:        row.created_at,
+        time:      new Date(row.created_at).toLocaleString('ms-MY'),
+        msg:       row.aksi,
+        user:      uid,
+        sessionId: row.session_id
+      });
+    });
+    return grouped;
+  } catch(e) {
+    console.warn('_fetchLogsFromSupabase failed:', e);
+    return {};
+  }
 }
-function _saveUserLogs(logs) {
-  try { localStorage.setItem('dpmm_user_logs', JSON.stringify(logs)); } catch(e) {}
+
+function _writeLogToSupabase(entry) {
+  supabaseClient.from('DPMM_LOGS').insert([{
+    user_id:    entry.user || '?',
+    user_name:  currentUser ? currentUser.name : null,
+    aksi:       entry.msg,
+    session_id: entry.sessionId || null,
+    created_at: entry.ts
+  }]).then(function(res) {
+    if (res.error) console.warn('Log write error:', res.error.message);
+  });
 }
 
 function doLogin() {
   var uid = document.getElementById('login-user').value.trim();
   var pwd = document.getElementById('login-pass').value;
-  var user = null;
-  for (var i=0; i<USERS.length; i++) {
-    if (USERS[i].id.toLowerCase() === uid.toLowerCase() && USERS[i].pass === pwd) { user = USERS[i]; break; }
-  }
-  if (!user) { document.getElementById('login-err').style.display = 'block'; return; }
+  if (!uid || !pwd) { document.getElementById('login-err').style.display = 'block'; return; }
+  var btn = document.querySelector('.login-btn');
+  if (btn) { btn.textContent = '⏳ Mengesahkan...'; btn.disabled = true; }
+  // Load users from Supabase first, then authenticate
+  _loadUsersFromSupabase().then(function() {
+    var user = null;
+    for (var i=0; i<USERS.length; i++) {
+      if (USERS[i].id.toLowerCase() === uid.toLowerCase() && USERS[i].pass === pwd) { user = USERS[i]; break; }
+    }
+    if (!user) {
+      if (btn) { btn.textContent = 'LOG MASUK'; btn.disabled = false; }
+      document.getElementById('login-err').style.display = 'block';
+      return;
+    }
+    _continueLogin(user, btn);
+  });
+}
+function _continueLogin(user, btn) {
   currentUser = user;
 
   // Show loading state
@@ -1952,6 +2206,8 @@ function doLogin() {
     checkBackup();
     updateSidebarCount();
     renderAllPages();
+    // Load Supabase-backed data in background (non-blocking)
+    _loadTemplatesFromSupabase().then(function() { renderTemplates(); });
   }).catch(function(err) {
     if (btn) { btn.textContent = 'LOG MASUK'; btn.disabled = false; }
     document.getElementById('login-err').style.display = 'block';
@@ -1995,13 +2251,8 @@ function addLog(msg) {
   };
   activityLogs.unshift(entry);
   if (activityLogs.length > 200) activityLogs.pop();
-  if (uid !== '?') {
-    var allLogs = _loadUserLogs();
-    if (!allLogs[uid]) allLogs[uid] = [];
-    allLogs[uid].unshift(entry);
-    if (allLogs[uid].length > 500) allLogs[uid] = allLogs[uid].slice(0, 500);
-    _saveUserLogs(allLogs);
-  }
+  // Write to Supabase (non-blocking)
+  if (uid !== '?') _writeLogToSupabase(entry);
 }
 
 var backupLogs = [];
@@ -2238,6 +2489,7 @@ var PAGE_META = {
   ssm:       ['SSM TRACKER',''],
   followup:  ['FOLLOW UP',''],
   templates: ['TEMPLATE MESEJ',''],
+  dokumen:   ['DOKUMEN','Notis, Minit, Surat & Arkib Dokumen'],
   faq:       ['PANDUAN & SOALAN LAZIM','Rujukan penggunaan sistem'],
   workflow:  ['WORKFLOW',''],
   backup:    ['BACK UP',''],
@@ -2273,6 +2525,7 @@ function showPage(id) {
   if (id === 'followup') renderFollowUpPage();
   if (id === 'templates') renderTemplates();
   if (id === 'faq') { /* static page, no render needed */ }
+  if (id === 'dokumen') renderDokumenPage();
   closeSidebar();
 }
 
@@ -2559,29 +2812,62 @@ function _defaultTemplates() {
 }
 
 function _saveTemplatesToStorage() {
-  try {
-    var data = { ids: TEMPLATE_IDS, templates: TEMPLATES, nextId: TEMPLATE_NEXT_ID };
-    localStorage.setItem(TMPL_STORAGE_KEY, JSON.stringify(data));
-  } catch(e) { console.warn('Template save failed:', e); }
+  // no-op: templates are now saved to Supabase
 }
 
 function initTemplates() {
-  /* Load from localStorage; fall back to defaults */
-  var saved = null;
-  try { saved = JSON.parse(localStorage.getItem(TMPL_STORAGE_KEY)); } catch(e){}
-  if (saved && saved.ids && saved.templates && saved.ids.length > 0) {
-    TEMPLATE_IDS   = saved.ids;
-    TEMPLATES      = saved.templates;
-    TEMPLATE_NEXT_ID = saved.nextId || (Math.max.apply(null, saved.ids) + 1);
-  } else {
-    var defs = _defaultTemplates();
-    TEMPLATES = {}; TEMPLATE_IDS = [];
-    defs.forEach(function(t){ TEMPLATES[t.id] = {name: t.name, body: t.body}; TEMPLATE_IDS.push(t.id); });
-    TEMPLATE_NEXT_ID = 5;
-    _saveTemplatesToStorage();
-  }
+  // Load defaults into memory — Supabase data will overwrite on login
+  var defs = _defaultTemplates();
+  TEMPLATES = {}; TEMPLATE_IDS = [];
+  defs.forEach(function(t){ TEMPLATES[t.id] = {name: t.name, body: t.body}; TEMPLATE_IDS.push(t.id); });
+  TEMPLATE_NEXT_ID = 5;
 }
 initTemplates();
+
+async function _loadTemplatesFromSupabase() {
+  try {
+    var { data, error } = await supabaseClient
+      .from('DPMM_TEMPLATES')
+      .select('*')
+      .order('template_key', { ascending: true });
+    if (error || !data || !data.length) return;  // keep defaults
+    TEMPLATES = {}; TEMPLATE_IDS = [];
+    var maxKey = 0;
+    data.forEach(function(row) {
+      TEMPLATES[row.template_key] = { name: row.nama, body: row.kandungan, _dbId: row.id };
+      TEMPLATE_IDS.push(row.template_key);
+      if (row.template_key > maxKey) maxKey = row.template_key;
+    });
+    TEMPLATE_NEXT_ID = maxKey + 1;
+    renderTemplates();
+  } catch(e) { console.warn('_loadTemplatesFromSupabase failed:', e); }
+}
+
+async function _upsertTemplateToSupabase(templateId, t) {
+  var dbId = t._dbId || null;
+  var payload = {
+    template_key: templateId,
+    nama:         t.name,
+    kandungan:    t.body,
+    updated_at:   new Date().toISOString()
+  };
+  if (dbId) {
+    var res = await supabaseClient.from('DPMM_TEMPLATES').update(payload).eq('id', dbId);
+    if (res.error) console.warn('Template update error:', res.error.message);
+  } else {
+    payload.created_by = currentUser ? currentUser.id : null;
+    var res = await supabaseClient.from('DPMM_TEMPLATES').insert([payload]).select();
+    if (res.error) { console.warn('Template insert error:', res.error.message); }
+    else if (res.data && res.data[0]) { TEMPLATES[templateId]._dbId = res.data[0].id; }
+  }
+}
+
+async function _deleteTemplateFromSupabase(templateId) {
+  var t = TEMPLATES[templateId];
+  if (!t || !t._dbId) return;
+  var res = await supabaseClient.from('DPMM_TEMPLATES').delete().eq('id', t._dbId);
+  if (res.error) console.warn('Template delete error:', res.error.message);
+}
 
 function genWaMsg(m, id) {
   var tmpl = TEMPLATES[id];
@@ -2648,14 +2934,17 @@ function saveTemplate() {
 
   if (editingTemplateId !== null) {
     /* Edit existing */
-    TEMPLATES[editingTemplateId] = { name: name, body: body };
+    var existingDbId = TEMPLATES[editingTemplateId] ? TEMPLATES[editingTemplateId]._dbId : null;
+    TEMPLATES[editingTemplateId] = { name: name, body: body, _dbId: existingDbId };
+    _upsertTemplateToSupabase(editingTemplateId, TEMPLATES[editingTemplateId]);
   } else {
     /* Add new */
     var newId = TEMPLATE_NEXT_ID++;
     TEMPLATES[newId] = { name: name, body: body };
     TEMPLATE_IDS.push(newId);
+    _upsertTemplateToSupabase(newId, TEMPLATES[newId]);
   }
-  _saveTemplatesToStorage();
+  _saveTemplatesToStorage();  // no-op
   closeModal('edit-template-modal');
   renderTemplates();
   _syncWAModalButtons();
@@ -2673,9 +2962,10 @@ function confirmDeleteTemplate(id) {
 function deleteTemplate(id) {
   if (TEMPLATE_IDS.length <= 1) { alert('Sekurang-kurangnya satu template mesti ada.'); return; }
   if (!id && editingTemplateId) id = editingTemplateId;
+  _deleteTemplateFromSupabase(id);
   delete TEMPLATES[id];
   TEMPLATE_IDS = TEMPLATE_IDS.filter(function(i){ return i !== id; });
-  _saveTemplatesToStorage();
+  _saveTemplatesToStorage();  // no-op
   closeModal('edit-template-modal');
   renderTemplates();
   _syncWAModalButtons();
@@ -3288,79 +3578,88 @@ function openUserLog(uid) {
   var u = null;
   for (var i=0; i<USERS.length; i++) { if (USERS[i].id === uid) { u = USERS[i]; break; } }
   var uName = u ? u.name : uid;
-  document.getElementById('user-log-modal-title').textContent = '📋 Log Aktiviti: ' + uName;
+  document.getElementById('user-log-modal-title').textContent = 'Log Aktiviti: ' + uName;
   document.getElementById('user-log-modal-sub').textContent = uid;
-
-  var allLogs = _loadUserLogs();
-  var uLogs = allLogs[uid] || [];
-
-  // ── Stats bar ──
-  var sessions = {};
-  var totalActions = uLogs.length;
-  uLogs.forEach(function(l) { if (l.sessionId) sessions[l.sessionId] = true; });
-  var totalSessions = Object.keys(sessions).length;
-  var lastLogin = '—';
-  for (var k=0; k<uLogs.length; k++) {
-    if (uLogs[k].msg && uLogs[k].msg.indexOf('Log masuk') === 0) { lastLogin = uLogs[k].time; break; }
-  }
-  document.getElementById('user-log-stats').innerHTML =
-    '<div style="flex:1;padding:12px 16px;border-right:1px solid var(--gray1);text-align:center;">'
-    + '<div style="font-size:22px;font-weight:900;font-family:var(--mono);color:var(--primary);">' + totalSessions + '</div>'
-    + '<div style="font-size:11px;color:var(--muted);margin-top:2px;">Jumlah Sesi</div></div>'
-    + '<div style="flex:1;padding:12px 16px;border-right:1px solid var(--gray1);text-align:center;">'
-    + '<div style="font-size:22px;font-weight:900;font-family:var(--mono);color:var(--navy2);">' + totalActions + '</div>'
-    + '<div style="font-size:11px;color:var(--muted);margin-top:2px;">Jumlah Aktiviti</div></div>'
-    + '<div style="flex:2;padding:12px 16px;text-align:center;">'
-    + '<div style="font-size:13px;font-weight:700;color:var(--success);">' + lastLogin + '</div>'
-    + '<div style="font-size:11px;color:var(--muted);margin-top:2px;">Log Masuk Terakhir</div></div>';
-
-  // ── Build session groups to compute durations ──
-  var sessionMap = {};
-  uLogs.forEach(function(l) {
-    var sid = l.sessionId || 'nosession';
-    if (!sessionMap[sid]) sessionMap[sid] = { start: null, end: null, entries: [] };
-    sessionMap[sid].entries.push(l);
-    if (l.msg && l.msg.indexOf('Log masuk') === 0) sessionMap[sid].start = l.ts;
-    if (l.msg && l.msg.indexOf('Log keluar') === 0) sessionMap[sid].end = l.ts;
-  });
-
-  // ── Render table ──
+  document.getElementById('user-log-stats').innerHTML = '<div style="padding:12px 16px;color:var(--muted);">&#x23F3; Memuatkan...</div>';
   var tbody = document.getElementById('user-log-tbody');
-  if (!uLogs.length) {
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px;">Tiada log untuk pengguna ini.</td></tr>';
-  } else {
-    tbody.innerHTML = uLogs.map(function(l, i) {
-      var sid = l.sessionId || 'nosession';
-      var sm = sessionMap[sid];
-      var durText = '—';
-      if (sm && sm.start && sm.end) {
-        var mins = Math.round((new Date(sm.end) - new Date(sm.start)) / 60000);
-        durText = mins < 60 ? mins + ' min' : Math.floor(mins/60) + 'j ' + (mins%60) + 'min';
-      } else if (sm && sm.start && !sm.end) {
-        durText = '<span style="color:var(--success);font-size:10px;">Aktif</span>';
-      }
-      // Classify action type
-      var msgLower = (l.msg||'').toLowerCase();
-      var typeTag, typeCls;
-      if (msgLower.indexOf('log masuk') === 0)      { typeTag='🔓 Masuk';   typeCls='color:var(--success);' }
-      else if (msgLower.indexOf('log keluar') === 0) { typeTag='🔒 Keluar';  typeCls='color:var(--crimson);' }
-      else if (msgLower.indexOf('refresh') !== -1)   { typeTag='🔄 Refresh'; typeCls='color:var(--primary);' }
-      else if (msgLower.indexOf('padam') !== -1)     { typeTag='🗑 Padam';   typeCls='color:var(--danger);' }
-      else if (msgLower.indexOf('tambah') !== -1)    { typeTag='➕ Tambah';  typeCls='color:var(--navy2);' }
-      else if (msgLower.indexOf('eksport') !== -1 || msgLower.indexOf('muat turun') !== -1) { typeTag='📤 Eksport'; typeCls='color:#7c3aed;' }
-      else if (msgLower.indexOf('whatsapp') !== -1)  { typeTag='💬 WA';      typeCls='color:#25D366;' }
-      else                                            { typeTag='📝 Lain';   typeCls='color:var(--muted);' }
-
-      return '<tr>'
-        + '<td class="row-num">' + (i+1) + '</td>'
-        + '<td style="font-size:11px;white-space:nowrap;">' + l.time + '</td>'
-        + '<td style="font-size:12px;">' + (l.msg||'—') + '</td>'
-        + '<td style="text-align:center;font-size:11px;font-family:var(--mono);">' + durText + '</td>'
-        + '<td style="text-align:center;font-size:10px;font-weight:700;' + typeCls + '">' + typeTag + '</td>'
-        + '</tr>';
-    }).join('');
-  }
+  if (tbody) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px;">Memuatkan log...</td></tr>';
   document.getElementById('user-log-modal').classList.add('show');
+
+  // Fetch from Supabase
+  supabaseClient.from('DPMM_LOGS')
+    .select('*')
+    .eq('user_id', uid)
+    .order('created_at', { ascending: false })
+    .limit(500)
+    .then(function(res) {
+      if (res.error) { console.warn(res.error); return; }
+      var uLogs = (res.data||[]).map(function(row) {
+        return {
+          ts:        row.created_at,
+          time:      new Date(row.created_at).toLocaleString('ms-MY'),
+          msg:       row.aksi,
+          user:      row.user_id,
+          sessionId: row.session_id
+        };
+      });
+      // Stats
+      var sessions = {};
+      uLogs.forEach(function(l) { if (l.sessionId) sessions[l.sessionId] = true; });
+      var totalSessions = Object.keys(sessions).length;
+      var lastLogin = '—';
+      for (var k=0; k<uLogs.length; k++) {
+        if (uLogs[k].msg && uLogs[k].msg.indexOf('Log masuk') === 0) { lastLogin = uLogs[k].time; break; }
+      }
+      document.getElementById('user-log-stats').innerHTML =
+        '<div style="flex:1;padding:12px 16px;border-right:1px solid var(--gray1);text-align:center;">'
+        + '<div style="font-size:22px;font-weight:900;font-family:var(--mono);color:var(--primary);">' + totalSessions + '</div>'
+        + '<div style="font-size:11px;color:var(--muted);margin-top:2px;">Jumlah Sesi</div></div>'
+        + '<div style="flex:1;padding:12px 16px;border-right:1px solid var(--gray1);text-align:center;">'
+        + '<div style="font-size:22px;font-weight:900;font-family:var(--mono);color:var(--navy2);">' + uLogs.length + '</div>'
+        + '<div style="font-size:11px;color:var(--muted);margin-top:2px;">Jumlah Aktiviti</div></div>'
+        + '<div style="flex:2;padding:12px 16px;text-align:center;">'
+        + '<div style="font-size:13px;font-weight:700;color:var(--success);">' + lastLogin + '</div>'
+        + '<div style="font-size:11px;color:var(--muted);margin-top:2px;">Log Masuk Terakhir</div></div>';
+      // Session map for duration
+      var sessionMap = {};
+      uLogs.forEach(function(l) {
+        var sid = l.sessionId || 'nosession';
+        if (!sessionMap[sid]) sessionMap[sid] = { start: null, end: null };
+        if (l.msg && l.msg.indexOf('Log masuk') === 0) sessionMap[sid].start = l.ts;
+        if (l.msg && l.msg.indexOf('Log keluar') === 0) sessionMap[sid].end = l.ts;
+      });
+      if (!uLogs.length) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px;">Tiada log untuk pengguna ini.</td></tr>';
+      } else {
+        tbody.innerHTML = uLogs.map(function(l, i) {
+          var sid = l.sessionId || 'nosession';
+          var sm = sessionMap[sid];
+          var durText = '—';
+          if (sm && sm.start && sm.end) {
+            var mins = Math.round((new Date(sm.end) - new Date(sm.start)) / 60000);
+            durText = mins < 60 ? mins + ' min' : Math.floor(mins/60) + 'j ' + (mins%60) + 'min';
+          } else if (sm && sm.start && !sm.end) {
+            durText = '<span style="color:var(--success);font-size:10px;">Aktif</span>';
+          }
+          var msgLower = (l.msg||'').toLowerCase();
+          var typeTag, typeCls;
+          if (msgLower.indexOf('log masuk') === 0)      { typeTag='Log Masuk';  typeCls='color:var(--success);' }
+          else if (msgLower.indexOf('log keluar') === 0) { typeTag='Log Keluar'; typeCls='color:var(--crimson);' }
+          else if (msgLower.indexOf('padam') !== -1)     { typeTag='Padam';      typeCls='color:var(--danger);' }
+          else if (msgLower.indexOf('tambah') !== -1)    { typeTag='Tambah';     typeCls='color:var(--navy2);' }
+          else if (msgLower.indexOf('eksport') !== -1)   { typeTag='Eksport';    typeCls='color:#7c3aed;' }
+          else if (msgLower.indexOf('whatsapp') !== -1)  { typeTag='WA';         typeCls='color:#25D366;' }
+          else                                            { typeTag='Lain';      typeCls='color:var(--muted);' }
+          return '<tr>'
+            + '<td class="row-num">' + (i+1) + '</td>'
+            + '<td style="font-size:11px;white-space:nowrap;">' + l.time + '</td>'
+            + '<td style="font-size:12px;">' + (l.msg||'—') + '</td>'
+            + '<td style="text-align:center;font-size:11px;font-family:var(--mono);">' + durText + '</td>'
+            + '<td style="text-align:center;font-size:10px;font-weight:700;' + typeCls + '">' + typeTag + '</td>'
+            + '</tr>';
+        }).join('');
+      }
+    });
 }
 
 function clearUserLog() {
@@ -3401,33 +3700,37 @@ function renderAdminPage() {
         + '</div>';
     }).join('');
   }
-  // Merge ALL logs from localStorage + current in-memory session, newest first
+  // Fetch ALL logs from Supabase async
   var logDiv = document.getElementById('activity-log');
   if (logDiv) {
-    var allLogs2 = _loadUserLogs();
-    var merged = {};
-    Object.keys(allLogs2).forEach(function(uid) {
-      (allLogs2[uid]||[]).forEach(function(l){ if (l.ts) merged[l.ts + '|' + (l.user||uid)] = l; });
+    logDiv.innerHTML = '<div class="log-entry" style="color:var(--muted);">&#x23F3; Memuatkan log...</div>';
+    _fetchLogsFromSupabase().then(function(allLogs2) {
+      var merged = {};
+      // Merge Supabase logs
+      Object.keys(allLogs2).forEach(function(uid) {
+        (allLogs2[uid]||[]).forEach(function(l){ if (l.ts) merged[l.ts + '|' + (l.user||uid)] = l; });
+      });
+      // Also include current in-memory session (not yet flushed)
+      activityLogs.forEach(function(l){ if (l.ts) merged[l.ts + '|' + (l.user||'')] = l; });
+      var sorted = Object.keys(merged).sort().reverse().map(function(k){ return merged[k]; });
+      if (!sorted.length) {
+        logDiv.innerHTML = '<div class="log-entry">Tiada rekod log.</div>';
+      } else {
+        logDiv.innerHTML = sorted.map(function(l){
+          var ml = (l.msg||'').toLowerCase();
+          var col = 'var(--muted)';
+          if (ml.indexOf('log masuk')===0)                                 col='var(--success)';
+          else if (ml.indexOf('log keluar')===0)                           col='var(--crimson)';
+          else if (ml.indexOf('padam')!==-1)                               col='var(--danger)';
+          else if (ml.indexOf('tambah')!==-1||ml.indexOf('baru')!==-1)     col='var(--navy2)';
+          else if (ml.indexOf('kemaskini')!==-1||ml.indexOf('edit')!==-1)  col='var(--gold)';
+          return '<div class="log-entry">'
+            + '<span style="color:var(--muted);font-size:10.5px;">[' + l.time + ']</span> '
+            + '<span style="color:var(--primary);font-weight:700;font-family:var(--mono);">' + (l.user||'?') + '</span>: '
+            + '<span style="color:' + col + ';">' + (l.msg||'—') + '</span></div>';
+        }).join('');
+      }
     });
-    activityLogs.forEach(function(l){ if (l.ts) merged[l.ts + '|' + (l.user||'')] = l; });
-    var sorted = Object.keys(merged).sort().reverse().map(function(k){ return merged[k]; });
-    if (!sorted.length) {
-      logDiv.innerHTML = '<div class="log-entry">Tiada rekod log.</div>';
-    } else {
-      logDiv.innerHTML = sorted.map(function(l){
-        var ml = (l.msg||'').toLowerCase();
-        var col = 'var(--muted)';
-        if (ml.indexOf('log masuk')===0)                                 col='var(--success)';
-        else if (ml.indexOf('log keluar')===0)                           col='var(--crimson)';
-        else if (ml.indexOf('padam')!==-1)                               col='var(--danger)';
-        else if (ml.indexOf('tambah')!==-1||ml.indexOf('baru')!==-1)     col='var(--navy2)';
-        else if (ml.indexOf('kemaskini')!==-1||ml.indexOf('edit')!==-1)  col='var(--gold)';
-        return '<div class="log-entry">'
-          + '<span style="color:var(--muted);font-size:10.5px;">[' + l.time + ']</span> '
-          + '<span style="color:var(--primary);font-weight:700;font-family:var(--mono);">' + (l.user||'?') + '</span>: '
-          + '<span style="color:' + col + ';">' + (l.msg||'—') + '</span></div>';
-      }).join('');
-    }
   }
 }
 
@@ -3470,6 +3773,7 @@ function saveNewUser() {
         USERS[i].name = name;
         USERS[i].pass = pass;
         USERS[i].role = role;
+        _saveUserToSupabase(USERS[i], false);
         break;
       }
     }
@@ -3483,7 +3787,9 @@ function saveNewUser() {
   var exists = false;
   for (var i=0; i<USERS.length; i++) { if (USERS[i].id===uid) { exists=true; break; } }
   if (exists) { alert('ID pengguna sudah wujud.'); return; }
-  USERS.push({id:uid, name:name, pass:pass, role:role});
+  var newU = {id:uid, name:name, pass:pass, role:role};
+  USERS.push(newU);
+  _saveUserToSupabase(newU, true);
   closeModal('add-user-modal');
   addLog('Pengguna baru ditambah: ' + uid);
   renderAdminPage();
@@ -3492,6 +3798,7 @@ function saveNewUser() {
 function removeUser(uid) {
   if (!confirm('Padam pengguna ' + uid + '?')) return;
   for (var i=0; i<USERS.length; i++) { if (USERS[i].id===uid) { USERS.splice(i,1); break; } }
+  _deleteUserFromSupabase(uid);
   addLog('Pengguna dipadam: ' + uid);
   renderAdminPage();
 }
@@ -3578,6 +3885,378 @@ function exportCurrentPage(fmt) {
   // Route through pageExport for consistent landscape + no-waste layout
   if (fmt === 'csv') pageExportCSV(CURRENT_PAGE);
   else pageExport(CURRENT_PAGE, fmt);
+}
+
+
+// ══════════════════════════════════════════════════════════════════
+// DOKUMEN SYSTEM — localStorage-backed document manager
+// Key: DPMM_DOKUMEN → [{id,kat,tajuk,kandungan,tarikh,createdBy,kemaskini}]
+// ══════════════════════════════════════════════════════════════════
+
+var DOK_KEY = 'DPMM_DOKUMEN';
+var DOK_EDITING_ID = null;  // null = new doc, string = editing existing
+
+var DOK_KAT_LABEL = {
+  NOTIS_MESYUARAT:  'Notis Mesyuarat',
+  MINIT_MESYUARAT:  'Minit Mesyuarat',
+  BUKU_MESYUARAT:   'Buku Mesyuarat',
+  LAPORAN_KEWANGAN: 'Laporan Kewangan',
+  LAPORAN_AKTIVITI: 'Laporan Aktiviti',
+  PERLEMBAGAAN:     'Buku Perlembagaan',
+  SURAT_RASMI:      'Surat Rasmi',
+  LAIN:             'Lain-lain'
+};
+
+var DOK_KAT_COLOR = {
+  NOTIS_MESYUARAT:  '#1a3f7a',
+  MINIT_MESYUARAT:  '#2e4a7a',
+  BUKU_MESYUARAT:   '#3a5fa0',
+  LAPORAN_KEWANGAN: '#1a7a4a',
+  LAPORAN_AKTIVITI: '#4a7a1a',
+  PERLEMBAGAAN:     '#7a4a1a',
+  SURAT_RASMI:      '#7a1a4a',
+  LAIN:             '#555'
+};
+
+var DOK_TEMPLATES = {   NOTIS_MESYUARAT: '<p style="text-align:center;"><strong>DEWAN PERNIAGAAN MELAYU MALAYSIA NEGERI JOHOR</strong></p> <p style="text-align:center;"><strong>NOTIS MESYUARAT</strong></p> <br> <p>Dengan hormatnya dimaklumkan bahawa sebuah mesyuarat akan diadakan seperti butiran berikut:</p> <br> <table><tr><td><strong>Tarikh</strong></td><td>: __________________</td></tr><tr><td><strong>Masa</strong></td><td>: __________________</td></tr><tr><td><strong>Tempat</strong></td><td>: __________________</td></tr><tr><td><strong>Agenda</strong></td><td>: Seperti di lampiran</td></tr></table> <br> <p>Kehadiran tuan/puan amat diperlukan. Kerjasama semua pihak amat dihargai.</p> <br> <p>Sekian, terima kasih.</p> <br> <p>________________________</p> <p><strong>Setiausaha Kehormat</strong><br>Dewan Perniagaan Melayu Malaysia Negeri Johor</p>',    MINIT_MESYUARAT: '<p style="text-align:center;"><strong>DEWAN PERNIAGAAN MELAYU MALAYSIA NEGERI JOHOR</strong></p> <p style="text-align:center;"><strong>MINIT MESYUARAT</strong></p> <br> <table><tr><td><strong>Tarikh</strong></td><td>: __________________</td></tr><tr><td><strong>Masa</strong></td><td>: __________________</td></tr><tr><td><strong>Tempat</strong></td><td>: __________________</td></tr><tr><td><strong>Pengerusi</strong></td><td>: __________________</td></tr></table> <br> <p><strong>1.0 KEHADIRAN</strong></p> <p>__________________</p> <br> <p><strong>2.0 UCAPAN PEMBUKAAN</strong></p> <p>Pengerusi membuka mesyuarat dengan ucapan pembukaan.</p> <br> <p><strong>3.0 PERKARA-PERKARA BERBANGKIT</strong></p> <p>__________________</p> <br> <p><strong>4.0 PENANGGUHAN</strong></p> <p>Mesyuarat ditangguhkan pada pukul ________.</p>',    SURAT_RASMI: '<p style="text-align:right;">Johor Bahru,<br>__________________</p> <br> <p>Kepada,<br><strong>__________________</strong><br>__________________</p> <br> <p>Tuan/Puan,</p> <br> <p style="text-align:center;text-decoration:underline;"><strong>PERKARA: __________________</strong></p> <br> <p>Dengan segala hormatnya saya merujuk kepada perkara di atas.</p> <br> <p>__________________</p> <br> <p>Sekian, terima kasih.</p> <br> <p>Yang benar,</p> <br> <br> <p>________________________<br><strong>__________________</strong><br>Dewan Perniagaan Melayu Malaysia Negeri Johor</p>',    LAPORAN_KEWANGAN: '<p style="text-align:center;"><strong>DEWAN PERNIAGAAN MELAYU MALAYSIA NEGERI JOHOR</strong></p> <p style="text-align:center;"><strong>LAPORAN KEWANGAN</strong></p> <p style="text-align:center;">Bagi Tempoh: __________________</p> <br> <p><strong>1. PENDAPATAN</strong></p> <table><tr><th>Butiran</th><th>Amaun (RM)</th></tr><tr><td>Yuran Pendaftaran</td><td></td></tr><tr><td>Yuran Tahunan</td><td></td></tr><tr><td>Lain-lain</td><td></td></tr><tr><td><strong>JUMLAH PENDAPATAN</strong></td><td><strong></strong></td></tr></table> <br> <p><strong>2. PERBELANJAAN</strong></p> <table><tr><th>Butiran</th><th>Amaun (RM)</th></tr><tr><td>Pentadbiran</td><td></td></tr><tr><td>Program & Aktiviti</td><td></td></tr><tr><td>Lain-lain</td><td></td></tr><tr><td><strong>JUMLAH PERBELANJAAN</strong></td><td><strong></strong></td></tr></table> <br> <p><strong>3. BAKI</strong></p> <table><tr><td>Lebihan/(Kurangan)</td><td>RM __________________</td></tr><tr><td>Baki Terbawa</td><td>RM __________________</td></tr></table>',    LAPORAN_AKTIVITI: '<p style="text-align:center;"><strong>DEWAN PERNIAGAAN MELAYU MALAYSIA NEGERI JOHOR</strong></p> <p style="text-align:center;"><strong>LAPORAN AKTIVITI</strong></p> <p style="text-align:center;">Bagi Tempoh: __________________</p> <br> <p><strong>1. OBJEKTIF</strong></p> <p>__________________</p> <br> <p><strong>2. AKTIVITI YANG TELAH DILAKSANAKAN</strong></p> <table><tr><th>Bil.</th><th>Aktiviti</th><th>Tarikh</th><th>Peserta</th><th>Status</th></tr><tr><td>1</td><td></td><td></td><td></td><td></td></tr></table> <br> <p><strong>3. PENCAPAIAN</strong></p> <p>__________________</p> <br> <p><strong>4. CADANGAN</strong></p> <p>__________________</p>',    PERLEMBAGAAN: '<p style="text-align:center;"><strong>PERLEMBAGAAN</strong></p> <p style="text-align:center;"><strong>DEWAN PERNIAGAAN MELAYU MALAYSIA NEGERI JOHOR</strong></p> <br> <p><em>Untuk melihat Perlembagaan penuh, sila rujuk dokumen rasmi yang telah difailkan bersama ROS.</em></p>',    BUKU_MESYUARAT: '<p style="text-align:center;"><strong>DEWAN PERNIAGAAN MELAYU MALAYSIA NEGERI JOHOR</strong></p> <p style="text-align:center;"><strong>BUKU MESYUARAT</strong></p> <p style="text-align:center;">Tahun: __________________</p> <br> <p>Buku ini mengandungi rekod mesyuarat rasmi bagi tahun berkenaan.</p> <br> <table><tr><th>Bil.</th><th>Jenis Mesyuarat</th><th>Tarikh</th><th>Tempat</th><th>Pengerusi</th></tr><tr><td>1</td><td></td><td></td><td></td><td></td></tr></table>',    LAIN: '<p>__________________</p>' };
+
+// Dokumen in-memory cache (loaded from Supabase)
+var _DOK_CACHE = null;
+
+function _dokNextId() { return 'DOK' + Date.now(); }
+
+// Legacy stubs (no-op)
+function _dokLoad() { return _DOK_CACHE || []; }
+function _dokSave(docs) { _DOK_CACHE = docs; }
+
+async function _dokFetchAll() {
+  try {
+    var { data, error } = await supabaseClient
+      .from('DPMM_DOKUMEN')
+      .select('*')
+      .order('updated_at', { ascending: false });
+    if (error) throw error;
+    _DOK_CACHE = (data||[]).map(function(row) {
+      return {
+        id:         row.dok_id,
+        _dbId:      row.id,
+        kat:        row.kategori,
+        tajuk:      row.tajuk,
+        kandungan:  row.kandungan,
+        status:     row.status,
+        createdBy:  row.created_by,
+        tarikh:     row.created_at ? new Date(row.created_at).toLocaleDateString('ms-MY') : '—',
+        kemaskini:  row.updated_at ? new Date(row.updated_at).toLocaleDateString('ms-MY') : '—',
+      };
+    });
+    return _DOK_CACHE;
+  } catch(e) { console.warn('_dokFetchAll failed:', e); return []; }
+}
+
+async function _dokUpsert(doc) {
+  var payload = {
+    dok_id:     doc.id,
+    kategori:   doc.kat,
+    tajuk:      doc.tajuk,
+    kandungan:  doc.kandungan,
+    status:     doc.status || 'DRAFT',
+    updated_at: new Date().toISOString()
+  };
+  if (doc._dbId) {
+    var res = await supabaseClient.from('DPMM_DOKUMEN').update(payload).eq('id', doc._dbId);
+    if (res.error) console.warn('Dokumen update error:', res.error.message);
+  } else {
+    payload.created_by = currentUser ? currentUser.id : null;
+    payload.created_at = new Date().toISOString();
+    var res = await supabaseClient.from('DPMM_DOKUMEN').insert([payload]).select();
+    if (res.error) { console.warn('Dokumen insert error:', res.error.message); }
+    else if (res.data && res.data[0]) { doc._dbId = res.data[0].id; }
+  }
+}
+
+async function _dokDeleteFromSupabase(dbId) {
+  var res = await supabaseClient.from('DPMM_DOKUMEN').delete().eq('id', dbId);
+  if (res.error) console.warn('Dokumen delete error:', res.error.message);
+}
+
+function renderDokumenPage() {
+  var docs = _dokLoad();  // uses in-memory cache
+  if (!_DOK_CACHE) {
+    // First load: fetch from Supabase then re-render
+    _dokFetchAll().then(function() { renderDokumenPage(); });
+    // Show loading state while fetching
+    var g = document.getElementById('dok-grid');
+    if (g) g.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);">&#x23F3; Memuatkan dokumen...</div>';
+    return;
+  }
+  var filterKat = (document.getElementById('dok-filter-kat')||{}).value || '';
+  var filterQ   = ((document.getElementById('dok-search')||{}).value || '').toLowerCase().trim();
+
+  var filtered = docs.filter(function(d){
+    if (filterKat && d.kat !== filterKat) return false;
+    if (filterQ && (d.tajuk||'').toLowerCase().indexOf(filterQ) === -1
+      && (DOK_KAT_LABEL[d.kat]||'').toLowerCase().indexOf(filterQ) === -1) return false;
+    return true;
+  }).sort(function(a,b){ return (b.kemaskini||b.tarikh||'') > (a.kemaskini||a.tarikh||'') ? 1 : -1; });
+
+  // Count label
+  var lbl = document.getElementById('dok-count-lbl');
+  if (lbl) lbl.textContent = filtered.length + ' dokumen' + (filterKat||filterQ ? ' (ditapis)' : '') + ' daripada ' + docs.length + ' jumlah';
+
+  // Category pills
+  var pills = document.getElementById('dok-cat-pills');
+  if (pills) {
+    var counts = {};
+    docs.forEach(function(d){ counts[d.kat] = (counts[d.kat]||0) + 1; });
+    pills.innerHTML = '<span class="dok-kat-pill' + (!filterKat?' active':'') + '" onclick="dokSetKat(\'\')">Semua (' + docs.length + ')</span>'
+      + Object.keys(DOK_KAT_LABEL).filter(function(k){ return counts[k]; }).map(function(k){
+          return '<span class="dok-kat-pill' + (filterKat===k?' active':'') + '" onclick="dokSetKat(\'' + k + '\')">'
+            + DOK_KAT_LABEL[k] + ' (' + (counts[k]||0) + ')</span>';
+        }).join('');
+  }
+
+  var grid = document.getElementById('dok-grid');
+  var empty = document.getElementById('dok-empty');
+  if (!grid) return;
+
+  if (!filtered.length) {
+    grid.style.display = 'none';
+    if (empty) empty.style.display = 'block';
+    return;
+  }
+  grid.style.display = 'grid';
+  if (empty) empty.style.display = 'none';
+
+  var katColor = DOK_KAT_COLOR;
+  grid.innerHTML = filtered.map(function(d){
+    var col = katColor[d.kat] || '#555';
+    var preview = (d.kandungan||'').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim().substring(0,90);
+    var isPerlembagaan = d.kat === 'PERLEMBAGAAN';
+    return '<div class="dok-card" onclick="dokOpenView(\'' + d.id + '\')">'
+      + '<div class="dok-card-head" style="border-left:4px solid ' + col + ';">'
+      + '<div class="dok-card-kat" style="color:' + col + ';">' + (DOK_KAT_LABEL[d.kat]||d.kat) + '</div>'
+      + '<div class="dok-card-title">' + (d.tajuk||'—') + '</div>'
+      + '</div>'
+      + '<div class="dok-card-body">'
+      + '<div style="color:var(--muted);font-size:10.5px;margin-bottom:4px;">&#x1F4C5; ' + (d.tarikh||'—') + ' &nbsp;|&nbsp; &#x1F464; ' + (d.createdBy||'—') + '</div>'
+      + '<div style="color:#666;font-size:11px;line-height:1.5;">' + (preview||'<em>Tiada pratonton</em>') + (preview.length>=90?'…':'') + '</div>'
+      + '</div>'
+      + '<div class="dok-card-actions">'
+      + (!isPerlembagaan ? '<button class="btn btn-outline btn-xs" onclick="event.stopPropagation();dokOpenCompose(\'' + d.id + '\')">&#x270F; Edit</button>' : '')
+      + '<button class="btn btn-outline btn-xs" onclick="event.stopPropagation();dokOpenView(\'' + d.id + '\')">&#x1F441; Buka</button>'
+      + '<button class="btn btn-outline btn-xs" onclick="event.stopPropagation();dokPrintById(\'' + d.id + '\')">&#x1F5A8; PDF</button>'
+      + '<button class="btn btn-outline-red btn-xs" onclick="event.stopPropagation();dokDelete(\'' + d.id + '\')">&#x1F5D1;</button>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+function dokSetKat(kat) {
+  var sel = document.getElementById('dok-filter-kat');
+  if (sel) sel.value = kat;
+  renderDokumenPage();
+}
+
+/* ── Open compose (new or edit) ─── */
+function dokOpenCompose(id) {
+  DOK_EDITING_ID = id;
+  var doc = null;
+  if (id) {
+    var docs = _dokLoad();
+    for (var i=0;i<docs.length;i++) { if (docs[i].id===id) { doc=docs[i]; break; } }
+  }
+  var kat = doc ? doc.kat : 'NOTIS_MESYUARAT';
+  var tajuk = doc ? (doc.tajuk||'') : '';
+  var kandungan = doc ? (doc.kandungan||'') : (DOK_TEMPLATES[kat]||'');
+
+  document.getElementById('dok-modal-title').textContent = id ? 'Edit Dokumen' : 'Cipta Dokumen Baru';
+  document.getElementById('dok-modal-kat-badge').textContent = DOK_KAT_LABEL[kat]||kat;
+  document.getElementById('dok-modal-kat-badge').style.background = (DOK_KAT_COLOR[kat]||'#555') + '22';
+  document.getElementById('dok-modal-kat-badge').style.color = DOK_KAT_COLOR[kat]||'#555';
+  document.getElementById('dok-kat-sel').value = kat;
+  document.getElementById('dok-tajuk-input').value = tajuk;
+  document.getElementById('dok-editor').innerHTML = kandungan;
+  document.getElementById('dok-editor').contentEditable = 'true';
+  document.getElementById('dok-compose-bar').style.display = 'flex';
+  document.getElementById('dok-btn-edit').style.display = 'none';
+  document.getElementById('dok-btn-save').style.display = 'inline-flex';
+  // Meta bar
+  var meta = document.getElementById('dok-meta-bar');
+  if (meta) meta.innerHTML = doc
+    ? '&#x1F4C5; Dicipta: ' + doc.tarikh + ' &nbsp;|&nbsp; &#x1F464; ' + doc.createdBy + ' &nbsp;|&nbsp; &#x1F501; Kemaskini: ' + (doc.kemaskini||doc.tarikh)
+    : '&#x270F; Mod pengarangan — dokumen baru';
+  // Kat dropdown change updates badge
+  document.getElementById('dok-kat-sel').onchange = function() {
+    var k = this.value;
+    document.getElementById('dok-modal-kat-badge').textContent = DOK_KAT_LABEL[k]||k;
+    document.getElementById('dok-modal-kat-badge').style.background = (DOK_KAT_COLOR[k]||'#555') + '22';
+    document.getElementById('dok-modal-kat-badge').style.color = DOK_KAT_COLOR[k]||'#555';
+    if (!DOK_EDITING_ID) {
+      document.getElementById('dok-editor').innerHTML = DOK_TEMPLATES[k]||'';
+    }
+  };
+  document.getElementById('dok-modal').classList.add('show');
+  setTimeout(function(){ document.getElementById('dok-editor').focus(); }, 200);
+}
+
+/* ── Open view (read-only) ─── */
+function dokOpenView(id) {
+  var docs = _dokLoad();
+  var doc = null;
+  for (var i=0;i<docs.length;i++) { if (docs[i].id===id) { doc=docs[i]; break; } }
+  if (!doc) return;
+  DOK_EDITING_ID = null;
+  document.getElementById('dok-modal-title').textContent = doc.tajuk||'Dokumen';
+  var badge = document.getElementById('dok-modal-kat-badge');
+  badge.textContent = DOK_KAT_LABEL[doc.kat]||doc.kat;
+  badge.style.background = (DOK_KAT_COLOR[doc.kat]||'#555') + '22';
+  badge.style.color = DOK_KAT_COLOR[doc.kat]||'#555';
+  document.getElementById('dok-editor').innerHTML = doc.kandungan||'';
+  document.getElementById('dok-editor').contentEditable = 'false';
+  document.getElementById('dok-compose-bar').style.display = 'none';
+  document.getElementById('dok-btn-edit').style.display = doc.kat !== 'PERLEMBAGAAN' ? 'inline-flex' : 'none';
+  document.getElementById('dok-btn-edit').setAttribute('data-view-id', id);
+  document.getElementById('dok-btn-save').style.display = 'none';
+  var meta = document.getElementById('dok-meta-bar');
+  if (meta) meta.innerHTML = '&#x1F4C5; Dicipta: ' + doc.tarikh
+    + ' &nbsp;|&nbsp; &#x1F464; ' + doc.createdBy
+    + ' &nbsp;|&nbsp; &#x1F501; Kemaskini: ' + (doc.kemaskini||doc.tarikh)
+    + ' &nbsp;|&nbsp; &#x1F4C2; ' + (DOK_KAT_LABEL[doc.kat]||doc.kat);
+  document.getElementById('dok-modal').classList.add('show');
+}
+
+function dokToggleEdit() {
+  var id = document.getElementById('dok-btn-edit').getAttribute('data-view-id');
+  if (id) dokOpenCompose(id);
+}
+
+/* ── Save ─── */
+function dokSave() {
+  var tajuk = document.getElementById('dok-tajuk-input').value.trim();
+  var kat   = document.getElementById('dok-kat-sel').value;
+  var kandungan = document.getElementById('dok-editor').innerHTML;
+  if (!tajuk) { alert('Sila masukkan tajuk dokumen.'); document.getElementById('dok-tajuk-input').focus(); return; }
+  if (!kandungan.trim() || kandungan === '<br>') { alert('Kandungan dokumen tidak boleh kosong.'); return; }
+  var docs = _dokLoad();
+  var now = new Date();
+  var dateStr = String(now.getDate()).padStart(2,'0') + '.' + String(now.getMonth()+1).padStart(2,'0') + '.' + now.getFullYear();
+  var user = currentUser ? currentUser.name : '—';
+  if (DOK_EDITING_ID) {
+    for (var i=0;i<docs.length;i++) {
+      if (docs[i].id===DOK_EDITING_ID) {
+        docs[i].kat = kat; docs[i].tajuk = tajuk;
+        docs[i].kandungan = kandungan; docs[i].kemaskini = dateStr;
+        break;
+      }
+    }
+    addLog('Dokumen dikemaskini: ' + tajuk);
+  } else {
+    docs.unshift({ id: _dokNextId(), kat: kat, tajuk: tajuk,
+      kandungan: kandungan, tarikh: dateStr, kemaskini: dateStr, createdBy: user });
+    addLog('Dokumen baru: ' + tajuk);
+  }
+  _DOK_CACHE = docs;
+  var savedDoc = DOK_EDITING_ID
+    ? docs.find(function(d){ return d.id===DOK_EDITING_ID; })
+    : docs[0];
+  if (savedDoc) _dokUpsert(savedDoc);
+  closeModal('dok-modal');
+  renderDokumenPage();
+  DOK_EDITING_ID = null;
+}
+
+/* ── Delete ─── */
+function dokDelete(id) {
+  var docs = _dokLoad();
+  var doc = docs.find(function(d){ return d.id===id; });
+  if (!doc) return;
+  if (!confirm('Padam dokumen: ' + (doc.tajuk||id) + '? Tindakan ini tidak boleh dibuat asal.')) return;
+  docs = docs.filter(function(d){ return d.id!==id; });
+  _DOK_CACHE = docs;
+  if (doc._dbId) _dokDeleteFromSupabase(doc._dbId);
+  addLog('Dokumen dipadam: ' + (doc.tajuk||id));
+  renderDokumenPage();
+}
+
+/* ── Print / PDF ─── */
+function dokPrint() {
+  var tajuk = document.getElementById('dok-modal-title').textContent;
+  var content = document.getElementById('dok-editor').innerHTML;
+  _dokDoPrint(tajuk, content);
+}
+function dokPrintById(id) {
+  var docs = _dokLoad();
+  var doc = docs.find(function(d){ return d.id===id; });
+  if (!doc) return;
+  _dokDoPrint(doc.tajuk, doc.kandungan);
+}
+function _dokDoPrint(tajuk, content) {
+  var w = window.open('','_blank','width=820,height=900');
+  if (!w) { alert('Sila benarkan pop-up untuk cetak.'); return; }
+  w.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>' + tajuk + '</title>'
+    + '<style>'
+    + '@page { size: A4 portrait; margin: 20mm 18mm; }'
+    + 'body { font-family: Georgia, serif; font-size: 13px; color: #111; line-height: 1.8; padding: 0; margin: 0; }'
+    + 'table { border-collapse: collapse; width: 100%; margin: 8px 0; }'
+    + 'td, th { border: 1px solid #bbb; padding: 6px 10px; font-size: 12px; }'
+    + 'th { background: #eee; font-weight: 700; }'
+    + 'p { margin: 6px 0; }'
+    + '.dok-print-header { text-align: center; border-bottom: 2px solid #1a3f7a; padding-bottom: 10px; margin-bottom: 20px; }'
+    + '.dok-print-header h1 { font-size: 15px; color: #1a3f7a; margin: 0 0 4px; }'
+    + '.dok-print-header p { font-size: 10px; color: #888; margin: 0; }'
+    + '</style></head><body>'
+    + '<div class="dok-print-header">'
+    + '<h1>DEWAN PERNIAGAAN MELAYU MALAYSIA NEGERI JOHOR</h1>'
+    + '<p>' + tajuk + ' &nbsp;&mdash;&nbsp; Dicetak: ' + new Date().toLocaleString('ms-MY') + '</p>'
+    + '</div>'
+    + content
+    + '</body></html>');
+  w.document.close();
+  setTimeout(function(){ w.focus(); w.print(); }, 600);
+  addLog('Cetak dokumen: ' + tajuk);
+}
+
+/* ── Email ─── */
+function dokEmail() {
+  var tajuk = document.getElementById('dok-modal-title').textContent;
+  var content = document.getElementById('dok-editor').innerHTML;
+  var plain = content.replace(/<br\s*\/?>/gi,'\n').replace(/<\/p>/gi,'\n').replace(/<[^>]+>/g,'').replace(/&amp;/g,'&').replace(/&nbsp;/g,' ');
+  var subject = encodeURIComponent('DPMM Negeri Johor — ' + tajuk);
+  var body = encodeURIComponent(plain.trim().substring(0, 1800));
+  window.location.href = 'mailto:?subject=' + subject + '&body=' + body;
+  addLog('E-mel dokumen: ' + tajuk);
+}
+
+/* ── Rich text toolbar helpers ─── */
+function dokFmt(cmd, val) {
+  var ed = document.getElementById('dok-editor');
+  if (!ed || ed.contentEditable !== 'true') return;
+  ed.focus();
+  document.execCommand(cmd, false, val || null);
+}
+function dokInsertDate() {
+  var now = new Date();
+  var d = String(now.getDate()).padStart(2,'0') + ' '
+    + ['Januari','Februari','Mac','April','Mei','Jun','Julai','Ogos',
+       'September','Oktober','November','Disember'][now.getMonth()]
+    + ' ' + now.getFullYear();
+  dokFmt('insertText', d);
+}
+function dokInsertTable() {
+  var rows = parseInt(prompt('Bilangan baris (tidak termasuk tajuk):', '3') || '3', 10);
+  var cols = parseInt(prompt('Bilangan lajur:', '3') || '3', 10);
+  if (isNaN(rows)||rows<1||isNaN(cols)||cols<1) return;
+  var th = '<tr>' + Array(cols).fill(0).map(function(_,i){ return '<th>Tajuk ' + (i+1) + '</th>'; }).join('') + '</tr>';
+  var tr = Array(rows).fill(0).map(function(){ return '<tr>' + Array(cols).fill('<td>&nbsp;</td>').join('') + '</tr>'; }).join('');
+  document.getElementById('dok-editor').focus();
+  document.execCommand('insertHTML', false, '<table>' + th + tr + '</table><p></p>');
+}
+function dokInsertTemplate() {
+  var kat = (document.getElementById('dok-kat-sel')||{}).value || 'LAIN';
+  if (!DOK_TEMPLATES[kat]) { alert('Tiada template untuk kategori ini.'); return; }
+  if (confirm('Gantikan kandungan semasa dengan template ' + (DOK_KAT_LABEL[kat]||kat) + '?')) {
+    document.getElementById('dok-editor').innerHTML = DOK_TEMPLATES[kat];
+  }
 }
 
 // ── GENERATE REPORT ─────────────────────────────────────
