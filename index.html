@@ -3674,32 +3674,46 @@ function clearUserLog() {
 
 var EDIT_USER_ID = null;
 
+function _buildUserCards(allLogs) {
+  return USERS.map(function(u){
+    var uLogs = allLogs[u.id] || [];
+    var lastLogin = '—';
+    for (var k=0; k<uLogs.length; k++) {
+      if (uLogs[k].msg && uLogs[k].msg.indexOf('Log masuk') === 0) { lastLogin = uLogs[k].time; break; }
+    }
+    var totalAct = uLogs.length;
+    var isAdmin = u.role === 'admin';
+    return '<div class="user-row" style="cursor:pointer;" onclick="openUserLog(\'' + u.id + '\')">'
+      + '<div class="user-avatar">' + (u.name[0]||'?').toUpperCase() + '</div>'
+      + '<div style="flex:1;">'
+      + '<div class="user-name">' + u.name + ' <span style="font-size:10px;color:var(--muted);font-weight:400;">— klik untuk lihat log</span></div>'
+      + '<div class="user-role">' + (isAdmin?'🔑 Admin':'👤 Pengguna Biasa') + ' &nbsp;|&nbsp; <span style="font-family:var(--mono);">' + u.id + '</span></div>'
+      + '<div style="font-size:11px;color:var(--muted);margin-top:3px;">Log masuk terakhir: <strong>' + lastLogin + '</strong> &nbsp;|&nbsp; Jumlah aktiviti: <strong style="color:var(--primary);">' + totalAct + '</strong></div>'
+      + '</div>'
+      + '<div style="display:flex;gap:6px;">'
+      + '<button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openEditUserModal(\'' + u.id + '\')" title="Edit pengguna">✏ Edit</button>'
+      + (!isAdmin ? '<button class="btn btn-outline-red btn-sm" onclick="event.stopPropagation();removeUser(\'' + u.id + '\')">Padam</button>' : '')
+      + '</div>'
+      + '</div>';
+  }).join('');
+}
+
 function renderAdminPage() {
   var userList = document.getElementById('user-list');
+  // Show skeleton placeholders while logs load from Supabase
   if (userList) {
-    var allLogs = _loadUserLogs();
     userList.innerHTML = USERS.map(function(u){
-      var uLogs = allLogs[u.id] || [];
-      var lastLogin = '—';
-      for (var k=0; k<uLogs.length; k++) {
-        if (uLogs[k].msg && uLogs[k].msg.indexOf('Log masuk') === 0) { lastLogin = uLogs[k].time; break; }
-      }
-      var totalAct = uLogs.length;
       var isAdmin = u.role === 'admin';
-      return '<div class="user-row" style="cursor:pointer;" onclick="openUserLog(\'' + u.id + '\')">'
+      return '<div class="user-row">'
         + '<div class="user-avatar">' + (u.name[0]||'?').toUpperCase() + '</div>'
         + '<div style="flex:1;">'
-        + '<div class="user-name">' + u.name + ' <span style="font-size:10px;color:var(--muted);font-weight:400;">— klik untuk lihat log</span></div>'
+        + '<div class="user-name">' + u.name + '</div>'
         + '<div class="user-role">' + (isAdmin?'🔑 Admin':'👤 Pengguna Biasa') + ' &nbsp;|&nbsp; <span style="font-family:var(--mono);">' + u.id + '</span></div>'
-        + '<div style="font-size:11px;color:var(--muted);margin-top:3px;">Log masuk terakhir: <strong>' + lastLogin + '</strong> &nbsp;|&nbsp; Jumlah aktiviti: <strong style="color:var(--primary);">' + totalAct + '</strong></div>'
-        + '</div>'
-        + '<div style="display:flex;gap:6px;">'
-        + '<button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openEditUserModal(\'' + u.id + '\')" title="Edit pengguna">✏ Edit</button>'
-        + (!isAdmin ? '<button class="btn btn-outline-red btn-sm" onclick="event.stopPropagation();removeUser(\'' + u.id + '\')">Padam</button>' : '')
-        + '</div>'
-        + '</div>';
+        + '<div style="font-size:11px;color:var(--muted);margin-top:3px;">⏳ Memuatkan statistik...</div>'
+        + '</div></div>';
     }).join('');
   }
+
   // Fetch ALL logs from Supabase async
   var logDiv = document.getElementById('activity-log');
   if (logDiv) {
@@ -3730,6 +3744,9 @@ function renderAdminPage() {
             + '<span style="color:' + col + ';">' + (l.msg||'—') + '</span></div>';
         }).join('');
       }
+      // Update user cards with real log data from Supabase
+      var userList = document.getElementById('user-list');
+      if (userList) userList.innerHTML = _buildUserCards(allLogs2);
     });
   }
 }
