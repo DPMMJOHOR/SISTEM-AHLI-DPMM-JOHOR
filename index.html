@@ -1030,6 +1030,13 @@ tr.row-unpaid { background: #fff0f0 !important; }
       <span class="nav-badge" id="followup-badge">0</span>
     </div>
 
+    <div class="sb-section-label">KEAHLIAN</div>
+    <div class="nav-item" onclick="showPage('permohonan')">
+      <span class="nav-icon">&#x1F4CB;</span>
+      <span class="nav-text">PERMOHONAN AHLI</span>
+      <span class="nav-badge" id="permohonan-badge" style="display:none">0</span>
+    </div>
+
     <div class="sb-section-label">ALATAN</div>
     <div class="nav-item" onclick="showPage('templates')">
       <span class="nav-icon">&#x1F4AC;</span>
@@ -1952,9 +1959,159 @@ tr.row-unpaid { background: #fff0f0 !important; }
       </div>
     </div>
   </div>
-</div>
+  <!-- ══ PERMOHONAN AHLI ══ -->
+  <div id="page-permohonan" class="page">
+    <!-- KPI CARDS -->
+    <div class="statsbar" id="permohonan-kpi" style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:20px;"></div>
 
-<script>
+    <!-- SUB-TAB NAV -->
+    <div style="display:flex;gap:0;margin-bottom:16px;background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden;border:1px solid var(--gray1);">
+      <button id="ptab-MOHON_BARU"     class="ptab-btn active" onclick="switchPermohonanTab('MOHON_BARU')"     style="flex:1;padding:12px 8px;border:none;background:none;font-family:var(--sans);font-size:12px;font-weight:700;letter-spacing:.06em;cursor:pointer;border-bottom:3px solid transparent;color:var(--muted);transition:all .2s;">MOHON BARU</button>
+      <button id="ptab-SEMAKAN_DOKUMEN" class="ptab-btn"       onclick="switchPermohonanTab('SEMAKAN_DOKUMEN')" style="flex:1;padding:12px 8px;border:none;background:none;font-family:var(--sans);font-size:12px;font-weight:700;letter-spacing:.06em;cursor:pointer;border-bottom:3px solid transparent;color:var(--muted);transition:all .2s;">SEMAKAN DOKUMEN</button>
+      <button id="ptab-MESYUARAT_JKP"  class="ptab-btn"       onclick="switchPermohonanTab('MESYUARAT_JKP')"  style="flex:1;padding:12px 8px;border:none;background:none;font-family:var(--sans);font-size:12px;font-weight:700;letter-spacing:.06em;cursor:pointer;border-bottom:3px solid transparent;color:var(--muted);transition:all .2s;">MESYUARAT JKP</button>
+      <button id="ptab-DITOLAK"        class="ptab-btn"       onclick="switchPermohonanTab('DITOLAK')"        style="flex:1;padding:12px 8px;border:none;background:none;font-family:var(--sans);font-size:12px;font-weight:700;letter-spacing:.06em;cursor:pointer;border-bottom:3px solid transparent;color:var(--muted);transition:all .2s;">DITOLAK</button>
+    </div>
+
+    <!-- TABLE -->
+    <div style="background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow-sm);border:1px solid var(--gray1);overflow:hidden;">
+      <div style="padding:14px 18px;border-bottom:1px solid var(--gray1);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+        <div style="font-weight:700;font-size:13px;color:var(--text)" id="permohonan-tab-label">Mohon Baru</div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="text" id="permohonan-search" placeholder="Cari nama / syarikat / ref..." oninput="renderPermohonanTable()" style="padding:7px 12px;border:1.5px solid var(--gray2);border-radius:7px;font-size:12px;font-family:var(--sans);width:240px;outline:none;">
+          <button class="btn btn-outline btn-sm" onclick="renderPermohonanPage()" style="font-size:12px;">🔄 Muat Semula</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;font-size:12.5px;">
+          <thead>
+            <tr style="background:var(--body-bg);">
+              <th style="padding:10px 14px;text-align:left;font-weight:700;font-size:11px;letter-spacing:.07em;color:var(--muted);border-bottom:1px solid var(--gray1);">REF ID</th>
+              <th style="padding:10px 14px;text-align:left;font-weight:700;font-size:11px;letter-spacing:.07em;color:var(--muted);border-bottom:1px solid var(--gray1);">NAMA PROKSI</th>
+              <th style="padding:10px 14px;text-align:left;font-weight:700;font-size:11px;letter-spacing:.07em;color:var(--muted);border-bottom:1px solid var(--gray1);">NAMA ENTITI</th>
+              <th style="padding:10px 14px;text-align:left;font-weight:700;font-size:11px;letter-spacing:.07em;color:var(--muted);border-bottom:1px solid var(--gray1);">FASAL</th>
+              <th style="padding:10px 14px;text-align:left;font-weight:700;font-size:11px;letter-spacing:.07em;color:var(--muted);border-bottom:1px solid var(--gray1);">TARIKH MOHON</th>
+              <th style="padding:10px 14px;text-align:left;font-weight:700;font-size:11px;letter-spacing:.07em;color:var(--muted);border-bottom:1px solid var(--gray1);">STATUS</th>
+              <th style="padding:10px 14px;text-align:center;font-weight:700;font-size:11px;letter-spacing:.07em;color:var(--muted);border-bottom:1px solid var(--gray1);">AKSI</th>
+            </tr>
+          </thead>
+          <tbody id="permohonan-tbody">
+            <tr><td colspan="7" style="padding:40px;text-align:center;color:var(--muted)">⏳ Memuatkan data...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div id="permohonan-pagination" style="padding:10px 16px;border-top:1px solid var(--gray1);display:flex;justify-content:flex-end;gap:6px;flex-wrap:wrap;"></div>
+    </div>
+  </div>
+
+  <!-- ══ MODAL: SEMAK PERMOHONAN ══ -->
+  <div id="modal-permohonan" class="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:8000;overflow-y:auto;padding:20px;">
+    <div style="background:var(--white);border-radius:14px;max-width:860px;margin:0 auto;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden;">
+      <!-- Modal Header -->
+      <div style="background:linear-gradient(135deg,var(--primary) 0%,var(--primary-dk) 100%);padding:18px 24px;display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <div id="pm-ref" style="font-weight:800;font-size:15px;color:#fff;letter-spacing:.05em;font-family:var(--head);">—</div>
+          <div id="pm-entity" style="font-size:12px;color:rgba(255,255,255,.75);margin-top:2px;">—</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span id="pm-status-badge" style="font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;background:rgba(255,255,255,.2);color:#fff;">—</span>
+          <button onclick="closePermohonanModal()" style="background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:7px;padding:6px 12px;cursor:pointer;font-size:14px;">✕</button>
+        </div>
+      </div>
+
+      <!-- Modal Sub-Tabs -->
+      <div style="display:flex;border-bottom:1px solid var(--gray1);background:var(--body-bg);">
+        <button id="mt-maklumat" class="modal-tab-btn active-mt" onclick="switchModalTab('maklumat')" style="padding:10px 18px;border:none;background:none;font-size:12px;font-weight:700;letter-spacing:.05em;cursor:pointer;color:var(--primary);border-bottom:2px solid var(--primary);">MAKLUMAT</button>
+        <button id="mt-saham"    class="modal-tab-btn"           onclick="switchModalTab('saham')"    style="padding:10px 18px;border:none;background:none;font-size:12px;font-weight:700;letter-spacing:.05em;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;">PEMEGANG SAHAM</button>
+        <button id="mt-dokumen"  class="modal-tab-btn"           onclick="switchModalTab('dokumen')"  style="padding:10px 18px;border:none;background:none;font-size:12px;font-weight:700;letter-spacing:.05em;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;">DOKUMEN</button>
+        <button id="mt-bayaran"  class="modal-tab-btn"           onclick="switchModalTab('bayaran')"  style="padding:10px 18px;border:none;background:none;font-size:12px;font-weight:700;letter-spacing:.05em;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;">BAYARAN</button>
+        <button id="mt-admin"    class="modal-tab-btn"           onclick="switchModalTab('admin')"    style="padding:10px 18px;border:none;background:none;font-size:12px;font-weight:700;letter-spacing:.05em;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;">TINDAKAN ADMIN</button>
+      </div>
+
+      <!-- Modal Body -->
+      <div id="modal-body-permohonan" style="padding:22px 26px;max-height:65vh;overflow-y:auto;">
+        <!-- JS Generated -->
+      </div>
+
+      <!-- Modal Footer -->
+      <div id="modal-footer-permohonan" style="padding:14px 24px;border-top:1px solid var(--gray1);display:flex;justify-content:space-between;align-items:center;background:var(--body-bg);">
+        <button onclick="closePermohonanModal()" style="padding:9px 20px;border:1.5px solid var(--gray2);border-radius:7px;background:var(--white);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--sans);">← Kembali</button>
+        <div id="modal-action-btns" style="display:flex;gap:8px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MODAL: LULUSKAN ══ -->
+  <div id="modal-lulus" class="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:8500;align-items:center;justify-content:center;">
+    <div style="background:var(--white);border-radius:14px;width:460px;max-width:calc(100vw - 32px);box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden;">
+      <div style="background:linear-gradient(135deg,#00D4A0,#00b386);padding:18px 22px;">
+        <div style="font-weight:800;font-size:15px;color:#fff;font-family:var(--head);">✅ Sahkan Kelulusan</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.8);margin-top:3px)" id="lulus-ref-label">—</div>
+      </div>
+      <div style="padding:22px;">
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div>
+            <label style="font-size:12px;font-weight:700;color:var(--text2);display:block;margin-bottom:5px;">No. Ahli (Manual) <span style="color:var(--danger)">*</span></label>
+            <input id="lulus-no-ahli" type="text" placeholder="Contoh: B-2026-0123" style="width:100%;padding:9px 12px;border:1.5px solid var(--gray2);border-radius:7px;font-size:13px;font-family:var(--sans);outline:none;">
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:700;color:var(--text2);display:block;margin-bottom:5px;">Tarikh Kuatkuasa <span style="color:var(--danger)">*</span></label>
+            <input id="lulus-tarikh" type="date" style="width:100%;padding:9px 12px;border:1.5px solid var(--gray2);border-radius:7px;font-size:13px;font-family:var(--sans);outline:none;">
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:700;color:var(--text2);display:block;margin-bottom:5px;">No. Minit Mesyuarat <span style="color:var(--danger)">*</span></label>
+            <input id="lulus-minit" type="text" placeholder="Contoh: MM001/Bil 5" style="width:100%;padding:9px 12px;border:1.5px solid var(--gray2);border-radius:7px;font-size:13px;font-family:var(--sans);outline:none;">
+          </div>
+          <div style="background:var(--success-lt);border-radius:8px;padding:12px;font-size:12px;color:var(--text2);">
+            ℹ️ Selepas mengesahkan, ahli akan ditambah secara automatik ke <strong>Senarai Ahli</strong>.
+          </div>
+          <div id="lulus-error" style="color:var(--danger);font-size:12px;display:none;"></div>
+        </div>
+      </div>
+      <div style="padding:14px 22px;border-top:1px solid var(--gray1);display:flex;justify-content:flex-end;gap:8px;background:var(--body-bg);">
+        <button onclick="closeLulusModal()" style="padding:9px 20px;border:1.5px solid var(--gray2);border-radius:7px;background:var(--white);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--sans);">Batal</button>
+        <button onclick="confirmLulus()" style="padding:9px 24px;border:none;border-radius:7px;background:var(--success);color:white;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--sans);">✅ Sahkan Kelulusan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MODAL: TOLAK ══ -->
+  <div id="modal-tolak" class="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:8500;align-items:center;justify-content:center;">
+    <div style="background:var(--white);border-radius:14px;width:460px;max-width:calc(100vw - 32px);box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden;">
+      <div style="background:linear-gradient(135deg,var(--danger),#e05555);padding:18px 22px;">
+        <div style="font-weight:800;font-size:15px;color:#fff;font-family:var(--head);">✗ Sahkan Penolakan</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.8);margin-top:3px" id="tolak-ref-label">—</div>
+      </div>
+      <div style="padding:22px;">
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div>
+            <label style="font-size:12px;font-weight:700;color:var(--text2);display:block;margin-bottom:5px;">Sebab Penolakan <span style="color:var(--danger)">*</span></label>
+            <textarea id="tolak-sebab" rows="4" placeholder="Nyatakan sebab penolakan secara terperinci..." style="width:100%;padding:9px 12px;border:1.5px solid var(--gray2);border-radius:7px;font-size:13px;font-family:var(--sans);outline:none;resize:vertical;"></textarea>
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:700;color:var(--text2);display:block;margin-bottom:8px;">Pulangan Yuran Tahunan</label>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;"><input type="radio" name="pulangan" value="tiada" checked style="accent-color:var(--primary)"> Tiada pulangan (Fi Pendaftaran tidak dikembalikan)</label>
+              <label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;"><input type="radio" name="pulangan" value="ada" style="accent-color:var(--primary)"> Yuran Tahunan akan dikembalikan</label>
+            </div>
+          </div>
+          <div id="tolak-maklumat-wrap" style="display:none;">
+            <label style="font-size:12px;font-weight:700;color:var(--text2);display:block;margin-bottom:5px;">Maklumat Pulangan</label>
+            <input id="tolak-maklumat" type="text" placeholder="Contoh: EFT ke akaun pemohon" style="width:100%;padding:9px 12px;border:1.5px solid var(--gray2);border-radius:7px;font-size:13px;font-family:var(--sans);outline:none;">
+          </div>
+          <div style="background:var(--danger-lt);border-radius:8px;padding:12px;font-size:12px;color:var(--text2);">
+            ⚠️ <strong>Fi Pendaftaran TIDAK akan dipulangkan</strong> walau apa jua sebab penolakan.
+          </div>
+          <div id="tolak-error" style="color:var(--danger);font-size:12px;display:none;"></div>
+        </div>
+      </div>
+      <div style="padding:14px 22px;border-top:1px solid var(--gray1);display:flex;justify-content:flex-end;gap:8px;background:var(--body-bg);">
+        <button onclick="closeTolakModal()" style="padding:9px 20px;border:1.5px solid var(--gray2);border-radius:7px;background:var(--white);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--sans);">Batal</button>
+        <button onclick="confirmTolak()" style="padding:9px 24px;border:none;border-radius:7px;background:var(--danger);color:white;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--sans);">✗ Sahkan Penolakan</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end #app -->
 // DATA
 // ═══════════════════════════════════════════════════════════
 // SUPABASE CONFIGURATION
@@ -2493,7 +2650,8 @@ var PAGE_META = {
   faq:       ['PANDUAN & SOALAN LAZIM','Rujukan penggunaan sistem'],
   workflow:  ['WORKFLOW',''],
   backup:    ['BACK UP',''],
-  admin:     ['PANEL ADMIN',''],
+  admin:       ['PANEL ADMIN',''],
+  permohonan:  ['PERMOHONAN AHLI','Semak, luluskan atau tolak permohonan keahlian baru'],
 };
 
 function showPage(id) {
@@ -2526,6 +2684,7 @@ function showPage(id) {
   if (id === 'templates') renderTemplates();
   if (id === 'faq') { /* static page, no render needed */ }
   if (id === 'dokumen') renderDokumenPage();
+  if (id === 'permohonan') renderPermohonanPage();
   closeSidebar();
 }
 
@@ -4894,6 +5053,609 @@ function exportImage() {
   });
 }
 /* ═══ END EXPORT ═══ */
+
+/* ══════════════════════════════════════════════════════════════════
+   PERMOHONAN AHLI — MODUL LENGKAP
+   ══════════════════════════════════════════════════════════════════ */
+var permohonanData      = [];   // semua rekod dari Supabase
+var permohonanTab       = 'MOHON_BARU'; // tab aktif
+var permohonanSelected  = null; // rekod yang sedang dibuka
+var permohonanPage      = 1;
+var permohonanPerPage   = 15;
+
+/* ── STATUS CONFIG ───────────────────────────────────────── */
+var P_STATUS = {
+  MOHON_BARU:       { label: 'Mohon Baru',        color: '#339AF0', bg: '#E8F4FF' },
+  SEMAKAN_DOKUMEN:  { label: 'Semakan Dokumen',    color: '#F59F00', bg: '#FFF9DB' },
+  MESYUARAT_JKP:    { label: 'Mesyuarat JKP',      color: '#9C36B5', bg: '#F8F0FF' },
+  DILULUSKAN:       { label: 'Diluluskan',          color: '#00D4A0', bg: '#E0FBF5' },
+  DITOLAK:          { label: 'Ditolak',             color: '#FF6B6B', bg: '#FFEAEA' },
+};
+
+/* ── JENIS LABEL ─────────────────────────────────────────── */
+var JENIS_LABEL_MAP = { A:'Ahli Biasa', S:'Ahli Bersekutu', G:'Ahli Bergabung', H:'Ahli Kehormat' };
+
+/* ── LOAD DATA FROM SUPABASE ─────────────────────────────── */
+async function loadPermohonanData() {
+  try {
+    var { data, error } = await supabaseClient
+      .from('PERMOHONAN_AHLI')
+      .select('*')
+      .order('submitted_at', { ascending: false });
+    if (error) throw error;
+    permohonanData = data || [];
+    updatePermohonanBadge();
+  } catch(e) {
+    console.error('Permohonan load error:', e);
+    permohonanData = [];
+  }
+}
+
+/* ── UPDATE SIDEBAR BADGE ────────────────────────────────── */
+function updatePermohonanBadge() {
+  var pending = permohonanData.filter(function(p){
+    return p.status === 'MOHON_BARU' || p.status === 'SEMAKAN_DOKUMEN' || p.status === 'MESYUARAT_JKP';
+  }).length;
+  var badge = document.getElementById('permohonan-badge');
+  if (!badge) return;
+  if (pending > 0) {
+    badge.style.display = '';
+    badge.textContent   = pending;
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+/* ── MAIN RENDER ─────────────────────────────────────────── */
+async function renderPermohonanPage() {
+  await loadPermohonanData();
+  renderPermohonanKPI();
+  renderPermohonanTable();
+}
+
+/* ── KPI CARDS ───────────────────────────────────────────── */
+function renderPermohonanKPI() {
+  var counts = { MOHON_BARU:0, SEMAKAN_DOKUMEN:0, MESYUARAT_JKP:0, DILULUSKAN:0, DITOLAK:0 };
+  permohonanData.forEach(function(p){ if (counts[p.status] !== undefined) counts[p.status]++; });
+
+  var container = document.getElementById('permohonan-kpi');
+  if (!container) return;
+
+  var cards = [
+    { key:'MOHON_BARU',      icon:'🔵', label:'Mohon Baru' },
+    { key:'SEMAKAN_DOKUMEN', icon:'🟡', label:'Semakan Dokumen' },
+    { key:'MESYUARAT_JKP',   icon:'🟣', label:'Mesyuarat JKP' },
+    { key:'DILULUSKAN',      icon:'🟢', label:'Diluluskan' },
+    { key:'DITOLAK',         icon:'🔴', label:'Ditolak' },
+  ];
+
+  container.innerHTML = cards.map(function(c){
+    var cfg = P_STATUS[c.key];
+    return '<div onclick="switchPermohonanTab(\'' + c.key + '\')" style="flex:1;min-width:130px;background:var(--white);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow-sm);border:1px solid var(--gray1);cursor:pointer;border-left:4px solid ' + cfg.color + ';transition:box-shadow .2s;" onmouseover="this.style.boxShadow=\'var(--shadow-md)\'" onmouseout="this.style.boxShadow=\'var(--shadow-sm)\'">'
+      + '<div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">' + c.icon + ' ' + c.label + '</div>'
+      + '<div style="font-size:26px;font-weight:900;color:' + cfg.color + ';font-family:var(--head);">' + counts[c.key] + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+/* ── SUB-TAB SWITCH ──────────────────────────────────────── */
+function switchPermohonanTab(tab) {
+  permohonanTab  = tab === 'DILULUSKAN' ? 'MOHON_BARU' : tab; // DILULUSKAN not in sub-tabs
+  if (tab === 'DILULUSKAN') permohonanTab = 'MOHON_BARU';
+  else permohonanTab = tab;
+
+  // Update active tab button styling
+  var tabs = ['MOHON_BARU','SEMAKAN_DOKUMEN','MESYUARAT_JKP','DITOLAK'];
+  tabs.forEach(function(t){
+    var btn = document.getElementById('ptab-' + t);
+    if (!btn) return;
+    if (t === permohonanTab) {
+      btn.style.color      = 'var(--primary)';
+      btn.style.borderBottom = '3px solid var(--primary)';
+      btn.style.background = 'var(--primary-lt)';
+    } else {
+      btn.style.color      = 'var(--muted)';
+      btn.style.borderBottom = '3px solid transparent';
+      btn.style.background = 'none';
+    }
+  });
+
+  var labelMap = {
+    MOHON_BARU:      'Mohon Baru',
+    SEMAKAN_DOKUMEN: 'Semakan Dokumen',
+    MESYUARAT_JKP:   'Menunggu Keputusan Mesyuarat JKP',
+    DITOLAK:         'Permohonan Ditolak',
+  };
+  var el = document.getElementById('permohonan-tab-label');
+  if (el) el.textContent = labelMap[permohonanTab] || '';
+
+  permohonanPage = 1;
+  renderPermohonanTable();
+}
+
+/* ── TABLE RENDER ────────────────────────────────────────── */
+function renderPermohonanTable() {
+  var search = (document.getElementById('permohonan-search') || {}).value || '';
+  search = search.toLowerCase().trim();
+
+  var filtered = permohonanData.filter(function(p){
+    if (p.status !== permohonanTab) return false;
+    if (!search) return true;
+    return (p.ref_id || '').toLowerCase().includes(search)
+        || (p.proksi_nama || '').toLowerCase().includes(search)
+        || (p.nama_entiti || '').toLowerCase().includes(search)
+        || (p.fasal || '').toLowerCase().includes(search);
+  });
+
+  var totalPages = Math.max(1, Math.ceil(filtered.length / permohonanPerPage));
+  permohonanPage = Math.min(permohonanPage, totalPages);
+  var start = (permohonanPage - 1) * permohonanPerPage;
+  var paged = filtered.slice(start, start + permohonanPerPage);
+
+  var tbody = document.getElementById('permohonan-tbody');
+  if (!tbody) return;
+
+  if (paged.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="padding:40px;text-align:center;color:var(--muted)">Tiada rekod ditemui.</td></tr>';
+    document.getElementById('permohonan-pagination').innerHTML = '';
+    return;
+  }
+
+  tbody.innerHTML = paged.map(function(p, idx){
+    var cfg = P_STATUS[p.status] || { label: p.status, color:'#888', bg:'#eee' };
+    var d   = p.submitted_at ? new Date(p.submitted_at).toLocaleDateString('ms-MY') : '—';
+    var actionBtns = buildPermohonanActionBtns(p);
+    return '<tr style="border-bottom:1px solid var(--gray1);' + (idx % 2 === 0 ? '' : 'background:var(--body-bg);') + '">'
+      + '<td style="padding:10px 14px;font-family:var(--mono);font-size:11.5px;font-weight:600;color:var(--primary)">' + (p.ref_id || '—') + '</td>'
+      + '<td style="padding:10px 14px;font-weight:600;">' + (p.proksi_nama || '(Pemunya Tunggal)') + '</td>'
+      + '<td style="padding:10px 14px;color:var(--text2);">' + (p.nama_entiti || '—') + '</td>'
+      + '<td style="padding:10px 14px;font-weight:600;color:var(--muted);">' + (p.fasal || '—') + '</td>'
+      + '<td style="padding:10px 14px;color:var(--muted);font-size:12px;">' + d + '</td>'
+      + '<td style="padding:10px 14px;"><span style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;background:' + cfg.bg + ';color:' + cfg.color + ';">' + cfg.label + '</span></td>'
+      + '<td style="padding:10px 14px;text-align:center;">' + actionBtns + '</td>'
+      + '</tr>';
+  }).join('');
+
+  // Pagination
+  var pgHtml = '';
+  for (var i = 1; i <= totalPages; i++) {
+    pgHtml += '<button onclick="permohonanPage=' + i + ';renderPermohonanTable()" style="padding:5px 10px;border-radius:6px;border:1.5px solid ' + (i === permohonanPage ? 'var(--primary)' : 'var(--gray2)') + ';background:' + (i === permohonanPage ? 'var(--primary)' : 'var(--white)') + ';color:' + (i === permohonanPage ? '#fff' : 'var(--text)') + ';font-size:12px;font-weight:600;cursor:pointer;">' + i + '</button>';
+  }
+  document.getElementById('permohonan-pagination').innerHTML = pgHtml;
+}
+
+/* ── ACTION BUTTONS ──────────────────────────────────────── */
+function buildPermohonanActionBtns(p) {
+  var id  = p.id;
+  var st  = p.status;
+  var isAdm = currentUser && currentUser.role === 'admin';
+  var html = '<button onclick="openPermohonanModal(' + id + ')" style="padding:5px 12px;border-radius:6px;border:1.5px solid var(--gray2);background:var(--white);font-size:11px;font-weight:600;cursor:pointer;margin-right:4px;">👁 Semak</button>';
+
+  if (isAdm) {
+    if (st === 'MOHON_BARU') {
+      html += '<button onclick="updatePermohonanStatus(' + id + ',\'SEMAKAN_DOKUMEN\')" style="padding:5px 12px;border-radius:6px;border:none;background:var(--warning-lt);color:#a06000;font-size:11px;font-weight:700;cursor:pointer;">▶ Mula Semakan</button>';
+    }
+    if (st === 'SEMAKAN_DOKUMEN') {
+      html += '<button onclick="updatePermohonanStatus(' + id + ',\'MESYUARAT_JKP\')" style="padding:5px 12px;border-radius:6px;border:none;background:#F8F0FF;color:#7a1fa2;font-size:11px;font-weight:700;cursor:pointer;margin-right:4px;">🟣 Bawa ke JKP</button>';
+      html += '<button onclick="openTolakModal(' + id + ')" style="padding:5px 12px;border-radius:6px;border:none;background:var(--danger-lt);color:var(--danger);font-size:11px;font-weight:700;cursor:pointer;">✗ Tolak</button>';
+    }
+    if (st === 'MESYUARAT_JKP') {
+      html += '<button onclick="openLulusModal(' + id + ')" style="padding:5px 12px;border-radius:6px;border:none;background:var(--success-lt);color:#006b50;font-size:11px;font-weight:700;cursor:pointer;margin-right:4px;">✅ Luluskan</button>';
+      html += '<button onclick="openTolakModal(' + id + ')" style="padding:5px 12px;border-radius:6px;border:none;background:var(--danger-lt);color:var(--danger);font-size:11px;font-weight:700;cursor:pointer;">✗ Tolak</button>';
+    }
+    if (st === 'DITOLAK') {
+      html += '<button onclick="updatePermohonanStatus(' + id + ',\'MOHON_BARU\')" style="padding:5px 12px;border-radius:6px;border:none;background:var(--primary-lt);color:var(--primary);font-size:11px;font-weight:700;cursor:pointer;">↺ Buka Semula</button>';
+    }
+  }
+  return html;
+}
+
+/* ── OPEN SEMAK MODAL ────────────────────────────────────── */
+function openPermohonanModal(id) {
+  var p = permohonanData.find(function(x){ return x.id === id; });
+  if (!p) return;
+  permohonanSelected = p;
+
+  var cfg = P_STATUS[p.status] || { label: p.status, color:'#888' };
+  document.getElementById('pm-ref').textContent    = p.ref_id || '—';
+  document.getElementById('pm-entity').textContent = (p.nama_entiti || '—') + '  •  ' + (JENIS_LABEL_MAP[p.jenis_keahlian] || '') + ' (' + (p.fasal || '') + ')';
+  document.getElementById('pm-status-badge').textContent   = cfg.label;
+  document.getElementById('pm-status-badge').style.background = cfg.color;
+
+  // Build action buttons in footer
+  var isAdm = currentUser && currentUser.role === 'admin';
+  var footerBtns = '';
+  if (isAdm) {
+    if (p.status === 'MOHON_BARU') footerBtns += '<button onclick="updatePermohonanStatus(' + id + ',\'SEMAKAN_DOKUMEN\');closePermohonanModal()" style="padding:9px 18px;border:none;border-radius:7px;background:var(--warning);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--sans);">▶ Mula Semakan</button>';
+    if (p.status === 'SEMAKAN_DOKUMEN') {
+      footerBtns += '<button onclick="updatePermohonanStatus(' + id + ',\'MESYUARAT_JKP\');closePermohonanModal()" style="padding:9px 18px;border:none;border-radius:7px;background:#9C36B5;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--sans);margin-right:6px;">🟣 Bawa ke JKP</button>';
+      footerBtns += '<button onclick="closePermohonanModal();openTolakModal(' + id + ')" style="padding:9px 18px;border:none;border-radius:7px;background:var(--danger);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--sans);">✗ Tolak</button>';
+    }
+    if (p.status === 'MESYUARAT_JKP') {
+      footerBtns += '<button onclick="closePermohonanModal();openLulusModal(' + id + ')" style="padding:9px 18px;border:none;border-radius:7px;background:var(--success);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--sans);margin-right:6px;">✅ Luluskan</button>';
+      footerBtns += '<button onclick="closePermohonanModal();openTolakModal(' + id + ')" style="padding:9px 18px;border:none;border-radius:7px;background:var(--danger);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--sans);">✗ Tolak</button>';
+    }
+  }
+  document.getElementById('modal-action-btns').innerHTML = footerBtns;
+
+  switchModalTab('maklumat');
+  document.getElementById('modal-permohonan').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+
+function closePermohonanModal() {
+  document.getElementById('modal-permohonan').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+/* ── MODAL SUB-TAB SWITCH ────────────────────────────────── */
+function switchModalTab(tab) {
+  var tabs = ['maklumat','saham','dokumen','bayaran','admin'];
+  tabs.forEach(function(t){
+    var btn = document.getElementById('mt-' + t);
+    if (!btn) return;
+    if (t === tab) {
+      btn.style.color       = 'var(--primary)';
+      btn.style.borderBottom = '2px solid var(--primary)';
+    } else {
+      btn.style.color       = 'var(--muted)';
+      btn.style.borderBottom = '2px solid transparent';
+    }
+  });
+
+  var body = document.getElementById('modal-body-permohonan');
+  var p    = permohonanSelected;
+  if (!p || !body) return;
+
+  if (tab === 'maklumat')  body.innerHTML = buildTabMaklumat(p);
+  if (tab === 'saham')     body.innerHTML = buildTabSaham(p);
+  if (tab === 'dokumen')   body.innerHTML = buildTabDokumen(p);
+  if (tab === 'bayaran')   body.innerHTML = buildTabBayaran(p);
+  if (tab === 'admin')     body.innerHTML = buildTabAdmin(p);
+}
+
+/* ── TAB: MAKLUMAT ───────────────────────────────────────── */
+function buildTabMaklumat(p) {
+  function row(l,v){ return '<div style="display:flex;padding:8px 0;border-bottom:1px solid var(--gray1);gap:12px;"><span style="min-width:160px;font-size:12px;font-weight:700;color:var(--muted);">' + l + '</span><span style="font-size:13px;color:var(--text);font-weight:500;">' + (v || '—') + '</span></div>'; }
+  function section(t){ return '<div style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--primary);margin:16px 0 8px;padding-bottom:4px;border-bottom:2px solid var(--primary-lt);">' + t + '</div>'; }
+
+  var industri = Array.isArray(p.industri) ? p.industri.join(', ') : (p.industri || '—');
+  var rantaian = Array.isArray(p.rantaian_bekalan) ? p.rantaian_bekalan.join(', ') : (p.rantaian_bekalan || '—');
+  var persijil = Array.isArray(p.persijilan) ? p.persijilan.join(', ') : (p.persijilan || '—');
+
+  return section('Jenis Keahlian')
+    + row('Jenis', (JENIS_LABEL_MAP[p.jenis_keahlian] || '—') + ' (' + (p.jenis_keahlian || '—') + ')')
+    + row('Fasal', p.fasal)
+    + row('Jenis Entiti', p.jenis_entiti)
+    + row('Sektor', p.sektor)
+    + row('Industri', industri)
+    + row('Rantaian Bekalan', rantaian)
+    + row('Saiz Entiti', p.saiz_entiti)
+    + row('Persijilan', persijil)
+    + row('Jenama', p.jenama)
+    + row('Aktiviti', p.aktiviti_perniagaan)
+    + section('Butiran Perniagaan')
+    + row('Nama Entiti', p.nama_entiti)
+    + row('No. Pendaftaran', p.no_pendaftaran)
+    + row('Tarikh Daftar', p.tarikh_daftar)
+    + row('Tarikh Luput', p.tarikh_luput)
+    + row('Alamat', (p.alamat || '') + (p.poskod ? ', ' + p.poskod : '') + (p.bandar ? ' ' + p.bandar : '') + (p.negeri ? ', ' + p.negeri : ''))
+    + row('No. Tel', p.no_tel_syarikat)
+    + row('E-mel', p.emel_syarikat)
+    + row('URL', p.url_syarikat)
+    + row('Modal Berbayar', p.modal_berbayar ? 'RM ' + Number(p.modal_berbayar).toLocaleString() : '—')
+    + row('Modal Pusingan', p.modal_pusingan ? 'RM ' + Number(p.modal_pusingan).toLocaleString() : '—')
+    + section('Proksi / Wakil')
+    + row('Nama Proksi', p.proksi_nama || '(Pemunya Tunggal)')
+    + row('No. MyKAD', p.proksi_ic)
+    + row('Jawatan', p.proksi_jawatan)
+    + row('No. HP', p.proksi_hp)
+    + row('E-mel Proksi', p.proksi_emel);
+}
+
+/* ── TAB: PEMEGANG SAHAM ─────────────────────────────────── */
+function buildTabSaham(p) {
+  function tableSection(title, data) {
+    var rows = Array.isArray(data) && data.length > 0
+      ? data.map(function(r, i){ return '<tr style="border-bottom:1px solid var(--gray1);"><td style="padding:8px 12px;color:var(--muted);font-size:12px;">' + (i+1) + '</td><td style="padding:8px 12px;font-weight:600;">' + (r.nama || '—') + '</td><td style="padding:8px 12px;text-align:center;">' + (r.peratusan || '—') + '%</td><td style="padding:8px 12px;">' + (r.bangsa || '—') + '</td></tr>'; }).join('')
+      : '<tr><td colspan="4" style="padding:20px;text-align:center;color:var(--muted);font-size:12px;">Tiada rekod</td></tr>';
+    return '<div style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--primary);margin:16px 0 8px;">' + title + '</div>'
+      + '<table style="width:100%;border-collapse:collapse;font-size:13px;">'
+      + '<thead><tr style="background:var(--body-bg);"><th style="padding:8px 12px;text-align:left;font-size:11px;color:var(--muted);">#</th><th style="padding:8px 12px;text-align:left;font-size:11px;color:var(--muted);">Nama</th><th style="padding:8px 12px;text-align:center;font-size:11px;color:var(--muted);">%</th><th style="padding:8px 12px;text-align:left;font-size:11px;color:var(--muted);">Bangsa</th></tr></thead>'
+      + '<tbody>' + rows + '</tbody></table>';
+  }
+  return tableSection('Pemegang Saham', p.pemegang_saham)
+       + tableSection('Ahli Lembaga / Pengurusan', p.ahli_lembaga);
+}
+
+/* ── TAB: DOKUMEN ────────────────────────────────────────── */
+function buildTabDokumen(p) {
+  var docs = [
+    { label: 'Gambar Passport 1',         url: p.url_gambar_1 },
+    { label: 'Gambar Passport 2',         url: p.url_gambar_2 },
+    { label: 'Insolvensi Entiti',         url: p.url_insolvensi_entiti },
+    { label: 'Insolvensi Pemohon',        url: p.url_insolvensi_pemohon },
+    { label: 'Sijil SSM',                 url: p.url_ssm_sijil },
+    { label: 'M&AA',                      url: p.url_m_aa },
+    { label: 'Borang 9/13',              url: p.url_borang_9 },
+    { label: 'Borang 24',                url: p.url_borang_24 },
+    { label: 'Borang 49',                url: p.url_borang_49 },
+    { label: 'Sijil Profesional',        url: p.url_sijil_profesional },
+    { label: 'Surat Kebenaran',          url: p.url_surat_kebenaran },
+    { label: 'Sijil Pemerbadanan',       url: p.url_sijil_perbadanan },
+    { label: 'Surat Pelantikan',         url: p.url_surat_pelantikan },
+    { label: 'Sijil Koperasi',           url: p.url_sijil_koperasi },
+    { label: 'Senarai Ahli Lembaga',     url: p.url_senarai_lembaga },
+    { label: 'Surat Proksi',             url: p.url_surat_proksi },
+    { label: 'Dokumen Tambahan',         url: p.url_dokumen_tambahan },
+    { label: 'Slip Bayaran',             url: p.url_bukti_bayaran },
+  ];
+
+  var rows = docs.map(function(d){
+    var ada = !!d.url;
+    return '<div style="display:flex;align-items:center;padding:10px 14px;border-bottom:1px solid var(--gray1);gap:14px;">'
+      + '<div style="width:22px;font-size:16px;">' + (ada ? '✅' : '❌') + '</div>'
+      + '<div style="flex:1;font-size:13px;font-weight:600;color:' + (ada ? 'var(--text)' : 'var(--muted)') + ';">' + d.label + '</div>'
+      + (ada ? '<a href="' + d.url + '" target="_blank" style="padding:5px 14px;border-radius:6px;background:var(--primary-lt);color:var(--primary);font-size:12px;font-weight:700;text-decoration:none;">👁 Lihat</a>' : '<span style="font-size:11px;color:var(--muted);">Tiada</span>')
+      + '</div>';
+  }).join('');
+
+  return '<div style="border:1px solid var(--gray1);border-radius:9px;overflow:hidden;">' + rows + '</div>';
+}
+
+/* ── TAB: BAYARAN ────────────────────────────────────────── */
+function buildTabBayaran(p) {
+  function row(l,v){ return '<div style="display:flex;padding:9px 0;border-bottom:1px solid var(--gray1);gap:12px;"><span style="min-width:160px;font-size:12px;font-weight:700;color:var(--muted);">' + l + '</span><span style="font-size:13px;font-weight:600;">' + (v || '—') + '</span></div>'; }
+
+  var isAdm   = currentUser && currentUser.role === 'admin';
+  var slipHtml = p.url_bukti_bayaran
+    ? '<a href="' + p.url_bukti_bayaran + '" target="_blank" style="display:inline-block;margin-top:10px;padding:8px 20px;border-radius:7px;background:var(--primary-lt);color:var(--primary);font-size:12px;font-weight:700;text-decoration:none;">👁 Lihat Slip Bayaran</a>'
+    : '<span style="color:var(--danger);font-size:12px;">Slip belum dimuat naik</span>';
+
+  var sahkanHtml = '';
+  if (isAdm) {
+    sahkanHtml = '<div style="margin-top:16px;background:var(--body-bg);border-radius:9px;padding:14px;border:1px solid var(--gray1);">'
+      + '<div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:10px;">Pengesahan Pembayaran (BHK)</div>'
+      + '<div style="display:flex;flex-direction:column;gap:8px;">'
+      + '<label style="font-size:12px;color:var(--muted);">No. Resit</label>'
+      + '<input id="bkh-resit" type="text" value="' + (p.no_resit || '') + '" placeholder="No. resit pembayaran" style="padding:8px 12px;border:1.5px solid var(--gray2);border-radius:7px;font-size:13px;font-family:var(--sans);outline:none;">'
+      + '<label style="font-size:12px;color:var(--muted);margin-top:4px;">Tarikh Disahkan</label>'
+      + '<input id="bkh-tarikh" type="date" value="' + (p.tarikh_resit || '') + '" style="padding:8px 12px;border:1.5px solid var(--gray2);border-radius:7px;font-size:13px;font-family:var(--sans);outline:none;">'
+      + '<label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;margin-top:4px;">'
+      + '<input type="checkbox" id="bkh-sahkan" ' + (p.bayaran_disahkan ? 'checked' : '') + ' style="accent-color:var(--primary);transform:scale(1.2);">'
+      + ' Bayaran telah disahkan diterima</label>'
+      + '<button onclick="saveBayaranSahkan(' + p.id + ')" style="margin-top:6px;padding:9px 18px;border:none;border-radius:7px;background:var(--primary);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--sans);align-self:flex-start;">💾 Simpan Pengesahan</button>'
+      + '</div></div>';
+  }
+
+  return row('Fi Pendaftaran', p.jumlah_fi_daftar ? 'RM ' + Number(p.jumlah_fi_daftar).toLocaleString() : '—')
+    + row('Yuran (' + (p.tempoh_yuran || '—') + ' thn)', p.jumlah_yuran ? 'RM ' + Number(p.jumlah_yuran).toLocaleString() : '—')
+    + row('JUMLAH BAYAR', p.jumlah_bayar ? '<strong style="color:var(--primary)">RM ' + Number(p.jumlah_bayar).toLocaleString() + '</strong>' : '—')
+    + row('Kaedah', p.kaedah_bayar || 'Online Transfer')
+    + row('Status Bayaran', p.bayaran_disahkan ? '<span style="color:var(--success);font-weight:700;">✅ Disahkan</span>' : '<span style="color:var(--warning);font-weight:700;">⏳ Belum Disahkan</span>')
+    + row('No. Resit', p.no_resit)
+    + '<div style="margin-top:12px;">' + slipHtml + '</div>'
+    + sahkanHtml;
+}
+
+/* ── TAB: ADMIN / TINDAKAN ───────────────────────────────── */
+function buildTabAdmin(p) {
+  var isAdm = currentUser && currentUser.role === 'admin';
+  if (!isAdm) return '<div style="padding:20px;text-align:center;color:var(--muted);">Hanya admin boleh mengakses bahagian ini.</div>';
+
+  function row(l,v){ return '<div style="display:flex;padding:8px 0;border-bottom:1px solid var(--gray1);gap:12px;"><span style="min-width:160px;font-size:12px;font-weight:700;color:var(--muted);">' + l + '</span><span style="font-size:13px;font-weight:600;">' + (v || '—') + '</span></div>'; }
+
+  var approvedSection = p.status === 'DILULUSKAN'
+    ? '<div style="background:var(--success-lt);border-radius:9px;padding:14px 18px;margin-bottom:16px;">'
+      + '<div style="font-size:12px;font-weight:700;color:#006b50;margin-bottom:8px;">✅ Maklumat Kelulusan</div>'
+      + row('No. Ahli', p.no_ahli)
+      + row('Tarikh Kuatkuasa', p.tarikh_kuatkuasa)
+      + row('No. Minit Mesyuarat', p.no_minit_mesyuarat)
+      + row('Diluluskan Oleh', p.keputusan_oleh)
+      + '</div>'
+    : '';
+
+  var rejectedSection = p.status === 'DITOLAK'
+    ? '<div style="background:var(--danger-lt);border-radius:9px;padding:14px 18px;margin-bottom:16px;">'
+      + '<div style="font-size:12px;font-weight:700;color:var(--danger);margin-bottom:8px;">✗ Maklumat Penolakan</div>'
+      + row('Sebab Tolak', p.sebab_tolak)
+      + row('Pulangan Yuran', p.pulangan_yuran ? 'Ya' : 'Tidak — Fi Pendaftaran tidak dipulangkan')
+      + row('Maklumat Pulangan', p.maklumat_pulangan)
+      + '</div>'
+    : '';
+
+  var notaHtml = '<div style="margin-bottom:16px;">'
+    + '<label style="font-size:12px;font-weight:700;color:var(--text2);display:block;margin-bottom:6px;">Nota Admin</label>'
+    + '<textarea id="admin-nota" rows="3" style="width:100%;padding:9px 12px;border:1.5px solid var(--gray2);border-radius:7px;font-size:13px;font-family:var(--sans);outline:none;resize:vertical;">' + (p.catatan_admin || '') + '</textarea>'
+    + '<button onclick="saveAdminNota(' + p.id + ')" style="margin-top:6px;padding:8px 18px;border:none;border-radius:7px;background:var(--primary);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--sans);">💾 Simpan Nota</button>'
+    + '</div>';
+
+  return approvedSection + rejectedSection + notaHtml
+    + row('Tarikh Submit', p.submitted_at ? new Date(p.submitted_at).toLocaleString('ms-MY') : '—')
+    + row('Mula Semakan', p.semakan_at ? new Date(p.semakan_at).toLocaleString('ms-MY') : '—')
+    + row('Bawa ke JKP', p.jkp_at ? new Date(p.jkp_at).toLocaleString('ms-MY') : '—')
+    + row('Keputusan', p.keputusan_at ? new Date(p.keputusan_at).toLocaleString('ms-MY') : '—');
+}
+
+/* ── UPDATE STATUS ───────────────────────────────────────── */
+async function updatePermohonanStatus(id, newStatus) {
+  var payload = { status: newStatus };
+  var now = new Date().toISOString();
+  if (newStatus === 'SEMAKAN_DOKUMEN')  payload.semakan_at  = now;
+  if (newStatus === 'MESYUARAT_JKP')   payload.jkp_at      = now;
+  if (newStatus === 'DITOLAK' || newStatus === 'DILULUSKAN') {
+    payload.keputusan_at  = now;
+    payload.keputusan_oleh = currentUser ? currentUser.name : '—';
+  }
+
+  var { error } = await supabaseClient.from('PERMOHONAN_AHLI').update(payload).eq('id', id);
+  if (error) { showToast && showToast('Ralat kemaskini status: ' + error.message, 'error'); return; }
+  await renderPermohonanPage();
+  showSnack && showSnack('Status dikemaskini: ' + (P_STATUS[newStatus] || {}).label);
+}
+
+/* ── LULUS MODAL ─────────────────────────────────────────── */
+function openLulusModal(id) {
+  var p = permohonanData.find(function(x){ return x.id === id; });
+  if (!p) return;
+  permohonanSelected = p;
+  document.getElementById('lulus-ref-label').textContent = (p.ref_id || '') + ' — ' + (p.nama_entiti || '');
+  document.getElementById('lulus-no-ahli').value = '';
+  document.getElementById('lulus-tarikh').value  = new Date().toISOString().split('T')[0];
+  document.getElementById('lulus-minit').value   = '';
+  document.getElementById('lulus-error').style.display = 'none';
+  document.getElementById('modal-lulus').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeLulusModal() {
+  document.getElementById('modal-lulus').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+async function confirmLulus() {
+  var p        = permohonanSelected;
+  var noAhli   = document.getElementById('lulus-no-ahli').value.trim();
+  var tarikh   = document.getElementById('lulus-tarikh').value;
+  var minit    = document.getElementById('lulus-minit').value.trim();
+  var errEl    = document.getElementById('lulus-error');
+
+  if (!noAhli || !tarikh || !minit) {
+    errEl.textContent = 'Sila isi semua maklumat yang diperlukan.';
+    errEl.style.display = 'block';
+    return;
+  }
+  errEl.style.display = 'none';
+
+  // 1. Build ahli payload untuk AHLI DPMM JOHOR
+  var ahliPayload = {
+    NO_AHLI:         noAhli,
+    NAMA_PIC:        p.proksi_nama  || '',
+    NO_IC:           p.proksi_ic   || '',
+    NO_HP:           p.proksi_hp   || '',
+    NAMA_SYARIKAT:   p.nama_entiti || '',
+    NO_SSM:          p.no_pendaftaran || '',
+    JENIS_AHLI:      p.jenis_keahlian === 'A' && ['6.2.1','6.2.2','6.2.3a','6.2.3b'].includes(p.fasal) ? 'ENT' : 'SB',
+    DAERAH:          p.bandar || '',
+    ALAMAT:          (p.alamat || '') + ' ' + (p.poskod || '') + ' ' + (p.bandar || ''),
+    STATUS_AHLI:     'AKTIF',
+    TARIKH_DAFTAR:   tarikh,
+    created_by:      currentUser ? currentUser.id : null,
+  };
+
+  // 2. Insert ke AHLI DPMM JOHOR
+  var { error: insErr } = await supabaseClient.from('AHLI DPMM JOHOR').insert([ahliPayload]);
+  if (insErr) {
+    errEl.textContent = 'Ralat menambah ahli: ' + insErr.message;
+    errEl.style.display = 'block';
+    return;
+  }
+
+  // 3. Update PERMOHONAN_AHLI
+  var now = new Date().toISOString();
+  await supabaseClient.from('PERMOHONAN_AHLI').update({
+    status:              'DILULUSKAN',
+    no_ahli:             noAhli,
+    tarikh_kuatkuasa:    tarikh,
+    no_minit_mesyuarat:  minit,
+    keputusan_at:        now,
+    keputusan_oleh:      currentUser ? currentUser.name : '—',
+  }).eq('id', p.id);
+
+  closeLulusModal();
+  await renderPermohonanPage();
+  // Refresh senarai ahli jika ada
+  if (typeof loadMembers === 'function') loadMembers();
+  showSnack && showSnack('✅ ' + (p.proksi_nama || p.nama_entiti) + ' telah diluluskan sebagai Ahli No. ' + noAhli);
+}
+
+/* ── TOLAK MODAL ─────────────────────────────────────────── */
+function openTolakModal(id) {
+  var p = permohonanData.find(function(x){ return x.id === id; });
+  if (!p) return;
+  permohonanSelected = p;
+  document.getElementById('tolak-ref-label').textContent = (p.ref_id || '') + ' — ' + (p.nama_entiti || '');
+  document.getElementById('tolak-sebab').value = '';
+  document.getElementById('tolak-error').style.display = 'none';
+  document.getElementById('tolak-maklumat-wrap').style.display = 'none';
+  document.querySelectorAll('input[name="pulangan"]').forEach(function(r){ if (r.value === 'tiada') r.checked = true; });
+  // Show/hide pulangan field
+  document.querySelectorAll('input[name="pulangan"]').forEach(function(r){
+    r.onchange = function(){ document.getElementById('tolak-maklumat-wrap').style.display = r.value === 'ada' ? 'block' : 'none'; };
+  });
+  document.getElementById('modal-tolak').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeTolakModal() {
+  document.getElementById('modal-tolak').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+async function confirmTolak() {
+  var p       = permohonanSelected;
+  var sebab   = document.getElementById('tolak-sebab').value.trim();
+  var errEl   = document.getElementById('tolak-error');
+  var pulangan = document.querySelector('input[name="pulangan"]:checked').value === 'ada';
+  var maklumat = document.getElementById('tolak-maklumat').value.trim();
+
+  if (!sebab) { errEl.textContent = 'Sila nyatakan sebab penolakan.'; errEl.style.display = 'block'; return; }
+  errEl.style.display = 'none';
+
+  var now = new Date().toISOString();
+  await supabaseClient.from('PERMOHONAN_AHLI').update({
+    status:           'DITOLAK',
+    sebab_tolak:      sebab,
+    pulangan_yuran:   pulangan,
+    maklumat_pulangan: maklumat || null,
+    keputusan_at:     now,
+    keputusan_oleh:   currentUser ? currentUser.name : '—',
+  }).eq('id', p.id);
+
+  closeTolakModal();
+  permohonanTab = 'DITOLAK';
+  await renderPermohonanPage();
+  switchPermohonanTab('DITOLAK');
+  showSnack && showSnack('Permohonan ' + (p.ref_id || '') + ' telah ditolak.');
+}
+
+/* ── SAVE NOTA ADMIN ─────────────────────────────────────── */
+async function saveAdminNota(id) {
+  var nota = document.getElementById('admin-nota').value;
+  await supabaseClient.from('PERMOHONAN_AHLI').update({ catatan_admin: nota }).eq('id', id);
+  var p = permohonanData.find(function(x){ return x.id === id; });
+  if (p) p.catatan_admin = nota;
+  showSnack && showSnack('Nota admin disimpan.');
+}
+
+/* ── SAVE BAYARAN SAHKAN ─────────────────────────────────── */
+async function saveBayaranSahkan(id) {
+  var resit    = document.getElementById('bkh-resit').value.trim();
+  var tarikh   = document.getElementById('bkh-tarikh').value;
+  var disahkan = document.getElementById('bkh-sahkan').checked;
+  await supabaseClient.from('PERMOHONAN_AHLI').update({
+    no_resit:         resit || null,
+    tarikh_resit:     tarikh || null,
+    bayaran_disahkan: disahkan,
+  }).eq('id', id);
+  var p = permohonanData.find(function(x){ return x.id === id; });
+  if (p) { p.no_resit = resit; p.tarikh_resit = tarikh; p.bayaran_disahkan = disahkan; }
+  showSnack && showSnack('Pengesahan bayaran disimpan.');
+}
+
+/* ── SNACK HELPER (fallback jika showToast wujud) ────────── */
+function showSnack(msg) {
+  if (typeof showToast === 'function') { showToast(msg); return; }
+  var s = document.getElementById('snack');
+  if (!s) { s = document.createElement('div'); s.id = 'snack'; s.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#2D2B3D;color:#fff;padding:12px 20px;border-radius:9px;font-size:13px;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,.3);z-index:9999;transition:opacity .3s;'; document.body.appendChild(s); }
+  s.textContent = msg; s.style.opacity = '1';
+  setTimeout(function(){ s.style.opacity = '0'; }, 3500);
+}
+
+/* ── AUTO-LOAD badge on startup ──────────────────────────── */
+document.addEventListener('DOMContentLoaded', function(){
+  setTimeout(function(){
+    loadPermohonanData();
+  }, 2000); // load after main data
+});
 </script>
 </body>
 </html>
