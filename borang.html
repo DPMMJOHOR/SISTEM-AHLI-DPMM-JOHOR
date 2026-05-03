@@ -1785,7 +1785,7 @@ QZGdgoKCgoJCrPD/AgwAY9jLI0rpsVEAAAAASUVORK5CYII=" alt="Logo DPMM NJ" style="widt
     
     <div class="field">
       <label>Syarikat anda adalah <span style="color:var(--red)">*</span></label>
-      <select id="business-type-selector" class="input">
+      <select id="business-type-selector" class="input" onchange="handleBusinessTypeChange()">
         <option value="">-- Sila Pilih --</option>
         <option value="enterprise_sole">Enterprise (Milikan Tunggal)</option>
         <option value="enterprise_partnership">Enterprise (Perkongsian)</option>
@@ -2732,8 +2732,10 @@ const DOCS_CONDITIONAL = {
    INTRO PAGE - BUSINESS TYPE SELECTION
    ============================================================ */
 function handleBusinessTypeChange() {
+  console.log("handleBusinessTypeChange called");
   const selector = document.getElementById('business-type-selector');
   const selectedType = selector.value;
+  console.log("Selected type:", selectedType);
   const displayDiv = document.getElementById('fasal-document-display');
   const startBtn = document.getElementById('btn-start-form');
   
@@ -2744,6 +2746,7 @@ function handleBusinessTypeChange() {
   }
   
   const mapping = BUSINESS_TYPE_MAPPING[selectedType];
+  console.log("Mapping found:", mapping);
   if (!mapping) return;
   
   // Get fasal data
@@ -2792,6 +2795,7 @@ function handleBusinessTypeChange() {
 function startFormWithBusinessType() {
   const selector = document.getElementById('business-type-selector');
   const selectedType = selector.value;
+  console.log("Selected type:", selectedType);
   
   if (!selectedType) {
     alert('Sila pilih jenis perniagaan anda terlebih dahulu.');
@@ -2799,6 +2803,7 @@ function startFormWithBusinessType() {
   }
   
   const mapping = BUSINESS_TYPE_MAPPING[selectedType];
+  console.log("Mapping found:", mapping);
   if (!mapping) return;
   
   // Store business type in state
