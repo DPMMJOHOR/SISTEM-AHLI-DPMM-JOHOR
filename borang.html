@@ -1805,8 +1805,8 @@ QZGdgoKCgoJCrPD/AgwAY9jLI0rpsVEAAAAASUVORK5CYII=" alt="Logo DPMM NJ" style="widt
       <h4>Maklumat Keahlian Anda</h4>
       <div class="yuran-row"><span>Jenis Perniagaan</span><span id="display-business-type">—</span></div>
       <div class="yuran-row"><span>Fasal</span><span id="display-fasal">—</span></div>
-      <div class="yuran-row"><span>Yuran Pendaftaran (sekali bayar)</span><span id="display-daftar">—</span></div>
-      <div class="yuran-row"><span>Yuran Pendaftaran</span><span id="display-tahunan">—</span></div>
+      <div class="yuran-row"><span>Yuran Pendaftaran (Once in a lifetime)</span><span id="display-daftar">—</span></div>
+      <div class="yuran-row"><span>Yuran Tahunan (Yearly)</span><span id="display-tahunan">—</span></div>
     </div>
 
     <!-- Required Documents -->
@@ -1894,8 +1894,8 @@ QZGdgoKCgoJCrPD/AgwAY9jLI0rpsVEAAAAASUVORK5CYII=" alt="Logo DPMM NJ" style="widt
         <h4> Maklumat Yuran</h4>
         <div class="yuran-row"><span>Fasal</span><span id="pv-fasal">—</span></div>
         <div class="yuran-row"><span>Jenis Keahlian</span><span id="pv-jenis">—</span></div>
-        <div class="yuran-row"><span>Yuran Pendaftaran (sekali bayar)</span><span id="pv-daftar">—</span></div>
-        <div class="yuran-row"><span>Yuran Pendaftaran</span><span id="pv-yuran-pendaftaran">—</span></div>
+        <div class="yuran-row"><span>Yuran Pendaftaran (Once in a lifetime)</span><span id="pv-daftar">—</span></div>
+        <div class="yuran-row"><span>Yuran Tahunan (Yearly)</span><span id="pv-yuran-pendaftaran">—</span></div>
       </div>
 
       <div class="btn-row">
@@ -2350,8 +2350,8 @@ QZGdgoKCgoJCrPD/AgwAY9jLI0rpsVEAAAAASUVORK5CYII=" alt="Logo DPMM NJ" style="widt
 
       <div class="bayaran-summary" id="bayaran-summary" style="display:none">
         <h4>📊 Ringkasan Bayaran</h4>
-        <div class="bayaran-row"><span>Yuran Pendaftaran (sekali bayar)</span><span id="sum-fi">—</span></div>
-        <div class="bayaran-row"><span>Yuran Pendaftaran</span><span id="sum-yuran-pendaftaran-formula">—</span></div>
+        <div class="bayaran-row"><span>Yuran Pendaftaran (Once in a lifetime)</span><span id="sum-fi">—</span></div>
+        <div class="bayaran-row"><span>Yuran Tahunan (Yearly)</span><span id="sum-yuran-pendaftaran-formula">—</span></div>
         <div class="bayaran-row total"><span>JUMLAH KESELURUHAN</span><span id="sum-total">—</span></div>
       </div>
 
@@ -2369,7 +2369,7 @@ QZGdgoKCgoJCrPD/AgwAY9jLI0rpsVEAAAAASUVORK5CYII=" alt="Logo DPMM NJ" style="widt
       <div class="amaran-box">
         <span class="amaran-icon">⚠️</span>
         <div>
-          <strong>PERINGATAN PENTING — SILA BACA SEBELUM MEMBAYAR:</strong><ul style="margin:8px 0 0 0;padding-left:18px;line-height:1.8;"><li>Yuran Pendaftaran adalah <u>TIDAK AKAN DIPULANGKAN</u> sekiranya permohonan keahlian anda gagal atau ditolak, walau apa jua sebab sekalipun.</li><li>Yuran Pendaftaran yang dibayar akan <u>dipulangkan</u> sekiranya permohonan ditolak.</li><li>Yuran Pendaftaran <strong>mesti dijelaskan pada atau sebelum 31 Disember</strong> setiap tahun (Fasal 10.8).</li><li>Keahlian akan <strong>gugur secara automatik</strong> sekiranya tunggakan yuran tahunan melebihi <strong>dua (2) tahun</strong> (Fasal 8.12.4).</li></ul>
+          <strong>PERINGATAN PENTING — SILA BACA SEBELUM MEMBAYAR:</strong><ul style="margin:8px 0 0 0;padding-left:18px;line-height:1.8;"><li>Yuran Pendaftaran adalah <u>TIDAK AKAN DIPULANGKAN</u> sekiranya permohonan keahlian anda gagal atau ditolak, walau apa jua sebab sekalipun.</li><li>Yuran Pendaftaran yang dibayar akan <u>dipulangkan</u> sekiranya permohonan ditolak.</li><li>Yuran Tahunan <strong>mesti dijelaskan pada atau sebelum 31 Disember</strong> setiap tahun (Fasal 10.8).</li><li>Keahlian akan <strong>gugur secara automatik</strong> sekiranya tunggakan yuran tahunan melebihi <strong>dua (2) tahun</strong> (Fasal 8.12.4).</li></ul>
         </div>
       </div>
 
@@ -3211,7 +3211,7 @@ function renderRingkasan() {
     ['No. HP', val('proksi_hp') || '—'],
     ['E-mel', val('proksi_emel') || val('emel_syarikat')],
     ['Alamat', val('alamat') + ', ' + val('poskod') + ' ' + val('bandar')],
-    ['Yuran Pendaftaran', fi === 0 ? 'Percuma' : 'RM ' + fi.toLocaleString()],
+    ['Yuran Pendaftaran (Once in a lifetime)', fi === 0 ? 'Percuma' : 'RM ' + fi.toLocaleString()],
     ['Yuran (' + tempoh + ' Tahun)', yr === 0 ? 'Percuma' : 'RM ' + (yr * tempoh).toLocaleString()],
     ['JUMLAH BAYAR', total === 0 ? 'Percuma' : 'RM ' + total.toLocaleString()],
     ['Dokumen Dimuat Naik', Object.keys(state.uploadedFiles).length + ' fail'],
@@ -3633,8 +3633,8 @@ function downloadPDF() {
   const tempoh = parseInt(getRadio('tempoh_yuran') || '1');
   const fi = fasalData?.daftar || 0;
   const yr2 = fasalData?.tahunan || 0;
-  row('Yuran Pendaftaran', fi === 0 ? 'Percuma' : 'RM ' + fi.toLocaleString());
-  row('Yuran Pendaftaran', yr2 === 0 ? 'Percuma' : 'RM ' + yr2.toLocaleString() + ' × ' + tempoh + ' tahun = RM ' + (yr2 * tempoh).toLocaleString());
+  row('Yuran Pendaftaran (Once in a lifetime)', fi === 0 ? 'Percuma' : 'RM ' + fi.toLocaleString());
+  row('Yuran Tahunan (Yearly)', yr2 === 0 ? 'Percuma' : 'RM ' + yr2.toLocaleString() + ' × ' + tempoh + ' tahun = RM ' + (yr2 * tempoh).toLocaleString());
   row('JUMLAH', fi === 0 ? 'Percuma' : 'RM ' + (fi + yr2 * tempoh).toLocaleString());
   y += 4;
 
