@@ -2120,10 +2120,15 @@ QZGdgoKCgoJCrPD/AgwAY9jLI0rpsVEAAAAASUVORK5CYII=" alt="Logo DPMM NJ" style="widt
             </select>
           </div>
         </div>
-        <div class="form-row cols-2">
+        <div class="form-row cols-3">
           <div class="form-group">
             <label class="form-label">No. Telefon</label>
             <input type="text" class="form-control" id="no_tel_syarikat" placeholder="07-xxx xxxx">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nombor Telefon Bimbit <span class="req">*</span></label>
+            <input type="text" class="form-control" id="no_tel_bimbit" placeholder="01x-xxxx xxxx">
+            <span class="field-error" id="err-no_tel_bimbit">Sila isi nombor telefon bimbit.</span>
           </div>
           <div class="form-group">
             <label class="form-label">URL Website</label>
@@ -2885,6 +2890,7 @@ function validateStep(n) {
     if (!val('poskod'))                  { showErr('err-poskod'); ok = false; }
     if (!val('bandar'))                  { showErr('err-bandar'); ok = false; }
     if (!val('emel_syarikat'))           { showErr('err-emel_syarikat'); ok = false; }
+    if (!val('no_tel_bimbit'))           { showErr('err-no_tel_bimbit'); ok = false; }
     // Proksi wajib jika bukan Pemunya Tunggal
     if (getRadio('jenis_entiti') !== 'Pemunya Tunggal') {
       if (!val('proksi_nama'))           { showErr('err-proksi_nama'); ok = false; }
