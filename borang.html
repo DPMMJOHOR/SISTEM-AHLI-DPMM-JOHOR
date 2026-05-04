@@ -21,60 +21,62 @@
 @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
 
 :root {
-  --navy:         #0d2060;
-  --navy-mid:     #1a3a8c;
-  --navy-light:   #2e5bbf;
-  --red:          #c41230;
-  --red-light:    #e63050;
-  --red-pale:     #fff0f2;
+  /* Corporate Professional Color Palette */
+  --primary:      #1a365d;      /* Deep corporate blue */
+  --primary-dark: #0f1e2d;      /* Darker blue */
+  --primary-light:#2c5282;      /* Lighter blue */
+  --secondary:    #718096;      /* Professional grey */
+  --accent:       #2b6cb1;      /* Corporate accent blue */
+  --success:      #2d6a4f;      /* Professional green */
+  --warning:      #744210;      /* Corporate amber */
+  --error:        #c53030;      /* Professional red */
   --white:        #ffffff;
-  --grey-50:      #f5f7fb;
-  --grey-100:     #e8ecf4;
-  --grey-200:     #c8d0e0;
-  --grey-400:     #7a8aaa;
-  --grey-600:     #3d4f70;
-  --grey-800:     #1a2540;
-  --text:         #0d1628;
-  --text-muted:   #4a5a7a;
-  --success:      #1a7a4a;
-  --success-bg:   #e8f7ef;
-  --error:        #a01a1a;
-  --error-bg:     #fce8e8;
-  --warning:      #7a5200;
-  --warning-bg:   #fff8e1;
-  --radius:       10px;
-  --shadow:       0 4px 24px rgba(13,32,96,0.10);
-  --shadow-lg:    0 8px 40px rgba(13,32,96,0.16);
+  --grey-50:      #f8fafc;
+  --grey-100:     #f1f5f9;
+  --grey-200:     #e2e8f0;
+  --grey-300:     #cbd5e0;
+  --grey-400:     #a0aec0;
+  --grey-500:     #718096;
+  --grey-600:     #4a5568;
+  --grey-700:     #2d3748;
+  --text:         #1a202c;
+  --text-muted:   #4a5568;
+  --border:       #e2e8f0;
+  --bg-light:     #f8fafc;
+  --bg-card:      #ffffff;
+  --radius:       8px;
+  --shadow:       0 2px 8px rgba(26,54,93,0.08);
+  --shadow-lg:    0 4px 16px rgba(26,54,93,0.12);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
   font-family: 'DM Sans', sans-serif;
-  background: #f0f3f8;
+  background: var(--bg-light);
   color: var(--text);
   min-height: 100vh;
-  font-size: 15px;
-  line-height: 1.2;
+  font-size: 17px;
+  line-height: 1.5;
 }
 
 /* ---- HEADER ---- */
 .site-header {
-  background: #ffffff;
-  padding: 18px 0 0;
+  background: var(--bg-card);
+  padding: 24px 0 0;
   text-align: center;
-  border-bottom: none;
+  border-bottom: 1px solid var(--border);
   position: relative;
   overflow: hidden;
-  box-shadow: 0 2px 12px rgba(13,32,96,0.08);
+  box-shadow: var(--shadow);
 }
 .site-header::before { display: none; }
 .site-header::after {
   content: '';
   display: block;
-  height: 4px;
-  background: linear-gradient(90deg, var(--navy) 60%, var(--red) 100%);
-  margin-top: 16px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary) 60%, var(--accent) 100%);
+  margin-top: 20px;
 }
 .header-inner { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; padding: 0 24px; }
 .header-logo {
@@ -85,8 +87,8 @@ body {
   flex-shrink: 0;
 }
 .version-tag {
-  font-size: 0.6rem;
-  color: var(--grey-600);
+  font-size: 0.7rem;
+  color: var(--grey-500);
   letter-spacing: 0.04em;
   text-align: center;
   font-family: 'DM Sans', sans-serif;
@@ -96,24 +98,24 @@ body {
 .header-text { text-align: center; }
 .header-text h1 {
   font-family: 'Crimson Pro', serif;
-  color: var(--navy);
-  font-size: 1.25rem;
+  color: var(--primary);
+  font-size: 1.4rem;
   font-weight: 700;
   letter-spacing: 0.08em;
-  line-height: 1.2;
+  line-height: 1.3;
   text-transform: uppercase;
 }
 .header-text p {
-  color: #000000;
-  font-size: 1.25rem;
-  font-weight: 700;
-  line-height: 1.2;
-  margin-top: 6px;
+  color: var(--text);
+  font-size: 1.3rem;
+  font-weight: 600;
+  line-height: 1.3;
+  margin-top: 8px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   font-family: 'Crimson Pro', serif;
-  border-top: 2px solid var(--red);
-  padding-top: 7px;
+  border-top: 2px solid var(--accent);
+  padding-top: 8px;
   display: block;
   width: 100%;
 }
@@ -154,34 +156,34 @@ body {
   background: var(--grey-200);
 }
 .step-item.active {
-  background: var(--grey-50);
-  border-bottom-color: var(--navy);
+  background: var(--bg-light);
+  border-bottom-color: var(--primary);
 }
-.step-item.done { border-bottom-color: #198754; }
+.step-item.done { border-bottom-color: var(--success); }
 .step-num {
-  width: 28px; height: 28px;
+  width: 32px; height: 32px;
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-size: 0.78rem;
+  font-size: 0.85rem;
   font-weight: 600;
   background: var(--grey-100);
-  color: var(--grey-400);
+  color: var(--grey-500);
   transition: all 0.2s;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
-.step-item.active .step-num { background: var(--navy); color: white; }
-.step-item.done .step-num { background: #198754; color: white; }
+.step-item.active .step-num { background: var(--primary); color: white; }
+.step-item.done .step-num { background: var(--success); color: white; }
 .step-label {
-  font-size: 0.68rem;
-  color: var(--grey-400);
+  font-size: 0.72rem;
+  color: var(--grey-500);
   text-align: center;
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   line-height: 1.3;
 }
-.step-item.active .step-label { color: var(--navy); }
-.step-item.done .step-label { color: #198754; }
+.step-item.active .step-label { color: var(--primary); }
+.step-item.done .step-label { color: var(--success); }
 
 /* ---- MAIN CONTAINER ---- */
 .container {
@@ -192,33 +194,33 @@ body {
 
 /* ---- CARD ---- */
 .card {
-  background: var(--white);
+  background: var(--bg-card);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  padding: 36px 40px;
-  margin-bottom: 16px;
-  border: 1px solid var(--grey-100);
-  border-top: 3px solid var(--navy);
+  padding: 40px 44px;
+  margin-bottom: 20px;
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--primary);
 }
 @media (max-width: 600px) {
-  .card { padding: 24px 18px; }
+  .card { padding: 28px 20px; }
 }
 
 .card-title {
   font-family: 'Crimson Pro', serif;
-  font-size: 1.6rem;
-  color: var(--navy);
-  margin-bottom: 16px;
+  font-size: 1.7rem;
+  color: var(--primary);
+  margin-bottom: 18px;
   text-align: center;
   text-transform: uppercase;
   position: relative;
-  padding-top: 30px;
+  padding-top: 32px;
 }
 .card-title .step-badge {
   position: absolute;
   top: 0;
   right: 0;
-  background: var(--navy);
+  background: var(--primary);
   color: white;
   font-family: 'DM Sans', sans-serif;
   font-size: 0.75rem;
@@ -229,32 +231,32 @@ body {
 }
 .card-subtitle {
   color: var(--text-muted);
-  font-size: 0.88rem;
-  margin-bottom: 28px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--grey-100);
+  font-size: 0.95rem;
+  margin-bottom: 32px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--border);
 }
 
 /* ---- FORM ELEMENTS ---- */
 .form-section {
-  margin-bottom: 28px;
+  margin-bottom: 32px;
 }
 .section-heading {
-  font-size: 0.78rem;
+  font-size: 0.85rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: var(--navy);
-  margin-bottom: 14px;
-  padding-bottom: 6px;
-  border-bottom: 1px solid rgba(13,32,96,0.15);
+  color: var(--primary);
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(26,54,93,0.15);
   display: flex; align-items: center; gap: 8px;
 }
 .section-heading::before {
   content: '';
   display: inline-block;
-  width: 3px; height: 14px;
-  background: var(--red);
+  width: 3px; height: 16px;
+  background: var(--accent);
   border-radius: 2px;
 }
 
@@ -268,30 +270,30 @@ body {
   .form-row.cols-4 { grid-template-columns: 1fr; }
 }
 
-.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
 .form-label {
-  font-size: 0.83rem;
+  font-size: 0.9rem;
   font-weight: 600;
-  color: var(--grey-800);
+  color: var(--text);
   display: flex; align-items: center; gap: 4px;
 }
 .req { color: var(--error); font-size: 0.85em; }
 
 .form-control {
-  border: 1.5px solid var(--grey-200);
-  border-radius: 7px;
-  padding: 9px 13px;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  padding: 11px 15px;
   font-family: 'DM Sans', sans-serif;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   color: var(--text);
-  background: var(--white);
+  background: var(--bg-card);
   transition: border-color 0.2s, box-shadow 0.2s;
   width: 100%;
   outline: none;
 }
 .form-control:focus {
-  border-color: var(--navy-light);
-  box-shadow: 0 0 0 3px rgba(26,58,140,0.08);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(43,108,177,0.08);
 }
 .form-control.error { border-color: var(--error); }
 .form-control[disabled] { background: var(--grey-50); color: var(--text-muted); }
@@ -321,22 +323,22 @@ textarea.form-control { resize: vertical; min-height: 80px; }
 .radio-item, .check-item {
   display: flex;
   align-items: center;
-  gap: 7px;
-  background: var(--grey-50);
-  border: 1.5px solid var(--grey-200);
-  border-radius: 7px;
-  padding: 7px 13px;
+  gap: 8px;
+  background: var(--bg-light);
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 15px;
   cursor: pointer;
   transition: all 0.15s;
-  font-size: 0.88rem;
+  font-size: 0.92rem;
 }
 .radio-item:hover, .check-item:hover {
-  border-color: var(--navy-light);
+  border-color: var(--accent);
   background: var(--grey-100);
 }
 .radio-item input[type="radio"],
-.check-item input[type="checkbox"] { cursor: pointer; accent-color: var(--navy); }
-.radio-item.selected { border-color: var(--navy); background: rgba(26,58,140,0.07); color: var(--navy); font-weight: 600; }
+.check-item input[type="checkbox"] { cursor: pointer; accent-color: var(--primary); }
+.radio-item.selected { border-color: var(--primary); background: rgba(26,54,93,0.07); color: var(--primary); font-weight: 600; }
 
 /* ---- JENIS KEAHLIAN CARDS ---- */
 .keahlian-grid {
@@ -629,86 +631,77 @@ textarea.form-control { resize: vertical; min-height: 80px; }
 .nota-pdf li { margin-bottom: 4px; color: var(--text-muted); }
 
 /* ---- BUTTONS ---- */
-.btn-row { display: flex; gap: 12px; justify-content: space-between; align-items: center; margin-top: 28px; }
+.btn-row { display: flex; gap: 12px; justify-content: space-between; align-items: center; margin-top: 32px; }
 .btn {
-  padding: 11px 28px;
-  border-radius: 8px;
+  padding: 12px 32px;
+  border-radius: 6px;
   font-family: 'DM Sans', sans-serif;
-  font-size: 0.92rem;
+  font-size: 0.96rem;
   font-weight: 600;
   cursor: pointer;
   border: none;
   transition: all 0.2s;
-  display: inline-flex; align-items: center; gap: 7px;
+  display: inline-flex; align-items: center; gap: 8px;
   letter-spacing: 0.01em;
 }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .btn-primary {
-  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   color: white;
   box-shadow: 0 3px 12px rgba(13,32,96,0.25);
 }
-.btn-primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 5px 18px rgba(13,32,96,0.35); }
+.btn-primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 5px 18px rgba(26,54,93,0.35); }
 .btn-secondary {
-  background: var(--white);
-  color: var(--navy);
-  border: 1.5px solid var(--grey-200);
+  background: var(--bg-card);
+  color: var(--primary);
+  border: 1.5px solid var(--border);
 }
-.btn-secondary:hover { border-color: var(--navy-light); background: var(--grey-50); }
+.btn-secondary:hover { border-color: var(--accent); background: var(--bg-light); }
 .btn-gold {
-  background: linear-gradient(135deg, var(--red) 0%, var(--red-light) 100%);
-  color: var(--navy);
-  box-shadow: 0 3px 12px rgba(196,18,48,0.35);
+  background: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
+  color: white;
+  box-shadow: 0 3px 12px rgba(43,108,177,0.35);
   font-weight: 700;
 }
-.btn-gold:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 5px 18px rgba(196,18,48,0.45); }
-.btn-lg { padding: 14px 36px; font-size: 1rem; }
+.btn-gold:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 5px 18px rgba(43,108,177,0.45); }
+.btn-lg { padding: 16px 40px; font-size: 1.05rem; }
 
 /* ---- SUCCESS SCREEN ---- */
 #screen-success { display: none; }
 .success-card {
-  background: white;
-  border-radius: 14px;
-  padding: 50px 40px;
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 55px 45px;
   text-align: center;
   box-shadow: var(--shadow-lg);
 }
-.success-icon {
-  width: 80px; height: 80px;
-  background: var(--success-bg);
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 2.2rem;
-  margin: 0 auto 20px;
-  border: 3px solid var(--success);
-}
 .success-card h2 {
   font-family: 'Crimson Pro', serif;
-  color: var(--navy);
+  color: var(--primary);
   font-size: 1.6rem;
   margin-bottom: 10px;
 }
 .ref-box {
-  background: var(--grey-50);
-  border: 2px dashed var(--navy);
-  border-radius: 10px;
-  padding: 16px 24px;
-  margin: 20px auto;
-  max-width: 320px;
+  background: var(--bg-light);
+  border: 2px dashed var(--primary);
+  border-radius: 8px;
+  padding: 18px 26px;
+  margin: 24px auto;
+  max-width: 340px;
 }
-.ref-box .ref-label { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; }
-.ref-box .ref-num { font-size: 1.4rem; font-weight: 700; color: var(--navy); font-family: 'Crimson Pro', serif; letter-spacing: 0.05em; }
+.ref-box .ref-label { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; }
+.ref-box .ref-num { font-size: 1.5rem; font-weight: 700; color: var(--primary); font-family: 'Crimson Pro', serif; letter-spacing: 0.05em; }
 .seterusnya-list {
   text-align: left;
-  max-width: 440px;
-  margin: 0 auto 28px;
-  padding: 20px 24px;
-  background: var(--grey-50);
-  border-radius: 10px;
+  max-width: 460px;
+  margin: 0 auto 32px;
+  padding: 22px 26px;
+  background: var(--bg-light);
+  border-radius: 8px;
 }
-.seterusnya-list h5 { color: var(--navy); font-weight: 700; margin-bottom: 12px; font-size: 0.9rem; }
-.seterusnya-list ol { padding-left: 18px; }
-.seterusnya-list li { margin-bottom: 8px; font-size: 0.88rem; color: var(--text-muted); }
+.seterusnya-list h5 { color: var(--primary); font-weight: 700; margin-bottom: 14px; font-size: 0.95rem; }
+.seterusnya-list ol { padding-left: 20px; }
+.seterusnya-list li { margin-bottom: 10px; font-size: 0.92rem; color: var(--text-muted); }
 
 /* ---- TOAST ---- */
 #toast {
@@ -2291,14 +2284,13 @@ QZGdgoKCgoJCrPD/AgwAY9jLI0rpsVEAAAAASUVORK5CYII=" alt="Logo DPMM NJ" style="widt
         <div class="section-heading">Dokumen Tambahan (Pilihan)</div>
         <div class="doc-list">
           <div class="doc-item">
-            <div class="doc-icon"></div>
             <div class="doc-info">
               <div class="doc-name">Dokumen Sokongan Tambahan <span class="doc-badge optional">Optional</span></div>
               <div class="doc-meta">Sebarang dokumen sokongan lain yang berkaitan</div>
             </div>
             <div class="doc-upload">
               <input type="file" id="file-tambahan" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="handleFileSelect(this,'tambahan')">
-              <button class="btn-upload" onclick="document.getElementById('file-tambahan').click()">📁 Pilih Fail</button>
+              <button class="btn-upload" onclick="document.getElementById('file-tambahan').click()">Pilih Fail</button>
               <div class="upload-status" id="status-tambahan"></div>
             </div>
           </div>
@@ -2349,7 +2341,7 @@ QZGdgoKCgoJCrPD/AgwAY9jLI0rpsVEAAAAASUVORK5CYII=" alt="Logo DPMM NJ" style="widt
       </div>
 
       <div class="bayaran-summary" id="bayaran-summary" style="display:none">
-        <h4>📊 Ringkasan Bayaran</h4>
+        <h4>Ringkasan Bayaran</h4>
         <div class="bayaran-row"><span>Yuran Pendaftaran (Once in a lifetime)</span><span id="sum-fi">—</span></div>
         <div class="bayaran-row"><span>Yuran Tahunan (Yearly)</span><span id="sum-yuran-pendaftaran-formula">—</span></div>
         <div class="bayaran-row total"><span>JUMLAH KESELURUHAN</span><span id="sum-total">—</span></div>
@@ -2358,7 +2350,7 @@ QZGdgoKCgoJCrPD/AgwAY9jLI0rpsVEAAAAASUVORK5CYII=" alt="Logo DPMM NJ" style="widt
       <div class="form-section">
         <div class="section-heading">Maklumat Akaun Pembayaran</div>
         <div class="bank-info">
-          <h5>🏦 Butiran Pindahan Online</h5>
+          <h5>Butiran Pindahan Online</h5>
           <div class="bank-row"><span class="bank-key">Bank</span><span class="bank-val">Maybank (MBB)</span></div>
           <div class="bank-row"><span class="bank-key">No. Akaun</span><span class="bank-val">0010 1126 2244</span></div>
           <div class="bank-row"><span class="bank-key">Atas Nama</span><span class="bank-val">Dewan Perniagaan Melayu Malaysia Negeri Johor</span></div>
@@ -2367,7 +2359,6 @@ QZGdgoKCgoJCrPD/AgwAY9jLI0rpsVEAAAAASUVORK5CYII=" alt="Logo DPMM NJ" style="widt
       </div>
 
       <div class="amaran-box">
-        <span class="amaran-icon">⚠️</span>
         <div>
           <strong>PERINGATAN PENTING — SILA BACA SEBELUM MEMBAYAR:</strong><ul style="margin:8px 0 0 0;padding-left:18px;line-height:1.8;"><li>Yuran Pendaftaran adalah <u>TIDAK AKAN DIPULANGKAN</u> sekiranya permohonan keahlian anda gagal atau ditolak, walau apa jua sebab sekalipun.</li><li style="font-size:1.1em;font-weight:bold;color:var(--red);">YURAN TAHUNAN YANG DI BAYAR AKAN DI PULANGKAN SEKIRANYA PERMOHONAN DITOLAK.</li><li>Yuran Tahunan <strong>mesti dijelaskan pada atau sebelum 31 Disember</strong> setiap tahun (Fasal 10.8).</li><li>Keahlian akan <strong>gugur secara automatik</strong> sekiranya tunggakan yuran tahunan melebihi <strong>dua (2) tahun</strong> (Fasal 8.12.4).</li></ul>
         </div>
@@ -2377,14 +2368,13 @@ QZGdgoKCgoJCrPD/AgwAY9jLI0rpsVEAAAAASUVORK5CYII=" alt="Logo DPMM NJ" style="widt
         <div class="section-heading">Muat Naik Slip Bayaran</div>
         <div class="doc-list">
           <div class="doc-item wajib" id="slip-item">
-            <div class="doc-icon">💳</div>
             <div class="doc-info">
               <div class="doc-name">Slip Pindahan / Resit Bayaran <span class="doc-badge">Wajib</span></div>
               <div class="doc-meta">Tangkapan skrin pindahan online atau resit | Format: PDF/JPG/PNG | Max: 5MB</div>
             </div>
             <div class="doc-upload">
               <input type="file" id="file-slip" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="handleFileSelect(this,'slip')">
-              <button class="btn-upload" id="btn-slip" onclick="document.getElementById('file-slip').click()">📁 Pilih Fail</button>
+              <button class="btn-upload" id="btn-slip" onclick="document.getElementById('file-slip').click()">Pilih Fail</button>
               <div class="upload-status" id="status-slip"></div>
             </div>
           </div>
@@ -2467,7 +2457,7 @@ QZGdgoKCgoJCrPD/AgwAY9jLI0rpsVEAAAAASUVORK5CYII=" alt="Logo DPMM NJ" style="widt
       <div class="btn-row">
         <button class="btn btn-secondary" onclick="goStep(6)">&larr; Kembali</button>
         <button class="btn btn-gold btn-lg" id="btn-submit" onclick="submitPermohonan()">
-          📤 Hantar Permohonan
+          Hantar Permohonan
         </button>
       </div>
     </div>
@@ -2476,7 +2466,6 @@ QZGdgoKCgoJCrPD/AgwAY9jLI0rpsVEAAAAASUVORK5CYII=" alt="Logo DPMM NJ" style="widt
   <!-- ======================== SUCCESS ======================== -->
   <div id="screen-success">
     <div class="success-card">
-      <div class="success-icon">✅</div>
       <h2>Permohonan Berjaya Dihantar!</h2>
       <p style="color:var(--text-muted);margin-bottom:16px">Terima kasih kerana memohon untuk menjadi ahli DPMM Negeri Johor.</p>
 
@@ -2497,7 +2486,7 @@ QZGdgoKCgoJCrPD/AgwAY9jLI0rpsVEAAAAASUVORK5CYII=" alt="Logo DPMM NJ" style="widt
       </div>
 
       <div style="background:#fff8e1;border:1.5px solid #e8b800;border-radius:10px;padding:16px 20px;font-size:0.84rem;color:#7a5800;margin-bottom:20px;max-width:480px;margin-left:auto;margin-right:auto;text-align:left;line-height:1.7;">
-        ⚠️ <strong>DISCLAIMER — SILA BACA:</strong><br>
+        <strong>DISCLAIMER — SILA BACA:</strong><br>
         E-mel pengesahan telah dihantar ke alamat e-mel anda. E-mel tersebut adalah <u>pengesahan penerimaan sahaja</u> dan <strong>BUKAN kelulusan automatik</strong>. Permohonan ini tertakluk kepada pertimbangan Jawatankuasa DPMM Negeri Johor (Fasal 7.1). Keputusan muktamad akan dimaklumkan kemudian.
       </div>
       <div style="background:var(--warning-bg);border:1px solid #e8b800;border-radius:8px;padding:10px 18px;font-size:0.82rem;color:var(--warning);margin-bottom:24px;max-width:480px;margin-left:auto;margin-right:auto">
@@ -2505,7 +2494,7 @@ QZGdgoKCgoJCrPD/AgwAY9jLI0rpsVEAAAAASUVORK5CYII=" alt="Logo DPMM NJ" style="widt
       </div>
 
       <button class="btn btn-gold btn-lg" onclick="downloadPDF()">
-        📥 Download Borang PDF
+        Download Borang PDF
       </button>
       <br><br>
       <p style="font-size:0.8rem;color:var(--text-muted)">Simpan no. rujukan anda untuk tujuan susulan.</p>
