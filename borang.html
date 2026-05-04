@@ -2806,16 +2806,16 @@ function startFormWithBusinessType() {
   
   // Pre-fill the fasal selection in Step 1
   setTimeout(() => {
-    const jenisRadio = document.querySelector(`input[name="jenis"][value="${mapping.jenis}"]`);
+    const jenisRadio = document.querySelector(`input[name="jenis_keahlian"][value="${mapping.jenis}"]`);
     if (jenisRadio) {
       jenisRadio.checked = true;
       onJenisChange();
       
       // Pre-select the fasal
       setTimeout(() => {
-        const fasalRadio = document.querySelector(`input[name="fasal"][value="${mapping.fasal}"]`);
-        if (fasalRadio) {
-          fasalRadio.checked = true;
+        const fasalSelect = document.getElementById('fasal');
+        if (fasalSelect) {
+          fasalSelect.value = mapping.fasal;
           onFasalChange();
         }
       }, 100);
