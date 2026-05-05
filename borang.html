@@ -25,7 +25,7 @@
   --primary:      #1a365d;      /* Deep corporate blue */
   --primary-dark: #0f1e2d;      /* Darker blue */
   --primary-light:#2c5282;      /* Lighter blue */
-  --secondary:    #718096;      /* Professional grey */
+  --secondary:    hsl(216, 15%, 52%);      /* Professional grey */
   --accent:       #2b6cb1;      /* Corporate accent blue */
   --success:      #2d6a4f;      /* Professional green */
   --warning:      #744210;      /* Corporate amber */
@@ -1719,7 +1719,7 @@ goIiOwUFBQUFBUV2CgoKCgoKiuwUFBQUFBQU2SkoKCgoKCiyU1BQUFBQZKegoKCgoKDITkFBQUFB
 QZGdgoKCgoJCrPD/AgwAY9jLI0rpsVEAAAAASUVORK5CYII=" alt="Logo DPMM NJ" style="width:100px;height:100px;object-fit:contain;"></div>
     <div class="header-text">
     <div style="position:relative;">
-      <h1>DEWAN PERNIAGAAN MELAYU MALAYSIA<br><span style="font-size:0.82em;letter-spacing:0.15em;color:var(--red);">NEGERI JOHOR</span></h1>
+      <h1>DEWAN PERNIAGAAN MELAYU MALAYSIA<br><span style="font-size:1em;letter-spacing:0.15em;color:var(--red);">NEGERI JOHOR</span></h1>
       <p>Borang Permohonan Keahlian</p>
       <span class="version-tag" style="position:absolute;right:0;bottom:0;font-size:0.6rem;color:var(--grey-600);">v1.2</span>
     </div>
@@ -1766,9 +1766,96 @@ QZGdgoKCgoJCrPD/AgwAY9jLI0rpsVEAAAAASUVORK5CYII=" alt="Logo DPMM NJ" style="widt
 <div id="screen-intro">
 
   <!-- Hero Banner -->
-  <div class="intro-header-card">
-    <div>
-      <p>Selamat datang ke sistem pemohonan keahlian DPMM Negeri Johor. Sila lengkapkan semua maklumat yang diperlukan dengan betul dan lengkap.</p>
+  <div class="intro-header-card" style="display: flex; align-items: center; gap: 20px;">
+    <div style="flex-shrink: 0;">
+      <img src="data:image/png;base64,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
+" alt="Logo DPMM NJ" style="width: 120px; height: 120px; object-fit: contain;">
+    </div>
+    <div style="flex: 1;">
+      <p style="font-size: 1.3rem; font-weight: 600; background: #1a365d; color: white; padding: 20px; border-radius: 8px; text-align: center; line-height: 1.6;">Selamat datang ke sistem pemohonan keahlian DPMM Negeri Johor. Sila lengkapkan semua maklumat yang diperlukan dengan betul dan lengkap.</p>
     </div>
   </div>
 
@@ -1795,7 +1882,7 @@ QZGdgoKCgoJCrPD/AgwAY9jLI0rpsVEAAAAASUVORK5CYII=" alt="Logo DPMM NJ" style="widt
     
     <!-- Fasal Information Box -->
     <div class="yuran-box show" id="fasal-info-box">
-      <h4>Maklumat Keahlian Anda</h4>
+      <h4 style="background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 6px; display: inline-block;">Maklumat Keahlian Anda</h4>
       <div class="yuran-row"><span>Jenis Perniagaan</span><span id="display-business-type">—</span></div>
       <div class="yuran-row"><span>Fasal</span><span id="display-fasal">—</span></div>
       <div class="yuran-row"><span>Yuran Pendaftaran (Once in a lifetime)</span><span id="display-daftar">—</span></div>
@@ -1815,12 +1902,12 @@ QZGdgoKCgoJCrPD/AgwAY9jLI0rpsVEAAAAASUVORK5CYII=" alt="Logo DPMM NJ" style="widt
   </div>
 
   <!-- CTA Button -->
-  <div class="intro-cta">
-    <div>
-      <p style="font-size:0.92rem;color:var(--text-muted);margin-bottom:16px;">Proses pengisian borang ini akan mengambil masa lebih kurang <strong>15–20 minit</strong> sahaja.</p>
+  <div class="intro-cta" style="text-align: center;">
+    <div style="text-align: center;">
+      <p style="font-size:0.92rem;color:var(--text-muted);margin-bottom:16px;text-align: center;">Proses pengisian borang ini akan mengambil masa lebih kurang <strong>15–20 minit</strong> sahaja.</p>
     </div>
-    <div>
-      <button class="btn btn-primary btn-lg" id="btn-start-form" onclick="startFormWithBusinessType()" disabled>
+    <div style="text-align: center;">
+      <button class="btn btn-primary btn-lg" id="btn-start-form" onclick="startFormWithBusinessType()" disabled style="display: inline-block;">
         Mula Isi Borang Permohonan &rarr;
       </button>
     </div>
