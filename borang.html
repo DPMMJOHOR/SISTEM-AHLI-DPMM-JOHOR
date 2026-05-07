@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <meta name="description" content="Borang Permohonan Keahlian DPMM Negeri Johor - Daftar sebagai ahli Dewan Perniagaan Melayu Malaysia Negeri Johor"/>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://api.emailjs.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://lzoloupwtqmjyupvofhh.supabase.co https://api.emailjs.com https://api.ipify.org; frame-src 'none'; object-src 'none';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://api.emailjs.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: https://lzoloupwtqmjyupvofhh.supabase.co; connect-src 'self' https://lzoloupwtqmjyupvofhh.supabase.co https://api.emailjs.com https://api.ipify.org https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; frame-src 'none'; object-src 'none';">
 <title>BORANG PERMOHONAN KEAHLIAN — DPMM Negeri Johor</title>
 
 <!-- Supabase -->
@@ -837,29 +837,33 @@ textarea.form-control { resize: vertical; min-height: 80px; }
 .success-card h2 {
   font-family: 'Crimson Pro', serif;
   color: var(--primary);
-  font-size: 1.6rem;
-  margin-bottom: 10px;
+  font-size: 2.2rem;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
 }
 .ref-box {
-  background: var(--bg-light);
-  border: 2px dashed var(--primary);
+  background: #f8f9fa;
+  border: 2px solid var(--primary);
   border-radius: 8px;
   padding: 18px 26px;
   margin: 24px auto;
-  max-width: 340px;
+  max-width: 100%;
+  text-align: center;
 }
-.ref-box .ref-label { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; }
-.ref-box .ref-num { font-size: 1.5rem; font-weight: 700; color: var(--primary); font-family: 'Crimson Pro', serif; letter-spacing: 0.05em; }
+.ref-box .ref-label { font-size: 0.95rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
+.ref-box .ref-num { font-size: 1.8rem; font-weight: 700; color: var(--primary); font-family: 'Crimson Pro', serif; letter-spacing: 0.05em; }
 .seterusnya-list {
-  text-align: left;
+  text-align: center;
   max-width: 460px;
   margin: 0 auto 32px;
   padding: 22px 26px;
   background: var(--bg-light);
   border-radius: 8px;
 }
-.seterusnya-list h5 { color: var(--primary); font-weight: 700; margin-bottom: 14px; font-size: 0.95rem; }
-.seterusnya-list ol { padding-left: 20px; }
+.seterusnya-list h5 { color: var(--primary); font-weight: 700; margin-bottom: 14px; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.08em; }
+.seterusnya-list ol { padding-left: 20px; text-align: left; }
 .seterusnya-list li { margin-bottom: 10px; font-size: 0.92rem; color: var(--text-muted); }
 
 /* ---- TOAST ---- */
@@ -1925,16 +1929,21 @@ textarea.form-control { resize: vertical; min-height: 80px; }
   <!-- ======================== SUCCESS ======================== -->
   <div id="screen-success">
     <div class="success-card">
-      <h2>Permohonan Berjaya Dihantar!</h2>
-      <p style="color:var(--text-muted);margin-bottom:16px">Terima kasih kerana memohon untuk menjadi ahli DPMM Negeri Johor.</p>
+      <h2>PERMOHONAN BERJAYA DIHANTAR!</h2>
+      <p style="color:var(--text-muted);margin-bottom:12px;line-height:1.3">Terima kasih kerana memohon untuk menjadi ahli DPMM Negeri Johor.</p>
 
       <div class="ref-box">
-        <div class="ref-label">No. Rujukan Permohonan</div>
+        <div class="ref-label">NO. RUJUKAN PERMOHONAN</div>
         <div class="ref-num" id="success-ref-id">—</div>
       </div>
 
+      <div style="background:#fff8e1;border:1.5px solid #e8b800;border-radius:10px;padding:16px 20px;font-size:0.84rem;color:#7a5800;margin-bottom:20px;max-width:480px;margin-left:auto;margin-right:auto;text-align:left;line-height:1.7;">
+        <strong>DISCLAIMER — SILA BACA:</strong><br>
+        E-mel pengesahan telah dihantar ke alamat e-mel anda. E-mel tersebut adalah <u>pengesahan penerimaan sahaja</u> dan <strong>BUKAN kelulusan automatik</strong>. Permohonan ini tertakluk kepada pertimbangan Jawatankuasa DPMM Negeri Johor (Fasal 7.1). Keputusan muktamad akan dimaklumkan kemudian.
+      </div>
+
       <div class="seterusnya-list">
-        <h5>Langkah Seterusnya:</h5>
+        <h5>LANGKAH SETERUSNYA:</h5>
         <ol>
           <li>Download dan cetak borang PDF di bawah</li>
           <li>Tandatangan di bahagian yang ditetapkan &amp; cop syarikat</li>
@@ -1942,11 +1951,6 @@ textarea.form-control { resize: vertical; min-height: 80px; }
           <li>Serahkan ke pejabat DPMM Negeri Johor bersama dokumen asal</li>
           <li>Admin akan menghubungi anda selepas semakan dokumen</li>
         </ol>
-      </div>
-
-      <div style="background:#fff8e1;border:1.5px solid #e8b800;border-radius:10px;padding:16px 20px;font-size:0.84rem;color:#7a5800;margin-bottom:20px;max-width:480px;margin-left:auto;margin-right:auto;text-align:left;line-height:1.7;">
-        <strong>DISCLAIMER — SILA BACA:</strong><br>
-        E-mel pengesahan telah dihantar ke alamat e-mel anda. E-mel tersebut adalah <u>pengesahan penerimaan sahaja</u> dan <strong>BUKAN kelulusan automatik</strong>. Permohonan ini tertakluk kepada pertimbangan Jawatankuasa DPMM Negeri Johor (Fasal 7.1). Keputusan muktamad akan dimaklumkan kemudian.
       </div>
       <div style="background:var(--warning-bg);border:1px solid #e8b800;border-radius:8px;padding:10px 18px;font-size:0.82rem;color:var(--warning);margin-bottom:24px;max-width:480px;margin-left:auto;margin-right:auto">
         Yuran Pendaftaran tidak akan dipulangkan sekiranya permohonan ditolak.
@@ -1976,7 +1980,7 @@ textarea.form-control { resize: vertical; min-height: 80px; }
    KONFIGURASI — UBAH NILAI INI
    ============================================================ */
 const SUPABASE_URL  = 'https://lzoloupwtqmjyupvofhh.supabase.co';
-const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx6b2xvdXB3dHFtanl1cHZvZmhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5NTMxMTEsImV4cCI6MjA4ODUyOTExMX0.tBcGc6KfPyjUmJngbLTBHv-GZkSoSoyWGXwlXFZ0ShE'; // ← REPLACE WITH YOUR ACTUAL SUPABASE ANON KEY
+const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx6b2xvdXB3dHFtanl1cHZvZmhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5NTMxMTEsImV4cCI6MjA4ODUyOTExMX0.tBcGc6KfPyjUmJngbLTBHv-GZkSoSoyWGXwlXFZ0ShE'; // ← REPLACE WITH YOUR SERVICE ROLE KEY (not anon key)
 const EMAILJS_SVC   = 'service_a3kt2zm';
 const EMAILJS_TPL   = 'template_553fkme';
 const EMAILJS_KEY   = 'Bq94zNa6cDvdTUCU8';
@@ -2757,12 +2761,86 @@ async function submitPermohonan() {
       setLoadingText(`Memuat naik dokumen ${i + 1} / ${filesToUpload.length}...`);
       const ext = fileData.name.split('.').pop();
       const path = `${tempRef}/${key}.${ext}`;
-      const { data, error } = await sb.storage
-        .from('permohonan-dokumen')
-        .upload(path, fileData.file, { upsert: true });
-      if (error) throw new Error('Upload gagal: ' + error.message);
-      const { data: urlData } = sb.storage.from('permohonan-dokumen').getPublicUrl(path);
-      uploadedUrls[key] = urlData.publicUrl;
+      
+      // Add retry logic for upload
+      let uploadSuccess = false;
+      let lastError = null;
+      const maxRetries = 3;
+      
+      for (let retry = 0; retry < maxRetries && !uploadSuccess; retry++) {
+        try {
+          console.log(`Upload attempt ${retry + 1}/${maxRetries} for file: ${key}, path: ${path}`);
+          
+          const { data, error } = await sb.storage
+            .from('permohonan-dokumen')
+            .upload(path, fileData.file, { upsert: true, cacheControl: '3600' });
+          
+          console.log('Upload response:', { data, error });
+          
+          if (error) {
+            console.error('Upload error details:', error);
+            lastError = error;
+            if (retry < maxRetries - 1) {
+              // Wait before retry
+              await new Promise(resolve => setTimeout(resolve, 1000 * (retry + 1)));
+              continue;
+            }
+            // Provide more detailed error information
+            let errorMsg = 'Upload gagal: ' + error.message;
+            if (error.message.includes('row-level security')) {
+              errorMsg += '\n\nMasalah: Kebenaran capaian Supabase Storage.\nSila pastikan: 1) Bucket policy adalah public, 2) Gunakan service role key, atau 3) Enable RLS policies untuk anon users.';
+            }
+            throw new Error(errorMsg);
+          }
+          
+          const { data: urlData } = sb.storage.from('permohonan-dokumen').getPublicUrl(path);
+          uploadedUrls[key] = urlData.publicUrl;
+          uploadSuccess = true;
+          console.log(`Successfully uploaded ${key} to: ${urlData.publicUrl}`);
+          
+        } catch (err) {
+          console.error('Upload attempt failed:', err);
+          lastError = err;
+          if (retry < maxRetries - 1) {
+            await new Promise(resolve => setTimeout(resolve, 1000 * (retry + 1)));
+          }
+        }
+      }
+      
+      if (!uploadSuccess) {
+        // Fallback: Try signed URL upload if direct upload fails
+        console.log('Direct upload failed, trying signed URL method...');
+        try {
+          const { data: signedUrlData, error: signedUrlError } = await sb.storage
+            .from('permohonan-dokumen')
+            .createSignedUploadUrl(path);
+          
+          if (signedUrlError) {
+            throw new Error('Signed URL creation failed: ' + signedUrlError.message);
+          }
+          
+          // Upload using signed URL
+          const uploadResponse = await fetch(signedUrlData.signedUrl, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': fileData.file.type,
+            },
+            body: fileData.file
+          });
+          
+          if (!uploadResponse.ok) {
+            throw new Error('Signed URL upload failed: ' + uploadResponse.statusText);
+          }
+          
+          const { data: urlData } = sb.storage.from('permohonan-dokumen').getPublicUrl(path);
+          uploadedUrls[key] = urlData.publicUrl;
+          console.log(`Successfully uploaded ${key} via signed URL: ${urlData.publicUrl}`);
+          
+        } catch (signedErr) {
+          console.error('Signed URL upload also failed:', signedErr);
+          throw new Error('Upload gagal selepas ' + maxRetries + ' percubaan: ' + (lastError?.message || 'Ralat tidak diketahui') + '\n\nSila pastikan storage policies dikonfigurasi dengan betul di Supabase Dashboard.');
+        }
+      }
     }
 
     setLoadingText('Menghantar permohonan...');
@@ -2968,102 +3046,155 @@ function downloadPDF() {
   const greyLight = [245, 245, 245];
 
   function header() {
-    // Add logo on the left
+    // Clean professional header
+    let headerY = 8;
+    
+    // Add logo on left - professional size
     try {
       const img = new Image();
       img.src = 'logo-dpmmnj.png';
-      doc.addImage(img, 'PNG', margin, y, 30, 30);
+      doc.addImage(img, 'PNG', margin, headerY, 25, 25);
     } catch (e) {
-      // Fallback if logo fails to load
       console.warn('Logo not loaded:', e);
     }
 
-    // Organization name - using Crimson Pro style (serif, bold, uppercase, letter spacing)
-    doc.setTextColor(...black);
+    // Organization name - clean typography
+    doc.setTextColor(0, 0, 0);
     doc.setFontSize(18);
-    doc.setFont('times', 'bold'); // Closest to Crimson Pro serif
-    doc.text('DEWAN PERNIAGAAN MELAYU MALAYSIA', W / 2 + 15, y + 10, { align: 'center' });
-    y += 8;
+    doc.setFont('times', 'bold');
+    doc.text('DEWAN PERNIAGAAN MELAYU MALAYSIA', W / 2, headerY + 10, { align: 'center' });
+    headerY += 7;
 
-    // Subtitle - using DM Sans style (uppercase, medium weight, letter spacing)
-    doc.setFontSize(13);
-    doc.setFont('helvetica', 'medium'); // Closest to DM Sans
-    doc.text('NEGERI JOHOR', W / 2 + 15, y + 10, { align: 'center' });
-    y += 10;
+    // Subtitle with clean styling
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('NEGERI JOHOR', W / 2, headerY + 10, { align: 'center' });
+    headerY += 7;
 
-    // Form title - using DM Sans style (uppercase, medium weight)
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'medium');
-    doc.text('BORANG PERMOHONAN KEAHLIAN', W / 2 + 15, y + 10, { align: 'center' });
-    y += 10;
-
-    // Reference number - smaller, normal weight
-    doc.setFontSize(9);
+    // Form title
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text('BORANG PERMOHONAN KEAHLIAN', W / 2, headerY + 10, { align: 'center' });
+    headerY += 8;
+    
+    // Reference number in clean box
+    doc.setFillColor(245, 245, 245);
+    doc.setDrawColor(0, 0, 0);
+    doc.setLineWidth(1);
+    const refBoxWidth = 80;
+    const refBoxX = (W - refBoxWidth) / 2;
+    doc.rect(refBoxX, headerY + 5, refBoxWidth, 12, 'FD');
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(0, 0, 0);
+    doc.text('No. Rujukan:', refBoxX + 5, headerY + 10);
     doc.setFont('helvetica', 'normal');
-    doc.text('No. Rujukan: ' + state.refId, W / 2 + 15, y + 10, { align: 'center' });
-    y += 15;
+    doc.text(state.refId, refBoxX + 5, headerY + 15);
+    
+    headerY += 25;
 
-    // Bottom line - black, thin
-    doc.setDrawColor(...black);
-    doc.setLineWidth(0.8);
-    doc.line(margin, y, W - margin, y);
-    y += 10;
+    // Clean separator line
+    doc.setDrawColor(0, 0, 0);
+    doc.setLineWidth(1);
+    doc.line(margin, headerY, W - margin, headerY);
+    y = headerY + 10;
   }
 
   function sectionTitle(title) {
-    if (y > 260) { doc.addPage(); header(); }
-    doc.setFillColor(...greyLight);
-    doc.rect(margin, y, W - margin * 2, 6, 'F');
-    doc.setDrawColor(...grey);
-    doc.setLineWidth(0.3);
-    doc.rect(margin, y, W - margin * 2, 6, 'S');
-    doc.setTextColor(...black);
-    doc.setFontSize(9);
+    if (y > 250) { doc.addPage(); header(); }
+    
+    // Clean section header with border
+    doc.setFillColor(245, 245, 245);
+    doc.rect(margin, y, W - margin * 2, 8, 'F');
+    
+    // Black text on light background
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(10);
     doc.setFont('helvetica', 'bold');
-    doc.text(title, margin + 3, y + 4);
-    y += 9;
+    doc.text(title, margin + 5, y + 5);
+    
+    // Clean border
+    doc.setDrawColor(0, 0, 0);
+    doc.setLineWidth(0.5);
+    doc.rect(margin, y, W - margin * 2, 8, 'S');
+    
+    y += 12;
   }
 
   function row(label, value) {
-    if (y > 270) { doc.addPage(); header(); }
+    if (y > 250) { doc.addPage(); header(); }
+    
+    // Clean alternating row background
+    const rowHeight = 7;
+    if ((Math.floor(y / rowHeight) % 2) === 0) {
+      doc.setFillColor(248, 249, 250);
+      doc.rect(margin, y - 1, W - margin * 2, rowHeight, 'F');
+    }
+    
+    // Label with clean styling
+    doc.setTextColor(0, 0, 0);
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(8);
-    doc.setTextColor(...black);
-    doc.text(label + ':', margin, y);
+    doc.setFontSize(9);
+    doc.text(label + ':', margin + 2, y + 4);
+    
+    // Value with proper spacing
+    doc.setTextColor(0, 0, 0);
     doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
     const lines = doc.splitTextToSize(String(value || '—'), W - margin * 2 - 45);
-    doc.text(lines, margin + 45, y);
-    y += (lines.length * 4) + 2;
+    doc.text(lines, margin + 45, y + 4);
+    
+    // Clean row separator
+    doc.setDrawColor(200, 200, 200);
+    doc.setLineWidth(0.2);
+    doc.line(margin, y + rowHeight - 0.5, W - margin, y + rowHeight - 0.5);
+    
+    y += rowHeight + 1;
   }
 
   function emptyRow(label) {
-    if (y > 270) { doc.addPage(); header(); }
-    doc.setFontSize(8);
+    if (y > 250) { doc.addPage(); header(); }
+    
+    const rowHeight = 7;
+    
+    // Label
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(9);
     doc.setFont('helvetica', 'bold');
-    doc.setTextColor(...black);
-    doc.text(label + ':', margin, y);
-    doc.setDrawColor(...grey);
-    doc.line(margin + 45, y + 0.5, W - margin, y + 0.5);
-    y += 7;
+    doc.text(label + ':', margin + 2, y + 4);
+    
+    // Clean input field
+    doc.setDrawColor(0, 0, 0);
+    doc.setLineWidth(0.8);
+    doc.setLineDashPattern([2, 2], 0);
+    doc.line(margin + 45, y + 3.5, W - margin - 5, y + 3.5);
+    doc.setLineDashPattern([], 0);
+    
+    // Row separator
+    doc.setDrawColor(200, 200, 200);
+    doc.setLineWidth(0.2);
+    doc.line(margin, y + rowHeight - 0.5, W - margin, y + rowHeight - 0.5);
+    
+    y += rowHeight + 1;
   }
 
   // ---- Page 1 ----
   header();
 
-  // Jenis Keahlian box - grey background
-  doc.setFillColor(...greyLight);
-  doc.setDrawColor(...grey);
-  doc.setLineWidth(0.5);
-  doc.rect(margin, y, W - margin * 2, 12, 'FD');
-  doc.setTextColor(...black);
-  doc.setFontSize(8);
+  // Jenis Keahlian box - clean styling
+  doc.setFillColor(245, 245, 245);
+  doc.setDrawColor(0, 0, 0);
+  doc.setLineWidth(1);
+  doc.rect(margin, y, W - margin * 2, 15, 'FD');
+  doc.setTextColor(0, 0, 0);
+  doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
-  doc.text('KEAHLIAN:', margin + 4, y + 4);
-  doc.text('FASAL:', margin + 4, y + 9);
+  doc.text('KEAHLIAN:', margin + 5, y + 5);
+  doc.text('FASAL:', margin + 5, y + 11);
   doc.setFont('helvetica', 'normal');
-  doc.text(JENIS_LABEL[state.jenis_keahlian] + ' (' + state.jenis_keahlian + ')', margin + 28, y + 4);
-  doc.text(state.fasal, margin + 28, y + 9);
-  y += 16;
+  doc.text(JENIS_LABEL[state.jenis_keahlian] + ' (' + state.jenis_keahlian + ')', margin + 35, y + 5);
+  doc.text(state.fasal, margin + 35, y + 11);
+  y += 18;
 
   sectionTitle('A. MAKLUMAT ENTITI PERNIAGAAN');
   row('Jenis Entiti', getRadio('jenis_entiti'));
@@ -3073,14 +3204,14 @@ function downloadPDF() {
   row('Persijilan', getCheckboxes('persijilan').join(', '));
   row('Jenama', val('jenama'));
   row('Aktiviti Perniagaan', val('aktiviti_perniagaan'));
-  y += 3;
+  y += 2;
 
   sectionTitle('B. BUTIRAN PEMOHON');
   row('Nama Lengkap Pemohon', val('nama_lengkap_pemohon'));
   row('Nombor KAD Pengenal', val('no_kad_pengenal'));
-  y += 3;
+  y += 2;
   
-  sectionTitle('B. BUTIRAN PERNIAGAAN');
+  sectionTitle('C. BUTIRAN PERNIAGAAN');
   row('Nama Entiti', val('nama_entiti'));
   row('No. Pendaftaran', val('no_pendaftaran'));
   row('Tarikh Daftar', val('tarikh_daftar'));
@@ -3091,85 +3222,107 @@ function downloadPDF() {
   row('E-mel', val('emel_syarikat'));
   row('Modal Berbayar', val('modal_berbayar') ? 'RM ' + parseFloat(val('modal_berbayar')).toLocaleString() : '—');
   row('Modal Pusingan', val('modal_pusingan') ? 'RM ' + parseFloat(val('modal_pusingan')).toLocaleString() : '—');
-  y += 3;
+  y += 2;
 
-  sectionTitle('C. PROKSI / WAKIL');
+  sectionTitle('D. PROKSI / WAKIL');
   row('Nama Proksi', val('proksi_nama') || '(Pemunya Tunggal)');
   row('No. MyKAD', val('proksi_ic'));
   row('Jawatan', document.getElementById('proksi_jawatan').value);
   row('No. HP', val('proksi_hp'));
   row('E-mel', val('proksi_emel'));
-  y += 3;
+  y += 2;
 
-  // ---- Page 2 ----
-  doc.addPage(); header();
-  sectionTitle('9. MAKLUMAT PEMEGANG SAHAM');
+  // Clean table headers
   const psSizes = [8, 85, 20, 25];
   const psCols = ['#', 'Nama Pemegang Saham', '% Saham', 'Bangsa'];
   let x2 = margin;
-  doc.setFillColor(...greyLight);
-  doc.rect(margin, y, W - margin * 2, 6, 'F');
-  doc.setDrawColor(...grey);
-  doc.setLineWidth(0.3);
-  doc.rect(margin, y, W - margin * 2, 6, 'S');
+  
+  // Table header background
+  doc.setFillColor(245, 245, 245);
+  doc.rect(margin, y, W - margin * 2, 8, 'F');
+  doc.setDrawColor(0, 0, 0);
+  doc.setLineWidth(0.5);
+  doc.rect(margin, y, W - margin * 2, 8, 'S');
+  
+  // Header text
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(8);
-  doc.setTextColor(...black);
+  doc.setFontSize(9);
+  doc.setTextColor(0, 0, 0);
   psCols.forEach((c, i) => {
-    doc.text(c, x2 + 2, y + 4);
+    doc.text(c, x2 + 2, y + 5);
     x2 += psSizes[i];
   });
-  y += 7;
+  y += 9;
+  
+  // Table rows with alternating background
   for (let i = 1; i <= 5; i++) {
     const n = document.getElementById('saham_nama_' + i)?.value || '';
     const p = document.getElementById('saham_pct_' + i)?.value || '';
     const b = document.getElementById('saham_bangsa_' + i)?.value || '';
+    
+    // Alternating row background
+    if (i % 2 === 0) {
+      doc.setFillColor(248, 249, 250);
+      doc.rect(margin, y, W - margin * 2, 7, 'F');
+    }
+    
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8);
-    doc.setDrawColor(...grey);
-    doc.setLineWidth(0.2);
-    doc.rect(margin, y, W - margin * 2, 6);
+    doc.setFontSize(9);
+    doc.setDrawColor(0, 0, 0);
+    doc.setLineWidth(0.3);
+    doc.rect(margin, y, W - margin * 2, 7, 'S');
+    
     x2 = margin;
-    doc.setTextColor(...black);
+    doc.setTextColor(0, 0, 0);
     [i, n, p + '%', b].forEach((v, idx) => {
-      doc.text(String(v), x2 + 2, y + 4);
+      doc.text(String(v), x2 + 2, y + 4.5);
       x2 += psSizes[idx];
     });
-    y += 6;
+    y += 7;
   }
   y += 5;
 
-  sectionTitle('10. MAKLUMAT AHLI LEMBAGA / PENGURUSAN');
+  // Clean table headers
   x2 = margin;
-  doc.setFillColor(...greyLight);
-  doc.rect(margin, y, W - margin * 2, 6, 'F');
-  doc.setDrawColor(...grey);
-  doc.setLineWidth(0.3);
-  doc.rect(margin, y, W - margin * 2, 6, 'S');
+  doc.setFillColor(245, 245, 245);
+  doc.rect(margin, y, W - margin * 2, 8, 'F');
+  doc.setDrawColor(0, 0, 0);
+  doc.setLineWidth(0.5);
+  doc.rect(margin, y, W - margin * 2, 8, 'S');
+  
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(8);
-  doc.setTextColor(...black);
+  doc.setFontSize(9);
+  doc.setTextColor(0, 0, 0);
   ['#', 'Nama Ahli Lembaga', '%', 'Bangsa'].forEach((c, i) => {
-    doc.text(c, x2 + 2, y + 4);
+    doc.text(c, x2 + 2, y + 5);
     x2 += psSizes[i];
   });
-  y += 7;
+  y += 9;
+  
+  // Table rows with alternating background
   for (let i = 1; i <= 5; i++) {
     const n = document.getElementById('lembaga_nama_' + i)?.value || '';
     const p = document.getElementById('lembaga_pct_' + i)?.value || '';
     const b = document.getElementById('lembaga_bangsa_' + i)?.value || '';
+    
+    if (i % 2 === 0) {
+      doc.setFillColor(248, 249, 250);
+      doc.rect(margin, y, W - margin * 2, 7, 'F');
+    }
+    
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8);
-    doc.setDrawColor(...grey);
-    doc.setLineWidth(0.2);
-    doc.rect(margin, y, W - margin * 2, 6);
+    doc.setFontSize(9);
+    doc.setDrawColor(0, 0, 0);
+    doc.setLineWidth(0.3);
+    doc.rect(margin, y, W - margin * 2, 7, 'S');
+    
     x2 = margin;
-    doc.setTextColor(...black);
+    doc.setTextColor(0, 0, 0);
     [i, n, p + '%', b].forEach((v, idx) => {
-      doc.text(String(v), x2 + 2, y + 4);
+      doc.text(String(v), x2 + 2, y + 4.5);
       x2 += psSizes[idx];
     });
-    y += 6;
+    y += 7;
   }
   y += 5;
 
@@ -3184,9 +3337,9 @@ function downloadPDF() {
   row('JUMLAH', fi === 0 ? 'Percuma' : 'RM ' + (fi + yr2 * tempoh).toLocaleString());
   y += 3;
 
-  // ---- Page 3: Pengisytiharan ----
-  doc.addPage(); header();
-  sectionTitle('PENGISYTIHARAN PEMOHON');
+  // Continue on same page if space allows
+  if (y > 240) { doc.addPage(); header(); }
+  sectionTitle('G. PENGISYTIHARAN PEMOHON');
 
   doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
@@ -3194,41 +3347,41 @@ function downloadPDF() {
   const pengakuan = 'Kami mengesahkan segala butiran dalam maklumat yang diberikan dalam permohonan ini adalah benar dan betul. Kami bersetuju untuk mematuhi serta akur kepada peruntukan-peruntukan dalam Undang-Undang Tubuh dan Peraturan yang ditetapkan oleh DPMM pada bila-bila masa, serta sentiasa menjaga dan menyumbang bakti kepada kejayaan misi DPMM.';
   const lines = doc.splitTextToSize(pengakuan, W - margin * 2);
   doc.text(lines, margin, y);
-  y += lines.length * 4 + 6;
+  y += lines.length * 3.5 + 4;
 
   doc.setFontSize(8);
   doc.setFont('helvetica', 'bold');
-  doc.text('Bagi Pihak Pemohon (Fasal 6.2.1, 6.2.2 & 6.2.3):', margin, y); y += 5;
+  doc.text('Bagi Pihak Pemohon (Fasal 6.2.1, 6.2.2 & 6.2.3):', margin, y); y += 4;
   doc.setFont('helvetica', 'normal');
   doc.text('Nama Penandatangan:', margin, y);
   doc.setDrawColor(...grey);
   doc.setLineWidth(0.3);
-  doc.line(margin + 40, y, W - margin, y); y += 6;
+  doc.line(margin + 35, y + 0.5, W - margin, y + 0.5); y += 4;
   doc.text('No. MyKAD:', margin, y);
-  doc.line(margin + 22, y, margin + 80, y);
-  doc.text('Tarikh:', margin + 90, y);
-  doc.line(margin + 105, y, W - margin, y); y += 10;
+  doc.line(margin + 20, y + 0.5, margin + 70, y + 0.5);
+  doc.text('Tarikh:', margin + 75, y);
+  doc.line(margin + 85, y + 0.5, W - margin, y + 0.5); y += 6;
 
   doc.setFont('helvetica', 'bold');
-  doc.text('Bagi Pihak Pemohon (Fasal 6.2.3b, 6.2.4, 6.2.5, 6.2.6):', margin, y); y += 5;
+  doc.text('Bagi Pihak Pemohon (Fasal 6.2.3b, 6.2.4, 6.2.5, 6.2.6):', margin, y); y += 4;
   doc.setFont('helvetica', 'normal');
   doc.text('Nama:', margin, y);
-  doc.line(margin + 15, y, W - margin, y); y += 6;
+  doc.line(margin + 12, y + 0.5, W - margin, y + 0.5); y += 4;
   doc.text('No. MyKAD:', margin, y);
-  doc.line(margin + 22, y, margin + 80, y);
-  doc.text('Jawatan:', margin + 90, y);
-  doc.line(margin + 110, y, W - margin, y); y += 10;
+  doc.line(margin + 20, y + 0.5, margin + 70, y + 0.5);
+  doc.text('Jawatan:', margin + 75, y);
+  doc.line(margin + 90, y + 0.5, W - margin, y + 0.5); y += 8;
 
-  // Cop syarikat box - grey border
+  // Cop syarikat box - compact
   doc.setDrawColor(...grey);
   doc.setLineWidth(0.5);
-  doc.rect(W - margin - 50, y, 50, 25);
+  doc.rect(W - margin - 40, y, 40, 20);
   doc.setFontSize(8);
   doc.setTextColor(100, 100, 100);
-  doc.text('Cop Syarikat', W - margin - 25, y + 14, { align: 'center' });
-  y += 30;
+  doc.text('Cop Syarikat', W - margin - 20, y + 10, { align: 'center' });
+  y += 24;
 
-  sectionTitle('KEGUNAAN URUSETIA DPMM');
+  sectionTitle('H. KEGUNAAN URUSETIA DPMM');
   emptyRow('Disemak & Lengkap — Tarikh');
   emptyRow('Tandatangan Urusetia');
   emptyRow('No. Resit Bayaran');
@@ -3236,16 +3389,29 @@ function downloadPDF() {
   emptyRow('Minit Mesyuarat Bil.');
   emptyRow('Kuatkuasa Keahlian mulai');
   emptyRow('Disahkan oleh SUK / SUA');
-  y += 3;
+  y += 2;
 
-  // Footer - black text
-  doc.setDrawColor(...grey);
-  doc.setLineWidth(0.3);
-  doc.line(margin, y, W - margin, y);
-  y += 5;
-  doc.setFontSize(7);
-  doc.setTextColor(80, 80, 80);
-  doc.text('Tarikh cetak: ' + new Date().toLocaleDateString('ms-MY') + '  |  No. Rujukan: ' + state.refId, margin, y);
+  // Clean footer
+  const footerY = 280;
+  
+  // Footer background
+  doc.setFillColor(245, 245, 245);
+  doc.rect(0, footerY, W, 20, 'F');
+  
+  // Footer text
+  doc.setTextColor(0, 0, 0);
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'normal');
+  doc.text('Tarikh cetak: ' + new Date().toLocaleDateString('ms-MY') + '  |  No. Rujukan: ' + state.refId, margin, footerY + 7);
+  
+  // Page number
+  const totalPages = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= totalPages; i++) {
+    doc.setPage(i);
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(8);
+    doc.text('Halaman ' + i + ' daripada ' + totalPages, W - margin - 30, footerY + 7);
+  }
 
   doc.save('Borang_Permohonan_' + state.refId + '.pdf');
   showToast('PDF berjaya dimuat turun!', 'success');
