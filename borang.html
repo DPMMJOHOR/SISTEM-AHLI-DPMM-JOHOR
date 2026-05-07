@@ -1352,117 +1352,7 @@ textarea.form-control { resize: vertical; min-height: 80px; }
       <p class="card-subtitle">Maklumat berkaitan jenis, sektor dan industri perniagaan anda.</p>
 
       <div class="form-section">
-        <div class="section-heading">Jenis Entiti</div>
-        <div class="radio-group" id="jenis-entiti-group">
-          <label class="radio-item"><input type="radio" name="jenis_entiti" value="Pemunya Tunggal" onchange="onEntitiChange()"> Pemunya Tunggal</label>
-          <label class="radio-item"><input type="radio" name="jenis_entiti" value="PLT" onchange="onEntitiChange()"> PLT</label>
-          <label class="radio-item"><input type="radio" name="jenis_entiti" value="Perkongsian" onchange="onEntitiChange()"> Perkongsian</label>
-          <label class="radio-item"><input type="radio" name="jenis_entiti" value="Sdn Bhd" onchange="onEntitiChange()"> Sdn Bhd</label>
-          <label class="radio-item"><input type="radio" name="jenis_entiti" value="Bhd" onchange="onEntitiChange()"> Bhd</label>
-          <label class="radio-item"><input type="radio" name="jenis_entiti" value="Pro. Tunggal" onchange="onEntitiChange()"> Pro. Tunggal</label>
-          <label class="radio-item"><input type="radio" name="jenis_entiti" value="Pro. Firma" onchange="onEntitiChange()"> Pro. Firma</label>
-          <label class="radio-item"><input type="radio" name="jenis_entiti" value="Koperasi" onchange="onEntitiChange()"> Koperasi</label>
-          <label class="radio-item"><input type="radio" name="jenis_entiti" value="Perbadanan" onchange="onEntitiChange()"> Perbadanan</label>
-          <label class="radio-item"><input type="radio" name="jenis_entiti" value="Yayasan" onchange="onEntitiChange()"> Yayasan</label>
-          <label class="radio-item"><input type="radio" name="jenis_entiti" value="Persatuan" onchange="onEntitiChange()"> Persatuan</label>
-          <label class="radio-item"><input type="radio" name="jenis_entiti" value="Lain-lain" onchange="onEntitiChange()"> Lain-lain</label>
-        </div>
-        <span class="field-error" id="err-entiti">Sila pilih jenis entiti.</span>
-      </div>
-
-      <div class="form-section">
-        <div class="section-heading">Sektor</div>
-        <div class="radio-group">
-          <label class="radio-item"><input type="radio" name="sektor" value="Perkhidmatan"> Perkhidmatan</label>
-          <label class="radio-item"><input type="radio" name="sektor" value="Pembuatan"> Pembuatan</label>
-          <label class="radio-item"><input type="radio" name="sektor" value="Industri Asas Tani"> Industri Asas Tani</label>
-          <label class="radio-item"><input type="radio" name="sektor" value="Perlombongan"> Perlombongan</label>
-        </div>
-      </div>
-
-      <div class="form-section">
-        <div class="section-heading">Industri</div>
-        <div class="check-group" id="industri-group">
-          <label class="check-item"><input type="checkbox" name="industri" value="Acara"> Acara</label>
-          <label class="check-item"><input type="checkbox" name="industri" value="Automotif"> Automotif</label>
-          <label class="check-item"><input type="checkbox" name="industri" value="Baik-Pulih"> Baik-Pulih</label>
-          <label class="check-item"><input type="checkbox" name="industri" value="Busana & Tekstil"> Busana &amp; Tekstil</label>
-          <label class="check-item"><input type="checkbox" name="industri" value="Hartanah"> Hartanah</label>
-          <label class="check-item"><input type="checkbox" name="industri" value="Hobi & Kraf"> Hobi &amp; Kraf</label>
-          <label class="check-item"><input type="checkbox" name="industri" value="ICT"> ICT</label>
-          <label class="check-item"><input type="checkbox" name="industri" value="Kesihatan"> Kesihatan</label>
-          <label class="check-item"><input type="checkbox" name="industri" value="Kesejahteraan"> Kesejahteraan</label>
-          <label class="check-item"><input type="checkbox" name="industri" value="Kosmetik"> Kosmetik</label>
-          <label class="check-item"><input type="checkbox" name="industri" value="Khidmat Profesional"> Khidmat Profesional</label>
-          <label class="check-item"><input type="checkbox" name="industri" value="Komoditi Tani"> Komoditi Tani</label>
-          <label class="check-item"><input type="checkbox" name="industri" value="Kewangan"> Kewangan</label>
-          <label class="check-item"><input type="checkbox" name="industri" value="Logistik"> Logistik</label>
-          <label class="check-item"><input type="checkbox" name="industri" value="Makanan & Minuman"> Makanan &amp; Minuman</label>
-          <label class="check-item"><input type="checkbox" name="industri" value="Pelancongan"> Pelancongan</label>
-          <label class="check-item"><input type="checkbox" name="industri" value="Perunding"> Perunding</label>
-          <label class="check-item"><input type="checkbox" name="industri" value="Percetakan & Penerbitan"> Percetakan &amp; Penerbitan</label>
-          <label class="check-item"><input type="checkbox" name="industri" value="Pembinaan"> Pembinaan</label>
-          <label class="check-item"><input type="checkbox" name="industri" value="Pendidikan & Latihan"> Pendidikan &amp; Latihan</label>
-          <label class="check-item"><input type="checkbox" name="industri" value="Pengangkutan"> Pengangkutan</label>
-          <label class="check-item"><input type="checkbox" name="industri" value="Perabot"> Perabot</label>
-          <label class="check-item"><input type="checkbox" name="industri" value="Pertukangan"> Pertukangan</label>
-          <label class="check-item"><input type="checkbox" name="industri" value="Perkayuan"> Perkayuan</label>
-          <label class="check-item"><input type="checkbox" name="industri" value="Pertanian"> Pertanian</label>
-          <label class="check-item"><input type="checkbox" name="industri" value="Perhutanan"> Perhutanan</label>
-          <label class="check-item"><input type="checkbox" name="industri" value="Petroliam & Gas"> Petroliam &amp; Gas</label>
-          <label class="check-item"><input type="checkbox" name="industri" value="Penyelenggaraan"> Penyelenggaraan</label>
-          <label class="check-item"><input type="checkbox" name="industri" value="Sisa & Kitar Semula"> Sisa &amp; Kitar Semula</label>
-          <label class="check-item"><input type="checkbox" name="industri" value="Sukan"> Sukan</label>
-          <label class="check-item"><input type="checkbox" name="industri" value="Telekomunikasi"> Telekomunikasi</label>
-          <label class="check-item"><input type="checkbox" name="industri" value="Tenaga"> Tenaga</label>
-          <label class="check-item"><input type="checkbox" name="industri" value="Kumbahan"> Kumbahan</label>
-        </div>
-      </div>
-
-      <div class="form-section">
-        <div class="section-heading">Rantaian Bekalan</div>
-        <div class="check-group">
-          <label class="check-item"><input type="checkbox" name="rantaian" value="Pengeluar"> Pengeluar</label>
-          <label class="check-item"><input type="checkbox" name="rantaian" value="Pengilang"> Pengilang</label>
-          <label class="check-item"><input type="checkbox" name="rantaian" value="Pengedar"> Pengedar</label>
-          <label class="check-item"><input type="checkbox" name="rantaian" value="Pemborong"> Pemborong</label>
-          <label class="check-item"><input type="checkbox" name="rantaian" value="Peruncit"> Peruncit</label>
-          <label class="check-item"><input type="checkbox" name="rantaian" value="Penyedia"> Penyedia</label>
-          <label class="check-item"><input type="checkbox" name="rantaian" value="Pengurusan"> Pengurusan</label>
-          <label class="check-item"><input type="checkbox" name="rantaian" value="Pengendali"> Pengendali</label>
-          <label class="check-item"><input type="checkbox" name="rantaian" value="Agen"> Agen</label>
-        </div>
-      </div>
-
-      <div class="form-section">
-        <div class="section-heading">Saiz Entiti</div>
-        <div class="radio-group">
-          <label class="radio-item"><input type="radio" name="saiz_entiti" value="ATOM < RM100K"> ATOM &lt; RM100K</label>
-          <label class="radio-item"><input type="radio" name="saiz_entiti" value="MIKRO < RM300K"> MIKRO &lt; RM300K</label>
-          <label class="radio-item"><input type="radio" name="saiz_entiti" value="KECIL < RM3J"> KECIL &lt; RM3J</label>
-          <label class="radio-item"><input type="radio" name="saiz_entiti" value="SEDERHANA < RM25J"> SEDERHANA &lt; RM25J</label>
-          <label class="radio-item"><input type="radio" name="saiz_entiti" value="BESAR > RM25J"> BESAR &gt; RM25J</label>
-        </div>
-      </div>
-
-      <div class="form-section">
-        <div class="section-heading">Persijilan</div>
-        <div class="check-group">
-          <label class="check-item"><input type="checkbox" name="persijilan" value="HALAL"> HALAL</label>
-          <label class="check-item"><input type="checkbox" name="persijilan" value="GMP"> GMP</label>
-          <label class="check-item"><input type="checkbox" name="persijilan" value="GAP"> GAP</label>
-          <label class="check-item"><input type="checkbox" name="persijilan" value="HCCP"> HCCP</label>
-          <label class="check-item"><input type="checkbox" name="persijilan" value="ISO"> ISO</label>
-        </div>
-        <div class="form-row" style="margin-top:10px">
-          <div class="form-group">
-            <label class="form-label">Persijilan Lain</label>
-            <input type="text" class="form-control" id="persijilan_lain" placeholder="Nyatakan jika ada">
-          </div>
-        </div>
-      </div>
-
-      <div class="form-section">
+        <div class="section-heading">Maklumat Asas Perniagaan</div>
         <div class="form-row cols-2">
           <div class="form-group">
             <label class="form-label">Jenama</label>
@@ -1472,6 +1362,129 @@ textarea.form-control { resize: vertical; min-height: 80px; }
             <label class="form-label">Aktiviti Perniagaan <span class="req">*</span></label>
             <input type="text" class="form-control" id="aktiviti_perniagaan" placeholder="Huraian ringkas aktiviti">
             <span class="field-error" id="err-aktiviti">Sila isi aktiviti perniagaan.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-heading">Klasifikasi Perniagaan</div>
+        <div class="form-row cols-2">
+          <div class="form-group">
+            <label class="form-label">Jenis Entiti <span class="req">*</span></label>
+            <div class="radio-group" id="jenis-entiti-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+              <label class="radio-item"><input type="radio" name="jenis_entiti" value="Pemunya Tunggal" onchange="onEntitiChange()"> Pemunya Tunggal</label>
+              <label class="radio-item"><input type="radio" name="jenis_entiti" value="PLT" onchange="onEntitiChange()"> PLT</label>
+              <label class="radio-item"><input type="radio" name="jenis_entiti" value="Perkongsian" onchange="onEntitiChange()"> Perkongsian</label>
+              <label class="radio-item"><input type="radio" name="jenis_entiti" value="Sdn Bhd" onchange="onEntitiChange()"> Sdn Bhd</label>
+              <label class="radio-item"><input type="radio" name="jenis_entiti" value="Bhd" onchange="onEntitiChange()"> Bhd</label>
+              <label class="radio-item"><input type="radio" name="jenis_entiti" value="Pro. Tunggal" onchange="onEntitiChange()"> Pro. Tunggal</label>
+              <label class="radio-item"><input type="radio" name="jenis_entiti" value="Pro. Firma" onchange="onEntitiChange()"> Pro. Firma</label>
+              <label class="radio-item"><input type="radio" name="jenis_entiti" value="Koperasi" onchange="onEntitiChange()"> Koperasi</label>
+              <label class="radio-item"><input type="radio" name="jenis_entiti" value="Perbadanan" onchange="onEntitiChange()"> Perbadanan</label>
+              <label class="radio-item"><input type="radio" name="jenis_entiti" value="Yayasan" onchange="onEntitiChange()"> Yayasan</label>
+              <label class="radio-item"><input type="radio" name="jenis_entiti" value="Persatuan" onchange="onEntitiChange()"> Persatuan</label>
+              <label class="radio-item"><input type="radio" name="jenis_entiti" value="Lain-lain" onchange="onEntitiChange()"> Lain-lain</label>
+            </div>
+            <span class="field-error" id="err-entiti">Sila pilih jenis entiti.</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Sektor <span class="req">*</span></label>
+            <div class="radio-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+              <label class="radio-item"><input type="radio" name="sektor" value="Perkhidmatan"> Perkhidmatan</label>
+              <label class="radio-item"><input type="radio" name="sektor" value="Pembuatan"> Pembuatan</label>
+              <label class="radio-item"><input type="radio" name="sektor" value="Industri Asas Tani"> Industri Asas Tani</label>
+              <label class="radio-item"><input type="radio" name="sektor" value="Perlombongan"> Perlombongan</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-heading">Maklumat Operasi</div>
+        <div class="form-row cols-2">
+          <div class="form-group">
+            <label class="form-label">Industri Utama <span class="req">*</span></label>
+            <div class="check-group" id="industri-group" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--border); padding: 12px; border-radius: 8px; background: var(--bg-light);">
+              <label class="check-item"><input type="checkbox" name="industri" value="Acara"> Acara</label>
+              <label class="check-item"><input type="checkbox" name="industri" value="Automotif"> Automotif</label>
+              <label class="check-item"><input type="checkbox" name="industri" value="Baik-Pulih"> Baik-Pulih</label>
+              <label class="check-item"><input type="checkbox" name="industri" value="Busana & Tekstil"> Busana &amp; Tekstil</label>
+              <label class="check-item"><input type="checkbox" name="industri" value="Hartanah"> Hartanah</label>
+              <label class="check-item"><input type="checkbox" name="industri" value="Hobi & Kraf"> Hobi &amp; Kraf</label>
+              <label class="check-item"><input type="checkbox" name="industri" value="ICT"> ICT</label>
+              <label class="check-item"><input type="checkbox" name="industri" value="Kesihatan"> Kesihatan</label>
+              <label class="check-item"><input type="checkbox" name="industri" value="Kesejahteraan"> Kesejahteraan</label>
+              <label class="check-item"><input type="checkbox" name="industri" value="Kosmetik"> Kosmetik</label>
+              <label class="check-item"><input type="checkbox" name="industri" value="Khidmat Profesional"> Khidmat Profesional</label>
+              <label class="check-item"><input type="checkbox" name="industri" value="Komoditi Tani"> Komoditi Tani</label>
+              <label class="check-item"><input type="checkbox" name="industri" value="Kewangan"> Kewangan</label>
+              <label class="check-item"><input type="checkbox" name="industri" value="Logistik"> Logistik</label>
+              <label class="check-item"><input type="checkbox" name="industri" value="Makanan & Minuman"> Makanan &amp; Minuman</label>
+              <label class="check-item"><input type="checkbox" name="industri" value="Pelancongan"> Pelancongan</label>
+              <label class="check-item"><input type="checkbox" name="industri" value="Perunding"> Perunding</label>
+              <label class="check-item"><input type="checkbox" name="industri" value="Percetakan & Penerbitan"> Percetakan &amp; Penerbitan</label>
+              <label class="check-item"><input type="checkbox" name="industri" value="Pembinaan"> Pembinaan</label>
+              <label class="check-item"><input type="checkbox" name="industri" value="Pendidikan & Latihan"> Pendidikan &amp; Latihan</label>
+              <label class="check-item"><input type="checkbox" name="industri" value="Pengangkutan"> Pengangkutan</label>
+              <label class="check-item"><input type="checkbox" name="industri" value="Perabot"> Perabot</label>
+              <label class="check-item"><input type="checkbox" name="industri" value="Pertukangan"> Pertukangan</label>
+              <label class="check-item"><input type="checkbox" name="industri" value="Perkayuan"> Perkayuan</label>
+              <label class="check-item"><input type="checkbox" name="industri" value="Pertanian"> Pertanian</label>
+              <label class="check-item"><input type="checkbox" name="industri" value="Perhutanan"> Perhutanan</label>
+              <label class="check-item"><input type="checkbox" name="industri" value="Petroliam & Gas"> Petroliam &amp; Gas</label>
+              <label class="check-item"><input type="checkbox" name="industri" value="Penyelenggaraan"> Penyelenggaraan</label>
+              <label class="check-item"><input type="checkbox" name="industri" value="Sisa & Kitar Semula"> Sisa &amp; Kitar Semula</label>
+              <label class="check-item"><input type="checkbox" name="industri" value="Sukan"> Sukan</label>
+              <label class="check-item"><input type="checkbox" name="industri" value="Telekomunikasi"> Telekomunikasi</label>
+              <label class="check-item"><input type="checkbox" name="industri" value="Tenaga"> Tenaga</label>
+              <label class="check-item"><input type="checkbox" name="industri" value="Kumbahan"> Kumbahan</label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Rantaian Bekalan</label>
+            <div class="check-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+              <label class="check-item"><input type="checkbox" name="rantaian" value="Pengeluar"> Pengeluar</label>
+              <label class="check-item"><input type="checkbox" name="rantaian" value="Pengilang"> Pengilang</label>
+              <label class="check-item"><input type="checkbox" name="rantaian" value="Pengedar"> Pengedar</label>
+              <label class="check-item"><input type="checkbox" name="rantaian" value="Pemborong"> Pemborong</label>
+              <label class="check-item"><input type="checkbox" name="rantaian" value="Peruncit"> Peruncit</label>
+              <label class="check-item"><input type="checkbox" name="rantaian" value="Penyedia"> Penyedia</label>
+              <label class="check-item"><input type="checkbox" name="rantaian" value="Pengurusan"> Pengurusan</label>
+              <label class="check-item"><input type="checkbox" name="rantaian" value="Pengendali"> Pengendali</label>
+              <label class="check-item"><input type="checkbox" name="rantaian" value="Agen"> Agen</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-heading">Skala Perniagaan &amp; Persijilan</div>
+        <div class="form-row cols-2">
+          <div class="form-group">
+            <label class="form-label">Saiz Entiti <span class="req">*</span></label>
+            <div class="radio-group" style="display: grid; grid-template-columns: 1fr; gap: 8px;">
+              <label class="radio-item"><input type="radio" name="saiz_entiti" value="ATOM < RM100K"> ATOM &lt; RM100K</label>
+              <label class="radio-item"><input type="radio" name="saiz_entiti" value="MIKRO < RM300K"> MIKRO &lt; RM300K</label>
+              <label class="radio-item"><input type="radio" name="saiz_entiti" value="KECIL < RM3J"> KECIL &lt; RM3J</label>
+              <label class="radio-item"><input type="radio" name="saiz_entiti" value="SEDERHANA < RM25J"> SEDERHANA &lt; RM25J</label>
+              <label class="radio-item"><input type="radio" name="saiz_entiti" value="BESAR > RM25J"> BESAR &gt; RM25J</label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Persijilan</label>
+            <div class="check-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+              <label class="check-item"><input type="checkbox" name="persijilan" value="HALAL"> HALAL</label>
+              <label class="check-item"><input type="checkbox" name="persijilan" value="GMP"> GMP</label>
+              <label class="check-item"><input type="checkbox" name="persijilan" value="GAP"> GAP</label>
+              <label class="check-item"><input type="checkbox" name="persijilan" value="HCCP"> HCCP</label>
+              <label class="check-item"><input type="checkbox" name="persijilan" value="ISO"> ISO</label>
+            </div>
+            <div class="form-row" style="margin-top:10px">
+              <div class="form-group">
+                <label class="form-label">Persijilan Lain</label>
+                <input type="text" class="form-control" id="persijilan_lain" placeholder="Nyatakan jika ada">
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -1496,11 +1509,11 @@ textarea.form-control { resize: vertical; min-height: 80px; }
         <div class="section-heading">BUTIRAN PEMOHON</div>
         <div class="form-row cols-2">
           <div class="form-group">
-            <label class="form-label">NAMA LENGKAP PEMOHON <span class="req">*</span></label>
+            <label class="form-label">Nama Penuh Pemohon <span class="req">*</span></label>
             <input type="text" class="form-control" id="nama_lengkap_pemohon" placeholder="Nama penuh seperti dalam kad pengenalan">
           </div>
           <div class="form-group">
-            <label class="form-label">NOMBOR KAD PENGENALAN <span class="req">*</span></label>
+            <label class="form-label">Nombor Kad Pengenalan <span class="req">*</span></label>
             <input type="text" class="form-control" id="no_kad_pengenal" placeholder="xxxxxx-xx-xxxx" maxlength="14">
           </div>
         </div>
@@ -1822,11 +1835,17 @@ textarea.form-control { resize: vertical; min-height: 80px; }
       <div class="form-section">
         <div class="section-heading">Maklumat Akaun Pembayaran</div>
         <div class="bank-info">
-          <h5 style="font-size:1.1rem;font-weight:600;color:var(--primary);margin-bottom:12px;">Pembayaran hendaklah ke akaun :-</h5>
-          <div class="bank-row"><span class="bank-key">Bank</span><span class="bank-val">Maybank (MBB)</span></div>
-          <div class="bank-row"><span class="bank-key">No. Akaun</span><span class="bank-val">0010 1126 2244</span></div>
-          <div class="bank-row"><span class="bank-key">Atas Nama</span><span class="bank-val">Dewan Perniagaan Melayu Malaysia Negeri Johor</span></div>
-          <div class="bank-row"><span class="bank-key">Rujukan</span><span class="bank-val">&lt;NAMA SYARIKAT&gt; — &lt;JUMLAH&gt;</span></div>
+          <h5 style="font-size:1.1rem;font-weight:600;color:var(--primary);margin-bottom:12px;">SILA BUAT PEMBAYARAN AMAUN SEPERTI DI ATAS KE AKAUN BERIKUT :-</h5>
+          <div style="text-align:center;font-size:1.1rem;font-weight:600;color:var(--primary);line-height:1.8;">
+            <div>Bank</div>
+            <div>Maybank (MBB)</div>
+            <div>No. Akaun</div>
+            <div>0010 1126 2244</div>
+            <div>Atas Nama</div>
+            <div>Dewan Perniagaan Melayu Malaysia Negeri Johor</div>
+            <div>Rujukan</div>
+            <div>&lt;NAMA SYARIKAT&gt; — &lt;NAMA PEMOHON&gt;</div>
+          </div>
         </div>
       </div>
 
