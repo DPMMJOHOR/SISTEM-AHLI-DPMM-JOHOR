@@ -91,7 +91,7 @@ body {
 }
 .header-inner { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; padding: 0 24px; }
 .header-logo {
-  width: 96px;
+  width: 120px;
   background: transparent;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 4px;
@@ -455,11 +455,12 @@ textarea.form-control { resize: vertical; min-height: 80px; }
 .check-item input[type="checkbox"] { 
   cursor: pointer; 
   accent-color: var(--primary); 
-  position: absolute;
-  opacity: 0;
-  width: 100%;
-  height: 100%;
-  margin: 0;
+  position: relative;
+  opacity: 1;
+  width: auto;
+  height: auto;
+  margin: 0 8px 0 0;
+  z-index: 2;
 }
 .radio-item.selected { 
   border-color: var(--primary); 
@@ -469,35 +470,7 @@ textarea.form-control { resize: vertical; min-height: 80px; }
   box-shadow: 0 2px 8px rgba(26,54,93,0.15);
 }
 .radio-item::before, .check-item::before {
-  content: '';
-  width: 16px;
-  height: 16px;
-  border: 2px solid var(--border);
-  border-radius: 50%;
-  flex-shrink: 0;
-  transition: all 0.2s;
-}
-.check-item::before {
-  border-radius: 3px;
-}
-.radio-item.selected::before {
-  background: var(--primary);
-  border-color: var(--primary);
-  box-shadow: inset 0 0 0 3px white;
-}
-.check-item.selected::before {
-  background: var(--primary);
-  border-color: var(--primary);
-  position: relative;
-}
-.check-item.selected::after {
-  content: '✓';
-  color: white;
-  position: absolute;
-  left: 3px;
-  top: 1px;
-  font-size: 10px;
-  font-weight: bold;
+  display: none;
 }
 
 /* ---- JENIS KEAHLIAN CARDS ---- */
@@ -1173,10 +1146,10 @@ textarea.form-control { resize: vertical; min-height: 80px; }
 <!-- HEADER -->
 <header class="site-header">
   <div class="header-inner">
-    <div class="header-logo"><img src="logo-dpmmnj.png" alt="Logo DPMM Negeri Johor" style="width:80px;height:80px;object-fit:contain;"></div>
+    <div class="header-logo"><img src="logo-dpmmnj.png" alt="Logo DPMM Negeri Johor" style="width:120px;height:120px;object-fit:contain;"></div>
     <div class="header-text">
     <div style="position:relative;">
-      <h1>DEWAN PERNIAGAAN MELAYU<br><span style="font-size:1em;letter-spacing:0.15em;color:#FFFFFF;">NEGERI JOHOR</span></h1>
+      <h1>DEWAN PERNIAGAAN MELAYU MALAYSIA<br><span style="font-size:1em;letter-spacing:0.15em;color:#FFFFFF;">NEGERI JOHOR</span></h1>
       <p>Borang Permohonan Keahlian</p>
       <span class="version-tag" style="position:absolute;right:0;bottom:0;font-size:0.6rem;color:var(--grey-600);">v1.2</span>
     </div>
@@ -1223,23 +1196,22 @@ textarea.form-control { resize: vertical; min-height: 80px; }
 <div id="screen-intro">
 
   <!-- Hero Banner -->
-  <div class="intro-header-card" style="display: flex; align-items: center; gap: 20px;">
+  <div class="intro-header-card" style="display: flex; align-items: center; gap: 20px; background: transparent; border: none; box-shadow: none; padding: 20px 0;">
     <div style="flex-shrink: 0;">
-      <img src="logo-dpmmnj.png" alt="Logo DPMM Negeri Johor" style="width:110px;height:110px;object-fit:contain;">
     </div>
     <div style="flex: 1;">
-      <p style="font-family: 'DM Sans', sans-serif; font-size: 1.1rem; font-weight: 500; color: white; padding: 0; text-align: center; line-height: 1.6; letter-spacing: 0.02em;">Selamat datang ke sistem pemohonan keahlian DPMM Negeri Johor. Sila lengkapkan semua maklumat yang diperlukan dengan Betul dan lengkap.</p>
+      <p style="font-family: 'DM Sans', sans-serif; font-size: 1.1rem; font-weight: 500; color: black; padding: 0; text-align: center; line-height: 1.6; letter-spacing: 0.02em; text-transform: uppercase;">SELAMAT DATANG KE SISTEM PEMOHONAN KEAHLIAN DPMM NEGERI JOHOR. SILA LENGKAPKAN SEMUA MAKLUMAT YANG DIPERLUKAN DENGAN BETUL DAN LENGKAP.</p>
     </div>
   </div>
 
   <!-- Business Type Selection -->
   <div class="intro-card">
     <h3>Pilih Jenis Perniagaan Anda</h3>
-    <p style="text-align:center;font-size:0.9rem;color:var(--text-muted);margin-top:6px;margin-bottom:18px;">Sila pilih kategori syarikat yang paling sesuai dengan perniagaan anda</p>
+    <p style="text-align:center;font-size:0.9rem;color:var(--text-muted);margin-top:4px;margin-bottom:12px;">Sila pilih kategori syarikat yang paling sesuai dengan perniagaan anda</p>
     
     <div class="field">
-      <label>Jenis Syarikat <span style="color:var(--red)">*</span></label>
-      <select id="business-type-selector" class="input" onchange="handleBusinessTypeChange()">
+      <label style="display:block;text-align:center;font-size:1.1rem;font-weight:600;color:var(--text);margin-bottom:8px;">Jenis Syarikat <span style="color:var(--red)">*</span></label>
+      <select id="business-type-selector" class="input" onchange="handleBusinessTypeChange()" style="display:block;margin:0 auto;text-align:center;">
         <option value="">-- Sila Pilih --</option>
         <option value="enterprise_sole">Enterprise (Milikan Tunggal)</option>
         <option value="enterprise_partnership">Enterprise (Perkongsian)</option>
@@ -1275,12 +1247,12 @@ textarea.form-control { resize: vertical; min-height: 80px; }
   </div>
 
   <!-- CTA Button -->
-  <div class="intro-cta" style="text-align: center;">
+  <div class="intro-cta" style="text-align: center; display: block; padding: 28px 40px;">
     <div style="text-align: center;">
       <p style="font-size:0.92rem;color:var(--text-muted);margin-bottom:16px;text-align: center;">Proses pengisian borang ini akan mengambil masa lebih kurang <strong>15–20 minit</strong> sahaja.</p>
     </div>
     <div style="text-align: center;">
-      <button class="btn btn-gold btn-lg" id="btn-start-form" onclick="startFormWithBusinessType()" disabled style="display: inline-block; position: relative; overflow: hidden; transform: translateZ(0); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
+      <button class="btn btn-gold btn-lg" id="btn-start-form" onclick="startFormWithBusinessType()" disabled style="display: block; margin: 0 auto; position: relative; overflow: hidden; transform: translateZ(0); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
         <span style="position: relative; z-index: 1;">MULA ISI BORANG PERMOHONAN &rarr;</span>
         <span style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent); transform: translateX(-100%); transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); z-index: 0;"></span>
       </button>
