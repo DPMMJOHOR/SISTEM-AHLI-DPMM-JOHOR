@@ -5220,7 +5220,7 @@ function renderPermohonanTable() {
   // Pagination
   var pgHtml = '';
   for (var i = 1; i <= totalPages; i++) {
-    pgHtml += '<button onclick="permohonanPage=' + i + ';renderPermohonanTable()" style="padding:5px 10px;border-radius:6px;border:1.5px solid ' + (i === permohonanPage ? 'var(--primary)' : 'var(--gray2)') + ';background:' + (i === permohonanPage ? 'var(--primary)' : 'var(--white)') + ';color:' + (i === permohonanPage ? '#fff' : 'var(--text)') + ';font-size:12px;font-weight:600;cursor:pointer;">' + i + '</button>';
+    pgHtml += '<button class="btn-permohonan-page" data-page="' + i + '" style="padding:5px 10px;border-radius:6px;border:1.5px solid ' + (i === permohonanPage ? 'var(--primary)' : 'var(--gray2)') + ';background:' + (i === permohonanPage ? 'var(--primary)' : 'var(--white)') + ';color:' + (i === permohonanPage ? '#fff' : 'var(--text)') + ';font-size:12px;font-weight:600;cursor:pointer;">' + i + '</button>';
   }
   document.getElementById('permohonan-pagination').innerHTML = pgHtml;
 }
@@ -5230,22 +5230,22 @@ function buildPermohonanActionBtns(p) {
   var id  = p.id;
   var st  = p.status;
   var isAdm = currentUser && currentUser.role === 'admin';
-  var html = '<button onclick="openPermohonanModal(' + id + ')" style="padding:5px 12px;border-radius:6px;border:1.5px solid var(--gray2);background:var(--white);font-size:11px;font-weight:600;cursor:pointer;margin-right:4px;">👁 Semak</button>';
+  var html = '<button class="btn-permohonan-action" data-action="semak" data-id="' + id + '" style="padding:5px 12px;border-radius:6px;border:1.5px solid var(--gray2);background:var(--white);font-size:11px;font-weight:600;cursor:pointer;margin-right:4px;">👁 Semak</button>';
 
   if (isAdm) {
     if (st === 'MOHON_BARU') {
-      html += '<button onclick="updatePermohonanStatus(' + id + ',\'SEMAKAN_DOKUMEN\')" style="padding:5px 12px;border-radius:6px;border:none;background:var(--warning-lt);color:#a06000;font-size:11px;font-weight:700;cursor:pointer;">▶ Mula Semakan</button>';
+      html += '<button class="btn-permohonan-action" data-action="update-status" data-id="' + id + '" data-status="SEMAKAN_DOKUMEN" style="padding:5px 12px;border-radius:6px;border:none;background:var(--warning-lt);color:#a06000;font-size:11px;font-weight:700;cursor:pointer;">▶ Mula Semakan</button>';
     }
     if (st === 'SEMAKAN_DOKUMEN') {
-      html += '<button onclick="updatePermohonanStatus(' + id + ',\'MESYUARAT_JKP\')" style="padding:5px 12px;border-radius:6px;border:none;background:#F8F0FF;color:#7a1fa2;font-size:11px;font-weight:700;cursor:pointer;margin-right:4px;">🟣 Bawa ke JKP</button>';
-      html += '<button onclick="openTolakModal(' + id + ')" style="padding:5px 12px;border-radius:6px;border:none;background:var(--danger-lt);color:var(--danger);font-size:11px;font-weight:700;cursor:pointer;">✗ Tolak</button>';
+      html += '<button class="btn-permohonan-action" data-action="update-status" data-id="' + id + '" data-status="MESYUARAT_JKP" style="padding:5px 12px;border-radius:6px;border:none;background:#F8F0FF;color:#7a1fa2;font-size:11px;font-weight:700;cursor:pointer;margin-right:4px;">🟣 Bawa ke JKP</button>';
+      html += '<button class="btn-permohonan-action" data-action="tolak" data-id="' + id + '" style="padding:5px 12px;border-radius:6px;border:none;background:var(--danger-lt);color:var(--danger);font-size:11px;font-weight:700;cursor:pointer;">✗ Tolak</button>';
     }
     if (st === 'MESYUARAT_JKP') {
-      html += '<button onclick="openLulusModal(' + id + ')" style="padding:5px 12px;border-radius:6px;border:none;background:var(--success-lt);color:#006b50;font-size:11px;font-weight:700;cursor:pointer;margin-right:4px;">✅ Luluskan</button>';
-      html += '<button onclick="openTolakModal(' + id + ')" style="padding:5px 12px;border-radius:6px;border:none;background:var(--danger-lt);color:var(--danger);font-size:11px;font-weight:700;cursor:pointer;">✗ Tolak</button>';
+      html += '<button class="btn-permohonan-action" data-action="lulus" data-id="' + id + '" style="padding:5px 12px;border-radius:6px;border:none;background:var(--success-lt);color:#006b50;font-size:11px;font-weight:700;cursor:pointer;margin-right:4px;">✅ Luluskan</button>';
+      html += '<button class="btn-permohonan-action" data-action="tolak" data-id="' + id + '" style="padding:5px 12px;border-radius:6px;border:none;background:var(--danger-lt);color:var(--danger);font-size:11px;font-weight:700;cursor:pointer;">✗ Tolak</button>';
     }
     if (st === 'DITOLAK') {
-      html += '<button onclick="updatePermohonanStatus(' + id + ',\'MOHON_BARU\')" style="padding:5px 12px;border-radius:6px;border:none;background:var(--primary-lt);color:var(--primary);font-size:11px;font-weight:700;cursor:pointer;">↺ Buka Semula</button>';
+      html += '<button class="btn-permohonan-action" data-action="update-status" data-id="' + id + '" data-status="MOHON_BARU" style="padding:5px 12px;border-radius:6px;border:none;background:var(--primary-lt);color:var(--primary);font-size:11px;font-weight:700;cursor:pointer;">↺ Buka Semula</button>';
     }
   }
   return html;
@@ -5267,14 +5267,14 @@ function openPermohonanModal(id) {
   var isAdm = currentUser && currentUser.role === 'admin';
   var footerBtns = '';
   if (isAdm) {
-    if (p.status === 'MOHON_BARU') footerBtns += '<button onclick="updatePermohonanStatus(' + id + ',\'SEMAKAN_DOKUMEN\');closePermohonanModal()" style="padding:9px 18px;border:none;border-radius:7px;background:var(--warning);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--sans);">▶ Mula Semakan</button>';
+    if (p.status === 'MOHON_BARU') footerBtns += '<button class="btn-modal-action" data-action="mula-semakan" data-id="' + id + '" style="padding:9px 18px;border:none;border-radius:7px;background:var(--warning);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--sans);">▶ Mula Semakan</button>';
     if (p.status === 'SEMAKAN_DOKUMEN') {
-      footerBtns += '<button onclick="updatePermohonanStatus(' + id + ',\'MESYUARAT_JKP\');closePermohonanModal()" style="padding:9px 18px;border:none;border-radius:7px;background:#9C36B5;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--sans);margin-right:6px;">🟣 Bawa ke JKP</button>';
-      footerBtns += '<button onclick="closePermohonanModal();openTolakModal(' + id + ')" style="padding:9px 18px;border:none;border-radius:7px;background:var(--danger);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--sans);">✗ Tolak</button>';
+      footerBtns += '<button class="btn-modal-action" data-action="bawa-jkp" data-id="' + id + '" style="padding:9px 18px;border:none;border-radius:7px;background:#9C36B5;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--sans);margin-right:6px;">🟣 Bawa ke JKP</button>';
+      footerBtns += '<button class="btn-modal-action" data-action="tolak-from-modal" data-id="' + id + '" style="padding:9px 18px;border:none;border-radius:7px;background:var(--danger);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--sans);">✗ Tolak</button>';
     }
     if (p.status === 'MESYUARAT_JKP') {
-      footerBtns += '<button onclick="closePermohonanModal();openLulusModal(' + id + ')" style="padding:9px 18px;border:none;border-radius:7px;background:var(--success);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--sans);margin-right:6px;">✅ Luluskan</button>';
-      footerBtns += '<button onclick="closePermohonanModal();openTolakModal(' + id + ')" style="padding:9px 18px;border:none;border-radius:7px;background:var(--danger);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--sans);">✗ Tolak</button>';
+      footerBtns += '<button class="btn-modal-action" data-action="lulus-from-modal" data-id="' + id + '" style="padding:9px 18px;border:none;border-radius:7px;background:var(--success);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--sans);margin-right:6px;">✅ Luluskan</button>';
+      footerBtns += '<button class="btn-modal-action" data-action="tolak-from-modal" data-id="' + id + '" style="padding:9px 18px;border:none;border-radius:7px;background:var(--danger);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--sans);">✗ Tolak</button>';
     }
   }
   document.getElementById('modal-action-btns').innerHTML = footerBtns;
@@ -5657,6 +5657,59 @@ document.addEventListener('DOMContentLoaded', function(){
     loadPermohonanData();
   }, 2000); // load after main data
 });
+
+// Event delegation for Permohonan action buttons
+document.addEventListener('click', function(e) {
+  var target = e.target;
+  
+  // Check if clicked element is a permohonan action button
+  if (target.classList.contains('btn-permohonan-action')) {
+    e.preventDefault();
+    var action = target.getAttribute('data-action');
+    var id = parseInt(target.getAttribute('data-id'));
+    
+    if (action === 'semak') {
+      openPermohonanModal(id);
+    } else if (action === 'update-status') {
+      var newStatus = target.getAttribute('data-status');
+      updatePermohonanStatus(id, newStatus);
+    } else if (action === 'tolak') {
+      openTolakModal(id);
+    } else if (action === 'lulus') {
+      openLulusModal(id);
+    }
+  }
+  
+  // Check if clicked element is a modal action button
+  if (target.classList.contains('btn-modal-action')) {
+    e.preventDefault();
+    var action = target.getAttribute('data-action');
+    var id = parseInt(target.getAttribute('data-id'));
+    
+    if (action === 'mula-semakan') {
+      updatePermohonanStatus(id, 'SEMAKAN_DOKUMEN');
+      closePermohonanModal();
+    } else if (action === 'bawa-jkp') {
+      updatePermohonanStatus(id, 'MESYUARAT_JKP');
+      closePermohonanModal();
+    } else if (action === 'tolak-from-modal') {
+      closePermohonanModal();
+      openTolakModal(id);
+    } else if (action === 'lulus-from-modal') {
+      closePermohonanModal();
+      openLulusModal(id);
+    }
+  }
+  
+  // Check if clicked element is a pagination button
+  if (target.classList.contains('btn-permohonan-page')) {
+    e.preventDefault();
+    var page = parseInt(target.getAttribute('data-page'));
+    permohonanPage = page;
+    renderPermohonanTable();
+  }
+});
+
 </script>
 </body>
 </html>
