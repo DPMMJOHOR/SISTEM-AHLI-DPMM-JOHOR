@@ -2682,6 +2682,32 @@ function renderRingkasan() {
 }
 
 /* ============================================================
+   REFERENCE NUMBER GENERATION
+   ============================================================ */
+async function generateReferenceNumber() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0'); // 01-12
+
+  // Query Supabase to count submissions for current month/year
+  const { count, error } = await sb
+    .from('PERMOHONAN_AHLI')
+    .select('*', { count: 'exact', head: true })
+    .like('ref_id', `DPMMJHR/BARU/${year}/${month}%`);
+
+  if (error) {
+    console.error('Error counting submissions:', error);
+    // Fallback to sequential if query fails
+    const sequence = String(1).padStart(2, '0');
+    return `DPMMJHR/BARU/${year}/${month}${sequence}`;
+  }
+
+  // Increment count for new submission
+  const sequence = String((count || 0) + 1).padStart(2, '0');
+  return `DPMMJHR/BARU/${year}/${month}${sequence}`;
+}
+
+/* ============================================================
    SUBMIT
    ============================================================ */
 async function submitPermohonan() {
@@ -2690,8 +2716,8 @@ async function submitPermohonan() {
   showLoading('Sedang memuat naik dokumen...');
 
   try {
-    // 1. Generate ref_id sementara
-    const tempRef = 'TEMP-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000);
+    // 1. Generate reference number in new format
+    const tempRef = await generateReferenceNumber();
 
     // 1b. Audit — dapatkan IP pemohon
     let clientIp = 'unknown';
@@ -2912,85 +2938,110 @@ function showSuccess(refId) {
 function downloadPDF() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-  const W = 210; const margin = 20;
-  let y = 20;
+  const W = 210; const margin = 15;
+  let y = 15;
 
-  const purple = [13, 32, 96];
-  const gold   = [196, 18, 48];
-  const black  = [30, 20, 50];
+  const black  = [0, 0, 0];
+  const grey   = [200, 200, 200];
+  const greyLight = [245, 245, 245];
 
   function header() {
-    doc.setFillColor(...purple);
-    doc.rect(0, 0, W, 28, 'F');
-    doc.setTextColor(255, 255, 255);
+    // Add logo on the left
+    try {
+      const img = new Image();
+      img.src = 'logo-dpmmnj.png';
+      doc.addImage(img, 'PNG', margin, y, 30, 30);
+    } catch (e) {
+      // Fallback if logo fails to load
+      console.warn('Logo not loaded:', e);
+    }
+
+    // Organization name - using Crimson Pro style (serif, bold, uppercase, letter spacing)
+    doc.setTextColor(...black);
+    doc.setFontSize(18);
+    doc.setFont('times', 'bold'); // Closest to Crimson Pro serif
+    doc.text('DEWAN PERNIAGAAN MELAYU MALAYSIA', W / 2 + 15, y + 10, { align: 'center' });
+    y += 8;
+
+    // Subtitle - using DM Sans style (uppercase, medium weight, letter spacing)
     doc.setFontSize(13);
-    doc.setFont('helvetica', 'bold');
-    doc.text('BORANG PERMOHONAN KEAHLIAN', W / 2, 12, { align: 'center' });
-    doc.setFontSize(10);
+    doc.setFont('helvetica', 'medium'); // Closest to DM Sans
+    doc.text('NEGERI JOHOR', W / 2 + 15, y + 10, { align: 'center' });
+    y += 10;
+
+    // Form title - using DM Sans style (uppercase, medium weight)
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'medium');
+    doc.text('BORANG PERMOHONAN KEAHLIAN', W / 2 + 15, y + 10, { align: 'center' });
+    y += 10;
+
+    // Reference number - smaller, normal weight
+    doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
-    doc.text('DEWAN PERNIAGAAN MELAYU MALAYSIA — NEGERI JOHOR', W / 2, 19, { align: 'center' });
-    doc.setTextColor(...gold);
-    doc.text('BRG/AHLI/01 v1.2', W / 2, 25, { align: 'center' });
-    y = 36;
+    doc.text('No. Rujukan: ' + state.refId, W / 2 + 15, y + 10, { align: 'center' });
+    y += 15;
+
+    // Bottom line - black, thin
+    doc.setDrawColor(...black);
+    doc.setLineWidth(0.8);
+    doc.line(margin, y, W - margin, y);
+    y += 10;
   }
 
   function sectionTitle(title) {
-    doc.setFillColor(...purple);
-    doc.rect(margin, y, W - margin * 2, 7, 'F');
-    doc.setTextColor(255, 255, 255);
+    if (y > 260) { doc.addPage(); header(); }
+    doc.setFillColor(...greyLight);
+    doc.rect(margin, y, W - margin * 2, 6, 'F');
+    doc.setDrawColor(...grey);
+    doc.setLineWidth(0.3);
+    doc.rect(margin, y, W - margin * 2, 6, 'S');
+    doc.setTextColor(...black);
     doc.setFontSize(9);
     doc.setFont('helvetica', 'bold');
-    doc.text(title, margin + 3, y + 5);
-    y += 11;
-    doc.setTextColor(...black);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
+    doc.text(title, margin + 3, y + 4);
+    y += 9;
   }
 
   function row(label, value) {
     if (y > 270) { doc.addPage(); header(); }
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(8.5);
-    doc.setTextColor(100, 80, 140);
+    doc.setFontSize(8);
+    doc.setTextColor(...black);
     doc.text(label + ':', margin, y);
     doc.setFont('helvetica', 'normal');
-    doc.setTextColor(...black);
-    const lines = doc.splitTextToSize(String(value || '—'), 120);
-    doc.text(lines, margin + 52, y);
-    y += (lines.length * 5) + 2;
+    const lines = doc.splitTextToSize(String(value || '—'), W - margin * 2 - 45);
+    doc.text(lines, margin + 45, y);
+    y += (lines.length * 4) + 2;
   }
 
   function emptyRow(label) {
     if (y > 270) { doc.addPage(); header(); }
-    doc.setFontSize(8.5);
+    doc.setFontSize(8);
     doc.setFont('helvetica', 'bold');
-    doc.setTextColor(100, 80, 140);
+    doc.setTextColor(...black);
     doc.text(label + ':', margin, y);
-    doc.setDrawColor(180, 192, 210);
-    doc.line(margin + 52, y + 0.5, W - margin, y + 0.5);
-    y += 9;
+    doc.setDrawColor(...grey);
+    doc.line(margin + 45, y + 0.5, W - margin, y + 0.5);
+    y += 7;
   }
 
   // ---- Page 1 ----
   header();
-  doc.setTextColor(...gold);
-  doc.setFontSize(9);
-  doc.setFont('helvetica', 'bold');
-  doc.text('No. Rujukan: ' + state.refId, W - margin, y, { align: 'right' });
-  y += 8;
 
-  // Jenis Keahlian box
-  doc.setFillColor(255, 240, 242);
-  doc.setDrawColor(...gold);
-  doc.rect(margin, y, W - margin * 2, 14, 'FD');
-  doc.setTextColor(...purple);
-  doc.setFontSize(9);
-  doc.text('KEAHLIAN:', margin + 4, y + 5);
-  doc.text('FASAL:', margin + 4, y + 10);
+  // Jenis Keahlian box - grey background
+  doc.setFillColor(...greyLight);
+  doc.setDrawColor(...grey);
+  doc.setLineWidth(0.5);
+  doc.rect(margin, y, W - margin * 2, 12, 'FD');
+  doc.setTextColor(...black);
+  doc.setFontSize(8);
   doc.setFont('helvetica', 'bold');
-  doc.text(JENIS_LABEL[state.jenis_keahlian] + ' (' + state.jenis_keahlian + ')', margin + 28, y + 5);
-  doc.text(state.fasal, margin + 28, y + 10);
-  y += 20;
+  doc.text('KEAHLIAN:', margin + 4, y + 4);
+  doc.text('FASAL:', margin + 4, y + 9);
+  doc.setFont('helvetica', 'normal');
+  doc.text(JENIS_LABEL[state.jenis_keahlian] + ' (' + state.jenis_keahlian + ')', margin + 28, y + 4);
+  doc.text(state.fasal, margin + 28, y + 9);
+  y += 16;
 
   sectionTitle('A. MAKLUMAT ENTITI PERNIAGAAN');
   row('Jenis Entiti', getRadio('jenis_entiti'));
@@ -3000,7 +3051,7 @@ function downloadPDF() {
   row('Persijilan', getCheckboxes('persijilan').join(', '));
   row('Jenama', val('jenama'));
   row('Aktiviti Perniagaan', val('aktiviti_perniagaan'));
-  y += 4;
+  y += 3;
 
   sectionTitle('B. BUTIRAN PERNIAGAAN');
   row('Nama Entiti', val('nama_entiti'));
@@ -3013,7 +3064,7 @@ function downloadPDF() {
   row('E-mel', val('emel_syarikat'));
   row('Modal Berbayar', val('modal_berbayar') ? 'RM ' + parseFloat(val('modal_berbayar')).toLocaleString() : '—');
   row('Modal Pusingan', val('modal_pusingan') ? 'RM ' + parseFloat(val('modal_pusingan')).toLocaleString() : '—');
-  y += 4;
+  y += 3;
 
   sectionTitle('C. PROKSI / WAKIL');
   row('Nama Proksi', val('proksi_nama') || '(Pemunya Tunggal)');
@@ -3021,7 +3072,7 @@ function downloadPDF() {
   row('Jawatan', document.getElementById('proksi_jawatan').value);
   row('No. HP', val('proksi_hp'));
   row('E-mel', val('proksi_emel'));
-  y += 4;
+  y += 3;
 
   // ---- Page 2 ----
   doc.addPage(); header();
@@ -3029,59 +3080,71 @@ function downloadPDF() {
   const psSizes = [8, 85, 20, 25];
   const psCols = ['#', 'Nama Pemegang Saham', '% Saham', 'Bangsa'];
   let x2 = margin;
-  doc.setFillColor(240, 235, 255);
-  doc.rect(margin, y, W - margin * 2, 7, 'F');
+  doc.setFillColor(...greyLight);
+  doc.rect(margin, y, W - margin * 2, 6, 'F');
+  doc.setDrawColor(...grey);
+  doc.setLineWidth(0.3);
+  doc.rect(margin, y, W - margin * 2, 6, 'S');
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(8);
+  doc.setTextColor(...black);
   psCols.forEach((c, i) => {
-    doc.text(c, x2 + 2, y + 5);
+    doc.text(c, x2 + 2, y + 4);
     x2 += psSizes[i];
   });
-  y += 8;
+  y += 7;
   for (let i = 1; i <= 5; i++) {
     const n = document.getElementById('saham_nama_' + i)?.value || '';
     const p = document.getElementById('saham_pct_' + i)?.value || '';
     const b = document.getElementById('saham_bangsa_' + i)?.value || '';
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8);
-    doc.setDrawColor(200, 190, 220);
-    doc.rect(margin, y, W - margin * 2, 7);
+    doc.setDrawColor(...grey);
+    doc.setLineWidth(0.2);
+    doc.rect(margin, y, W - margin * 2, 6);
     x2 = margin;
+    doc.setTextColor(...black);
     [i, n, p + '%', b].forEach((v, idx) => {
-      doc.text(String(v), x2 + 2, y + 5);
+      doc.text(String(v), x2 + 2, y + 4);
       x2 += psSizes[idx];
     });
-    y += 7;
+    y += 6;
   }
-  y += 6;
+  y += 5;
 
   sectionTitle('10. MAKLUMAT AHLI LEMBAGA / PENGURUSAN');
   x2 = margin;
-  doc.setFillColor(240, 235, 255);
-  doc.rect(margin, y, W - margin * 2, 7, 'F');
+  doc.setFillColor(...greyLight);
+  doc.rect(margin, y, W - margin * 2, 6, 'F');
+  doc.setDrawColor(...grey);
+  doc.setLineWidth(0.3);
+  doc.rect(margin, y, W - margin * 2, 6, 'S');
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(8);
+  doc.setTextColor(...black);
   ['#', 'Nama Ahli Lembaga', '%', 'Bangsa'].forEach((c, i) => {
-    doc.text(c, x2 + 2, y + 5);
+    doc.text(c, x2 + 2, y + 4);
     x2 += psSizes[i];
   });
-  y += 8;
+  y += 7;
   for (let i = 1; i <= 5; i++) {
     const n = document.getElementById('lembaga_nama_' + i)?.value || '';
     const p = document.getElementById('lembaga_pct_' + i)?.value || '';
     const b = document.getElementById('lembaga_bangsa_' + i)?.value || '';
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8);
-    doc.setDrawColor(200, 190, 220);
-    doc.rect(margin, y, W - margin * 2, 7);
+    doc.setDrawColor(...grey);
+    doc.setLineWidth(0.2);
+    doc.rect(margin, y, W - margin * 2, 6);
     x2 = margin;
+    doc.setTextColor(...black);
     [i, n, p + '%', b].forEach((v, idx) => {
-      doc.text(String(v), x2 + 2, y + 5);
+      doc.text(String(v), x2 + 2, y + 4);
       x2 += psSizes[idx];
     });
-    y += 7;
+    y += 6;
   }
-  y += 6;
+  y += 5;
 
   sectionTitle('BAYARAN');
   const jenis = state.jenis_keahlian;
@@ -3092,44 +3155,51 @@ function downloadPDF() {
   row('Yuran Pendaftaran (Once in a lifetime)', fi === 0 ? 'Percuma' : 'RM ' + fi.toLocaleString());
   row('Yuran Tahunan (Yearly)', yr2 === 0 ? 'Percuma' : 'RM ' + yr2.toLocaleString() + ' × ' + tempoh + ' tahun = RM ' + (yr2 * tempoh).toLocaleString());
   row('JUMLAH', fi === 0 ? 'Percuma' : 'RM ' + (fi + yr2 * tempoh).toLocaleString());
-  y += 4;
+  y += 3;
 
   // ---- Page 3: Pengisytiharan ----
   doc.addPage(); header();
   sectionTitle('PENGISYTIHARAN PEMOHON');
 
-  doc.setFontSize(9);
+  doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(...black);
   const pengakuan = 'Kami mengesahkan segala butiran dalam maklumat yang diberikan dalam permohonan ini adalah benar dan betul. Kami bersetuju untuk mematuhi serta akur kepada peruntukan-peruntukan dalam Undang-Undang Tubuh dan Peraturan yang ditetapkan oleh DPMM pada bila-bila masa, serta sentiasa menjaga dan menyumbang bakti kepada kejayaan misi DPMM.';
   const lines = doc.splitTextToSize(pengakuan, W - margin * 2);
   doc.text(lines, margin, y);
-  y += lines.length * 5 + 8;
+  y += lines.length * 4 + 6;
 
-  doc.setFontSize(8.5);
-  doc.text('Bagi Pihak Pemohon (Fasal 6.2.1, 6.2.2 & 6.2.3):', margin, y); y += 6;
-  doc.text('Nama Penandatangan:', margin, y);
-  doc.line(margin + 45, y, W - margin, y); y += 8;
-  doc.text('No. MyKad:', margin, y);
-  doc.line(margin + 25, y, margin + 90, y);
-  doc.text('Tarikh:', margin + 100, y);
-  doc.line(margin + 115, y, W - margin, y); y += 12;
-
-  doc.text('Bagi Pihak Pemohon (Fasal 6.2.3b, 6.2.4, 6.2.5, 6.2.6):', margin, y); y += 6;
-  doc.text('Nama:', margin, y);
-  doc.line(margin + 18, y, W - margin, y); y += 8;
-  doc.text('No. MyKad:', margin, y);
-  doc.line(margin + 25, y, margin + 90, y);
-  doc.text('Jawatan:', margin + 100, y);
-  doc.line(margin + 118, y, W - margin, y); y += 12;
-
-  // Cop syarikat box
-  doc.setDrawColor(...gold);
-  doc.rect(W - margin - 55, y, 55, 30);
   doc.setFontSize(8);
-  doc.setTextColor(150, 130, 180);
-  doc.text('Cop Syarikat', W - margin - 27, y + 16, { align: 'center' });
-  y += 38;
+  doc.setFont('helvetica', 'bold');
+  doc.text('Bagi Pihak Pemohon (Fasal 6.2.1, 6.2.2 & 6.2.3):', margin, y); y += 5;
+  doc.setFont('helvetica', 'normal');
+  doc.text('Nama Penandatangan:', margin, y);
+  doc.setDrawColor(...grey);
+  doc.setLineWidth(0.3);
+  doc.line(margin + 40, y, W - margin, y); y += 6;
+  doc.text('No. MyKAD:', margin, y);
+  doc.line(margin + 22, y, margin + 80, y);
+  doc.text('Tarikh:', margin + 90, y);
+  doc.line(margin + 105, y, W - margin, y); y += 10;
+
+  doc.setFont('helvetica', 'bold');
+  doc.text('Bagi Pihak Pemohon (Fasal 6.2.3b, 6.2.4, 6.2.5, 6.2.6):', margin, y); y += 5;
+  doc.setFont('helvetica', 'normal');
+  doc.text('Nama:', margin, y);
+  doc.line(margin + 15, y, W - margin, y); y += 6;
+  doc.text('No. MyKAD:', margin, y);
+  doc.line(margin + 22, y, margin + 80, y);
+  doc.text('Jawatan:', margin + 90, y);
+  doc.line(margin + 110, y, W - margin, y); y += 10;
+
+  // Cop syarikat box - grey border
+  doc.setDrawColor(...grey);
+  doc.setLineWidth(0.5);
+  doc.rect(W - margin - 50, y, 50, 25);
+  doc.setFontSize(8);
+  doc.setTextColor(100, 100, 100);
+  doc.text('Cop Syarikat', W - margin - 25, y + 14, { align: 'center' });
+  y += 30;
 
   sectionTitle('KEGUNAAN URUSETIA DPMM');
   emptyRow('Disemak & Lengkap — Tarikh');
@@ -3139,12 +3209,16 @@ function downloadPDF() {
   emptyRow('Minit Mesyuarat Bil.');
   emptyRow('Kuatkuasa Keahlian mulai');
   emptyRow('Disahkan oleh SUK / SUA');
-  y += 4;
+  y += 3;
 
-  // Tarikh
-  doc.setFontSize(8);
-  doc.setTextColor(150, 130, 180);
-  doc.text('Tarikh cetak: ' + new Date().toLocaleDateString('ms-MY') + '  |  No. Rujukan: ' + state.refId, margin, 288);
+  // Footer - black text
+  doc.setDrawColor(...grey);
+  doc.setLineWidth(0.3);
+  doc.line(margin, y, W - margin, y);
+  y += 5;
+  doc.setFontSize(7);
+  doc.setTextColor(80, 80, 80);
+  doc.text('Tarikh cetak: ' + new Date().toLocaleDateString('ms-MY') + '  |  No. Rujukan: ' + state.refId, margin, y);
 
   doc.save('Borang_Permohonan_' + state.refId + '.pdf');
   showToast('PDF berjaya dimuat turun!', 'success');
