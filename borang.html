@@ -1489,6 +1489,19 @@ textarea.form-control { resize: vertical; min-height: 80px; }
       <p class="card-subtitle">Maklumat pendaftaran syarikat dan pegawai yang bertanggungjawab.</p>
 
       <div class="form-section">
+        <div class="section-heading">BUTIRAN PEMOHON</div>
+        <div class="form-row cols-2">
+          <div class="form-group">
+            <label class="form-label">NAMA LENGKAP PEMOHON <span class="req">*</span></label>
+            <input type="text" class="form-control" id="nama_lengkap_pemohon" placeholder="Nama penuh seperti dalam kad pengenalan">
+          </div>
+          <div class="form-group">
+            <label class="form-label">NOMBOR KAD PENGENALAN <span class="req">*</span></label>
+            <input type="text" class="form-control" id="no_kad_pengenal" placeholder="xxxxxx-xx-xxxx" maxlength="14">
+          </div>
+        </div>
+      </div>
+      <div class="form-section">
         <div class="section-heading">Butiran Perniagaan / Perusahaan</div>
         <div class="form-row">
           <div class="form-group">
@@ -2818,6 +2831,8 @@ async function submitPermohonan() {
       emel_syarikat:        val('emel_syarikat'),
       modal_berbayar:       parseFloat(document.getElementById('modal_berbayar').value) || null,
       modal_pusingan:       parseFloat(document.getElementById('modal_pusingan').value) || null,
+      nama_lengkap_pemohon: val('nama_lengkap_pemohon'),
+      no_kad_pengenal:     val('no_kad_pengenal'),
       jualan_tahunan:       jualan,
       proksi_nama:          val('proksi_nama'),
       proksi_ic:            val('proksi_ic'),
@@ -3060,6 +3075,11 @@ function downloadPDF() {
   row('Aktiviti Perniagaan', val('aktiviti_perniagaan'));
   y += 3;
 
+  sectionTitle('B. BUTIRAN PEMOHON');
+  row('Nama Lengkap Pemohon', val('nama_lengkap_pemohon'));
+  row('Nombor KAD Pengenal', val('no_kad_pengenal'));
+  y += 3;
+  
   sectionTitle('B. BUTIRAN PERNIAGAAN');
   row('Nama Entiti', val('nama_entiti'));
   row('No. Pendaftaran', val('no_pendaftaran'));
