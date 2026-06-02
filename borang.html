@@ -4854,9 +4854,13 @@ async function runIsiPintar() {
     <h3 id="isi-pintar-title">Isi Pintar</h3>
     <p class="panel-sub">Muat naik IC dan Sijil SSM anda. AI akan membaca dan mengisi borang secara automatik.</p>
 
+    <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px 14px;font-size:0.78rem;color:#1e40af;margin-bottom:12px;">
+      ℹ️ <strong>Isi Pintar hanya untuk bacaan automatik.</strong> Muka depan IC mengandungi semua maklumat yang diperlukan (nama, no. IC, alamat). Muka belakang akan diminta semasa muat naik dokumen di Langkah 5.
+    </div>
+
     <div class="upload-zone" id="zone-ic">
       <input type="file" id="file-ic" accept="image/*" onchange="onIpFileSelected('ic', this)">
-      <span class="upload-zone-label">Kad Pengenalan (MyKad)</span>
+      <span class="upload-zone-label">🪪 MyKad — <strong>Muka Depan (Hadapan) Sahaja</strong></span>
       <span class="upload-zone-sub">JPG atau PNG sahaja — max 5MB</span>
       <span class="file-name" id="fname-ic"></span>
     </div>
