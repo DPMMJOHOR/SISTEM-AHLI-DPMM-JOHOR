@@ -1168,6 +1168,67 @@ textarea.form-control { resize: vertical; min-height: 80px; }
 }
 .btn-remove-file:hover { opacity: 1; }
 
+/* ========== ISI PINTAR — SSM GUIDANCE & CHECKLIST ========== */
+.ip-guidance-box {
+  background: #f0fdf4;
+  border: 1.5px solid #86efac;
+  border-radius: 9px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  font-size: 0.8rem;
+}
+.ip-guidance-title {
+  font-weight: 700;
+  color: #15803d;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.ip-fasal-badge {
+  background: #15803d;
+  color: #fff;
+  font-size: 0.68rem;
+  padding: 2px 7px;
+  border-radius: 8px;
+  font-weight: 700;
+}
+.ip-doc-list {
+  margin: 4px 0 8px 16px;
+  padding: 0;
+  color: #166534;
+  line-height: 1.7;
+}
+.ip-guidance-tip {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-top: 4px;
+  border-top: 1px solid #bbf7d0;
+  padding-top: 6px;
+}
+.ip-ssm-checklist {
+  background: #fefce8;
+  border: 1.5px solid #fde047;
+  border-radius: 9px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  font-size: 0.82rem;
+}
+.ip-ssm-checklist-title {
+  font-weight: 700;
+  color: #854d0e;
+  margin-bottom: 8px;
+}
+.ip-ssm-check-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  color: #44403c;
+  cursor: pointer;
+}
+.ip-ssm-check-item input { width: 16px; height: 16px; cursor: pointer; accent-color: #15803d; }
+
 /* ========== IC UPLOAD GROUP ========== */
 .ic-upload-group {
   border: 1.5px solid var(--navy-light);
@@ -4607,11 +4668,46 @@ window.addEventListener('DOMContentLoaded', () => {
    ISI PINTAR — SMART DOCUMENT AUTO-FILL
    ============================================================ */
 
-const _ip = { icFile: null, ssmFile: null };
+const _ip = { icFile: null, ssmFile: null, allSsmDocs: [], ssmDocKeys: [] };
 
 function openIsiPintar() {
+  renderIpSsmGuidance();
   document.getElementById('isi-pintar-overlay').classList.add('active');
   document.body.style.overflow = 'hidden';
+}
+
+function renderIpSsmGuidance() {
+  const fasal = state.fasal;
+  const condDocs = DOCS_CONDITIONAL[fasal] || [];
+  // All SSM-relevant docs for this fasal
+  const allSsmDocs = [
+    { key: 'profil_ssm', label: 'Profil Korporat SSM (E-Info) Terkini' },
+    ...condDocs
+  ];
+  _ip.allSsmDocs = allSsmDocs;
+  _ip.ssmDocKeys = ['profil_ssm']; // profil_ssm ticked by default
+
+  // Guidance block — insert before zone-ssm if not already there
+  let guidanceEl = document.getElementById('ip-ssm-guidance');
+  if (!guidanceEl) {
+    guidanceEl = document.createElement('div');
+    guidanceEl.id = 'ip-ssm-guidance';
+    const zoneSsm = document.getElementById('zone-ssm');
+    zoneSsm.parentNode.insertBefore(guidanceEl, zoneSsm);
+  }
+  let docListHtml = allSsmDocs.map(d => `<li>${d.label}</li>`).join('');
+  guidanceEl.innerHTML = `
+    <div class="ip-guidance-box">
+      <div class="ip-guidance-title">📋 Dokumen SSM Diperlukan
+        ${fasal ? `<span class="ip-fasal-badge">Fasal ${fasal}</span>` : ''}
+      </div>
+      <ul class="ip-doc-list">${docListHtml}</ul>
+      <div class="ip-guidance-tip">💡 Jika semua dokumen ini <strong>telah digabungkan dalam 1 fail kompilasi</strong>, muat naik fail tersebut dan tandakan kandungannya selepas memilih fail.</div>
+    </div>`;
+
+  // Hide checklist until file is chosen
+  let checklistEl = document.getElementById('ip-ssm-checklist');
+  if (checklistEl) checklistEl.style.display = 'none';
 }
 
 function closeIsiPintar() {
@@ -4619,6 +4715,7 @@ function closeIsiPintar() {
   document.body.style.overflow = '';
   _ip.icFile = null;
   _ip.ssmFile = null;
+  _ip.ssmDocKeys = [];
   document.getElementById('file-ic').value = '';
   document.getElementById('file-ssm').value = '';
   document.getElementById('zone-ic').classList.remove('has-file');
@@ -4630,6 +4727,8 @@ function closeIsiPintar() {
   document.getElementById('isi-pintar-loading').classList.remove('active');
   document.getElementById('isi-pintar-error').classList.remove('active');
   document.getElementById('isi-pintar-actions').style.display = 'flex';
+  const checklistEl = document.getElementById('ip-ssm-checklist');
+  if (checklistEl) checklistEl.style.display = 'none';
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -4644,8 +4743,9 @@ document.addEventListener('DOMContentLoaded', function() {
 function onIpFileSelected(type, input) {
   const file = input.files[0];
   if (!file) return;
-  if (file.size > 5 * 1024 * 1024) {
-    showIpError('Fail terlalu besar. Saiz maksimum adalah 5MB.');
+  const maxBytes = type === 'ssm' ? 10 * 1024 * 1024 : 5 * 1024 * 1024;
+  if (file.size > maxBytes) {
+    showIpError(`Fail terlalu besar. Saiz maksimum adalah ${type === 'ssm' ? '10' : '5'}MB.`);
     input.value = '';
     return;
   }
@@ -4657,8 +4757,47 @@ function onIpFileSelected(type, input) {
     _ip.ssmFile = file;
     document.getElementById('zone-ssm').classList.add('has-file');
     document.getElementById('fname-ssm').textContent = '\u2713 ' + file.name;
+    renderIpSsmChecklist(file.name);
   }
   updateIpAnalyzeBtn();
+}
+
+function renderIpSsmChecklist(fileName) {
+  const allDocs = _ip.allSsmDocs;
+  if (!allDocs || allDocs.length === 0) return;
+
+  let checklistEl = document.getElementById('ip-ssm-checklist');
+  if (!checklistEl) {
+    checklistEl = document.createElement('div');
+    checklistEl.id = 'ip-ssm-checklist';
+    checklistEl.className = 'ip-ssm-checklist';
+    const zoneSsm = document.getElementById('zone-ssm');
+    zoneSsm.parentNode.insertBefore(checklistEl, zoneSsm.nextSibling);
+  }
+
+  const itemsHtml = allDocs.map((d, i) => {
+    const isDefault = d.key === 'profil_ssm';
+    return `<label class="ip-ssm-check-item">
+      <input type="checkbox" id="ipchk-${d.key}" value="${d.key}" ${isDefault ? 'checked' : ''}
+             onchange="updateIpSsmDocKeys()">
+      ${d.label}
+    </label>`;
+  }).join('');
+
+  checklistEl.innerHTML = `
+    <div class="ip-ssm-checklist-title">📂 Fail "${fileName}" mengandungi:</div>
+    <p style="font-size:0.76rem;color:#92400e;margin:0 0 8px">Tandakan semua dokumen yang terkandung dalam fail ini. Ia akan diisi secara automatik di Langkah 5.</p>
+    ${itemsHtml}`;
+  checklistEl.style.display = 'block';
+
+  // Sync initial checked state
+  updateIpSsmDocKeys();
+}
+
+function updateIpSsmDocKeys() {
+  _ip.ssmDocKeys = Array.from(
+    document.querySelectorAll('#ip-ssm-checklist input[type=checkbox]:checked')
+  ).map(el => el.value);
 }
 
 function updateIpAnalyzeBtn() {
@@ -4839,12 +4978,23 @@ async function runIsiPintar() {
         file: _ip.icFile, name: _ip.icFile.name, url: null, fromIsiPintar: true
       };
     }
+    // Carry SSM file to every doc slot the user confirmed in the checklist
+    if (_ip.ssmFile && _ip.ssmDocKeys.length > 0) {
+      _ip.ssmDocKeys.forEach(key => {
+        state.uploadedFiles[key] = {
+          file: _ip.ssmFile, name: _ip.ssmFile.name, url: null, fromIsiPintar: true
+        };
+      });
+    }
     closeIsiPintar();
     mapExtractedToForm(icData, ssmData);
     startFormWithBusinessType();
     var count = state.autoFilledFields.length;
-    if (count > 0 && typeof showToast === 'function') {
-      showToast(count + ' ruangan telah diisi automatik. IC Depan telah disimpan untuk Langkah 5.', 'success');
+    var ssmCount = _ip.ssmDocKeys.length;
+    if (typeof showToast === 'function') {
+      var msg = count + ' ruangan diisi automatik.';
+      if (ssmCount > 0) msg += ' ' + ssmCount + ' slot dokumen SSM disimpan untuk Langkah 5.';
+      showToast(msg, 'success');
     }
   } catch(err) {
     document.getElementById('isi-pintar-loading').classList.remove('active');
