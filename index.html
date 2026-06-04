@@ -2329,7 +2329,20 @@ function doLogin() {
   var btn = document.querySelector('.login-btn');
   if (btn) { btn.textContent = '⏳ Mengesahkan...'; btn.disabled = true; }
   // Load users from Supabase first, then authenticate
+  // Fallback: if Supabase fails (e.g. RLS 401), continue with hardcoded USERS list
   _loadUsersFromSupabase().then(function() {
+    var user = null;
+    for (var i=0; i<USERS.length; i++) {
+      if (USERS[i].id.toLowerCase() === uid.toLowerCase() && USERS[i].pass === pwd) { user = USERS[i]; break; }
+    }
+    if (!user) {
+      if (btn) { btn.textContent = 'LOG MASUK'; btn.disabled = false; }
+      document.getElementById('login-err').style.display = 'block';
+      return;
+    }
+    _continueLogin(user, btn);
+  }).catch(function(err) {
+    console.warn('_loadUsersFromSupabase failed, using hardcoded fallback:', err.message || err);
     var user = null;
     for (var i=0; i<USERS.length; i++) {
       if (USERS[i].id.toLowerCase() === uid.toLowerCase() && USERS[i].pass === pwd) { user = USERS[i]; break; }
