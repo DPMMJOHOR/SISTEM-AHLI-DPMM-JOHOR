@@ -144,7 +144,12 @@ const SUPABASE_URL = 'https://lzoloupwtqmjyupvofhh.supabase.co';
 const SUPABASE_KEY = (typeof CONFIG !== 'undefined' && CONFIG.SUPABASE_KEY) ? CONFIG.SUPABASE_KEY : '';
 const EMAILJS_KEY  = (typeof CONFIG !== 'undefined' && CONFIG.EMAILJS_KEY) ? CONFIG.EMAILJS_KEY : '';
 const { createClient } = supabase;
-const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+function isKeyConfigured(k) {
+  return !!(k && !k.startsWith('YOUR_') && k.length > 20);
+}
+
+const sb = isKeyConfigured(SUPABASE_KEY) ? createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
 function setCard(id, status, msg) {
   const card = document.getElementById('card-' + id);
@@ -182,13 +187,17 @@ async function runAllChecks() {
 
   // 2. Supabase DB
   try {
-    const { data, error } = await sb.from('PERMOHONAN_AHLI').select('id', { count: 'exact', head: true });
-    if (error) {
-      let hint = '';
-      if (error.message.includes('row-level security')) hint = '<br><strong>Arahan:</strong> Semak RLS policies — anonymous users perlu dibenarkan <code>SELECT</code> pada jadual <code>PERMOHONAN_AHLI</code>.';
-      setCard('supabase', 'fail', 'Tidak dapat mencapai jadual <code>PERMOHONAN_AHLI</code>: ' + error.message + hint);
+    if (!sb) {
+      setCard('supabase', 'fail', 'Sambungan Supabase tidak dapat diwujudkan kerana <code>SUPABASE_KEY</code> tidak ditetapkan atau tidak sah.<br><strong>Arahan:</strong> Pastikan <code>config-local.js</code> dijana dengan kunci yang betul (GitHub Secrets + Actions).');
     } else {
-      setCard('supabase', 'pass', 'Sambungan ke Supabase OK. Jadual <code>PERMOHONAN_AHLI</code> boleh diakses.');
+      const { data, error } = await sb.from('PERMOHONAN_AHLI').select('id', { count: 'exact', head: true });
+      if (error) {
+        let hint = '';
+        if (error.message.includes('row-level security')) hint = '<br><strong>Arahan:</strong> Semak RLS policies — anonymous users perlu dibenarkan <code>SELECT</code> pada jadual <code>PERMOHONAN_AHLI</code>.';
+        setCard('supabase', 'fail', 'Tidak dapat mencapai jadual <code>PERMOHONAN_AHLI</code>: ' + error.message + hint);
+      } else {
+        setCard('supabase', 'pass', 'Sambungan ke Supabase OK. Jadual <code>PERMOHONAN_AHLI</code> boleh diakses.');
+      }
     }
   } catch (e) {
     setCard('supabase', 'fail', 'Ralat sambungan: ' + e.message);
@@ -196,13 +205,17 @@ async function runAllChecks() {
 
   // 3. Storage bucket
   try {
-    const { data, error } = await sb.storage.from('permohonan-dokumen').list('', { limit: 1 });
-    if (error) {
-      let hint = '';
-      if (error.message.includes('row-level security') || error.message.includes('Permission')) hint = '<br><strong>Arahan:</strong> Bucket policy perlu membenarkan <code>anon</code> role untuk read/write.';
-      setCard('storage', 'fail', 'Bucket <code>permohonan-dokumen</code> tidak dapat diakses: ' + error.message + hint);
+    if (!sb) {
+      setCard('storage', 'fail', 'Sambungan Supabase tidak dapat diwujudkan kerana <code>SUPABASE_KEY</code> tidak ditetapkan atau tidak sah.<br><strong>Arahan:</strong> Pastikan <code>config-local.js</code> dijana dengan kunci yang betul (GitHub Secrets + Actions).');
     } else {
-      setCard('storage', 'pass', 'Bucket <code>permohonan-dokumen</code> sedia untuk muat naik fail.');
+      const { data, error } = await sb.storage.from('permohonan-dokumen').list('', { limit: 1 });
+      if (error) {
+        let hint = '';
+        if (error.message.includes('row-level security') || error.message.includes('Permission')) hint = '<br><strong>Arahan:</strong> Bucket policy perlu membenarkan <code>anon</code> role untuk read/write.';
+        setCard('storage', 'fail', 'Bucket <code>permohonan-dokumen</code> tidak dapat diakses: ' + error.message + hint);
+      } else {
+        setCard('storage', 'pass', 'Bucket <code>permohonan-dokumen</code> sedia untuk muat naik fail.');
+      }
     }
   } catch (e) {
     setCard('storage', 'fail', 'Ralat storage: ' + e.message);
@@ -223,11 +236,15 @@ async function runAllChecks() {
 
   // 5. New applications count
   try {
-    const { count, error } = await sb.from('PERMOHONAN_AHLI').select('*', { count: 'exact', head: true }).eq('status', 'MOHON_BARU');
-    if (error) {
-      setCard('count', 'fail', 'Gagal mendapatkan jumlah permohonan: ' + error.message);
+    if (!sb) {
+      setCard('count', 'fail', 'Sambungan Supabase tidak dapat diwujudkan kerana <code>SUPABASE_KEY</code> tidak ditetapkan atau tidak sah.<br><strong>Arahan:</strong> Pastikan <code>config-local.js</code> dijana dengan kunci yang betul (GitHub Secrets + Actions).');
     } else {
-      setCard('count', 'pass', `Terdapat <strong>${count ?? 0}</strong> permohonan baharu (status <code>MOHON_BARU</code>) dalam sistem.`);
+      const { count, error } = await sb.from('PERMOHONAN_AHLI').select('*', { count: 'exact', head: true }).eq('status', 'MOHON_BARU');
+      if (error) {
+        setCard('count', 'fail', 'Gagal mendapatkan jumlah permohonan: ' + error.message);
+      } else {
+        setCard('count', 'pass', `Terdapat <strong>${count ?? 0}</strong> permohonan baharu (status <code>MOHON_BARU</code>) dalam sistem.`);
+      }
     }
   } catch (e) {
     setCard('count', 'fail', 'Ralat: ' + e.message);
