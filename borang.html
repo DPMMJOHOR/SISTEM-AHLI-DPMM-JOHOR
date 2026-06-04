@@ -2816,7 +2816,7 @@ const { createClient } = supabase;
 
 // Guard against placeholder values — prevents API calls when keys are not yet configured
 function isKeyConfigured(k) {
-  return !!(k && !k.startsWith('YOUR_') && k.length > 20);
+  return !!(k && !k.startsWith('YOUR_') && k.length > 10);
 }
 
 // Validate keys BEFORE creating client

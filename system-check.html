@@ -146,7 +146,7 @@ const EMAILJS_KEY  = (typeof CONFIG !== 'undefined' && CONFIG.EMAILJS_KEY) ? CON
 const { createClient } = supabase;
 
 function isKeyConfigured(k) {
-  return !!(k && !k.startsWith('YOUR_') && k.length > 20);
+  return !!(k && !k.startsWith('YOUR_') && k.length > 10);
 }
 
 const sb = isKeyConfigured(SUPABASE_KEY) ? createClient(SUPABASE_URL, SUPABASE_KEY) : null;
