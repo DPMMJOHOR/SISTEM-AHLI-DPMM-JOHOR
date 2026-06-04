@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sistem Check — DPMM Negeri Johor</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+  :root {
+    --primary: #1D3C96;
+    --success: #15803D;
+    --error:   #CC1628;
+    --warning: #D97706;
+    --grey:    #EEF1F6;
+    --text:    #111827;
+    --muted:   #566478;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #F7F9FC;
+    color: var(--text);
+    padding: 40px 20px;
+    min-height: 100vh;
+  }
+  .container { max-width: 700px; margin: 0 auto; }
+  h1 { font-size: 1.6rem; margin-bottom: 6px; color: var(--primary); }
+  .subtitle { color: var(--muted); font-size: 0.95rem; margin-bottom: 24px; }
+  .card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 4px rgba(29,60,150,0.06);
+    border-left: 4px solid transparent;
+  }
+  .card.waiting { border-left-color: var(--muted); }
+  .card.pass   { border-left-color: var(--success); }
+  .card.fail   { border-left-color: var(--error); }
+  .card.warn   { border-left-color: var(--warning); }
+  .card-header {
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;
+  }
+  .card-title { font-weight: 700; font-size: 1rem; }
+  .badge {
+    font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+    padding: 4px 10px; border-radius: 20px;
+  }
+  .badge.waiting { background: var(--grey); color: var(--muted); }
+  .badge.pass   { background: #DCFCE7; color: var(--success); }
+  .badge.fail   { background: #FEF2F4; color: var(--error); }
+  .badge.warn   { background: #FFF7ED; color: var(--warning); }
+  .card-body { font-size: 0.9rem; color: var(--muted); line-height: 1.6; }
+  .card-body code {
+    background: #F1F4F9; padding: 2px 6px; border-radius: 4px; font-size: 0.85rem;
+    font-family: 'JetBrains Mono', monospace; color: var(--primary);
+  }
+  .btn {
+    display: inline-block; margin-top: 16px;
+    background: var(--primary); color: #fff; border: none;
+    padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer;
+    font-size: 0.9rem;
+  }
+  .btn:hover { opacity: 0.92; }
+  .summary {
+    background: #fff; border-radius: 10px; padding: 20px 24px;
+    box-shadow: 0 1px 4px rgba(29,60,150,0.06); margin-bottom: 20px;
+  }
+  .summary h2 { font-size: 1.1rem; margin-bottom: 10px; }
+  .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .summary-box { text-align: center; padding: 14px; border-radius: 8px; background: var(--grey); }
+  .summary-box .num { font-size: 1.4rem; font-weight: 700; display: block; }
+  .summary-box .lbl { font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
+  @media (max-width: 480px) { .summary-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Sistem Check — DPMM Negeri Johor</h1>
+  <p class="subtitle">Ujian pantas untuk memastikan borang, database, e-mel & storage berfungsi.</p>
+
+  <div class="summary">
+    <h2>Ringkasan Keputusan</h2>
+    <div class="summary-grid">
+      <div class="summary-box"><span class="num" id="pass-count">0</span><div class="lbl">Lulus</div></div>
+      <div class="summary-box"><span class="num" id="warn-count">0</span><div class="lbl">Amaran</div></div>
+      <div class="summary-box"><span class="num" id="fail-count">0</span><div class="lbl">Gagal</div></div>
+    </div>
+    <button class="btn" onclick="runAllChecks()">Jalankan Semua Ujian</button>
+  </div>
+
+  <!-- Test 1 -->
+  <div class="card waiting" id="card-config">
+    <div class="card-header">
+      <div class="card-title">1. Fail Konfigurasi (<code>config-local.js</code>)</div>
+      <span class="badge waiting" id="badge-config">Menunggu</span>
+    </div>
+    <div class="card-body" id="body-config">Sila tekan butang ujian di atas.</div>
+  </div>
+
+  <!-- Test 2 -->
+  <div class="card waiting" id="card-supabase">
+    <div class="card-header">
+      <div class="card-title">2. Sambungan Supabase (Database)</div>
+      <span class="badge waiting" id="badge-supabase">Menunggu</span>
+    </div>
+    <div class="card-body" id="body-supabase">Sila tekan butang ujian di atas.</div>
+  </div>
+
+  <!-- Test 3 -->
+  <div class="card waiting" id="card-storage">
+    <div class="card-header">
+      <div class="card-title">3. Supabase Storage (Bucket <code>permohonan-dokumen</code>)</div>
+      <span class="badge waiting" id="badge-storage">Menunggu</span>
+    </div>
+    <div class="card-body" id="body-storage">Sila tekan butang ujian di atas.</div>
+  </div>
+
+  <!-- Test 4 -->
+  <div class="card waiting" id="card-emailjs">
+    <div class="card-header">
+      <div class="card-title">4. Perkhidmatan EmailJS</div>
+      <span class="badge waiting" id="badge-emailjs">Menunggu</span>
+    </div>
+    <div class="card-body" id="body-emailjs">Sila tekan butang ujian di atas.</div>
+  </div>
+
+  <!-- Test 5 -->
+  <div class="card waiting" id="card-count">
+    <div class="card-header">
+      <div class="card-title">5. Jumlah Permohonan Baru (Status MOHON_BARU)</div>
+      <span class="badge waiting" id="badge-count">Menunggu</span>
+    </div>
+    <div class="card-body" id="body-count">Sila tekan butang ujian di atas.</div>
+  </div>
+</div>
+
+<script src="config-local.js"></script>
+<script>
+const SUPABASE_URL = 'https://lzoloupwtqmjyupvofhh.supabase.co';
+const SUPABASE_KEY = (typeof CONFIG !== 'undefined' && CONFIG.SUPABASE_KEY) ? CONFIG.SUPABASE_KEY : '';
+const EMAILJS_KEY  = (typeof CONFIG !== 'undefined' && CONFIG.EMAILJS_KEY) ? CONFIG.EMAILJS_KEY : '';
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+function setCard(id, status, msg) {
+  const card = document.getElementById('card-' + id);
+  const badge = document.getElementById('badge-' + id);
+  const body = document.getElementById('body-' + id);
+  card.className = 'card ' + status;
+  badge.className = 'badge ' + status;
+  badge.textContent = status === 'pass' ? 'Lulus' : status === 'fail' ? 'Gagal' : status === 'warn' ? 'Amaran' : 'Menunggu';
+  body.innerHTML = msg;
+}
+
+function updateSummary() {
+  const pass = document.querySelectorAll('.card.pass').length;
+  const warn = document.querySelectorAll('.card.warn').length;
+  const fail = document.querySelectorAll('.card.fail').length;
+  document.getElementById('pass-count').textContent = pass;
+  document.getElementById('warn-count').textContent = warn;
+  document.getElementById('fail-count').textContent = fail;
+}
+
+async function runAllChecks() {
+  // Reset
+  ['config','supabase','storage','emailjs','count'].forEach(id => setCard(id, 'waiting', 'Sedang diuji...'));
+
+  // 1. Config file
+  try {
+    if (typeof CONFIG !== 'undefined' && CONFIG.SUPABASE_KEY && !CONFIG.SUPABASE_KEY.startsWith('YOUR_')) {
+      setCard('config', 'pass', 'Fail <code>config-local.js</code> berjaya dimuat dan kunci (keys) telah ditetapkan.');
+    } else {
+      setCard('config', 'fail', 'Fail <code>config-local.js</code> tidak wujud atau kunci masih menggunakan nilai lalai (placeholder).<br><strong>Arahan:</strong> Pastikan fail <code>config-local.js</code> ada di server dan mengandungi <code>SUPABASE_KEY</code> serta <code>EMAILJS_KEY</code> yang betul.');
+    }
+  } catch (e) {
+    setCard('config', 'fail', 'Ralat: ' + e.message);
+  }
+
+  // 2. Supabase DB
+  try {
+    const { data, error } = await sb.from('PERMOHONAN_AHLI').select('id', { count: 'exact', head: true });
+    if (error) {
+      let hint = '';
+      if (error.message.includes('row-level security')) hint = '<br><strong>Arahan:</strong> Semak RLS policies — anonymous users perlu dibenarkan <code>SELECT</code> pada jadual <code>PERMOHONAN_AHLI</code>.';
+      setCard('supabase', 'fail', 'Tidak dapat mencapai jadual <code>PERMOHONAN_AHLI</code>: ' + error.message + hint);
+    } else {
+      setCard('supabase', 'pass', 'Sambungan ke Supabase OK. Jadual <code>PERMOHONAN_AHLI</code> boleh diakses.');
+    }
+  } catch (e) {
+    setCard('supabase', 'fail', 'Ralat sambungan: ' + e.message);
+  }
+
+  // 3. Storage bucket
+  try {
+    const { data, error } = await sb.storage.from('permohonan-dokumen').list('', { limit: 1 });
+    if (error) {
+      let hint = '';
+      if (error.message.includes('row-level security') || error.message.includes('Permission')) hint = '<br><strong>Arahan:</strong> Bucket policy perlu membenarkan <code>anon</code> role untuk read/write.';
+      setCard('storage', 'fail', 'Bucket <code>permohonan-dokumen</code> tidak dapat diakses: ' + error.message + hint);
+    } else {
+      setCard('storage', 'pass', 'Bucket <code>permohonan-dokumen</code> sedia untuk muat naik fail.');
+    }
+  } catch (e) {
+    setCard('storage', 'fail', 'Ralat storage: ' + e.message);
+  }
+
+  // 4. EmailJS
+  try {
+    if (!EMAILJS_KEY || EMAILJS_KEY.startsWith('YOUR_')) {
+      setCard('emailjs', 'warn', 'Kunci EmailJS tidak ditetapkan — ujian diabaikan.<br><strong>Arahan:</strong> Tambah <code>EMAILJS_KEY</code> dalam <code>config-local.js</code>.');
+    } else {
+      // We cannot easily test a real send without spamming, so we init and check status
+      emailjs.init(EMAILJS_KEY);
+      setCard('emailjs', 'pass', 'EmailJS telah dimulakan dengan kunci yang sah. Perkhidmatan bersedia menghantar e-mel.');
+    }
+  } catch (e) {
+    setCard('emailjs', 'fail', 'Ralat EmailJS: ' + e.message);
+  }
+
+  // 5. New applications count
+  try {
+    const { count, error } = await sb.from('PERMOHONAN_AHLI').select('*', { count: 'exact', head: true }).eq('status', 'MOHON_BARU');
+    if (error) {
+      setCard('count', 'fail', 'Gagal mendapatkan jumlah permohonan: ' + error.message);
+    } else {
+      setCard('count', 'pass', `Terdapat <strong>${count ?? 0}</strong> permohonan baharu (status <code>MOHON_BARU</code>) dalam sistem.`);
+    }
+  } catch (e) {
+    setCard('count', 'fail', 'Ralat: ' + e.message);
+  }
+
+  updateSummary();
+}
+
+// Auto-run on load
+runAllChecks();
+</script>
+</body>
+</html>

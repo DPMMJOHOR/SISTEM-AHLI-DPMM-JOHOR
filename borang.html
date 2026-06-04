@@ -2813,15 +2813,23 @@ const GROQ_KEY      = (typeof CONFIG !== 'undefined' && CONFIG.GROQ_KEY) ? CONFI
    INIT
    ============================================================ */
 const { createClient } = supabase;
-const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Guard against placeholder values — prevents API calls when keys are not yet configured
 function isKeyConfigured(k) {
   return !!(k && !k.startsWith('YOUR_') && k.length > 20);
 }
 
+// Validate keys BEFORE creating client
+if (!isKeyConfigured(SUPABASE_KEY)) {
+  console.error('CRITICAL: Supabase key is not configured. Please ensure config-local.js exists and contains a valid SUPABASE_KEY.');
+}
+
+const sb = isKeyConfigured(SUPABASE_KEY) ? createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+
 if (isKeyConfigured(EMAILJS_KEY)) {
   emailjs.init(EMAILJS_KEY);
+} else {
+  console.warn('EmailJS key is not configured. Email notifications will not be sent. Please ensure config-local.js contains a valid EMAILJS_KEY.');
 }
 
 // State permohonan
@@ -3723,6 +3731,11 @@ async function submitPermohonan() {
 
 async function _doSubmit() {
   try {
+    // Guard: Supabase must be configured
+    if (!sb) {
+      throw new Error('Sistem tidak tersedia: Sambungan ke database tidak dapat diwujudkan. Sila pastikan fail config-local.js dikonfigurasi dengan betul.');
+    }
+
     // 1. Generate reference number in new format
     const tempRef = await generateReferenceNumber();
 
