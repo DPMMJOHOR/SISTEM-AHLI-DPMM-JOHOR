@@ -1965,11 +1965,13 @@ tr.row-unpaid { background: #fff0f0 !important; }
     <div class="statsbar" id="permohonan-kpi" style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:20px;"></div>
 
     <!-- SUB-TAB NAV -->
-    <div style="display:flex;gap:0;margin-bottom:16px;background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden;border:1px solid var(--gray1);">
-      <button id="ptab-MOHON_BARU"     class="ptab-btn active" onclick="switchPermohonanTab('MOHON_BARU')"     style="flex:1;padding:12px 8px;border:none;background:none;font-family:var(--sans);font-size:12px;font-weight:700;letter-spacing:.06em;cursor:pointer;border-bottom:3px solid transparent;color:var(--muted);transition:all .2s;">MOHON BARU</button>
-      <button id="ptab-SEMAKAN_DOKUMEN" class="ptab-btn"       onclick="switchPermohonanTab('SEMAKAN_DOKUMEN')" style="flex:1;padding:12px 8px;border:none;background:none;font-family:var(--sans);font-size:12px;font-weight:700;letter-spacing:.06em;cursor:pointer;border-bottom:3px solid transparent;color:var(--muted);transition:all .2s;">SEMAKAN DOKUMEN</button>
-      <button id="ptab-MESYUARAT_JKP"  class="ptab-btn"       onclick="switchPermohonanTab('MESYUARAT_JKP')"  style="flex:1;padding:12px 8px;border:none;background:none;font-family:var(--sans);font-size:12px;font-weight:700;letter-spacing:.06em;cursor:pointer;border-bottom:3px solid transparent;color:var(--muted);transition:all .2s;">MESYUARAT JKP</button>
-      <button id="ptab-DITOLAK"        class="ptab-btn"       onclick="switchPermohonanTab('DITOLAK')"        style="flex:1;padding:12px 8px;border:none;background:none;font-family:var(--sans);font-size:12px;font-weight:700;letter-spacing:.06em;cursor:pointer;border-bottom:3px solid transparent;color:var(--muted);transition:all .2s;">DITOLAK</button>
+    <div style="display:flex;gap:0;margin-bottom:16px;background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden;border:1px solid var(--gray1);flex-wrap:wrap;">
+      <button id="ptab-BARU"                   class="ptab-btn active" onclick="switchPermohonanTab('BARU')"                   style="flex:1;min-width:120px;padding:12px 8px;border:none;background:none;font-family:var(--sans);font-size:12px;font-weight:700;letter-spacing:.06em;cursor:pointer;border-bottom:3px solid transparent;color:var(--muted);transition:all .2s;">BARU</button>
+      <button id="ptab-DOKUMEN_LENGKAP"        class="ptab-btn"       onclick="switchPermohonanTab('DOKUMEN_LENGKAP')"        style="flex:1;min-width:120px;padding:12px 8px;border:none;background:none;font-family:var(--sans);font-size:12px;font-weight:700;letter-spacing:.06em;cursor:pointer;border-bottom:3px solid transparent;color:var(--muted);transition:all .2s;">LENGKAP</button>
+      <button id="ptab-DOKUMEN_TIDAK_LENGKAP"  class="ptab-btn"       onclick="switchPermohonanTab('DOKUMEN_TIDAK_LENGKAP')"  style="flex:1;min-width:120px;padding:12px 8px;border:none;background:none;font-family:var(--sans);font-size:12px;font-weight:700;letter-spacing:.06em;cursor:pointer;border-bottom:3px solid transparent;color:var(--muted);transition:all .2s;">TIDAK LENGKAP</button>
+      <button id="ptab-DALAM_PERHATIAN"        class="ptab-btn"       onclick="switchPermohonanTab('DALAM_PERHATIAN')"        style="flex:1;min-width:120px;padding:12px 8px;border:none;background:none;font-family:var(--sans);font-size:12px;font-weight:700;letter-spacing:.06em;cursor:pointer;border-bottom:3px solid transparent;color:var(--muted);transition:all .2s;">PERHATIAN</button>
+      <button id="ptab-LULUS"                 class="ptab-btn"       onclick="switchPermohonanTab('LULUS')"                 style="flex:1;min-width:120px;padding:12px 8px;border:none;background:none;font-family:var(--sans);font-size:12px;font-weight:700;letter-spacing:.06em;cursor:pointer;border-bottom:3px solid transparent;color:var(--muted);transition:all .2s;">LULUS</button>
+      <button id="ptab-TIDAK_LULUS"           class="ptab-btn"       onclick="switchPermohonanTab('TIDAK_LULUS')"           style="flex:1;min-width:120px;padding:12px 8px;border:none;background:none;font-family:var(--sans);font-size:12px;font-weight:700;letter-spacing:.06em;cursor:pointer;border-bottom:3px solid transparent;color:var(--muted);transition:all .2s;">TIDAK LULUS</button>
     </div>
 
     <!-- TABLE -->
@@ -2246,27 +2248,62 @@ async function _loadUsersFromSupabase() {
       .select('*')
       .eq('aktif', true)
       .order('id', { ascending: true });
-    if (error || !data || !data.length) return;
+    if (error) {
+      var isRLS = error.message && error.message.toLowerCase().includes('row-level security');
+      var is401 = error.code === '401' || error.status === 401 || (error.message && error.message.includes('401'));
+      if (isRLS || is401) {
+        console.warn('[DPMM_USERS] RLS policy memblok akses anon — menggunakan senarai pengguna lalai (fallback).\nSQL fix: CREATE POLICY "anon_read_active_users" ON DPMM_USERS FOR SELECT TO anon USING (aktif = true);');
+      } else {
+        console.warn('_loadUsersFromSupabase failed:', error.message || error);
+      }
+      return;
+    }
+    if (!data || !data.length) return;
     USERS = data.map(function(row) {
       return { id: row.user_id, name: row.nama, pass: row.kata_laluan, role: row.peranan };
     });
-  } catch(e) { console.warn('_loadUsersFromSupabase failed:', e); }
+    console.log('[DPMM_USERS] Loaded ' + USERS.length + ' users from Supabase.');
+  } catch(e) {
+    console.warn('_loadUsersFromSupabase failed:', e.message || e);
+  }
+}
+
+function _isRLSError(err) {
+  return err && (err.message || '').toLowerCase().includes('row-level security') || err.code === '401' || err.status === 401 || (err.message || '').includes('401');
 }
 
 async function _saveUserToSupabase(u, isNew) {
   var payload = { user_id: u.id, nama: u.name, kata_laluan: u.pass, peranan: u.role, aktif: true, updated_at: new Date().toISOString() };
   if (isNew) {
     var res = await supabaseClient.from('DPMM_USERS').insert([payload]);
-    if (res.error) console.warn('User insert error:', res.error.message);
+    if (res.error) {
+      if (_isRLSError(res.error)) {
+        alert('⚠ RLS policy memblok operasi INSERT ke DPMM_USERS.\nTambah policy di Supabase SQL Editor:\nCREATE POLICY "anon_insert_users" ON DPMM_USERS FOR INSERT TO anon WITH CHECK (true);');
+      } else {
+        console.warn('User insert error:', res.error.message);
+      }
+    }
   } else {
     var res = await supabaseClient.from('DPMM_USERS').update(payload).eq('user_id', u.id);
-    if (res.error) console.warn('User update error:', res.error.message);
+    if (res.error) {
+      if (_isRLSError(res.error)) {
+        alert('⚠ RLS policy memblok operasi UPDATE ke DPMM_USERS.\nTambah policy di Supabase SQL Editor:\nCREATE POLICY "anon_update_users" ON DPMM_USERS FOR UPDATE TO anon USING (true) WITH CHECK (true);');
+      } else {
+        console.warn('User update error:', res.error.message);
+      }
+    }
   }
 }
 
 async function _deleteUserFromSupabase(uid) {
   var res = await supabaseClient.from('DPMM_USERS').update({ aktif: false }).eq('user_id', uid);
-  if (res.error) console.warn('User delete error:', res.error.message);
+  if (res.error) {
+    if (_isRLSError(res.error)) {
+      alert('⚠ RLS policy memblok operasi UPDATE ke DPMM_USERS.\nTambah policy di Supabase SQL Editor:\nCREATE POLICY "anon_update_users" ON DPMM_USERS FOR UPDATE TO anon USING (true) WITH CHECK (true);');
+    } else {
+      console.warn('User delete error:', res.error.message);
+    }
+  }
 }
 var YURAN_TABLE = {"6.2.1": [50, 50], "6.2.2": [50, 50], "6.2.3": [200, 150], "6.2.4": [200, 150], "6.2.5": [200, 150], "6.2.6": [200, 150], "6.3.1": [500, 100], "6.3.2": [1000, 1000], "6.3.3": [1000, 1000], "6.3.4": [1000, 1000], "6.3.5": [1000, 1000], "6.3.6": [10, 10], "6.4.1": [1000, 500], "6.4.2": [500, 250], "6.5.1": [0, 0]};
 function getYuranDaftar(f){return YURAN_TABLE[f]?YURAN_TABLE[f][0]:0;}
@@ -5076,18 +5113,19 @@ function exportImage() {
    PERMOHONAN AHLI — MODUL LENGKAP
    ══════════════════════════════════════════════════════════════════ */
 var permohonanData      = [];   // semua rekod dari Supabase
-var permohonanTab       = 'MOHON_BARU'; // tab aktif
+var permohonanTab       = 'BARU'; // tab aktif
 var permohonanSelected  = null; // rekod yang sedang dibuka
 var permohonanPage      = 1;
 var permohonanPerPage   = 15;
 
 /* ── STATUS CONFIG ───────────────────────────────────────── */
 var P_STATUS = {
-  MOHON_BARU:       { label: 'Mohon Baru',        color: '#339AF0', bg: '#E8F4FF' },
-  SEMAKAN_DOKUMEN:  { label: 'Semakan Dokumen',    color: '#F59F00', bg: '#FFF9DB' },
-  MESYUARAT_JKP:    { label: 'Mesyuarat JKP',      color: '#9C36B5', bg: '#F8F0FF' },
-  DILULUSKAN:       { label: 'Diluluskan',          color: '#00D4A0', bg: '#E0FBF5' },
-  DITOLAK:          { label: 'Ditolak',             color: '#FF6B6B', bg: '#FFEAEA' },
+  BARU:                { label: 'Baru',                 color: '#339AF0', bg: '#E8F4FF' },
+  DOKUMEN_LENGKAP:     { label: 'Dokumen Lengkap',      color: '#00D4A0', bg: '#E0FBF5' },
+  DOKUMEN_TIDAK_LENGKAP:{ label: 'Dokumen Tidak Lengkap',color: '#F59F00', bg: '#FFF9DB' },
+  DALAM_PERHATIAN:     { label: 'Dalam Perhatian',      color: '#9C36B5', bg: '#F8F0FF' },
+  LULUS:               { label: 'Lulus',                color: '#15803D', bg: '#DCFCE7' },
+  TIDAK_LULUS:         { label: 'Tidak Lulus',          color: '#FF6B6B', bg: '#FFEAEA' },
 };
 
 /* ── JENIS LABEL ─────────────────────────────────────────── */
@@ -5112,7 +5150,7 @@ async function loadPermohonanData() {
 /* ── UPDATE SIDEBAR BADGE ────────────────────────────────── */
 function updatePermohonanBadge() {
   var pending = permohonanData.filter(function(p){
-    return p.status === 'MOHON_BARU' || p.status === 'SEMAKAN_DOKUMEN' || p.status === 'MESYUARAT_JKP';
+    return p.status === 'BARU' || p.status === 'DOKUMEN_LENGKAP' || p.status === 'DOKUMEN_TIDAK_LENGKAP' || p.status === 'DALAM_PERHATIAN';
   }).length;
   var badge = document.getElementById('permohonan-badge');
   if (!badge) return;
@@ -5133,18 +5171,19 @@ async function renderPermohonanPage() {
 
 /* ── KPI CARDS ───────────────────────────────────────────── */
 function renderPermohonanKPI() {
-  var counts = { MOHON_BARU:0, SEMAKAN_DOKUMEN:0, MESYUARAT_JKP:0, DILULUSKAN:0, DITOLAK:0 };
+  var counts = { BARU:0, DOKUMEN_LENGKAP:0, DOKUMEN_TIDAK_LENGKAP:0, DALAM_PERHATIAN:0, LULUS:0, TIDAK_LULUS:0 };
   permohonanData.forEach(function(p){ if (counts[p.status] !== undefined) counts[p.status]++; });
 
   var container = document.getElementById('permohonan-kpi');
   if (!container) return;
 
   var cards = [
-    { key:'MOHON_BARU',      icon:'🔵', label:'Mohon Baru' },
-    { key:'SEMAKAN_DOKUMEN', icon:'🟡', label:'Semakan Dokumen' },
-    { key:'MESYUARAT_JKP',   icon:'🟣', label:'Mesyuarat JKP' },
-    { key:'DILULUSKAN',      icon:'🟢', label:'Diluluskan' },
-    { key:'DITOLAK',         icon:'🔴', label:'Ditolak' },
+    { key:'BARU',                   icon:'🔵', label:'Baru' },
+    { key:'DOKUMEN_LENGKAP',        icon:'🟢', label:'Dokumen Lengkap' },
+    { key:'DOKUMEN_TIDAK_LENGKAP',  icon:'🟡', label:'Dokumen Tidak Lengkap' },
+    { key:'DALAM_PERHATIAN',        icon:'🟣', label:'Dalam Perhatian' },
+    { key:'LULUS',                  icon:'✅', label:'Lulus' },
+    { key:'TIDAK_LULUS',            icon:'🔴', label:'Tidak Lulus' },
   ];
 
   container.innerHTML = cards.map(function(c){
@@ -5158,12 +5197,10 @@ function renderPermohonanKPI() {
 
 /* ── SUB-TAB SWITCH ──────────────────────────────────────── */
 function switchPermohonanTab(tab) {
-  permohonanTab  = tab === 'DILULUSKAN' ? 'MOHON_BARU' : tab; // DILULUSKAN not in sub-tabs
-  if (tab === 'DILULUSKAN') permohonanTab = 'MOHON_BARU';
-  else permohonanTab = tab;
+  permohonanTab = tab;
 
   // Update active tab button styling
-  var tabs = ['MOHON_BARU','SEMAKAN_DOKUMEN','MESYUARAT_JKP','DITOLAK'];
+  var tabs = ['BARU','DOKUMEN_LENGKAP','DOKUMEN_TIDAK_LENGKAP','DALAM_PERHATIAN','LULUS','TIDAK_LULUS'];
   tabs.forEach(function(t){
     var btn = document.getElementById('ptab-' + t);
     if (!btn) return;
@@ -5179,10 +5216,12 @@ function switchPermohonanTab(tab) {
   });
 
   var labelMap = {
-    MOHON_BARU:      'Mohon Baru',
-    SEMAKAN_DOKUMEN: 'Semakan Dokumen',
-    MESYUARAT_JKP:   'Menunggu Keputusan Mesyuarat JKP',
-    DITOLAK:         'Permohonan Ditolak',
+    BARU:                  'Permohonan Baru',
+    DOKUMEN_LENGKAP:       'Dokumen Lengkap',
+    DOKUMEN_TIDAK_LENGKAP: 'Dokumen Tidak Lengkap',
+    DALAM_PERHATIAN:       'Dalam Perhatian',
+    LULUS:                 'Permohonan Lulus',
+    TIDAK_LULUS:           'Permohonan Tidak Lulus',
   };
   var el = document.getElementById('permohonan-tab-label');
   if (el) el.textContent = labelMap[permohonanTab] || '';
@@ -5250,20 +5289,19 @@ function buildPermohonanActionBtns(p) {
   var html = '<button data-action="open-permohonan" data-id="' + id + '" style="padding:5px 12px;border-radius:6px;border:1.5px solid var(--gray2);background:var(--white);font-size:11px;font-weight:600;cursor:pointer;margin-right:4px;">👁 Semak</button>';
 
   if (isAdm) {
-    if (st === 'MOHON_BARU') {
-      html += '<button data-action="update-status" data-id="' + id + '" data-status="SEMAKAN_DOKUMEN" style="padding:5px 12px;border-radius:6px;border:none;background:var(--warning-lt);color:#a06000;font-size:11px;font-weight:700;cursor:pointer;">▶ Mula Semakan</button>';
-    }
-    if (st === 'SEMAKAN_DOKUMEN') {
-      html += '<button data-action="update-status" data-id="' + id + '" data-status="MESYUARAT_JKP" style="padding:5px 12px;border-radius:6px;border:none;background:#F8F0FF;color:#7a1fa2;font-size:11px;font-weight:700;cursor:pointer;margin-right:4px;">🟣 Bawa ke JKP</button>';
-      html += '<button data-action="open-tolak" data-id="' + id + '" style="padding:5px 12px;border-radius:6px;border:none;background:var(--danger-lt);color:var(--danger);font-size:11px;font-weight:700;cursor:pointer;">✗ Tolak</button>';
-    }
-    if (st === 'MESYUARAT_JKP') {
-      html += '<button data-action="open-lulus" data-id="' + id + '" style="padding:5px 12px;border-radius:6px;border:none;background:var(--success-lt);color:#006b50;font-size:11px;font-weight:700;cursor:pointer;margin-right:4px;">✅ Luluskan</button>';
-      html += '<button data-action="open-tolak" data-id="' + id + '" style="padding:5px 12px;border-radius:6px;border:none;background:var(--danger-lt);color:var(--danger);font-size:11px;font-weight:700;cursor:pointer;">✗ Tolak</button>';
-    }
-    if (st === 'DITOLAK') {
-      html += '<button data-action="update-status" data-id="' + id + '" data-status="MOHON_BARU" style="padding:5px 12px;border-radius:6px;border:none;background:var(--primary-lt);color:var(--primary);font-size:11px;font-weight:700;cursor:pointer;">↺ Buka Semula</button>';
-    }
+    // Status dropdown for admin
+    var opts = [
+      { value: 'BARU',                  label: 'Baru' },
+      { value: 'DOKUMEN_LENGKAP',       label: 'Dokumen Lengkap' },
+      { value: 'DOKUMEN_TIDAK_LENGKAP', label: 'Dokumen Tidak Lengkap' },
+      { value: 'DALAM_PERHATIAN',       label: 'Dalam Perhatian' },
+      { value: 'LULUS',                 label: 'Lulus' },
+      { value: 'TIDAK_LULUS',           label: 'Tidak Lulus' },
+    ];
+    html += '<select data-action="change-status" data-id="' + id + '" style="padding:5px 8px;border-radius:6px;border:1.5px solid var(--gray2);background:var(--white);font-size:11px;font-weight:600;cursor:pointer;font-family:var(--sans);color:var(--text);" onchange="if(this.value){updatePermohonanStatus(' + id + ',this.value);this.value=\'\';}">'
+      + '<option value="">Ubah Status ▾</option>'
+      + opts.map(function(o){ return '<option value="' + o.value + '"' + (o.value === st ? ' selected disabled' : '') + '>' + o.label + '</option>'; }).join('')
+      + '</select>';
   }
   return html;
 }
@@ -5284,15 +5322,19 @@ function openPermohonanModal(id) {
   var isAdm = currentUser && currentUser.role === 'admin';
   var footerBtns = '';
   if (isAdm) {
-    if (p.status === 'MOHON_BARU') footerBtns += '<button data-action="update-status-close" data-id="' + id + '" data-status="SEMAKAN_DOKUMEN" style="padding:9px 18px;border:none;border-radius:7px;background:var(--warning);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--sans);">▶ Mula Semakan</button>';
-    if (p.status === 'SEMAKAN_DOKUMEN') {
-      footerBtns += '<button data-action="update-status-close" data-id="' + id + '" data-status="MESYUARAT_JKP" style="padding:9px 18px;border:none;border-radius:7px;background:#9C36B5;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--sans);margin-right:6px;">🟣 Bawa ke JKP</button>';
-      footerBtns += '<button data-action="close-then-tolak" data-id="' + id + '" style="padding:9px 18px;border:none;border-radius:7px;background:var(--danger);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--sans);">✗ Tolak</button>';
-    }
-    if (p.status === 'MESYUARAT_JKP') {
-      footerBtns += '<button data-action="close-then-lulus" data-id="' + id + '" style="padding:9px 18px;border:none;border-radius:7px;background:var(--success);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--sans);margin-right:6px;">✅ Luluskan</button>';
-      footerBtns += '<button data-action="close-then-tolak" data-id="' + id + '" style="padding:9px 18px;border:none;border-radius:7px;background:var(--danger);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--sans);">✗ Tolak</button>';
-    }
+    var opts = [
+      { value: 'BARU',                  label: 'Baru' },
+      { value: 'DOKUMEN_LENGKAP',       label: 'Dokumen Lengkap' },
+      { value: 'DOKUMEN_TIDAK_LENGKAP', label: 'Dokumen Tidak Lengkap' },
+      { value: 'DALAM_PERHATIAN',       label: 'Dalam Perhatian' },
+      { value: 'LULUS',                 label: 'Lulus' },
+      { value: 'TIDAK_LULUS',           label: 'Tidak Lulus' },
+    ];
+    footerBtns = '<select id="modal-status-select" style="padding:8px 12px;border-radius:7px;border:1.5px solid var(--gray2);background:var(--white);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--sans);color:var(--text);margin-right:8px;">'
+      + '<option value="">Ubah Status...</option>'
+      + opts.map(function(o){ return '<option value="' + o.value + '"' + (o.value === p.status ? ' selected disabled' : '') + '>' + o.label + '</option>'; }).join('')
+      + '</select>'
+      + '<button data-action="apply-status" data-id="' + id + '" style="padding:9px 18px;border:none;border-radius:7px;background:var(--primary);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--sans);">💾 Simpan</button>';
   }
   document.getElementById('modal-action-btns').innerHTML = footerBtns;
 
@@ -5463,7 +5505,7 @@ function buildTabAdmin(p) {
 
   function row(l,v){ return '<div style="display:flex;padding:8px 0;border-bottom:1px solid var(--gray1);gap:12px;"><span style="min-width:160px;font-size:12px;font-weight:700;color:var(--muted);">' + l + '</span><span style="font-size:13px;font-weight:600;">' + (v || '—') + '</span></div>'; }
 
-  var approvedSection = p.status === 'DILULUSKAN'
+  var approvedSection = p.status === 'LULUS'
     ? '<div style="background:var(--success-lt);border-radius:9px;padding:14px 18px;margin-bottom:16px;">'
       + '<div style="font-size:12px;font-weight:700;color:#006b50;margin-bottom:8px;">✅ Maklumat Kelulusan</div>'
       + row('No. Ahli', p.no_ahli)
@@ -5473,7 +5515,7 @@ function buildTabAdmin(p) {
       + '</div>'
     : '';
 
-  var rejectedSection = p.status === 'DITOLAK'
+  var rejectedSection = p.status === 'TIDAK_LULUS'
     ? '<div style="background:var(--danger-lt);border-radius:9px;padding:14px 18px;margin-bottom:16px;">'
       + '<div style="font-size:12px;font-weight:700;color:var(--danger);margin-bottom:8px;">✗ Maklumat Penolakan</div>'
       + row('Sebab Tolak', p.sebab_tolak)
@@ -5499,9 +5541,9 @@ function buildTabAdmin(p) {
 async function updatePermohonanStatus(id, newStatus) {
   var payload = { status: newStatus };
   var now = new Date().toISOString();
-  if (newStatus === 'SEMAKAN_DOKUMEN')  payload.semakan_at  = now;
-  if (newStatus === 'MESYUARAT_JKP')   payload.jkp_at      = now;
-  if (newStatus === 'DITOLAK' || newStatus === 'DILULUSKAN') {
+  if (newStatus === 'DOKUMEN_LENGKAP' || newStatus === 'DOKUMEN_TIDAK_LENGKAP')  payload.semakan_at  = now;
+  if (newStatus === 'DALAM_PERHATIAN')   payload.jkp_at      = now;
+  if (newStatus === 'LULUS' || newStatus === 'TIDAK_LULUS') {
     payload.keputusan_at  = now;
     payload.keputusan_oleh = currentUser ? currentUser.name : '—';
   }
@@ -5571,7 +5613,7 @@ async function confirmLulus() {
   // 3. Update PERMOHONAN_AHLI
   var now = new Date().toISOString();
   await supabaseClient.from('PERMOHONAN_AHLI').update({
-    status:              'DILULUSKAN',
+    status:              'LULUS',
     no_ahli:             noAhli,
     tarikh_kuatkuasa:    tarikh,
     no_minit_mesyuarat:  minit,
@@ -5620,7 +5662,7 @@ async function confirmTolak() {
 
   var now = new Date().toISOString();
   await supabaseClient.from('PERMOHONAN_AHLI').update({
-    status:           'DITOLAK',
+    status:           'TIDAK_LULUS',
     sebab_tolak:      sebab,
     pulangan_yuran:   pulangan,
     maklumat_pulangan: maklumat || null,
@@ -5629,9 +5671,9 @@ async function confirmTolak() {
   }).eq('id', p.id);
 
   closeTolakModal();
-  permohonanTab = 'DITOLAK';
+  permohonanTab = 'TIDAK_LULUS';
   await renderPermohonanPage();
-  switchPermohonanTab('DITOLAK');
+  switchPermohonanTab('TIDAK_LULUS');
   showSnack && showSnack('Permohonan ' + (p.ref_id || '') + ' telah ditolak.');
 }
 
@@ -5700,6 +5742,12 @@ document.addEventListener('DOMContentLoaded', function(){
     } else if (action === 'close-then-lulus') {
       closePermohonanModal();
       openLulusModal(id);
+    } else if (action === 'apply-status') {
+      var sel = document.getElementById('modal-status-select');
+      if (sel && sel.value) {
+        updatePermohonanStatus(id, sel.value);
+        closePermohonanModal();
+      }
     } else if (action === 'close-permohonan') {
       closePermohonanModal();
     } else if (action === 'switch-modal-tab') {

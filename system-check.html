@@ -129,9 +129,18 @@
   </div>
 
   <!-- Test 5 -->
+  <div class="card waiting" id="card-users">
+    <div class="card-header">
+      <div class="card-title">5. Akses Jadual Pengguna (<code>DPMM_USERS</code>)</div>
+      <span class="badge waiting" id="badge-users">Menunggu</span>
+    </div>
+    <div class="card-body" id="body-users">Sila tekan butang ujian di atas.</div>
+  </div>
+
+  <!-- Test 6 -->
   <div class="card waiting" id="card-count">
     <div class="card-header">
-      <div class="card-title">5. Jumlah Permohonan Baru (Status MOHON_BARU)</div>
+      <div class="card-title">6. Jumlah Permohonan Baru (Status BARU)</div>
       <span class="badge waiting" id="badge-count">Menunggu</span>
     </div>
     <div class="card-body" id="body-count">Sila tekan butang ujian di atas.</div>
@@ -172,7 +181,7 @@ function updateSummary() {
 
 async function runAllChecks() {
   // Reset
-  ['config','supabase','storage','emailjs','count'].forEach(id => setCard(id, 'waiting', 'Sedang diuji...'));
+  ['config','supabase','storage','emailjs','users','count'].forEach(id => setCard(id, 'waiting', 'Sedang diuji...'));
 
   // 1. Config file
   try {
@@ -234,16 +243,37 @@ async function runAllChecks() {
     setCard('emailjs', 'fail', 'Ralat EmailJS: ' + e.message);
   }
 
-  // 5. New applications count
+  // 5. DPMM_USERS check
+  try {
+    if (!sb) {
+      setCard('users', 'fail', 'Sambungan Supabase tidak dapat diwujudkan kerana <code>SUPABASE_KEY</code> tidak ditetapkan atau tidak sah.');
+    } else {
+      const { data, error } = await sb.from('DPMM_USERS').select('id').eq('aktif', true).limit(1);
+      if (error) {
+        let hint = '';
+        const isRLS = (error.message || '').toLowerCase().includes('row-level security') || error.code === '401' || error.status === 401;
+        if (isRLS) {
+          hint = '<br><strong>Arahan:</strong> Tambah RLS policy untuk <code>anon</code> role pada jadual <code>DPMM_USERS</code>.<br><code>CREATE POLICY "anon_read_active_users" ON DPMM_USERS FOR SELECT TO anon USING (aktif = true);</code>';
+        }
+        setCard('users', 'warn', 'Jadual <code>DPMM_USERS</code> tidak dapat diakses: ' + error.message + hint);
+      } else {
+        setCard('users', 'pass', 'Jadual <code>DPMM_USERS</code> boleh diakses. Pengguna akan dimuat dari pangkalan data.');
+      }
+    }
+  } catch (e) {
+    setCard('users', 'warn', 'Ralat: ' + e.message);
+  }
+
+  // 6. New applications count
   try {
     if (!sb) {
       setCard('count', 'fail', 'Sambungan Supabase tidak dapat diwujudkan kerana <code>SUPABASE_KEY</code> tidak ditetapkan atau tidak sah.<br><strong>Arahan:</strong> Pastikan <code>config-local.js</code> dijana dengan kunci yang betul (GitHub Secrets + Actions).');
     } else {
-      const { count, error } = await sb.from('PERMOHONAN_AHLI').select('*', { count: 'exact', head: true }).eq('status', 'MOHON_BARU');
+      const { count, error } = await sb.from('PERMOHONAN_AHLI').select('*', { count: 'exact', head: true }).eq('status', 'BARU');
       if (error) {
         setCard('count', 'fail', 'Gagal mendapatkan jumlah permohonan: ' + error.message);
       } else {
-        setCard('count', 'pass', `Terdapat <strong>${count ?? 0}</strong> permohonan baharu (status <code>MOHON_BARU</code>) dalam sistem.`);
+        setCard('count', 'pass', `Terdapat <strong>${count ?? 0}</strong> permohonan baharu (status <code>BARU</code>) dalam sistem.`);
       }
     }
   } catch (e) {
