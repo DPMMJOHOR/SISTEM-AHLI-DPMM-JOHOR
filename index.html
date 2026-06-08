@@ -5117,6 +5117,7 @@ var permohonanTab       = 'BARU'; // tab aktif
 var permohonanSelected  = null; // rekod yang sedang dibuka
 var permohonanPage      = 1;
 var permohonanPerPage   = 15;
+var permohonanLoadError = null;  // set when Supabase SELECT fails
 
 /* ── STATUS CONFIG ───────────────────────────────────────── */
 var P_STATUS = {
@@ -5133,16 +5134,30 @@ var JENIS_LABEL_MAP = { A:'Ahli Biasa', S:'Ahli Bersekutu', G:'Ahli Bergabung', 
 
 /* ── LOAD DATA FROM SUPABASE ─────────────────────────────── */
 async function loadPermohonanData() {
+  permohonanLoadError = null;
+  var tbody = document.getElementById('permohonan-tbody');
+  if (tbody) tbody.innerHTML = '<tr><td colspan="7" style="padding:40px;text-align:center;color:var(--muted)">⏳ Memuatkan data...</td></tr>';
   try {
     var { data, error } = await supabaseClient
       .from('PERMOHONAN_AHLI')
       .select('*')
       .order('submitted_at', { ascending: false });
-    if (error) throw error;
-    permohonanData = data || [];
+    if (error) {
+      console.error('[PERMOHONAN] Supabase SELECT error:', error);
+      permohonanLoadError = error.message || JSON.stringify(error);
+      if (tbody) tbody.innerHTML = '<tr><td colspan="7" style="padding:40px;text-align:center;color:var(--danger);font-size:12px;">⚠️ Gagal muatkan data: ' + permohonanLoadError + '<br><span style="color:var(--muted);font-size:11px;">Sila periksa RLS policy di Supabase untuk jadual PERMOHONAN_AHLI</span></td></tr>';
+      permohonanData = [];
+      return;
+    }
+    permohonanData = (data || []).map(function(r){ if (r.status) r.status = r.status.toUpperCase(); return r; });
+    console.log('[PERMOHONAN] Loaded', permohonanData.length, 'records.');
+    if (permohonanData.length > 0) console.log('[PERMOHONAN] Sample:', JSON.stringify(permohonanData[0]).substring(0, 200));
+    else console.warn('[PERMOHONAN] 0 records — jika ada permohonan, check RLS policy: CREATE POLICY "anon_select_permohonan" ON "PERMOHONAN_AHLI" FOR SELECT TO anon USING (true);');
     updatePermohonanBadge();
   } catch(e) {
-    console.error('Permohonan load error:', e);
+    console.error('[PERMOHONAN] Exception:', e);
+    permohonanLoadError = e.message || String(e);
+    if (tbody) tbody.innerHTML = '<tr><td colspan="7" style="padding:40px;text-align:center;color:var(--danger);font-size:12px;">⚠️ Ralat: ' + permohonanLoadError + '</td></tr>';
     permohonanData = [];
   }
 }
@@ -5232,6 +5247,7 @@ function switchPermohonanTab(tab) {
 
 /* ── TABLE RENDER ────────────────────────────────────────── */
 function renderPermohonanTable() {
+  if (permohonanLoadError) return; // error already shown in tbody by loadPermohonanData
   var search = (document.getElementById('permohonan-search') || {}).value || '';
   search = search.toLowerCase().trim();
 
@@ -5253,7 +5269,20 @@ function renderPermohonanTable() {
   if (!tbody) return;
 
   if (paged.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" style="padding:40px;text-align:center;color:var(--muted)">Tiada rekod ditemui.</td></tr>';
+    var emptyMsg;
+    if (permohonanData.length === 0) {
+      emptyMsg = '<tr><td colspan="7" style="padding:40px;text-align:center;">'
+        + '<div style="font-size:14px;font-weight:700;color:var(--muted);margin-bottom:8px;">⚠️ Tiada data dimuatkan</div>'
+        + '<div style="font-size:12px;color:var(--muted);">Kemungkinan RLS Supabase menyekat SELECT. Jalankan SQL ini di Supabase:</div>'
+        + '<code style="display:block;margin:10px auto;padding:8px 14px;background:#f5f5f5;border-radius:6px;font-size:11px;max-width:600px;text-align:left;">'
+        + 'CREATE POLICY &quot;anon_select_permohonan&quot; ON &quot;PERMOHONAN_AHLI&quot; FOR SELECT TO anon USING (true);'
+        + '</code>'
+        + '<a href="https://supabase.com/dashboard/project/lzoloupwtqmjyupvofhh/database/policies" target="_blank" style="font-size:12px;color:var(--primary);">Buka Supabase Policies →</a>'
+        + '</td></tr>';
+    } else {
+      emptyMsg = '<tr><td colspan="7" style="padding:40px;text-align:center;color:var(--muted)">Tiada rekod ditemui.</td></tr>';
+    }
+    tbody.innerHTML = emptyMsg;
     document.getElementById('permohonan-pagination').innerHTML = '';
     return;
   }

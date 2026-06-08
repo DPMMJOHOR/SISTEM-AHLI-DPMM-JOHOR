@@ -2803,8 +2803,9 @@ textarea:focus-visible {
 const SUPABASE_URL  = 'https://lzoloupwtqmjyupvofhh.supabase.co';
 const SUPABASE_KEY  = (typeof CONFIG !== 'undefined' && CONFIG.SUPABASE_KEY) ? CONFIG.SUPABASE_KEY : 'YOUR_SUPABASE_KEY_HERE'; // anon key — BETUL untuk borang awam. JANGAN gantikan dengan service role key.
 const EMAILJS_SVC   = 'service_a3kt2zm';
-const EMAILJS_TPL   = 'template_553fkme';
-const EMAILJS_KEY   = (typeof CONFIG !== 'undefined' && CONFIG.EMAILJS_KEY) ? CONFIG.EMAILJS_KEY : 'YOUR_EMAILJS_KEY_HERE';
+const EMAILJS_TPL_ADMIN = 'template_vud79xb';
+const EMAILJS_TPL_APPLICANT = 'template_553fkme';
+const EMAILJS_KEY   = (typeof CONFIG !== 'undefined' && CONFIG.EMAILJS_KEY) ? CONFIG.EMAILJS_KEY : 'Bq94zNa6cDvdTUCU8';
 const ADMIN_EMAIL   = 'dpmmnj.pengurusan@gmail.com';
 const ADMIN_WHATSAPP = '60175592722'; // No. WhatsApp Urusetia DPMM Negeri Johor
 const GROQ_KEY      = (typeof CONFIG !== 'undefined' && CONFIG.GROQ_KEY) ? CONFIG.GROQ_KEY : 'YOUR_GROQ_KEY_HERE';  // Add Groq API key — https://console.groq.com (shared with chatbot)
@@ -3966,7 +3967,7 @@ async function _doSubmit() {
 
     // 6a. EmailJS — Notifikasi kepada Setiausaha (admin)
     try {
-      await emailjs.send(EMAILJS_SVC, EMAILJS_TPL, {
+      await emailjs.send(EMAILJS_SVC, EMAILJS_TPL_ADMIN, {
         to_email:    ADMIN_EMAIL,
         ref_id:      finalRef,
         jenis:       JENIS_LABEL[jenis] + ' (' + jenis + ')',
@@ -3988,7 +3989,7 @@ async function _doSubmit() {
     const pemohonEmail = val('proksi_emel') || val('emel_syarikat');
     if (pemohonEmail) {
       try {
-        await emailjs.send(EMAILJS_SVC, EMAILJS_TPL, {
+        await emailjs.send(EMAILJS_SVC, EMAILJS_TPL_APPLICANT, {
           to_email:    pemohonEmail,
           ref_id:      finalRef,
           jenis:       JENIS_LABEL[jenis] + ' (' + jenis + ')',

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>EmailJS Test - DPMM Johor</title>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<style>
+body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }
+.container { background: #f5f5f5; padding: 20px; border-radius: 8px; }
+h1 { color: #1D3C96; }
+.test-section { margin: 20px 0; padding: 15px; background: white; border-radius: 6px; border: 1px solid #ddd; }
+button { background: #1D3C96; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+button:hover { background: #152D7A; }
+button:disabled { background: #ccc; cursor: not-allowed; }
+input, textarea { width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #ddd; border-radius: 4px; }
+label { font-weight: bold; display: block; margin-top: 10px; }
+#status { margin-top: 20px; padding: 10px; border-radius: 4px; }
+.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+.info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>EmailJS Test - DPMM Johor</h1>
+  <p>Halaman ini untuk menguji fungsi penghantaran e-mel melalui EmailJS.</p>
+  
+  <div class="test-section">
+    <h2>Konfigurasi EmailJS</h2>
+    <label>Service ID:</label>
+    <input type="text" id="serviceId" value="service_a3kt2zm" readonly>
+    <label>Admin Template ID:</label>
+    <input type="text" id="templateIdAdmin" value="template_vud79xb" readonly>
+    <label>Applicant Template ID:</label>
+    <input type="text" id="templateIdApplicant" value="template_553fkme" readonly>
+    <label>Public Key:</label>
+    <input type="text" id="publicKey" value="Bq94zNa6cDvdTUCU8" readonly>
+    <label>From Email (configured in EmailJS dashboard):</label>
+    <input type="email" id="fromEmail" value="dpmmnj@gmail.com" readonly>
+    <button onclick="initEmailJS()">Initialize EmailJS</button>
+  </div>
+  
+  <div class="test-section">
+    <h2>Ujian 1: E-mel Admin</h2>
+    <label>Admin Email:</label>
+    <input type="email" id="adminEmail" value="dpmmnj.pengurusan@gmail.com">
+    <label>Reference ID:</label>
+    <input type="text" id="refId" value="DPMMJHR/TEST/2026/06-TEST001">
+    <label>Recipient Field Name (check EmailJS template):</label>
+    <select id="recipientField">
+      <option value="to_email">to_email</option>
+      <option value="to">to</option>
+      <option value="email">email</option>
+      <option value="recipient_email">recipient_email</option>
+    </select>
+    <button onclick="sendAdminEmail()" id="btnAdmin">Hantar E-mel Admin</button>
+  </div>
+  
+  <div class="test-section">
+    <h2>Ujian 2: E-mel Pemohon</h2>
+    <label>Pemohon Email:</label>
+    <input type="email" id="applicantEmail" value="test@example.com">
+    <label>Reference ID:</label>
+    <input type="text" id="refId2" value="DPMMJHR/TEST/2026/06-TEST001">
+    <button onclick="sendApplicantEmail()" id="btnApplicant">Hantar E-mel Pemohon</button>
+  </div>
+  
+  <div id="status"></div>
+</div>
+
+<script>
+let isInitialized = false;
+
+function showStatus(message, type) {
+  const statusDiv = document.getElementById('status');
+  statusDiv.className = type;
+  statusDiv.textContent = message;
+  console.log(`[${type.toUpperCase()}] ${message}`);
+}
+
+function initEmailJS() {
+  try {
+    const publicKey = document.getElementById('publicKey').value;
+    emailjs.init(publicKey);
+    isInitialized = true;
+    showStatus('EmailJS initialized successfully!', 'success');
+    document.getElementById('btnAdmin').disabled = false;
+    document.getElementById('btnApplicant').disabled = false;
+  } catch (error) {
+    showStatus('Failed to initialize EmailJS: ' + error.message, 'error');
+  }
+}
+
+async function sendAdminEmail() {
+  if (!isInitialized) {
+    showStatus('Please initialize EmailJS first!', 'error');
+    return;
+  }
+  
+  const serviceId = document.getElementById('serviceId').value;
+  const templateId = document.getElementById('templateIdAdmin').value;
+  const adminEmail = document.getElementById('adminEmail').value;
+  const refId = document.getElementById('refId').value;
+  const recipientField = document.getElementById('recipientField').value;
+  
+  showStatus('Sending admin email...', 'info');
+  
+  try {
+    const params = {
+      ref_id: refId,
+      jenis: 'Ahli Biasa (A)',
+      fasal: '6.2.1',
+      nama_entiti: 'Test Enterprise Sdn Bhd',
+      proksi_nama: 'Test User',
+      proksi_hp: '0123456789',
+      proksi_emel: 'test@example.com',
+      jumlah: 'RM 100',
+      tarikh: new Date().toLocaleDateString('ms-MY'),
+      ip_address: '127.0.0.1',
+      pesan: '[TEST EMAIL] This is a test email from EmailJS test page.',
+    };
+    // Add recipient email using the selected field name
+    params[recipientField] = adminEmail;
+    
+    const response = await emailjs.send(serviceId, templateId, params);
+    
+    showStatus('Admin email sent successfully! Response: ' + JSON.stringify(response), 'success');
+  } catch (error) {
+    const errorMsg = error.message || error.text || JSON.stringify(error);
+    showStatus('Failed to send admin email: ' + errorMsg, 'error');
+    console.error('EmailJS error:', error);
+    console.error('Error details:', JSON.stringify(error, null, 2));
+  }
+}
+
+async function sendApplicantEmail() {
+  if (!isInitialized) {
+    showStatus('Please initialize EmailJS first!', 'error');
+    return;
+  }
+  
+  const serviceId = document.getElementById('serviceId').value;
+  const templateId = document.getElementById('templateIdApplicant').value;
+  const applicantEmail = document.getElementById('applicantEmail').value;
+  const refId = document.getElementById('refId2').value;
+  
+  showStatus('Sending applicant email...', 'info');
+  
+  try {
+    const response = await emailjs.send(serviceId, templateId, {
+      to_email: applicantEmail,
+      ref_id: refId,
+      jenis: 'Ahli Biasa (A)',
+      fasal: '6.2.1',
+      nama_entiti: 'Test Enterprise Sdn Bhd',
+      proksi_nama: 'Test User',
+      proksi_hp: '0123456789',
+      proksi_emel: applicantEmail,
+      jumlah: 'RM 100',
+      tarikh: new Date().toLocaleDateString('ms-MY'),
+      ip_address: '127.0.0.1',
+      pesan: 'Terima kasih kerana menghantar permohonan keahlian DPMM Negeri Johor. [TEST EMAIL]',
+    });
+    
+    showStatus('Applicant email sent successfully! Response: ' + JSON.stringify(response), 'success');
+  } catch (error) {
+    const errorMsg = error.message || error.text || JSON.stringify(error);
+    showStatus('Failed to send applicant email: ' + errorMsg, 'error');
+    console.error('EmailJS error:', error);
+    console.error('Error details:', JSON.stringify(error, null, 2));
+  }
+}
+
+// Auto-initialize on page load
+window.onload = function() {
+  initEmailJS();
+};
+</script>
+</body>
+</html>
