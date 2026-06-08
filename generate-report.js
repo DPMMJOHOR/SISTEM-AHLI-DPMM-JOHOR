@@ -109,8 +109,8 @@ function card(slide, icon, title, lines, x, y, w, h, bgColor) {
 
   // three system pills
   const pills = [
-    { t: 'Borang Permohonan', bg: C.purpleMid },
-    { t: 'Sistem Ahli', bg: C.purpleMid },
+    { t: 'Borang Permohonan DPMM', bg: C.purpleMid },
+    { t: 'Sistem Ahli DPMM', bg: C.purpleMid },
     { t: 'Sistem Mesyuarat', bg: '4A2060' },
   ];
   pills.forEach((p, i) => {
@@ -161,8 +161,8 @@ function card(slide, icon, title, lines, x, y, w, h, bgColor) {
   s.addShape(SH.rect, { x:0.55,y:1.32,w:9.45,h:0.05, fill:{color:C.gold}, line:{color:C.gold} });
 
   sectionLabel(s, 'MUKA SURAT 2 DARIPADA 5', 0.75, 0.1);
-  s.addText('borang.html', { x:0.75,y:0.28,w:7,h:0.55, fontSize:28, bold:true, color:C.purple, fontFace:FONT_HEAD });
-  s.addText('Borang Permohonan Keahlian DPMM (Awam)', { x:0.75,y:0.82,w:7,h:0.35, fontSize:12, color:C.muted, fontFace:FONT_BODY });
+  s.addText('Borang Permohonan DPMM', { x:0.75,y:0.28,w:7,h:0.55, fontSize:28, bold:true, color:C.purple, fontFace:FONT_HEAD });
+  s.addText('Borang Permohonan Keahlian — Akses Awam Tanpa Login', { x:0.75,y:0.82,w:7,h:0.35, fontSize:12, color:C.muted, fontFace:FONT_BODY });
   badge(s, '✅ OPERASI', 7.8, 0.5, C.green, C.white);
 
   // URL
@@ -216,8 +216,8 @@ function card(slide, icon, title, lines, x, y, w, h, bgColor) {
   s.addShape(SH.rect, { x:0.55,y:1.32,w:9.45,h:0.05, fill:{color:C.gold}, line:{color:C.gold} });
 
   sectionLabel(s, 'MUKA SURAT 3 DARIPADA 5', 0.75, 0.1);
-  s.addText('index.html', { x:0.75,y:0.28,w:7,h:0.55, fontSize:28, bold:true, color:C.purple, fontFace:FONT_HEAD });
-  s.addText('SISTEM-AHLI — Panel Pengurusan Pentadbir (Login Diperlukan)', { x:0.75,y:0.82,w:8,h:0.35, fontSize:12, color:C.muted, fontFace:FONT_BODY });
+  s.addText('Sistem Ahli DPMM', { x:0.75,y:0.28,w:7,h:0.55, fontSize:28, bold:true, color:C.purple, fontFace:FONT_HEAD });
+  s.addText('Panel Pengurusan Pentadbir — Login Diperlukan', { x:0.75,y:0.82,w:8,h:0.35, fontSize:12, color:C.muted, fontFace:FONT_BODY });
   badge(s, '✅ OPERASI', 7.8, 0.5, C.green, C.white);
 
   s.addText('🌐  https://dpmmjohor.github.io/SISTEM-AHLI-DPMM-JOHOR/', {
