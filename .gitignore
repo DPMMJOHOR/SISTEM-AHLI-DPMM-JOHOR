@@ -1,3 +1,7 @@
+# Node
+node_modules/
+package-lock.json
+
 # Local configuration files with API keys
 config-local.js
 config.js
