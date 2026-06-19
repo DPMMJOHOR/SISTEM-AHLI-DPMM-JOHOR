@@ -3967,19 +3967,49 @@ async function _doSubmit() {
 
     // 6a. EmailJS — Notifikasi kepada Setiausaha (admin)
     try {
+      const DOC_LABEL = {
+        ic_pemohon_depan:    'IC Pemohon (Hadapan)',
+        ic_pemohon_belakang: 'IC Pemohon (Belakang)',
+        ssm_sijil:           'Sijil Pendaftaran SSM',
+        profil_ssm:          'Profil SSM Terkini',
+        ssm_maklumat:        'Maklumat SSM',
+        m_aa:                'Memorandum & Artikel Asosiasi',
+        borang_9:            'Borang 9',
+        borang_24:           'Borang 24',
+        borang_49:           'Borang 49',
+        sijil_profesional:   'Sijil Profesional',
+        surat_kebenaran:     'Surat Kebenaran',
+        sijil_perbadanan:    'Sijil Perbadanan',
+        surat_pelantikan:    'Surat Pelantikan',
+        sijil_koperasi:      'Sijil Koperasi',
+        senarai_lembaga:     'Senarai Ahli Lembaga',
+        surat_proksi:        'Surat Proksi',
+        insolvensi_entiti:   'Akuan Insolvensi (Entiti)',
+        insolvensi_pemohon:  'Akuan Insolvensi (Pemohon)',
+        gambar_1:            'Gambar Premis 1',
+        gambar_2:            'Gambar Premis 2',
+        tambahan:            'Dokumen Tambahan',
+        slip:                'Bukti Bayaran',
+      };
+      const dokumenLines = Object.entries(uploadedUrls)
+        .filter(([, url]) => url)
+        .map(([key, url]) => (DOC_LABEL[key] || key) + ':\n' + url)
+        .join('\n\n');
+
       await emailjs.send(EMAILJS_SVC, EMAILJS_TPL_ADMIN, {
-        to_email:    ADMIN_EMAIL,
-        ref_id:      finalRef,
-        jenis:       JENIS_LABEL[jenis] + ' (' + jenis + ')',
-        fasal:       fasalVal,
-        nama_entiti: val('nama_entiti'),
-        proksi_nama: val('proksi_nama') || 'Pemunya Tunggal',
-        proksi_hp:   val('proksi_hp'),
-        proksi_emel: val('proksi_emel') || val('emel_syarikat'),
-        jumlah:      'RM ' + total.toLocaleString(),
-        tarikh:      new Date().toLocaleDateString('ms-MY'),
-        ip_address:  clientIp,
-        pesan:       '[ADMIN ALERT] Permohonan baharu diterima. Sila log masuk ke sistem untuk semakan.',
+        to_email:      ADMIN_EMAIL,
+        ref_id:        finalRef,
+        jenis:         JENIS_LABEL[jenis] + ' (' + jenis + ')',
+        fasal:         fasalVal,
+        nama_entiti:   val('nama_entiti'),
+        proksi_nama:   val('proksi_nama') || 'Pemunya Tunggal',
+        proksi_hp:     val('proksi_hp'),
+        proksi_emel:   val('proksi_emel') || val('emel_syarikat'),
+        jumlah:        'RM ' + total.toLocaleString(),
+        tarikh:        new Date().toLocaleDateString('ms-MY'),
+        ip_address:    clientIp,
+        dokumen_links: dokumenLines || '(Tiada dokumen dimuat naik)',
+        pesan:         '[ADMIN ALERT] Permohonan baharu diterima. Sila log masuk ke sistem untuk semakan.',
       });
     } catch (emailErr) {
       console.warn('EmailJS admin error (non-critical):', emailErr);

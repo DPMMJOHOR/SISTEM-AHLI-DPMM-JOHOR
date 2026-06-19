@@ -2731,7 +2731,13 @@ function showPage(id) {
       ta.innerHTML = '';
     }
   }
-  if (tla) { tla.innerHTML = ''; }
+  if (tla) {
+    if (id === 'permohonan') {
+      tla.innerHTML = '<div id="perm-topbar-stat" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;"></div>';
+    } else {
+      tla.innerHTML = '';
+    }
+  }
   if (id === 'backup') { renderBackupPage(); loadSupabaseBackups(); }
   if (id === 'admin') renderAdminPage();
   if (id === 'ssm') renderSSMPage();
@@ -5208,6 +5214,19 @@ function renderPermohonanKPI() {
       + '<div style="font-size:26px;font-weight:900;color:' + cfg.color + ';font-family:var(--head);">' + counts[c.key] + '</div>'
       + '</div>';
   }).join('');
+
+  // Update topbar counter
+  var stat = document.getElementById('perm-topbar-stat');
+  if (stat) {
+    var total = permohonanData.length;
+    var pending = (counts['BARU'] || 0) + (counts['DOKUMEN_LENGKAP'] || 0) + (counts['DOKUMEN_TIDAK_LENGKAP'] || 0) + (counts['DALAM_PERHATIAN'] || 0);
+    stat.innerHTML =
+      '<span style="font-family:var(--mono);font-size:13px;font-weight:800;color:var(--primary);">' + total + ' Permohonan</span>'
+      + '<span style="font-size:11px;color:var(--muted);">|</span>'
+      + '<span style="font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;background:#FFF4E6;color:#E67700;">⏳ ' + pending + ' Belum Selesai</span>'
+      + '<span style="font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;background:#E0FBF5;color:#0CA678;">✅ ' + (counts['LULUS'] || 0) + ' Lulus</span>'
+      + '<span style="font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;background:#FFEAEA;color:#E03131;">❌ ' + (counts['TIDAK_LULUS'] || 0) + ' Tolak</span>';
+  }
 }
 
 /* ── SUB-TAB SWITCH ──────────────────────────────────────── */
