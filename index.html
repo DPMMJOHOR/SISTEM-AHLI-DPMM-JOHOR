@@ -2012,8 +2012,9 @@ tr.row-unpaid { background: #fff0f0 !important; }
       <div style="font-size:13px;font-weight:800;letter-spacing:.08em;color:var(--primary);text-transform:uppercase;margin-bottom:4px;">QR Code Borang Permohonan</div>
       <div style="font-size:11px;color:var(--muted);margin-bottom:18px;">Imbas untuk mengisi permohonan keahlian DPMM Johor</div>
       <div style="display:inline-block;padding:10px;background:#fff;border:2px solid var(--gray1);border-radius:10px;margin-bottom:16px;">
-        <img id="qr-img" src="" alt="QR Code" style="width:240px;height:240px;display:block;">
+        <canvas id="qr-canvas" width="300" height="300" style="display:block;width:240px;height:240px;"></canvas>
       </div>
+      <div id="qr-loading" style="font-size:11px;color:var(--muted);margin-bottom:6px;">⏳ Menjana QR Code...</div>
       <div style="font-family:var(--mono);font-size:9.5px;color:var(--muted);word-break:break-all;margin-bottom:18px;padding:8px 10px;background:var(--body-bg);border-radius:6px;" id="qr-url-display"></div>
       <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
         <a id="qr-download-btn" download="QR-Borang-DPMM.png" style="padding:8px 18px;background:var(--primary);color:#fff;border-radius:7px;font-size:12px;font-weight:700;text-decoration:none;cursor:pointer;">⬇ Muat Turun PNG</a>
@@ -5374,18 +5375,73 @@ function buildPermohonanActionBtns(p) {
 }
 
 /* ── QR CODE MODAL ───────────────────────────────────────── */
-var BORANG_URL = 'https://dpmmjohor.github.io/SISTEM-AHLI-DPMM-JOHOR/borang.html';
+var BORANG_URL  = 'https://dpmmjohor.github.io/SISTEM-AHLI-DPMM-JOHOR/borang.html';
+var DPMM_LOGO   = 'https://dpmmjohor.github.io/SISTEM-AHLI-DPMM-JOHOR/dpmm-logo-color.png';
+var QR_SIZE     = 300;
 
 function openQRModal() {
-  var qrApi = 'https://api.qrserver.com/v1/create-qr-code/?size=480x480&margin=10&format=png&data=' + encodeURIComponent(BORANG_URL);
-  var img = document.getElementById('qr-img');
-  var dlBtn = document.getElementById('qr-download-btn');
+  var modal  = document.getElementById('modal-qr');
   var urlDiv = document.getElementById('qr-url-display');
-  if (img) img.src = qrApi;
-  if (dlBtn) dlBtn.href = qrApi;
+  var loader = document.getElementById('qr-loading');
   if (urlDiv) urlDiv.textContent = BORANG_URL;
-  var modal = document.getElementById('modal-qr');
-  if (modal) { modal.style.display = 'flex'; }
+  if (loader) loader.style.display = 'block';
+  if (modal)  modal.style.display  = 'flex';
+
+  var qrSrc = 'https://api.qrserver.com/v1/create-qr-code/?size=' + QR_SIZE + 'x' + QR_SIZE
+            + '&margin=10&ecc=H&format=png&data=' + encodeURIComponent(BORANG_URL);
+
+  var qrImg   = new Image();
+  qrImg.crossOrigin = 'anonymous';
+  qrImg.onload = function() {
+    var logoImg = new Image();
+    logoImg.crossOrigin = 'anonymous';
+    logoImg.onload = function() {
+      _drawQRWithLogo(qrImg, logoImg, loader);
+    };
+    logoImg.onerror = function() {
+      _drawQRWithLogo(qrImg, null, loader);
+    };
+    logoImg.src = DPMM_LOGO + '?t=' + Date.now();
+  };
+  qrImg.onerror = function() {
+    if (loader) loader.textContent = '⚠ Gagal memuatkan QR. Semak sambungan internet.';
+  };
+  qrImg.src = qrSrc;
+}
+
+function _drawQRWithLogo(qrImg, logoImg, loader) {
+  var canvas = document.getElementById('qr-canvas');
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+  var s   = QR_SIZE;
+  canvas.width  = s;
+  canvas.height = s;
+
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, s, s);
+  ctx.drawImage(qrImg, 0, 0, s, s);
+
+  if (logoImg) {
+    var logoSize   = Math.round(s * 0.22);
+    var badgeSize  = logoSize + 16;
+    var cx         = Math.round(s / 2);
+    var cy         = Math.round(s / 2);
+
+    ctx.save();
+    ctx.shadowColor   = 'rgba(0,0,0,0.18)';
+    ctx.shadowBlur    = 8;
+    ctx.beginPath();
+    ctx.arc(cx, cy, badgeSize / 2, 0, Math.PI * 2);
+    ctx.fillStyle = '#ffffff';
+    ctx.fill();
+    ctx.restore();
+
+    ctx.drawImage(logoImg, cx - logoSize / 2, cy - logoSize / 2, logoSize, logoSize);
+  }
+
+  var dlBtn = document.getElementById('qr-download-btn');
+  if (dlBtn) dlBtn.href = canvas.toDataURL('image/png');
+  if (loader) loader.style.display = 'none';
 }
 
 function closeQRModal() {
