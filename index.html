@@ -1002,63 +1002,50 @@ tr.row-unpaid { background: #fff0f0 !important; }
   <nav class="sb-nav">
     <div class="sb-section-label">UTAMA</div>
     <div class="nav-item active" onclick="showPage('dashboard')">
-      <span class="nav-icon">&#x1F4CA;</span>
       <span class="nav-text">DASHBOARD</span>
     </div>
     <div class="nav-item" onclick="showPage('senarai')">
-      <span class="nav-icon">&#x1F4CB;</span>
       <span class="nav-text">SENARAI AHLI</span>
     </div>
     <div class="nav-item" onclick="showPage('daerah')">
-      <span class="nav-icon">&#x1F5FA;</span>
       <span class="nav-text">MENGIKUT DAERAH</span>
     </div>
 
     <div class="sb-section-label">PENJEJAKAN</div>
     <div class="nav-item" onclick="showPage('yuran')">
-      <span class="nav-icon">&#x1F4B0;</span>
       <span class="nav-text">YURAN TRACKER</span>
     </div>
     <div class="nav-item" onclick="showPage('ssm')">
-      <span class="nav-icon">&#x1F4C5;</span>
       <span class="nav-text">SSM TRACKER</span>
     </div>
     <div class="nav-item" onclick="showPage('followup')">
-      <span class="nav-icon">&#x1F514;</span>
       <span class="nav-text">FOLLOW UP</span>
       <span class="nav-badge" id="followup-badge">0</span>
     </div>
 
     <div class="sb-section-label">KEAHLIAN</div>
     <div class="nav-item" onclick="showPage('permohonan')">
-      <span class="nav-icon">&#x1F4CB;</span>
       <span class="nav-text">PERMOHONAN AHLI</span>
       <span class="nav-badge" id="permohonan-badge" style="display:none">0</span>
     </div>
 
     <div class="sb-section-label">ALATAN</div>
     <div class="nav-item" onclick="showPage('templates')">
-      <span class="nav-icon">&#x1F4AC;</span>
       <span class="nav-text">TEMPLATE MESEJ</span>
     </div>
     <div class="nav-item" onclick="showPage('workflow')">
-      <span class="nav-icon">&#x2705;</span>
       <span class="nav-text">WORKFLOW</span>
     </div>
     <div class="nav-item" onclick="showPage('backup')">
-      <span class="nav-icon">&#x1F4BE;</span>
       <span class="nav-text">BACK UP</span>
     </div>
     <div class="nav-item" onclick="showPage('dokumen')">
-      <span class="nav-icon">&#x1F4C2;</span>
       <span class="nav-text">DOKUMEN</span>
     </div>
     <div class="nav-item" onclick="showPage('faq')">
-      <span class="nav-icon">&#x2753;</span>
       <span class="nav-text">PANDUAN & FAQ</span>
     </div>
     <div class="nav-item" id="admin-nav-item" onclick="showPage('admin')" style="display:none;">
-      <span class="nav-icon">&#x2699;</span>
       <span class="nav-text">PANEL ADMIN</span>
     </div>
   </nav>
@@ -1961,6 +1948,8 @@ tr.row-unpaid { background: #fff0f0 !important; }
 </div><!-- /user-log-modal -->
 <!-- ══ PERMOHONAN AHLI ══ -->
 <div id="page-permohonan" class="page">
+    <!-- SUMMARY BAR -->
+    <div id="perm-summary-bar" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px;padding:10px 16px;background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow-sm);border:1px solid var(--gray1);min-height:42px;"></div>
     <!-- KPI CARDS -->
     <div class="statsbar" id="permohonan-kpi" style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:20px;"></div>
 
@@ -2751,13 +2740,7 @@ function showPage(id) {
       ta.innerHTML = '';
     }
   }
-  if (tla) {
-    if (id === 'permohonan') {
-      tla.innerHTML = '<div id="perm-topbar-stat" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;"></div>';
-    } else {
-      tla.innerHTML = '';
-    }
-  }
+  if (tla) { tla.innerHTML = ''; }
   if (id === 'backup') { renderBackupPage(); loadSupabaseBackups(); }
   if (id === 'admin') renderAdminPage();
   if (id === 'ssm') renderSSMPage();
@@ -5235,17 +5218,17 @@ function renderPermohonanKPI() {
       + '</div>';
   }).join('');
 
-  // Update topbar counter
-  var stat = document.getElementById('perm-topbar-stat');
+  // Update summary bar (inside page content)
+  var stat = document.getElementById('perm-summary-bar');
   if (stat) {
     var total = permohonanData.length;
     var pending = (counts['BARU'] || 0) + (counts['DOKUMEN_LENGKAP'] || 0) + (counts['DOKUMEN_TIDAK_LENGKAP'] || 0) + (counts['DALAM_PERHATIAN'] || 0);
     stat.innerHTML =
       '<span style="font-family:var(--mono);font-size:13px;font-weight:800;color:var(--primary);">' + total + ' Permohonan</span>'
       + '<span style="font-size:11px;color:var(--muted);">|</span>'
-      + '<span style="font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;background:#FFF4E6;color:#E67700;">⏳ ' + pending + ' Belum Selesai</span>'
-      + '<span style="font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;background:#E0FBF5;color:#0CA678;">✅ ' + (counts['LULUS'] || 0) + ' Lulus</span>'
-      + '<span style="font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;background:#FFEAEA;color:#E03131;">❌ ' + (counts['TIDAK_LULUS'] || 0) + ' Tolak</span>';
+      + '<span style="font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;background:#FFF4E6;color:#E67700;">' + pending + ' Belum Selesai</span>'
+      + '<span style="font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;background:#E0FBF5;color:#0CA678;">' + (counts['LULUS'] || 0) + ' Lulus</span>'
+      + '<span style="font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;background:#FFEAEA;color:#E03131;">' + (counts['TIDAK_LULUS'] || 0) + ' Tidak Lulus</span>';
   }
 }
 
