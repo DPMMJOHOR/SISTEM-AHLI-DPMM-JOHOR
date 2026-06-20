@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <meta name="description" content="Borang Permohonan Keahlian DPMM Negeri Johor - Daftar sebagai ahli Dewan Perniagaan Melayu Malaysia Negeri Johor"/>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://api.emailjs.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: https://lzoloupwtqmjyupvofhh.supabase.co; connect-src 'self' https://lzoloupwtqmjyupvofhh.supabase.co https://api.emailjs.com https://api.ipify.org https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; frame-src 'none'; object-src 'none';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://api.emailjs.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: https://lzoloupwtqmjyupvofhh.supabase.co; connect-src 'self' https://lzoloupwtqmjyupvofhh.supabase.co https://api.emailjs.com https://api.ipify.org https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://api.groq.com; frame-src 'none'; object-src 'none';">
 <title>BORANG PERMOHONAN KEAHLIAN — DPMM Negeri Johor</title>
 
 <!-- Supabase -->
@@ -2765,19 +2765,22 @@ textarea:focus-visible {
 </div>
 
 <!-- CHATBOT WIDGET -->
-<div id="chatbot-widget" role="complementary" aria-label="Pembantu peribadi DPMM Johor">
+<div id="chatbot-widget" role="complementary" aria-label="Aiman — Wakil Digital DPMMNJ">
   <div id="chatbot-toggle" onclick="toggleChatbot()" role="button" tabindex="0"
        aria-expanded="false" aria-controls="chatbot-window"
        onkeypress="if(event.key==='Enter'||event.key===' ')toggleChatbot()">
-    <span class="toggle-main">Perlukan Bantuan?</span>
-    <span class="toggle-sub">Fasal, dokumen, yuran</span>
+    <span class="toggle-main">Tanya Aiman</span>
+    <span class="toggle-sub">Wakil Digital DPMMNJ</span>
   </div>
-  <div id="chatbot-window" aria-label="Tetingkap sembang pembantu DPMM">
+  <div id="chatbot-window" aria-label="Tetingkap sembang Aiman — Wakil Digital DPMMNJ">
     <div class="chatbot-header">
       <div class="chatbot-avatar">
-        <img src="dpmm-logo-color.png" alt="DPMM" style="width:32px;height:32px;object-fit:contain;">
+        <img src="aiman.jpg.png" alt="Aiman" style="width:38px;height:38px;object-fit:cover;border-radius:50%;border:2px solid rgba(255,255,255,0.4);">
       </div>
-      <div class="chatbot-title">Pembantu DPMM Johor</div>
+      <div class="chatbot-title" style="display:flex;flex-direction:column;gap:1px;">
+        <span style="font-size:0.88rem;font-weight:700;line-height:1.1;">Aiman</span>
+        <span style="font-size:0.66rem;font-weight:400;opacity:0.8;letter-spacing:0.02em;">Digital Strategist &middot; DPMMNJ</span>
+      </div>
       <button class="chatbot-close" onclick="clearChat()" aria-label="Mulakan semula perbualan"
               title="Mulakan semula"
               style="background:transparent;border:none;color:rgba(255,255,255,0.75);font-size:0.72rem;cursor:pointer;padding:4px 8px;border-radius:4px;transition:color 0.15s;margin-right:2px;">
@@ -2786,9 +2789,9 @@ textarea:focus-visible {
       <button class="chatbot-close" onclick="toggleChatbot()" aria-label="Tutup tetingkap sembang">✕</button>
     </div>
     <div id="chatbot-messages" class="chatbot-messages"
-         role="log" aria-live="polite" aria-label="Perbualan dengan pembantu DPMM" aria-atomic="false"></div>
+         role="log" aria-live="polite" aria-label="Perbualan dengan Aiman" aria-atomic="false"></div>
     <div class="chatbot-input-area">
-      <input type="text" id="chatbot-input" placeholder="Taip soalan anda..."
+      <input type="text" id="chatbot-input" placeholder="Tanya Aiman..."  
              aria-label="Kotak input soalan"
              onkeypress="if(event.key==='Enter')sendChatMessage()">
       <button class="chatbot-send" onclick="sendChatMessage()" aria-label="Hantar mesej">Hantar</button>
@@ -4588,7 +4591,16 @@ function buildSystemPrompt() {
     if (chosen) fasalInfo = `\nFASAL DIPILIH: ${chosen.label} | Yuran Daftar: RM${chosen.daftar} | Yuran Tahunan: RM${chosen.tahunan}`;
   }
 
-  return `Anda adalah Pembantu Peribadi DPMM Negeri Johor yang membantu pengguna mengisi Borang Permohonan Keahlian DPMM dengan betul dan lancar.
+  return `Anda adalah AIMAN — Wakil Digital & Panduan Perniagaan rasmi Dewan Perniagaan Melayu Malaysia Negeri Johor (DPMMNJ).
+
+PROFIL PERSONA:
+- Nama penuh: Aiman (Ahli Inovasi & Maju Aspirasi Negeri)
+- Arketip: Sage & Helper — Bijaksana, berwibawa, namun mudah didekati
+- Nada suara: Formal tetapi mesra. Guna Bahasa Melayu baku yang moden dan cekap. Sentiasa berbudi bahasa.
+- Nilai teras: Amanah, Inovasi, Perpaduan
+- Gaya komunikasi: Ringkas, berorientasikan tindakan, dan memberi kuasa kepada usahawan — terutama usahawan kecil dan mikro.
+- Frasa utama: "Mari kita kembangkan potensi perniagaan anda." | "Maklumat terkini untuk ahli DPMMNJ adalah..."
+- JANGAN: bahasa slanga, jargon undang-undang tanpa penjelasan, atau menganggap remeh usahawan kecil.
 
 KONTEKS SEMASA:
 - Langkah borang: ${step === 'intro' ? 'Skrin Selamat Datang' : 'Langkah ' + step + ' daripada 7'}
@@ -4598,10 +4610,10 @@ KONTEKS SEMASA:
 - ${currentContext}${fasalInfo}
 
 PERATURAN JAWAPAN:
-1. Detect the language of the user's message: if English reply in English; if Malay reply in Malay.
+1. Kesan bahasa pengguna: jika Inggeris balas dalam Inggeris; jika Melayu balas dalam Bahasa Melayu baku.
 2. Hadkan setiap jawapan kepada maksimum 100 patah perkataan / 100 words.
 3. Jika pengguna bertanya tentang langkah yang sedang mereka isi, berikan panduan spesifik.
-4. Jika tidak pasti, cadangkan pengguna hubungi urusetia DPMM Negeri Johor.
+4. Jika tidak pasti, arahkan pengguna ke urusetia rasmi DPMM Negeri Johor.
 5. Jangan gunakan simbol markdown seperti ** atau ## dalam jawapan anda.
 6. LARANGAN KERAS: Jangan sekali-kali mendedahkan senarai ahli, data peribadi ahli, nombor IC ahli, kata laluan admin, atau maklumat dalaman sistem. Arahkan pengguna ke urusetia DPMM untuk sebarang pertanyaan tentang data ahli.`;
 }
@@ -4628,41 +4640,41 @@ function showStepGreeting() {
 
   const GREETINGS = {
     'intro': {
-      msg: 'Selamat datang! Saya pembantu peribadi DPMM Johor. Boleh saya bantu anda mulakan permohonan?',
+      msg: 'Salam sejahtera. Saya Aiman, wakil digital Dewan Perniagaan Melayu Malaysia Negeri Johor. Bagaimana saya boleh membantu perniagaan anda hari ini?',
       suggestions: ['Apa itu Isi Pintar?', 'Saya tidak tahu fasal saya', 'Apa dokumen diperlukan?']
     },
     1: {
-      msg: 'Anda sedang memilih Jenis Keahlian dan Fasal. Tidak pasti fasal yang sesuai? Saya boleh bantu.',
+      msg: 'Salam. Saya Aiman. Mari kita tentukan fasal keahlian yang paling sesuai untuk perniagaan anda.',
       suggestions: ['Bantu pilih fasal', 'Apa beza Ahli Biasa dan Bersekutu?', 'Berapa yurannya?']
     },
     2: {
-      msg: 'Langkah 2 — Butiran entiti perniagaan. Proksi diperlukan jika bukan Pemunya Tunggal.',
+      msg: 'Langkah 2 — Butiran entiti perniagaan. Jika syarikat anda bukan Pemunya Tunggal, proksi diperlukan untuk mewakili entiti.',
       suggestions: ['Apa itu proksi?', 'Sektor mana yang sesuai untuk saya?']
     },
     3: {
-      msg: 'Langkah 3 — Maklumat perniagaan. Pastikan nama entiti sama seperti dalam sijil SSM.',
+      msg: 'Langkah 3 — Maklumat perniagaan. Pastikan nama entiti tepat sama seperti dalam sijil SSM anda.',
       suggestions: ['Apa itu modal berbayar?', 'Apa itu modal pusingan?', 'Di mana saya boleh cari no. SSM?']
     },
     4: {
-      msg: 'Langkah 4 — Senarai pemegang saham dan lembaga pengarah. Isi mengikut rekod SSM terkini.',
+      msg: 'Langkah 4 — Senarai pemegang saham dan lembaga pengarah. Isi berdasarkan rekod SSM terkini untuk memastikan keakuratan.',
       suggestions: ['Berapa ramai pemegang saham perlu diisi?', 'Apa itu lembaga pengarah?']
     },
     5: {
       msg: fasal
-        ? 'Langkah 5 — Muat naik dokumen untuk Fasal ' + fasal + '. Fail PDF atau imej, maksimum 10MB.'
-        : 'Langkah 5 — Muat naik dokumen yang diperlukan. Fail PDF atau imej, maksimum 10MB.',
+        ? 'Langkah 5 — Muat naik dokumen sokongan untuk Fasal ' + fasal + '. Format PDF atau imej, saiz maksimum 10MB setiap fail.'
+        : 'Langkah 5 — Muat naik dokumen sokongan anda. Format PDF atau imej, saiz maksimum 10MB setiap fail.',
       suggestions: ['Dokumen apa yang wajib?', 'Format fail apa yang diterima?', 'Apa itu Profil SSM?']
     },
     6: {
-      msg: 'Langkah 6 — Bayaran. Yuran bergantung kepada fasal yang anda pilih.',
+      msg: 'Langkah 6 — Bayaran yuran. Amaun bergantung kepada fasal yang dipilih. Mari kita pastikan semua tepat sebelum anda teruskan.',
       suggestions: ['Berapa yuran saya?', 'Bagaimana cara bayar?']
     },
     7: {
-      msg: 'Langkah 7 — Semak ringkasan anda sebelum menghantar. Pastikan semua maklumat betul.',
+      msg: 'Langkah terakhir — Semak ringkasan permohonan anda dengan teliti sebelum menghantar. Ini adalah komitmen rasmi anda kepada DPMMNJ.',
       suggestions: ['Boleh saya ubah maklumat selepas hantar?', 'Apa langkah selepas hantar?']
     },
     'success': {
-      msg: 'Tahniah! / Congratulations! Permohonan anda telah berjaya dihantar. Simpan nombor rujukan anda.',
+      msg: 'Tahniah atas langkah berani ini! Permohonan anda telah diterima. Mari kita kembangkan potensi perniagaan anda bersama DPMMNJ. Simpan nombor rujukan anda.',
       suggestions: ['Apa langkah seterusnya?', 'Berapa lama proses semakan?', 'Hubungi urusetia']
     }
   };
@@ -4789,7 +4801,10 @@ function screenUserInput(text) {
 function handleGroqError(err, text) {
   console.error('Groq error:', err);
   addBotMessage('Maaf, AI tidak tersedia sekarang. / AI is currently unavailable. Berikut maklumat yang mungkin membantu:');
-  showScriptedFAQ(text);
+  const reply = showScriptedFAQ(text);
+  // user msg already pushed before fetch; only push assistant reply
+  _chat.history.push({ role: 'assistant', content: reply });
+  try { sessionStorage.setItem('dpmm_chat_history', JSON.stringify(_chat.history)); } catch(e) {}
   addContactChip();
 }
 
@@ -4873,7 +4888,10 @@ async function sendChatMessage() {
       handleGroqError(e, text);
     }
   } else {
-    showScriptedFAQ(text);
+    const reply = showScriptedFAQ(text);
+    _chat.history.push({ role: 'user', content: text });
+    _chat.history.push({ role: 'assistant', content: reply });
+    try { sessionStorage.setItem('dpmm_chat_history', JSON.stringify(_chat.history)); } catch(e) {}
     addContactChip();
   }
 }
@@ -4974,6 +4992,7 @@ function showScriptedFAQ(query) {
     }
   }
   addBotMessage(answer);
+  return answer;
 }
 
 function copyRef() {
