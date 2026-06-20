@@ -2134,6 +2134,7 @@ var SUPABASE_ANON_KEY = (typeof CONFIG !== 'undefined' && CONFIG.SUPABASE_KEY &&
   : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx6b2xvdXB3dHFtanl1cHZvZmhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5NTMxMTEsImV4cCI6MjA4ODUyOTExMX0.tBcGc6KfPyjUmJngbLTBHv-GZkSoSoyWGXwlXFZ0ShE';
 var supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 var TABLE_NAME = 'AHLI DPMM JOHOR';
+var GROQ_KEY = (typeof CONFIG !== 'undefined' && CONFIG.GROQ_KEY && !CONFIG.GROQ_KEY.startsWith('YOUR_')) ? CONFIG.GROQ_KEY : '';
 
 // ── LIVE DATE / YEAR ──────────────────────────────────────
 // These update dynamically — always reflect current system date
@@ -2198,6 +2199,7 @@ function mapSupabaseRow(row) {
     jumlahYuranKeseluruhan: parseFloat(row.JUMLAH_YURAN_KESELURUHAN) || 0,
     tempohBayar:    tempoh,
     tarikhBayar2025: noVal(row.TARIKH_BAYARAN_2025),
+    tarikhBayar2026: noVal(row.TARIKH_BAYARAN_2026),
     noResit:        null,
     kaedahBayar:    noVal(row.KAEDAH_BAYARAN),
     daerah:         noVal(row.DAERAH) || 'Tidak Diketahui',
@@ -5890,6 +5892,420 @@ document.addEventListener('DOMContentLoaded', function(){
     }
   });
 });
+</script>
+
+<!-- ═══════════════════════════════════════════════════════
+   ADMIN AI CLERK — FLOATING WIDGET
+════════════════════════════════════════════════════════ -->
+<style>
+#admin-clerk-btn {
+  position:fixed;bottom:28px;right:28px;width:54px;height:54px;border-radius:50%;
+  background:linear-gradient(135deg,#6C5CE7,#5549D4);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;
+  box-shadow:0 4px 20px rgba(108,92,231,.45);z-index:9100;transition:transform .2s,box-shadow .2s;
+}
+#admin-clerk-btn:hover{transform:scale(1.08);box-shadow:0 6px 28px rgba(108,92,231,.6);}
+#admin-clerk-window {
+  position:fixed;bottom:92px;right:28px;width:420px;max-width:calc(100vw - 40px);
+  height:580px;max-height:calc(100vh - 110px);background:#fff;border-radius:16px;
+  box-shadow:0 12px 48px rgba(34,41,47,.22);display:none;flex-direction:column;
+  overflow:hidden;z-index:9100;border:1px solid #EBE9F1;
+}
+#admin-clerk-window.open{display:flex;}
+#admin-clerk-header {
+  background:linear-gradient(135deg,#6C5CE7,#5549D4);padding:12px 16px;
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
+}
+.aclerk-title{color:#fff;font-weight:700;font-size:14px;font-family:var(--head);}
+.aclerk-sub{color:rgba(255,255,255,.7);font-size:11px;margin-top:2px;}
+.aclerk-hdr-btns{display:flex;gap:6px;}
+.aclerk-hdr-btns button {
+  background:rgba(255,255,255,.18);border:none;color:#fff;border-radius:6px;
+  padding:4px 10px;font-size:11px;cursor:pointer;font-family:var(--sans);
+}
+.aclerk-hdr-btns button:hover{background:rgba(255,255,255,.3);}
+#admin-clerk-messages {
+  flex:1;overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:8px;
+}
+.aclerk-msg{max-width:90%;padding:9px 13px;border-radius:12px;font-size:13px;line-height:1.5;word-break:break-word;}
+.aclerk-msg.bot{background:#F5F4FB;color:#2D2B3D;border-bottom-left-radius:4px;align-self:flex-start;}
+.aclerk-msg.user{background:#6C5CE7;color:#fff;border-bottom-right-radius:4px;align-self:flex-end;}
+.aclerk-msg.html-card{background:#F5F4FB;color:#2D2B3D;border-bottom-left-radius:4px;align-self:flex-start;max-width:100%;padding:10px;font-size:12px;}
+.aclerk-typing{align-self:flex-start;display:flex;gap:5px;padding:10px 14px;background:#F5F4FB;border-radius:12px;border-bottom-left-radius:4px;}
+.aclerk-typing span{width:7px;height:7px;background:#6C5CE7;border-radius:50%;animation:aclerk-bounce .9s ease infinite;}
+.aclerk-typing span:nth-child(2){animation-delay:.15s;}
+.aclerk-typing span:nth-child(3){animation-delay:.3s;}
+@keyframes aclerk-bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-7px)}}
+#admin-clerk-chips {
+  padding:8px 12px;display:flex;flex-wrap:wrap;gap:6px;
+  flex-shrink:0;border-top:1px solid #EBE9F1;
+}
+.aclerk-chip {
+  padding:5px 11px;border-radius:20px;border:1.5px solid #6C5CE7;color:#6C5CE7;
+  background:#fff;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--sans);
+  white-space:nowrap;transition:background .15s;
+}
+.aclerk-chip:hover{background:#EEE9FD;}
+#admin-clerk-input-row {
+  padding:10px 12px;display:flex;gap:8px;flex-shrink:0;border-top:1px solid #EBE9F1;
+}
+#admin-clerk-input {
+  flex:1;padding:9px 12px;border:1.5px solid #D8D6DE;border-radius:8px;
+  font-size:13px;font-family:var(--sans);outline:none;color:#2D2B3D;
+}
+#admin-clerk-input:focus{border-color:#6C5CE7;}
+#admin-clerk-send {
+  padding:9px 16px;background:#6C5CE7;border:none;border-radius:8px;
+  color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--sans);
+}
+#admin-clerk-send:hover{background:#5549D4;}
+</style>
+
+<button id="admin-clerk-btn" onclick="toggleAdminClerk()" title="AI Admin Clerk" aria-label="Buka AI Admin Clerk">&#129302;</button>
+
+<div id="admin-clerk-window" role="dialog" aria-label="AI Admin Clerk">
+  <div id="admin-clerk-header">
+    <div>
+      <div class="aclerk-title">AI Admin Clerk</div>
+      <div class="aclerk-sub">DPMM Negeri Johor</div>
+    </div>
+    <div class="aclerk-hdr-btns">
+      <button onclick="clearAdminChat()">Kosong</button>
+      <button onclick="toggleAdminClerk()">&#10005;</button>
+    </div>
+  </div>
+  <div id="admin-clerk-messages"></div>
+  <div id="admin-clerk-chips">
+    <button class="aclerk-chip" onclick="adminChipSend('Ahli belum bayar yuran 2025')">Belum Bayar 2025</button>
+    <button class="aclerk-chip" onclick="adminChipSend('Ahli belum bayar yuran 2026')">Belum Bayar 2026</button>
+    <button class="aclerk-chip" onclick="adminChipSend('SSM hampir tamat tempoh')">SSM Hampir Tamat</button>
+    <button class="aclerk-chip" onclick="adminChipSend('Berapa jumlah ahli aktif')">Jumlah Ahli</button>
+    <button class="aclerk-chip" onclick="adminChipSend('Senarai ahli tidak lengkap maklumat')">Profil Tidak Lengkap</button>
+    <button class="aclerk-chip" onclick="adminChipSend('Taklimat harian')">Taklimat Harian</button>
+  </div>
+  <div id="admin-clerk-input-row">
+    <input id="admin-clerk-input" type="text" placeholder="Tanya AI Clerk... (cth: ahli belum bayar yuran 2025)" onkeydown="if(event.key==='Enter')sendAdminMessage()">
+    <button id="admin-clerk-send" onclick="sendAdminMessage()">Hantar</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   ADMIN AI CLERK — LOGIC
+   a2: buildAdminSystemPrompt, a3: parseGroqIntent, a4: routeAction,
+   a5: executeQuery+filterMembers, a5b: addBotHTML, a6: buildSendQueue,
+   a7: executeEmailBlast, a8: buildDailyBriefing, a9: showDisambig, a10: chips
+   ============================================================ */
+
+var _clerk = { history: [], maxHistory: 10, briefingShown: false, disambigMembers: [] };
+var adminClerkOpen = false;
+
+function toggleAdminClerk() {
+  adminClerkOpen = !adminClerkOpen;
+  var win = document.getElementById('admin-clerk-window');
+  if (adminClerkOpen) {
+    win.classList.add('open');
+    document.getElementById('admin-clerk-input').focus();
+    if (document.getElementById('admin-clerk-messages').children.length === 0) {
+      _clerk.briefingShown = true;
+      buildDailyBriefing();
+    }
+  } else {
+    win.classList.remove('open');
+  }
+}
+
+function clearAdminChat() {
+  document.getElementById('admin-clerk-messages').innerHTML = '';
+  _clerk.history = [];
+  addAdminBotMessage('Chat dikosongkan. Apa yang boleh saya bantu?');
+}
+
+function addAdminBotMessage(text) {
+  var c = document.getElementById('admin-clerk-messages');
+  var d = document.createElement('div');
+  d.className = 'aclerk-msg bot';
+  d.textContent = text;
+  c.appendChild(d); c.scrollTop = c.scrollHeight;
+}
+
+function addBotHTML(html) {
+  var c = document.getElementById('admin-clerk-messages');
+  var d = document.createElement('div');
+  d.className = 'aclerk-msg html-card';
+  d.innerHTML = html;
+  c.appendChild(d); c.scrollTop = c.scrollHeight;
+}
+
+function addAdminUserMessage(text) {
+  var c = document.getElementById('admin-clerk-messages');
+  var d = document.createElement('div');
+  d.className = 'aclerk-msg user';
+  d.textContent = text;
+  c.appendChild(d); c.scrollTop = c.scrollHeight;
+}
+
+function showAdminTyping() {
+  var c = document.getElementById('admin-clerk-messages');
+  var t = document.createElement('div');
+  t.className = 'aclerk-typing'; t.id = 'aclerk-typing';
+  t.innerHTML = '<span></span><span></span><span></span>';
+  c.appendChild(t); c.scrollTop = c.scrollHeight;
+}
+
+function hideAdminTyping() { var t = document.getElementById('aclerk-typing'); if (t) t.remove(); }
+
+function adminChipSend(text) {
+  document.getElementById('admin-clerk-input').value = text;
+  sendAdminMessage();
+}
+
+function buildAdminSystemPrompt() {
+  var totalAhli = (typeof MEMBERS !== 'undefined') ? MEMBERS.length : 0;
+  var aktif = (typeof MEMBERS !== 'undefined') ? MEMBERS.filter(function(m){return m.status==='AKTIF'||!m.status;}).length : 0;
+  var belum2025 = (typeof MEMBERS !== 'undefined') ? MEMBERS.filter(function(m){return !m.tarikhBayar2025&&(m.status==='AKTIF'||!m.status);}).length : 0;
+  var belum2026 = (typeof MEMBERS !== 'undefined') ? MEMBERS.filter(function(m){return !m.tarikhBayar2026&&(m.status==='AKTIF'||!m.status);}).length : 0;
+  var ssmExp = (typeof MEMBERS !== 'undefined') ? MEMBERS.filter(function(m){if(!m.ssmDeadline)return false;var d=(new Date(m.ssmDeadline)-new Date())/86400000;return d>=0&&d<=90;}).length : 0;
+  var userRole = (typeof currentUser !== 'undefined' && currentUser) ? (currentUser.role||'pengguna') : 'pengguna';
+  return 'Anda adalah AI Admin Clerk DPMM Negeri Johor. Anda membantu pegawai pentadbir menguruskan data ahli.\n\n' +
+    'STATISTIK SEMASA:\n- Jumlah ahli: ' + totalAhli + '\n- Ahli aktif: ' + aktif + '\n' +
+    '- Belum bayar yuran 2025: ' + belum2025 + '\n- Belum bayar yuran 2026: ' + belum2026 + '\n' +
+    '- SSM hampir tamat (90 hari): ' + ssmExp + '\n- Peranan pengguna: ' + userRole + '\n\n' +
+    'TINDAKAN (jawab dengan JSON dalam blok ```json```):\n' +
+    '{ "action": "query_members", "params": { "filter": "unpaid_2025"|"unpaid_2026"|"ssm_expiring"|"incomplete"|"all"|"by_name", "name": "..." } }\n' +
+    '{ "action": "daily_briefing", "params": {} }\n' +
+    '{ "action": "whatsapp_queue", "params": { "filter": "unpaid_2025"|"unpaid_2026" } }\n' +
+    '{ "action": "email_blast", "params": { "filter": "unpaid_2025"|"unpaid_2026" } }\n' +
+    '{ "action": "answer", "params": { "text": "..." } }\n\n' +
+    'PERATURAN:\n1. Soalan data/senarai/laporan — gunakan action yang sesuai.\n' +
+    '2. Soalan umum — gunakan action "answer".\n3. JANGAN dedahkan kata laluan atau kunci API.\n' +
+    '4. whatsapp_queue dan email_blast hanya untuk ADMIN.\n' +
+    '5. Medan yuran: tarikhBayar2025 (TARIKH_BAYARAN_2025) dan tarikhBayar2026 (TARIKH_BAYARAN_2026).\n' +
+    '6. Jawab dalam Bahasa Malaysia; jika soalan dalam English, jawab dalam English.';
+}
+
+function parseGroqIntent(text) {
+  var stripped = text.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+  var match = stripped.match(/\{[\s\S]*\}/);
+  if (match) { try { var p = JSON.parse(match[0]); if (p.action) return p; } catch(e) {} }
+  var lower = text.toLowerCase();
+  if (lower.includes('belum bayar')&&lower.includes('2026')) return {action:'query_members',params:{filter:'unpaid_2026'}};
+  if (lower.includes('belum bayar')) return {action:'query_members',params:{filter:'unpaid_2025'}};
+  if (lower.includes('ssm')&&(lower.includes('tamat')||lower.includes('expire'))) return {action:'query_members',params:{filter:'ssm_expiring'}};
+  if (lower.includes('taklimat')||lower.includes('briefing')||lower.includes('ringkasan harian')) return {action:'daily_briefing',params:{}};
+  if (lower.includes('tidak lengkap')||lower.includes('incomplete')||lower.includes('profil tidak')) return {action:'query_members',params:{filter:'incomplete'}};
+  if (lower.includes('whatsapp')||lower.includes('wa queue')||lower.includes('antrian wa')) return {action:'whatsapp_queue',params:{filter:'unpaid_2025'}};
+  if (lower.includes('email blast')||lower.includes('emel blast')||lower.includes('hantar emel')) return {action:'email_blast',params:{filter:'unpaid_2025'}};
+  if (lower.includes('jumlah ahli')||lower.includes('berapa ahli')||lower.includes('total ahli')) return {action:'query_members',params:{filter:'all'}};
+  return {action:'answer',params:{text:text}};
+}
+
+function routeAction(intent) {
+  var userRole = (typeof currentUser !== 'undefined' && currentUser) ? (currentUser.role||'pengguna') : 'pengguna';
+  var isAdmin = (userRole==='ADMIN'||userRole==='admin');
+  var action = intent.action; var params = intent.params||{};
+  if (action==='query_members') { executeQuery(params); }
+  else if (action==='daily_briefing') { buildDailyBriefing(); }
+  else if (action==='whatsapp_queue') {
+    if (!isAdmin) { addAdminBotMessage('Tindakan ini hanya untuk ADMIN. Sila hubungi pentadbir sistem.'); return; }
+    buildSendQueue(filterMembers(params.filter||'unpaid_2025'));
+  } else if (action==='email_blast') {
+    if (!isAdmin) { addAdminBotMessage('Tindakan ini hanya untuk ADMIN. Sila hubungi pentadbir sistem.'); return; }
+    executeEmailBlast(filterMembers(params.filter||'unpaid_2025'));
+  } else if (action==='answer') {
+    addAdminBotMessage(params.text||'Saya tidak dapat memahami permintaan. Sila cuba semula.');
+  } else {
+    addAdminBotMessage('Maaf, tindakan "'+action+'" tidak dikenali. Sila cuba semula.');
+  }
+}
+
+function filterMembers(filter, extra) {
+  extra = extra||{};
+  if (!MEMBERS||!MEMBERS.length) return [];
+  if (filter==='unpaid_2025') return MEMBERS.filter(function(m){return !m.tarikhBayar2025&&(m.status==='AKTIF'||!m.status);});
+  if (filter==='unpaid_2026') return MEMBERS.filter(function(m){return !m.tarikhBayar2026&&(m.status==='AKTIF'||!m.status);});
+  if (filter==='ssm_expiring') return MEMBERS.filter(function(m){if(!m.ssmDeadline)return false;var d=(new Date(m.ssmDeadline)-new Date())/86400000;return d>=0&&d<=90;});
+  if (filter==='incomplete') return MEMBERS.filter(function(m){return !m.emel||!m.hp||!m.ic;});
+  if (filter==='by_name'&&extra.name) { var n=extra.name.toLowerCase(); return MEMBERS.filter(function(m){return (m.namaSyarikat||'').toLowerCase().includes(n)||(m.namaPIC||'').toLowerCase().includes(n);}); }
+  return MEMBERS;
+}
+
+function executeQuery(params) {
+  var filter = params.filter||'all';
+  var members;
+  if (filter==='by_name'&&params.name) {
+    members = filterMembers('by_name',{name:params.name});
+    if (!members.length) { addAdminBotMessage('Tiada ahli dijumpai dengan nama "'+params.name+'".'); return; }
+    if (members.length>5) { showDisambig(members.slice(0,5),params.name); return; }
+  } else { members = filterMembers(filter); }
+  if (!members.length) { addAdminBotMessage('Tiada rekod ditemui untuk kriteria ini.'); return; }
+  var labels = {'unpaid_2025':'Belum Bayar Yuran 2025','unpaid_2026':'Belum Bayar Yuran 2026','ssm_expiring':'SSM Hampir Tamat (90 Hari)','incomplete':'Profil Tidak Lengkap','all':'Semua Ahli','by_name':'Carian Nama'};
+  var lbl = labels[filter]||filter;
+  var rows = members.slice(0,20).map(function(m,i){
+    return '<tr style="border-bottom:1px solid #EBE9F1;"><td style="padding:4px 6px;color:#6E6B7B;font-size:11px;">'+(i+1)+'</td>'+
+      '<td style="padding:4px 6px;font-weight:600;font-size:11px;">'+(m.id||'&#8212;')+'</td>'+
+      '<td style="padding:4px 6px;font-size:11px;">'+(m.namaSyarikat||m.namaPIC||'&#8212;')+'</td>'+
+      '<td style="padding:4px 6px;color:#6E6B7B;font-size:11px;">'+(m.fasal||'&#8212;')+'</td>'+
+      '<td style="padding:4px 6px;font-size:11px;">'+(m.hp||m.emel||'&#8212;')+'</td></tr>';
+  }).join('');
+  var more = members.length>20?'<div style="padding:5px 6px;font-size:10px;color:#6E6B7B;">...dan '+(members.length-20)+' rekod lagi</div>':'';
+  var csvBtn = '<button onclick="exportQueryCSV(\''+filter+'\','+JSON.stringify(params)+')" style="margin-top:7px;padding:4px 12px;background:#EEE9FD;border:1.5px solid #6C5CE7;color:#6C5CE7;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;">Export CSV</button>';
+  addBotHTML('<div style="font-size:12px;"><div style="font-weight:700;margin-bottom:6px;">'+lbl+' &#8212; '+members.length+' rekod</div>'+
+    '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">'+
+    '<thead><tr style="background:#EEE9FD;"><th style="padding:4px 6px;text-align:left;color:#6C5CE7;font-size:10px;">#</th>'+
+    '<th style="padding:4px 6px;text-align:left;color:#6C5CE7;font-size:10px;">No. Ahli</th>'+
+    '<th style="padding:4px 6px;text-align:left;color:#6C5CE7;font-size:10px;">Nama</th>'+
+    '<th style="padding:4px 6px;text-align:left;color:#6C5CE7;font-size:10px;">Fasal</th>'+
+    '<th style="padding:4px 6px;text-align:left;color:#6C5CE7;font-size:10px;">Kontak</th>'+
+    '</tr></thead><tbody>'+rows+'</tbody></table></div>'+more+csvBtn+'</div>');
+}
+
+function exportQueryCSV(filter, params) {
+  var members = (filter==='by_name')?filterMembers('by_name',{name:params.name}):filterMembers(filter);
+  if (!members.length){addAdminBotMessage('Tiada data untuk dieksport.');return;}
+  var hdr = ['No. Ahli','Nama Syarikat','Nama PIC','Fasal','E-mel','No. HP','Status','Tarikh Bayar 2025','Tarikh Bayar 2026','SSM Deadline'];
+  var rows = members.map(function(m){
+    return [m.id,m.namaSyarikat,m.namaPIC,m.fasal,m.emel,m.hp,m.status,m.tarikhBayar2025||'',m.tarikhBayar2026||'',m.ssmDeadline||'']
+      .map(function(v){return '"'+(v||'').toString().replace(/"/g,'""')+'"';}).join(',');
+  });
+  var csv = hdr.join(',')+'\n'+rows.join('\n');
+  var blob = new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href=url; a.download='DPMM_'+filter+'_'+new Date().toISOString().slice(0,10)+'.csv'; a.click();
+  URL.revokeObjectURL(url);
+  addAdminBotMessage('CSV dieksport: '+members.length+' rekod.');
+}
+
+function buildSendQueue(members) {
+  if (!members.length){addAdminBotMessage('Tiada ahli dalam senarai untuk peringatan WhatsApp.');return;}
+  var items = members.slice(0,30).map(function(m){
+    var ph=(m.hp||'').replace(/\D/g,''); if(ph.startsWith('0'))ph='6'+ph;
+    var msg=encodeURIComponent('Salam '+(m.namaSyarikat||m.namaPIC||'Ahli')+',\n\nYuran tahunan DPMM Negeri Johor anda masih belum dijelaskan.\n\nNo. Ahli: '+(m.id||'&#8212;')+'\n\nSila hubungi urusetia untuk maklumat lanjut.\n\nTerima kasih.\nUrusetia DPMM Negeri Johor');
+    return {name:m.namaSyarikat||m.namaPIC||'&#8212;',phone:ph,waUrl:ph?'https://wa.me/'+ph+'?text='+msg:null};
+  });
+  var rows = items.map(function(it,i){
+    var btn = it.waUrl?'<a href="'+it.waUrl+'" target="_blank" rel="noopener" style="padding:3px 10px;background:#25D366;color:#fff;border-radius:5px;font-size:10px;font-weight:700;text-decoration:none;">Hantar</a>':'<span style="color:#FF6B6B;font-size:10px;">Tiada No.</span>';
+    return '<tr style="border-bottom:1px solid #EBE9F1;"><td style="padding:4px 6px;font-size:11px;">'+(i+1)+'</td>'+
+      '<td style="padding:4px 6px;font-size:11px;font-weight:600;">'+it.name+'</td>'+
+      '<td style="padding:4px 6px;font-size:11px;">'+(it.phone||'&#8212;')+'</td>'+
+      '<td style="padding:4px 6px;">'+btn+'</td></tr>';
+  }).join('');
+  var more = members.length>30?'<div style="padding:5px 6px;font-size:10px;color:#6E6B7B;">...dan '+(members.length-30)+' lagi</div>':'';
+  addBotHTML('<div style="font-size:12px;"><div style="font-weight:700;margin-bottom:6px;">Antrian WhatsApp &#8212; '+members.length+' ahli</div>'+
+    '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">'+
+    '<thead><tr style="background:#EEE9FD;"><th style="padding:4px 6px;font-size:10px;text-align:left;color:#6C5CE7;">#</th>'+
+    '<th style="padding:4px 6px;font-size:10px;text-align:left;color:#6C5CE7;">Nama</th>'+
+    '<th style="padding:4px 6px;font-size:10px;text-align:left;color:#6C5CE7;">No. HP</th>'+
+    '<th style="padding:4px 6px;font-size:10px;text-align:left;color:#6C5CE7;">WA</th>'+
+    '</tr></thead><tbody>'+rows+'</tbody></table></div>'+more+'</div>');
+}
+
+function executeEmailBlast(members) {
+  if (!members.length){addAdminBotMessage('Tiada ahli dalam senarai untuk e-mel blast.');return;}
+  var quota=200; var count=Math.min(members.length,quota);
+  var previews = members.slice(0,3).map(function(m){
+    return '<div style="background:#F5F4FB;border-radius:6px;padding:7px;margin-bottom:5px;font-size:11px;">'+
+      '<div><strong>Kepada:</strong> '+(m.emel||'Tiada e-mel')+'</div>'+
+      '<div><strong>Nama:</strong> '+(m.namaSyarikat||m.namaPIC||'&#8212;')+'</div></div>';
+  }).join('');
+  var recipData = JSON.stringify(members.slice(0,count).map(function(m){return {id:m.id,emel:m.emel,nama:m.namaSyarikat||m.namaPIC};}));
+  addBotHTML('<div style="font-size:12px;">'+
+    '<div style="background:#FFF4E6;border:1.5px solid #FFA94D;border-radius:8px;padding:9px;margin-bottom:9px;">'+
+    '<div style="font-weight:700;color:#d48000;">Amaran Kuota EmailJS</div>'+
+    '<div style="margin-top:3px;color:#4E4B6B;">Had bulanan: '+quota+' e-mel. Sasaran: '+members.length+'. Yang akan dihantar: <strong>'+count+'</strong>.</div></div>'+
+    '<div style="font-weight:600;margin-bottom:6px;">Preview (3 pertama):</div>'+previews+
+    '<div style="display:flex;gap:8px;margin-top:8px;">'+
+    '<button onclick="confirmEmailBlast('+recipData+')" style="padding:6px 14px;background:#6C5CE7;color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">Hantar '+count+' E-mel</button>'+
+    '<button onclick="this.closest(\'.aclerk-msg\').remove()" style="padding:6px 14px;background:#EBE9F1;color:#2D2B3D;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;">Batal</button>'+
+    '</div></div>');
+}
+
+function confirmEmailBlast(recipients) {
+  addAdminBotMessage('Menghantar e-mel kepada '+recipients.length+' ahli... (EmailJS template perlu dikonfigurasi terlebih dahulu.)');
+}
+
+function mkKPI(label, value, color, bg) {
+  return '<div style="background:'+bg+';border-radius:8px;padding:10px;text-align:center;">'+
+    '<div style="font-size:20px;font-weight:800;color:'+color+';">'+value+'</div>'+
+    '<div style="font-size:10px;color:#6E6B7B;margin-top:2px;">'+label+'</div></div>';
+}
+
+function buildDailyBriefing() {
+  var today = new Date().toLocaleDateString('ms-MY',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  var M = (typeof MEMBERS!=='undefined') ? MEMBERS : [];
+  var total = M.length;
+  var aktif = M.filter(function(m){return m.status==='AKTIF'||!m.status;}).length;
+  var b2025 = M.filter(function(m){return !m.tarikhBayar2025&&(m.status==='AKTIF'||!m.status);}).length;
+  var b2026 = M.filter(function(m){return !m.tarikhBayar2026&&(m.status==='AKTIF'||!m.status);}).length;
+  var ssm = M.filter(function(m){if(!m.ssmDeadline)return false;var d=(new Date(m.ssmDeadline)-new Date())/86400000;return d>=0&&d<=90;}).length;
+  var inc = M.filter(function(m){return !m.emel||!m.hp||!m.ic;}).length;
+  addBotHTML('<div style="font-size:12px;">'+
+    '<div style="font-weight:700;font-size:13px;margin-bottom:8px;color:#2D2B3D;">Taklimat Harian &#8212; '+today+'</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;">'+
+    mkKPI('Jumlah Ahli',total,'#6C5CE7','#EEE9FD')+
+    mkKPI('Ahli Aktif',aktif,'#00D4A0','#E0FBF5')+
+    mkKPI('Belum Bayar 2025',b2025,'#e67e00','#FFF4E6')+
+    mkKPI('Belum Bayar 2026',b2026,'#FF6B6B','#FFEAEA')+
+    mkKPI('SSM Hampir Tamat',ssm,'#FFA94D','#FFF4E6')+
+    mkKPI('Profil Tidak Lengkap',inc,'#82868B','#F5F4FB')+
+    '</div>'+
+    '<div style="margin-top:9px;font-size:11px;color:#6E6B7B;">Pilih tindakan di atas atau taip soalan untuk bermula.</div></div>');
+}
+
+function showDisambig(matches, name) {
+  _clerk.disambigMembers = matches;
+  var btns = matches.map(function(m,i){
+    return '<button onclick="selectDisambig('+i+')" style="display:block;width:100%;text-align:left;padding:7px 10px;margin-bottom:4px;background:#F5F4FB;border:1.5px solid #D8D6DE;border-radius:7px;cursor:pointer;font-size:11px;">'+
+      '<strong>'+(m.id||'&#8212;')+'</strong> &#8212; '+(m.namaSyarikat||m.namaPIC||'&#8212;')+' <span style="color:#6E6B7B;">'+(m.fasal?'('+m.fasal+')':'')+'</span></button>';
+  }).join('');
+  addBotHTML('<div style="font-size:12px;"><div style="font-weight:700;margin-bottom:6px;">Carian "'+name+'" &#8212; pelbagai hasil. Pilih ahli:</div>'+btns+'</div>');
+}
+
+function selectDisambig(idx) {
+  var m = _clerk.disambigMembers[idx];
+  if (!m) return;
+  addAdminUserMessage(m.namaSyarikat||m.namaPIC||m.id||'Ahli');
+  executeQuery({filter:'by_name',name:m.namaSyarikat||m.namaPIC||''});
+}
+
+async function sendAdminMessage() {
+  var input = document.getElementById('admin-clerk-input');
+  var text = (input.value||'').trim();
+  if (!text) return;
+  input.value = '';
+  addAdminUserMessage(text);
+
+  var isKeyOk = (typeof GROQ_KEY !== 'undefined') && GROQ_KEY && !GROQ_KEY.startsWith('YOUR_') && GROQ_KEY.length > 20;
+
+  if (isKeyOk) {
+    showAdminTyping();
+    _clerk.history.push({role:'user',content:text});
+    if (_clerk.history.length > _clerk.maxHistory * 2) _clerk.history = _clerk.history.slice(-_clerk.maxHistory * 2);
+    try {
+      var resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method:'POST',
+        headers:{'Authorization':'Bearer '+GROQ_KEY,'Content-Type':'application/json'},
+        body:JSON.stringify({model:'llama-3.1-8b-instant',messages:[{role:'system',content:buildAdminSystemPrompt()},..._clerk.history],max_tokens:600})
+      });
+      var data = await resp.json();
+      hideAdminTyping();
+      if (data.choices && data.choices[0]) {
+        var reply = data.choices[0].message.content;
+        _clerk.history.push({role:'assistant',content:reply});
+        routeAction(parseGroqIntent(reply));
+      } else {
+        addAdminBotMessage('Ralat: AI tidak memberikan respons. Sila cuba semula.');
+      }
+    } catch(e) {
+      hideAdminTyping();
+      console.error('Admin clerk Groq error:',e);
+      routeAction(parseGroqIntent(text));
+    }
+  } else {
+    routeAction(parseGroqIntent(text));
+  }
+}
 </script>
 </body>
 </html>

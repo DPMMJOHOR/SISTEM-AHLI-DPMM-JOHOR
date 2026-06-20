@@ -190,6 +190,7 @@ CREATE TABLE IF NOT EXISTS "AHLI DPMM JOHOR" (
   JUMLAH_YURAN_KESELURUHAN NUMERIC,
   TEMPOH_BAYARAN_YURAN INTEGER,
   TARIKH_BAYARAN_2025  TEXT,
+  TARIKH_BAYARAN_2026  TEXT,
   KAEDAH_BAYARAN       TEXT,
   DAERAH               TEXT DEFAULT 'Tidak Diketahui',
   JAWATAN              TEXT DEFAULT 'AHLI',
@@ -215,7 +216,15 @@ CREATE POLICY "anon_update_ahli"
   USING (true) WITH CHECK (true);
 
 -- ============================================================
--- 8. STORAGE BUCKET — ensure public policy
+-- 8. MIGRATION — add TARIKH_BAYARAN_2026 to existing databases
+-- ============================================================
+-- Run this if your "AHLI DPMM JOHOR" table already exists and
+-- was created before this column was added:
+ALTER TABLE "AHLI DPMM JOHOR"
+  ADD COLUMN IF NOT EXISTS TARIKH_BAYARAN_2026 TEXT;
+
+-- ============================================================
+-- 9. STORAGE BUCKET — ensure public policy
 -- ============================================================
 -- Go to Supabase Dashboard → Storage → Policies
 -- Add these policies for bucket "permohonan-dokumen":
