@@ -5899,11 +5899,13 @@ document.addEventListener('DOMContentLoaded', function(){
 ════════════════════════════════════════════════════════ -->
 <style>
 #admin-clerk-btn {
-  position:fixed;bottom:28px;right:28px;width:54px;height:54px;border-radius:50%;
-  background:linear-gradient(135deg,#6C5CE7,#5549D4);border:none;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;
+  position:fixed;bottom:28px;right:28px;width:58px;height:58px;border-radius:50%;
+  background:linear-gradient(135deg,#6C5CE7,#5549D4);border:3px solid #fff;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
   box-shadow:0 4px 20px rgba(108,92,231,.45);z-index:9100;transition:transform .2s,box-shadow .2s;
+  overflow:hidden;padding:0;
 }
+#admin-clerk-btn img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
 #admin-clerk-btn:hover{transform:scale(1.08);box-shadow:0 6px 28px rgba(108,92,231,.6);}
 #admin-clerk-window {
   position:fixed;bottom:92px;right:28px;width:420px;max-width:calc(100vw - 40px);
@@ -5961,13 +5963,18 @@ document.addEventListener('DOMContentLoaded', function(){
 #admin-clerk-send:hover{background:#5549D4;}
 </style>
 
-<button id="admin-clerk-btn" onclick="toggleAdminClerk()" title="AI Admin Clerk" aria-label="Buka AI Admin Clerk">&#129302;</button>
+<button id="admin-clerk-btn" onclick="toggleAdminClerk()" title="Tanya Aiman" aria-label="Buka Aiman — Wakil Digital DPMMNJ">
+  <img src="aiman.jpg.png" alt="Aiman">
+</button>
 
-<div id="admin-clerk-window" role="dialog" aria-label="AI Admin Clerk">
+<div id="admin-clerk-window" role="dialog" aria-label="Aiman — Wakil Digital DPMMNJ">
   <div id="admin-clerk-header">
-    <div>
-      <div class="aclerk-title">AI Admin Clerk</div>
-      <div class="aclerk-sub">DPMM Negeri Johor</div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <img src="aiman.jpg.png" alt="Aiman" style="width:36px;height:36px;object-fit:cover;border-radius:50%;border:2px solid rgba(255,255,255,0.35);flex-shrink:0;">
+      <div>
+        <div class="aclerk-title">Aiman</div>
+        <div class="aclerk-sub">Digital Strategist &middot; DPMMNJ</div>
+      </div>
     </div>
     <div class="aclerk-hdr-btns">
       <button onclick="clearAdminChat()">Kosong</button>
@@ -5984,7 +5991,7 @@ document.addEventListener('DOMContentLoaded', function(){
     <button class="aclerk-chip" onclick="adminChipSend('Taklimat harian')">Taklimat Harian</button>
   </div>
   <div id="admin-clerk-input-row">
-    <input id="admin-clerk-input" type="text" placeholder="Tanya AI Clerk... (cth: ahli belum bayar yuran 2025)" onkeydown="if(event.key==='Enter')sendAdminMessage()">
+    <input id="admin-clerk-input" type="text" placeholder="Tanya Aiman... (cth: ahli belum bayar yuran 2025)" onkeydown="if(event.key==='Enter')sendAdminMessage()">
     <button id="admin-clerk-send" onclick="sendAdminMessage()">Hantar</button>
   </div>
 </div>
@@ -6018,7 +6025,7 @@ function toggleAdminClerk() {
 function clearAdminChat() {
   document.getElementById('admin-clerk-messages').innerHTML = '';
   _clerk.history = [];
-  addAdminBotMessage('Chat dikosongkan. Apa yang boleh saya bantu?');
+  addAdminBotMessage('Salam boss, Apa yang boleh saya bantu?');
 }
 
 function addAdminBotMessage(text) {
@@ -6067,7 +6074,13 @@ function buildAdminSystemPrompt() {
   var belum2026 = (typeof MEMBERS !== 'undefined') ? MEMBERS.filter(function(m){return !m.tarikhBayar2026&&(m.status==='AKTIF'||!m.status);}).length : 0;
   var ssmExp = (typeof MEMBERS !== 'undefined') ? MEMBERS.filter(function(m){if(!m.ssmDeadline)return false;var d=(new Date(m.ssmDeadline)-new Date())/86400000;return d>=0&&d<=90;}).length : 0;
   var userRole = (typeof currentUser !== 'undefined' && currentUser) ? (currentUser.role||'pengguna') : 'pengguna';
-  return 'Anda adalah AI Admin Clerk DPMM Negeri Johor. Anda membantu pegawai pentadbir menguruskan data ahli.\n\n' +
+  return 'Anda adalah AIMAN \u2014 Wakil Digital & Panduan Perniagaan rasmi Dewan Perniagaan Melayu Malaysia Negeri Johor (DPMMNJ).\n\n' +
+    'PROFIL PERSONA:\n- Nama penuh: Aiman (Ahli Inovasi & Maju Aspirasi Negeri)\n' +
+    '- Arketip: Sage & Helper \u2014 Bijaksana, berwibawa, namun mudah didekati\n' +
+    '- Nada suara: Formal tetapi mesra. Bahasa Melayu baku yang moden.\n' +
+    '- Nilai teras: Amanah, Inovasi, Perpaduan\n' +
+    '- Gaya: Ringkas, berorientasikan tindakan, data-driven.\n\n' +
+    'Anda membantu pegawai pentadbir menguruskan data ahli DPMMNJ.\n\n' +
     'STATISTIK SEMASA:\n- Jumlah ahli: ' + totalAhli + '\n- Ahli aktif: ' + aktif + '\n' +
     '- Belum bayar yuran 2025: ' + belum2025 + '\n- Belum bayar yuran 2026: ' + belum2026 + '\n' +
     '- SSM hampir tamat (90 hari): ' + ssmExp + '\n- Peranan pengguna: ' + userRole + '\n\n' +
@@ -6240,6 +6253,7 @@ function buildDailyBriefing() {
   var b2026 = M.filter(function(m){return !m.tarikhBayar2026&&(m.status==='AKTIF'||!m.status);}).length;
   var ssm = M.filter(function(m){if(!m.ssmDeadline)return false;var d=(new Date(m.ssmDeadline)-new Date())/86400000;return d>=0&&d<=90;}).length;
   var inc = M.filter(function(m){return !m.emel||!m.hp||!m.ic;}).length;
+  addAdminBotMessage('Salam boss, Apa yang boleh saya bantu?');
   addBotHTML('<div style="font-size:12px;">'+
     '<div style="font-weight:700;font-size:13px;margin-bottom:8px;color:#2D2B3D;">Taklimat Harian &#8212; '+today+'</div>'+
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;">'+
