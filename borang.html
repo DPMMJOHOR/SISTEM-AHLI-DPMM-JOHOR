@@ -4609,6 +4609,19 @@ KONTEKS SEMASA:
 - Jenis perniagaan: ${biz}
 - ${currentContext}${fasalInfo}
 
+SENARAI FASAL & YURAN (rujukan pantas):
+- 6.2.1 Individu/Pemunya Tunggal/Firma: Daftar RM50, Tahunan RM50
+- 6.2.2 Wanita Melayu: Daftar RM50, Tahunan RM50
+- 6.2.3(a) Profesional Berdaftar: Daftar RM200, Tahunan RM150
+- 6.2.3(b) Pengarah/CEO Syarikat: Daftar RM200, Tahunan RM150
+- 6.2.4 Syarikat Milik Kerajaan 100%: Daftar RM200, Tahunan RM150
+- 6.2.5 Syarikat Melayu 100%: Daftar RM200, Tahunan RM150
+- 6.2.6 Koperasi Melayu 100%: Daftar RM200, Tahunan RM150
+- 6.3.x Ahli Bersekutu: Daftar RM50-RM200, Tahunan RM50-RM150 (bergantung sub-fasal)
+- 6.4.1 Persatuan Kebangsaan: Daftar RM1000, Tahunan RM500
+- 6.4.2 Persatuan Negeri: Daftar RM500, Tahunan RM250
+- 6.5.x Ahli Kehormat: Percuma
+
 PERATURAN JAWAPAN:
 1. Kesan bahasa pengguna: jika Inggeris balas dalam Inggeris; jika Melayu balas dalam Bahasa Melayu baku.
 2. Hadkan setiap jawapan kepada maksimum 100 patah perkataan / 100 words.
@@ -4788,7 +4801,10 @@ function screenUserInput(text) {
     'senarai ahli', 'data ahli', 'nombor ahli', 'nama ahli', 'ic ahli',
     'email ahli', 'emel ahli', 'database', 'kata laluan', 'password',
     'berapa ahli', 'semua ahli', 'list member', 'all member', 'admin login',
-    'admin access', 'admin password'
+    'admin access', 'admin password',
+    'nombor ic', 'no ic', 'my ic', 'ic number', 'mykad number',
+    'semua member', 'cari ahli', 'check member', 'show member',
+    'lihat ahli', 'papar ahli', 'export ahli', 'download ahli'
   ];
   for (const term of blockedTerms) {
     if (lower.includes(term)) {
@@ -4983,6 +4999,9 @@ function showScriptedFAQ(query) {
     { aliases: ['berapa lama', 'how long', 'proses', 'tempoh', 'semakan', 'review'], answer: 'Tempoh proses semakan bergantung kepada kelengkapan dokumen. Biasanya antara 2 hingga 4 minggu bekerja.' },
     { aliases: ['hubungi', 'contact', 'whatsapp', 'urusetia', 'officer', 'pegawai'], answer: 'Hubungi Urusetia DPMM Negeri Johor melalui WhatsApp atau e-mel. Klik butang "Hubungi Urusetia" dalam chatbot ini.' },
     { aliases: ['koperasi', 'cooperative', 'skm', 'suruhanjaya koperasi'], answer: 'Koperasi yang didaftarkan di bawah SKM dan dimiliki 100% Melayu layak untuk Fasal 6.2.6 (RM200 daftar, RM150/tahun).' },
+    { aliases: ['selepas hantar', 'after submit', 'lepas hantar', 'dah hantar', 'sudah hantar', 'langkah seterusnya', 'next step', 'apa lepas'], answer: 'Selepas menghantar: (1) Muat turun & cetak borang PDF, (2) Tandatangan & cop syarikat, (3) Lengkapkan Akuan Berkanun di hadapan Pesuruhjaya Sumpah, (4) Serahkan ke pejabat DPMM bersama dokumen asal. Admin akan menghubungi anda.' },
+    { aliases: ['akuan berkanun', 'statutory declaration', 'pesuruhjaya sumpah', 'commissioner of oath'], answer: 'Akuan Berkanun perlu dilengkapkan di hadapan Pesuruhjaya Sumpah (boleh dijumpai di mana-mana pejabat guaman atau mahkamah). Bawa borang yang telah dicetak bersama IC asal.' },
+    { aliases: ['status permohonan', 'application status', 'semak status', 'check status', 'keputusan'], answer: 'Untuk semak status permohonan, hubungi Urusetia DPMM Negeri Johor dengan menyatakan nombor rujukan anda. Proses semakan biasanya mengambil masa 2-4 minggu.' },
   ];
   let answer = 'Maaf, saya tidak pasti jawapan untuk soalan ini. / I\'m not sure about that. Sila hubungi urusetia DPMM Negeri Johor.';
   for (const entry of entries) {

@@ -117,9 +117,9 @@ check('Fasal types A/S/G/H listed in step 1 context',   'Ahli Biasa' in src and 
 check('Fee data in system prompt for step 6',
       'RM${chosen.daftar}' in src or "chosen.daftar" in src,
       note='Fee amounts injected dynamically from FASAL_DATA')
-check('System prompt lacks specific fasal numbers (6.2.1-6.2.6)',
-      'fasal 6.2.1' not in src.lower() and '6.2.1' not in src[src.find('buildSystemPrompt'):src.find('buildSystemPrompt')+2000],
-      note='Detailed fasal numbers not in prompt — AI may give generic answers', warn=True)
+_bsp_start = src.find('function buildSystemPrompt(')
+check('System prompt includes fasal numbers (6.2.1-6.2.6)',
+      '6.2.1' in src[_bsp_start:_bsp_start+6000])
 
 # ── F. FASAL GUIDE STATE MACHINE ─────────────────────────────────────────────
 print('\n[ F ] FASAL GUIDE STATE MACHINE')
@@ -152,12 +152,10 @@ check('Blocks: "admin login" / "admin access"',    'admin login' in src)
 check('Blocks: "database"',                        'database' in src)
 check('Returns Malay+English bilingual block msg', "I\\'m sorry" in src or "I'm sorry" in src or 'can\'t help' in src or "can\\'t help" in src)
 check('Blocks: "list member" / "all member"',      'list member' in src and 'all member' in src)
-check('Missing: "semua member" / "cari ahli" / "check member"',
-      not ('semua member' in src or 'cari ahli' in src),
-      note='Add more Malay-English variants to blockedTerms list', warn=True)
-check('Missing: "nombor ic" extraction attempts',
-      'nombor ic' not in src.lower()[:src.lower().find('blockedterms')+500],
-      note='screenUserInput does not block "nombor ic" or "my ic number"', warn=True)
+check('Blocks: "semua member" / "cari ahli" / "check member"',
+      'semua member' in src and 'cari ahli' in src and 'check member' in src)
+check('Blocks: "nombor ic" / "ic number" extraction attempts',
+      'nombor ic' in src and 'ic number' in src)
 
 # ── H. SCRIPTED FAQ COVERAGE ─────────────────────────────────────────────────
 print('\n[ H ] SCRIPTED FAQ COVERAGE')
@@ -172,12 +170,10 @@ check('Bilingual default fallback',                "not sure about that" in src)
 check('Missing FAQ: "tempoh" / "berapa hari" approval timeline',
       'berapa hari' not in src,
       note='"berapa lama" covered but "berapa hari proses" not explicit', warn=True)
-check('Missing FAQ: "selepas hantar" post-submit flow',
-      'selepas hantar' not in src,
-      note='Add FAQ entry for post-submit steps', warn=True)
-check('Missing FAQ: "akuan berkanun" / statutory declaration',
-      'akuan berkanun' not in src,
-      note='Post-submit steps reference akuan berkanun but FAQ does not cover it', warn=True)
+check('FAQ covers: "selepas hantar" post-submit flow',
+      'selepas hantar' in src)
+check('FAQ covers: "akuan berkanun" / statutory declaration',
+      'akuan berkanun' in src)
 
 # ── I. UX BUGS ───────────────────────────────────────────────────────────────
 print('\n[ I ] UX BUGS')
