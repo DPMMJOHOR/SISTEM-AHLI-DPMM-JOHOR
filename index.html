@@ -6427,11 +6427,13 @@ function exportComputedCSV() {
   addAdminBotMessage('CSV dieksport: ' + members.length + ' rekod.');
 }
 
+var _meetCacheTime = 0;
 function executeMeetingQuery(params) {
-  if (!MEETINGS_CACHE.length) {
+  var stale = (Date.now() - _meetCacheTime) > 300000; // refresh every 5 min
+  if (!MEETINGS_CACHE.length || stale) {
     supabaseClient.from('DPMM_MESYUARAT').select('mesyuarat_id,nama,tarikh,tempat,aktif')
       .order('tarikh', {ascending:false}).limit(20)
-      .then(function(res){ MEETINGS_CACHE = res.data||[]; _renderMeetingResults(MEETINGS_CACHE, params); })
+      .then(function(res){ MEETINGS_CACHE = res.data||[]; _meetCacheTime = Date.now(); _renderMeetingResults(MEETINGS_CACHE, params); })
       .catch(function(){ addAdminBotMessage('Gagal memuatkan data mesyuarat. Cuba semula.'); });
   } else {
     _renderMeetingResults(MEETINGS_CACHE, params);
@@ -6487,73 +6489,6 @@ function buildSendQueue(members) {
     '<th style="padding:4px 6px;font-size:10px;text-align:left;color:#6C5CE7;">No. HP</th>'+
     '<th style="padding:4px 6px;font-size:10px;text-align:left;color:#6C5CE7;">WA</th>'+
     '</tr></thead><tbody>'+rows+'</tbody></table></div>'+more+'</div>');
-}
-
-function executeEmailBlast(members) {
-  if (!members.length){addAdminBotMessage('Tiada ahli dalam senarai untuk e-mel blast.');return;}
-  var quota=200; var count=Math.min(members.length,quota);
-  var previews = members.slice(0,3).map(function(m){
-    return '<div style="background:#F5F4FB;border-radius:6px;padding:7px;margin-bottom:5px;font-size:11px;">'+
-      '<div><strong>Kepada:</strong> '+(m.emel||'Tiada e-mel')+'</div>'+
-      '<div><strong>Nama:</strong> '+(m.namaSyarikat||m.namaPIC||'&#8212;')+'</div></div>';
-  }).join('');
-  var recipData = JSON.stringify(members.slice(0,count).map(function(m){return {id:m.id,emel:m.emel,nama:m.namaSyarikat||m.namaPIC};}));
-  addBotHTML('<div style="font-size:12px;">'+
-    '<div style="background:#FFF4E6;border:1.5px solid #FFA94D;border-radius:8px;padding:9px;margin-bottom:9px;">'+
-    '<div style="font-weight:700;color:#d48000;">Amaran Kuota EmailJS</div>'+
-    '<div style="margin-top:3px;color:#4E4B6B;">Had bulanan: '+quota+' e-mel. Sasaran: '+members.length+'. Yang akan dihantar: <strong>'+count+'</strong>.</div></div>'+
-    '<div style="font-weight:600;margin-bottom:6px;">Preview (3 pertama):</div>'+previews+
-    '<div style="display:flex;gap:8px;margin-top:8px;">'+
-    '<button onclick="confirmEmailBlast('+recipData+')" style="padding:6px 14px;background:#6C5CE7;color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">Hantar '+count+' E-mel</button>'+
-    '<button onclick="this.closest(\'.aclerk-msg\').remove()" style="padding:6px 14px;background:#EBE9F1;color:#2D2B3D;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;">Batal</button>'+
-    '</div></div>');
-}
-
-async function confirmEmailBlast(recipients) {
-  if (typeof emailjs === 'undefined') {
-    addAdminBotMessage('\u26a0\ufe0f EmailJS SDK tidak dimuatkan. Semak sambungan internet dan muat semula halaman.');
-    return;
-  }
-  if (!EMAILJS_KEY) {
-    addAdminBotMessage('\u26a0\ufe0f EMAILJS_KEY belum dikonfigurasi dalam config-local.js. Tambah: EMAILJS_KEY: "key_xxxx"');
-    return;
-  }
-  if (!EMAILJS_BLAST_TEMPLATE) {
-    addAdminBotMessage('\u26a0\ufe0f EMAILJS_BLAST_TEMPLATE belum dikonfigurasi. Buat template baru di emailjs.com dengan medan: to_name, to_email, no_ahli, message — kemudian tambah ke config-local.js: EMAILJS_BLAST_TEMPLATE: "template_xxxx"');
-    return;
-  }
-  var validRecips = recipients.filter(function(r){ return r.emel && r.emel.includes('@'); });
-  if (!validRecips.length) { addAdminBotMessage('Tiada penerima dengan alamat e-mel yang sah dalam senarai ini.'); return; }
-  var total = validRecips.length;
-  var sent = 0; var failed = 0;
-  var statusEl = document.createElement('div');
-  statusEl.className = 'aclerk-msg html-card';
-  statusEl.innerHTML = '<div style="font-size:12px;"><div style="font-weight:600;">\ud83d\udce7 Menghantar e-mel... <span id="blast-progress">0</span>/'+total+'</div><div style="margin-top:6px;height:4px;background:#EBE9F1;border-radius:2px;"><div id="blast-bar" style="height:4px;background:#6C5CE7;border-radius:2px;width:0%;transition:width .3s;"></div></div></div>';
-  document.getElementById('admin-clerk-messages').appendChild(statusEl);
-  document.getElementById('admin-clerk-messages').scrollTop = 99999;
-  for (var i = 0; i < total; i++) {
-    var m = validRecips[i];
-    try {
-      await emailjs.send(EMAILJS_SVC, EMAILJS_BLAST_TEMPLATE, {
-        to_name:  m.namaSyarikat || m.namaPIC || 'Ahli DPMM',
-        to_email: m.emel,
-        no_ahli:  m.id || '',
-        message:  'Salam ' + (m.namaSyarikat || m.namaPIC || 'Ahli') + ',\n\nYuran tahunan DPMM Negeri Johor anda masih belum dijelaskan. Sila hubungi urusetia untuk maklumat lanjut.\n\nTerima kasih.\nUrusetia DPMM Negeri Johor'
-      });
-      sent++;
-    } catch(e) {
-      console.error('Email blast error [' + (m.emel||'?') + ']:', e);
-      failed++;
-    }
-    var pct = Math.round(((sent+failed)/total)*100);
-    var progEl = document.getElementById('blast-progress');
-    var barEl = document.getElementById('blast-bar');
-    if (progEl) progEl.textContent = (sent+failed);
-    if (barEl) barEl.style.width = pct+'%';
-    if (i < total-1) await new Promise(function(r){ setTimeout(r,350); });
-  }
-  var color = failed===0?'#00D4A0':'#FFA94D';
-  statusEl.innerHTML = '<div style="font-size:12px;"><div style="font-weight:700;color:'+color+';margin-bottom:4px;">'+(failed===0?'\u2705':'\u26a0\ufe0f')+' E-mel selesai: '+sent+' berjaya'+(failed>0?', '+failed+' gagal':'')+' daripada '+total+'</div>'+(failed>0?'<div style="font-size:11px;color:#FF6B6B;">Semak console (F12) untuk butiran ralat.</div>':'')+'</div>';
 }
 
 function mkKPI(label, value, color, bg) {
@@ -6618,14 +6553,16 @@ async function sendAdminMessage() {
       var resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method:'POST',
         headers:{'Authorization':'Bearer '+GROQ_KEY,'Content-Type':'application/json'},
-        body:JSON.stringify({model:'llama-3.1-8b-instant',messages:[{role:'system',content:buildAdminSystemPrompt()},..._clerk.history],max_tokens:600})
+        body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'system',content:buildAdminSystemPrompt()},..._clerk.history],max_tokens:900})
       });
       var data = await resp.json();
       hideAdminTyping();
       if (data.choices && data.choices[0]) {
         var reply = data.choices[0].message.content;
-        _clerk.history.push({role:'assistant',content:reply});
-        routeAction(parseGroqIntent(reply));
+        var intent = parseGroqIntent(reply);
+        var histSummary = intent.action === 'answer' ? (intent.params.text||reply).slice(0,200) : '[Tindakan: '+intent.action+']';
+        _clerk.history.push({role:'assistant',content:histSummary});
+        routeAction(intent);
       } else {
         console.error('Admin clerk Groq error:', (data.error&&data.error.message)||data);
         routeAction(parseGroqIntent(text));
@@ -6636,6 +6573,14 @@ async function sendAdminMessage() {
       routeAction(parseGroqIntent(text));
     }
   } else {
+    if (!document.getElementById('aiman-dumb-notice')) {
+      var nb = document.createElement('div');
+      nb.id = 'aiman-dumb-notice';
+      nb.style.cssText = 'margin:6px 12px;padding:7px 10px;background:#FFF4E6;border:1.5px solid #FFA94D;border-radius:8px;font-size:11px;color:#7c5500;';
+      nb.innerHTML = '&#9888;&#65039; Mod Asas aktif (GROQ_KEY tidak dikonfigurasi). Hanya soalan mudah dijawab. Tambah kunci dalam <code>config-local.js</code> untuk AI penuh.';
+      document.getElementById('admin-clerk-messages').appendChild(nb);
+      document.getElementById('admin-clerk-messages').scrollTop = 99999;
+    }
     routeAction(parseGroqIntent(text));
   }
 }
