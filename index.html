@@ -6093,11 +6093,10 @@ function buildAdminSystemPrompt() {
     '{ "action": "query_members", "params": { "filter": "unpaid_2025"|"unpaid_2026"|"ssm_expiring"|"incomplete"|"all"|"by_name", "name": "..." } }\n' +
     '{ "action": "daily_briefing", "params": {} }\n' +
     '{ "action": "whatsapp_queue", "params": { "filter": "unpaid_2025"|"unpaid_2026" } }\n' +
-    '{ "action": "email_blast", "params": { "filter": "unpaid_2025"|"unpaid_2026" } }\n' +
     '{ "action": "answer", "params": { "text": "..." } }\n\n' +
     'PERATURAN:\n1. Soalan data/senarai/laporan — gunakan action yang sesuai.\n' +
     '2. Soalan umum — gunakan action "answer".\n3. JANGAN dedahkan kata laluan atau kunci API.\n' +
-    '4. whatsapp_queue dan email_blast hanya untuk ADMIN.\n' +
+    '4. whatsapp_queue hanya untuk ADMIN. E-mel blast tidak tersedia — gunakan WhatsApp sahaja.\n' +
     '5. Medan yuran: tarikhBayar2025 (TARIKH_BAYARAN_2025) dan tarikhBayar2026 (TARIKH_BAYARAN_2026).\n' +
     '6. Jawab dalam Bahasa Malaysia; jika soalan dalam English, jawab dalam English.';
 }
@@ -6113,7 +6112,7 @@ function parseGroqIntent(text) {
   if (lower.includes('taklimat')||lower.includes('briefing')||lower.includes('ringkasan harian')) return {action:'daily_briefing',params:{}};
   if (lower.includes('tidak lengkap')||lower.includes('incomplete')||lower.includes('profil tidak')) return {action:'query_members',params:{filter:'incomplete'}};
   if (lower.includes('whatsapp')||lower.includes('wa queue')||lower.includes('antrian wa')) return {action:'whatsapp_queue',params:{filter:'unpaid_2025'}};
-  if (lower.includes('email blast')||lower.includes('emel blast')||lower.includes('hantar emel')) return {action:'email_blast',params:{filter:'unpaid_2025'}};
+  if (lower.includes('email blast')||lower.includes('emel blast')||lower.includes('hantar emel')) return {action:'whatsapp_queue',params:{filter:'unpaid_2025'}};
   if (lower.includes('jumlah ahli')||lower.includes('berapa ahli')||lower.includes('total ahli')) return {action:'query_members',params:{filter:'all'}};
   return {action:'answer',params:{text:text}};
 }
@@ -6128,8 +6127,8 @@ function routeAction(intent) {
     if (!isAdmin) { addAdminBotMessage('Tindakan ini hanya untuk ADMIN. Sila hubungi pentadbir sistem.'); return; }
     buildSendQueue(filterMembers(params.filter||'unpaid_2025'));
   } else if (action==='email_blast') {
-    if (!isAdmin) { addAdminBotMessage('Tindakan ini hanya untuk ADMIN. Sila hubungi pentadbir sistem.'); return; }
-    executeEmailBlast(filterMembers(params.filter||'unpaid_2025'));
+    addAdminBotMessage('E-mel blast tidak tersedia buat masa ini. Menggunakan WhatsApp sebagai gantinya...');
+    if (isAdmin) buildSendQueue(filterMembers(params.filter||'unpaid_2025'));
   } else if (action==='answer') {
     addAdminBotMessage(params.text||'Saya tidak dapat memahami permintaan. Sila cuba semula.');
   } else {
