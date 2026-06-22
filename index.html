@@ -2198,6 +2198,43 @@ function refreshDateGlobals() {
 }
 
 let MEMBERS = []; // will be loaded from Supabase
+var MEETINGS_CACHE = [];
+
+function getBirthdayMonth(ic) {
+  if (!ic) return null;
+  var clean = (ic + '').replace(/[-\s]/g, '');
+  var mm = parseInt(clean.slice(2, 4), 10);
+  return (mm >= 1 && mm <= 12) ? mm : null;
+}
+
+function buildContextSnapshot() {
+  var M = MEMBERS || [];
+  var BULAN = ['','Jan','Feb','Mac','Apr','Mei','Jun','Jul','Ogo','Sep','Okt','Nov','Dis'];
+  var g = {}, d = {}, f = {}, bm = {}, ry = {}, s = {};
+  M.forEach(function(m) {
+    var gk = m.jantina || 'Tidak Diisi'; g[gk] = (g[gk]||0) + 1;
+    var dk = m.daerah  || 'Tidak Diisi'; d[dk] = (d[dk]||0) + 1;
+    var fk = m.fasal   || 'Tiada';       f[fk] = (f[fk]||0) + 1;
+    var sk = m.status  || 'AKTIF';       s[sk] = (s[sk]||0) + 1;
+    var bk = getBirthdayMonth(m.ic);     if (bk) bm[bk] = (bm[bk]||0) + 1;
+    if (m.tarikhDaftar) { var yr = new Date(m.tarikhDaftar).getFullYear(); if (yr > 2000) ry[yr] = (ry[yr]||0) + 1; }
+  });
+  var topD    = Object.keys(d).sort(function(a,b){return d[b]-d[a];}).slice(0,8).map(function(k){return k+'('+d[k]+')';}).join(', ');
+  var fasalStr = Object.keys(f).sort().map(function(k){return k+'('+f[k]+')';}).join(', ');
+  var bmStr   = Object.keys(bm).sort(function(a,b){return a-b;}).map(function(k){return BULAN[k]+'('+bm[k]+')';}).join(', ');
+  var sStr    = Object.keys(s).map(function(k){return k+'('+s[k]+')';}).join(', ');
+  var ryStr   = Object.keys(ry).sort().map(function(k){return k+'('+ry[k]+')';}).join(', ');
+  return { gStr: JSON.stringify(g), topD: topD, fasalStr: fasalStr, bmStr: bmStr, sStr: sStr, ryStr: ryStr };
+}
+
+async function loadMeetingsForAiman() {
+  try {
+    var res = await supabaseClient.from('DPMM_MESYUARAT')
+      .select('mesyuarat_id,nama,tarikh,tempat,aktif')
+      .order('tarikh', { ascending: false }).limit(20);
+    MEETINGS_CACHE = res.data || [];
+  } catch(e) { console.warn('loadMeetingsForAiman:', e); }
+}
 
 // ── AUDIT LOG (cross-app, fire-and-forget) ──
 function logAudit(tindakan, jadual, rekodId, butiran) {
@@ -2537,6 +2574,7 @@ function _continueLogin(user, btn) {
     renderAllPages();
     // Load Supabase-backed data in background (non-blocking)
     _loadTemplatesFromSupabase().then(function() { renderTemplates(); });
+    loadMeetingsForAiman();
   }).catch(function(err) {
     if (btn) { btn.textContent = 'LOG MASUK'; btn.disabled = false; }
     document.getElementById('login-err').style.display = 'block';
@@ -6093,12 +6131,12 @@ document.addEventListener('DOMContentLoaded', function(){
   </div>
   <div id="admin-clerk-messages"></div>
   <div id="admin-clerk-chips">
-    <button class="aclerk-chip" onclick="adminChipSend('Ahli belum bayar yuran 2025')">Belum Bayar 2025</button>
-    <button class="aclerk-chip" onclick="adminChipSend('Ahli belum bayar yuran 2026')">Belum Bayar 2026</button>
-    <button class="aclerk-chip" onclick="adminChipSend('SSM hampir tamat tempoh')">SSM Hampir Tamat</button>
-    <button class="aclerk-chip" onclick="adminChipSend('Berapa jumlah ahli aktif')">Jumlah Ahli</button>
-    <button class="aclerk-chip" onclick="adminChipSend('Senarai ahli tidak lengkap maklumat')">Profil Tidak Lengkap</button>
     <button class="aclerk-chip" onclick="adminChipSend('Taklimat harian')">Taklimat Harian</button>
+    <button class="aclerk-chip" onclick="adminChipSend('Berapa ramai ahli perempuan dan lelaki?')">Jantina Ahli</button>
+    <button class="aclerk-chip" onclick="adminChipSend('Senarai ahli belum bayar yuran 2026')">Belum Bayar 2026</button>
+    <button class="aclerk-chip" onclick="adminChipSend('Senarai mesyuarat terkini')">Mesyuarat</button>
+    <button class="aclerk-chip" onclick="adminChipSend('SSM hampir tamat tempoh')">SSM Hampir Tamat</button>
+    <button class="aclerk-chip" onclick="adminChipSend('Berapa ahli lahir bulan Julai?')">Birthday Julai</button>
   </div>
   <div id="admin-clerk-input-row">
     <input id="admin-clerk-input" type="text" placeholder="Tanya Aiman... (cth: ahli belum bayar yuran 2025)" onkeydown="if(event.key==='Enter')sendAdminMessage()">
@@ -6178,31 +6216,47 @@ function adminChipSend(text) {
 }
 
 function buildAdminSystemPrompt() {
-  var totalAhli = (typeof MEMBERS !== 'undefined') ? MEMBERS.length : 0;
-  var aktif = (typeof MEMBERS !== 'undefined') ? MEMBERS.filter(function(m){return m.status==='AKTIF'||!m.status;}).length : 0;
-  var belum2025 = (typeof MEMBERS !== 'undefined') ? MEMBERS.filter(function(m){return !m.tarikhBayar2025&&(m.status==='AKTIF'||!m.status);}).length : 0;
-  var belum2026 = (typeof MEMBERS !== 'undefined') ? MEMBERS.filter(function(m){return !m.tarikhBayar2026&&(m.status==='AKTIF'||!m.status);}).length : 0;
-  var ssmExp = (typeof MEMBERS !== 'undefined') ? MEMBERS.filter(function(m){if(!m.ssmDeadline)return false;var d=(new Date(m.ssmDeadline)-new Date())/86400000;return d>=0&&d<=90;}).length : 0;
-  var userRole = (typeof currentUser !== 'undefined' && currentUser) ? (currentUser.role||'pengguna') : 'pengguna';
-  return 'Anda adalah AIMAN \u2014 Wakil Digital & Panduan Perniagaan rasmi Dewan Perniagaan Melayu Malaysia Negeri Johor (DPMMNJ).\n\n' +
-    'PROFIL PERSONA:\n- Nama penuh: Aiman (Ahli Inovasi & Maju Aspirasi Negeri)\n' +
-    '- Arketip: Sage & Helper \u2014 Bijaksana, berwibawa, namun mudah didekati\n' +
-    '- Nada suara: Formal tetapi mesra. Bahasa Melayu baku yang moden.\n' +
-    '- Nilai teras: Amanah, Inovasi, Perpaduan\n' +
-    '- Gaya: Ringkas, berorientasikan tindakan, data-driven.\n\n' +
-    'Anda membantu pegawai pentadbir menguruskan data ahli DPMMNJ.\n\n' +
-    'STATISTIK SEMASA:\n- Jumlah ahli: ' + totalAhli + '\n- Ahli aktif: ' + aktif + '\n' +
-    '- Belum bayar yuran 2025: ' + belum2025 + '\n- Belum bayar yuran 2026: ' + belum2026 + '\n' +
-    '- SSM hampir tamat (90 hari): ' + ssmExp + '\n- Peranan pengguna: ' + userRole + '\n\n' +
-    'TINDAKAN (jawab dengan JSON dalam blok ```json```):\n' +
-    '{ "action": "query_members", "params": { "filter": "unpaid_2025"|"unpaid_2026"|"ssm_expiring"|"incomplete"|"all"|"by_name", "name": "..." } }\n' +
-    '{ "action": "daily_briefing", "params": {} }\n' +
-    '{ "action": "whatsapp_queue", "params": { "filter": "unpaid_2025"|"unpaid_2026" } }\n' +
-    '{ "action": "answer", "params": { "text": "..." } }\n\n' +
-    'PERATURAN:\n1. Soalan data/senarai/laporan — gunakan action yang sesuai.\n' +
-    '2. Soalan umum — gunakan action "answer".\n3. JANGAN dedahkan kata laluan atau kunci API.\n' +
-    '4. whatsapp_queue hanya untuk ADMIN. E-mel blast tidak tersedia — gunakan WhatsApp sahaja.\n' +
-    '5. Medan yuran: tarikhBayar2025 (TARIKH_BAYARAN_2025) dan tarikhBayar2026 (TARIKH_BAYARAN_2026).\n' +
+  var M = (typeof MEMBERS !== 'undefined') ? MEMBERS : [];
+  var totalAhli = M.length;
+  var aktif     = M.filter(function(m){return m.status==='AKTIF'||!m.status;}).length;
+  var belum2025 = M.filter(function(m){return !m.tarikhBayar2025&&(m.status==='AKTIF'||!m.status);}).length;
+  var belum2026 = M.filter(function(m){return !m.tarikhBayar2026&&(m.status==='AKTIF'||!m.status);}).length;
+  var ssmExp    = M.filter(function(m){if(!m.ssmDeadline)return false;var d=(new Date(m.ssmDeadline)-new Date())/86400000;return d>=0&&d<=90;}).length;
+  var userRole  = (typeof currentUser !== 'undefined' && currentUser) ? (currentUser.role||'pengguna') : 'pengguna';
+  var snap = (typeof buildContextSnapshot === 'function') ? buildContextSnapshot() : {};
+  var meetCtx = (MEETINGS_CACHE && MEETINGS_CACHE.length)
+    ? MEETINGS_CACHE.slice(0,8).map(function(m){return (m.mesyuarat_id||'')+' | '+(m.nama||'')+' | '+(m.tarikh||'')+' | '+(m.aktif?'AKTIF':'SELESAI');}).join('\n')
+    : 'Tiada data mesyuarat dimuatkan.';
+  return 'Anda adalah AIMAN — Staf Tetap Digital DPMM Negeri Johor. Jawab SEBARANG soalan pentadbiran.\n' +
+    'Nada: Formal tetapi mesra. Bahasa Melayu baku. Ringkas dan data-driven.\n\n' +
+    'STATISTIK AHLI:\n' +
+    'Jumlah: '+totalAhli+' | Aktif: '+aktif+' | Belum bayar 2025: '+belum2025+' | Belum bayar 2026: '+belum2026+' | SSM hampir tamat: '+ssmExp+'\n' +
+    'Jantina: '+(snap.gStr||'{}')+' | Status: '+(snap.sStr||'')+' | Tahun daftar: '+(snap.ryStr||'')+'\n' +
+    'Daerah (top): '+(snap.topD||'')+' | Fasal: '+(snap.fasalStr||'')+'\n' +
+    'Bulan lahir (dari IC): '+(snap.bmStr||'Tiada data IC')+'\n\n' +
+    'MEDAN AHLI (untuk computed_filter, guna "m.field"):\n' +
+    'id, namaSyarikat, namaPIC, jantina("LELAKI"/"PEREMPUAN"), daerah, fasal, status("AKTIF"/"TIDAK AKTIF"),\n' +
+    'tarikhDaftar, tarikhBayar2025(null=belum), tarikhBayar2026(null=belum),\n' +
+    'ssmDeadline, ic(YYMMDD-XXXXXXXX), hp, emel, jawatan\n' +
+    'HELPER: getBirthdayMonth(m.ic) -> integer 1-12 atau null\n\n' +
+    'MESYUARAT TERKINI:\n' + meetCtx + '\n\n' +
+    'TINDAKAN — balas dengan JSON dalam ```json```. Pilih tindakan yang PALING SESUAI:\n' +
+    '{"action":"computed_filter","params":{"expr":"JS filter expr pakai m dan getBirthdayMonth","label":"Penerangan"}}\n' +
+    '  Contoh Julai: "getBirthdayMonth(m.ic)===7"\n' +
+    '  Contoh perempuan: "m.jantina===\'PEREMPUAN\'"\n' +
+    '  Contoh daerah JB: "(m.daerah||\'\').toLowerCase().includes(\'johor bahru\')"\n' +
+    '  Contoh fasal+belum bayar: "m.fasal===\'6.2.4\'&&!m.tarikhBayar2026"\n' +
+    '{"action":"query_members","params":{"filter":"unpaid_2025"|"unpaid_2026"|"ssm_expiring"|"incomplete"|"all"|"by_name","name":"..."}}\n' +
+    '{"action":"query_meetings","params":{"filter":"all"|"active"}}\n' +
+    '{"action":"daily_briefing","params":{}}\n' +
+    '{"action":"whatsapp_queue","params":{"filter":"unpaid_2025"|"unpaid_2026"}}\n' +
+    '{"action":"answer","params":{"text":"..."}}\n\n' +
+    'PERATURAN:\n' +
+    '1. Soalan carian/senarai ahli — WAJIB guna computed_filter dengan expr yang betul.\n' +
+    '2. Soalan kiraan — boleh jawab terus via answer menggunakan data statistik di atas.\n' +
+    '3. Soalan mesyuarat — guna query_meetings.\n' +
+    '4. JANGAN dedahkan kata laluan atau kunci API.\n' +
+    '5. whatsapp_queue hanya untuk ADMIN (peranan semasa: '+userRole+').\n' +
     '6. Jawab dalam Bahasa Malaysia; jika soalan dalam English, jawab dalam English.';
 }
 
@@ -6211,14 +6265,26 @@ function parseGroqIntent(text) {
   var match = stripped.match(/\{[\s\S]*\}/);
   if (match) { try { var p = JSON.parse(match[0]); if (p.action) return p; } catch(e) {} }
   var lower = text.toLowerCase();
+  // Meetings
+  if (lower.includes('mesyuarat')||lower.includes('meeting')) return {action:'query_meetings',params:{filter:'all'}};
+  // Yuran
   if (lower.includes('belum bayar')&&lower.includes('2026')) return {action:'query_members',params:{filter:'unpaid_2026'}};
   if (lower.includes('belum bayar')) return {action:'query_members',params:{filter:'unpaid_2025'}};
-  if (lower.includes('ssm')&&(lower.includes('tamat')||lower.includes('expire'))) return {action:'query_members',params:{filter:'ssm_expiring'}};
-  if (lower.includes('taklimat')||lower.includes('briefing')||lower.includes('ringkasan harian')) return {action:'daily_briefing',params:{}};
+  // SSM
+  if (lower.includes('ssm')&&(lower.includes('tamat')||lower.includes('expire')||lower.includes('luput'))) return {action:'query_members',params:{filter:'ssm_expiring'}};
+  // Briefing
+  if (lower.includes('taklimat')||lower.includes('briefing')||lower.includes('ringkasan')) return {action:'daily_briefing',params:{}};
+  // Incomplete
   if (lower.includes('tidak lengkap')||lower.includes('incomplete')||lower.includes('profil tidak')) return {action:'query_members',params:{filter:'incomplete'}};
-  if (lower.includes('whatsapp')||lower.includes('wa queue')||lower.includes('antrian wa')) return {action:'whatsapp_queue',params:{filter:'unpaid_2025'}};
-  if (lower.includes('email blast')||lower.includes('emel blast')||lower.includes('hantar emel')) return {action:'whatsapp_queue',params:{filter:'unpaid_2025'}};
-  if (lower.includes('jumlah ahli')||lower.includes('berapa ahli')||lower.includes('total ahli')) return {action:'query_members',params:{filter:'all'}};
+  // Gender — keyword fallback uses computed_filter
+  if (lower.includes('perempuan')||lower.includes('wanita')) return {action:'computed_filter',params:{expr:"m.jantina==='PEREMPUAN'",label:'Ahli Perempuan'}};
+  if (lower.includes('lelaki')||lower.includes('laki')) return {action:'computed_filter',params:{expr:"m.jantina==='LELAKI'",label:'Ahli Lelaki'}};
+  // Birthday months (keyword fallback)
+  var monthMap = {januari:1,februari:2,mac:3,april:4,mei:5,jun:6,julai:7,ogos:8,september:9,oktober:10,november:11,disember:12,january:1,february:2,march:3,july:7,august:8,october:10,december:12};
+  for (var mn in monthMap) { if (lower.includes(mn)&&(lower.includes('lahir')||lower.includes('birthday')||lower.includes('harijadi'))) { var mm=monthMap[mn]; return {action:'computed_filter',params:{expr:'getBirthdayMonth(m.ic)==='+mm,label:'Ahli Lahir Bulan '+mn.charAt(0).toUpperCase()+mn.slice(1)}}; } }
+  // WA / all members
+  if (lower.includes('whatsapp')||lower.includes('wa queue')) return {action:'whatsapp_queue',params:{filter:'unpaid_2025'}};
+  if (lower.includes('jumlah ahli')||lower.includes('berapa ahli')||lower.includes('semua ahli')) return {action:'query_members',params:{filter:'all'}};
   return {action:'answer',params:{text:text}};
 }
 
@@ -6226,9 +6292,16 @@ function routeAction(intent) {
   var userRole = (typeof currentUser !== 'undefined' && currentUser) ? (currentUser.role||'pengguna') : 'pengguna';
   var isAdmin = (userRole==='ADMIN'||userRole==='admin');
   var action = intent.action; var params = intent.params||{};
-  if (action==='query_members') { executeQuery(params); }
-  else if (action==='daily_briefing') { buildDailyBriefing(); }
-  else if (action==='whatsapp_queue') {
+  if (action==='computed_filter') {
+    var result = computedFilter(params.expr||'true');
+    executeComputedFilter(result, params.label||'Hasil Carian');
+  } else if (action==='query_members') {
+    executeQuery(params);
+  } else if (action==='query_meetings') {
+    executeMeetingQuery(params);
+  } else if (action==='daily_briefing') {
+    buildDailyBriefing();
+  } else if (action==='whatsapp_queue') {
     if (!isAdmin) { addAdminBotMessage('Tindakan ini hanya untuk ADMIN. Sila hubungi pentadbir sistem.'); return; }
     buildSendQueue(filterMembers(params.filter||'unpaid_2025'));
   } else if (action==='email_blast') {
@@ -6297,6 +6370,99 @@ function exportQueryCSV(filter, params) {
   a.href=url; a.download='DPMM_'+filter+'_'+new Date().toISOString().slice(0,10)+'.csv'; a.click();
   URL.revokeObjectURL(url);
   addAdminBotMessage('CSV dieksport: '+members.length+' rekod.');
+}
+
+function computedFilter(expr) {
+  try {
+    var fn = new Function('m', 'getBirthdayMonth', 'return (' + expr + ')');
+    return (MEMBERS||[]).filter(function(m){ try { return !!fn(m, getBirthdayMonth); } catch(e) { return false; } });
+  } catch(e) { console.warn('computedFilter error:', e); return null; }
+}
+
+function executeComputedFilter(members, label) {
+  if (members === null) { addAdminBotMessage('Ralat dalam ungkapan penapisan. Cuba tanya semula dengan lebih spesifik.'); return; }
+  if (!members.length) { addAdminBotMessage('Tiada rekod dijumpai untuk: ' + (label||'kriteria ini')); return; }
+  var BULAN = ['','Jan','Feb','Mac','Apr','Mei','Jun','Jul','Ogo','Sep','Okt','Nov','Dis'];
+  var rows = members.slice(0,25).map(function(m,i){
+    var bm = getBirthdayMonth(m.ic);
+    return '<tr style="border-bottom:1px solid #EBE9F1;">' +
+      '<td style="padding:4px 6px;color:#6E6B7B;font-size:11px;">'+(i+1)+'</td>' +
+      '<td style="padding:4px 6px;font-weight:600;font-size:11px;">'+(m.id||'&#8212;')+'</td>' +
+      '<td style="padding:4px 6px;font-size:11px;">'+(m.namaSyarikat||m.namaPIC||'&#8212;')+'</td>' +
+      '<td style="padding:4px 6px;font-size:11px;">'+(m.daerah||'&#8212;')+'</td>' +
+      '<td style="padding:4px 6px;font-size:11px;">'+(m.jantina||'&#8212;')+'</td>' +
+      '<td style="padding:4px 6px;font-size:11px;">'+(bm?BULAN[bm]:'&#8212;')+'</td>' +
+      '<td style="padding:4px 6px;font-size:11px;">'+(m.hp||m.emel||'&#8212;')+'</td></tr>';
+  }).join('');
+  var more = members.length > 25 ? '<div style="padding:5px 6px;font-size:10px;color:#6E6B7B;">...dan '+(members.length-25)+' rekod lagi. Gunakan Export CSV untuk semua.</div>' : '';
+  var csvBtn = '<button onclick="exportComputedCSV()" style="margin-top:7px;padding:4px 12px;background:#EEE9FD;border:1.5px solid #6C5CE7;color:#6C5CE7;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;">&#x1F4E5; Export CSV ('+members.length+')</button>';
+  _clerk._lastComputed = members;
+  addBotHTML('<div style="font-size:12px;"><div style="font-weight:700;margin-bottom:6px;">'+(label||'Hasil Carian')+' &#8212; '+members.length+' rekod</div>' +
+    '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">' +
+    '<thead><tr style="background:#EEE9FD;">' +
+    '<th style="padding:4px 6px;text-align:left;color:#6C5CE7;font-size:10px;">#</th>' +
+    '<th style="padding:4px 6px;text-align:left;color:#6C5CE7;font-size:10px;">No. Ahli</th>' +
+    '<th style="padding:4px 6px;text-align:left;color:#6C5CE7;font-size:10px;">Nama</th>' +
+    '<th style="padding:4px 6px;text-align:left;color:#6C5CE7;font-size:10px;">Daerah</th>' +
+    '<th style="padding:4px 6px;text-align:left;color:#6C5CE7;font-size:10px;">Jantina</th>' +
+    '<th style="padding:4px 6px;text-align:left;color:#6C5CE7;font-size:10px;">Bln Lahir</th>' +
+    '<th style="padding:4px 6px;text-align:left;color:#6C5CE7;font-size:10px;">Kontak</th>' +
+    '</tr></thead><tbody>'+rows+'</tbody></table></div>'+more+csvBtn+'</div>');
+}
+
+function exportComputedCSV() {
+  var members = _clerk._lastComputed || [];
+  if (!members.length) { addAdminBotMessage('Tiada data untuk dieksport.'); return; }
+  var BULAN = ['','Jan','Feb','Mac','Apr','Mei','Jun','Jul','Ogo','Sep','Okt','Nov','Dis'];
+  var hdr = ['No. Ahli','Nama Syarikat','Nama PIC','Daerah','Jantina','Bulan Lahir','Fasal','E-mel','No. HP','Status','Tarikh Daftar','Tarikh Bayar 2025','Tarikh Bayar 2026','SSM Deadline'];
+  var rows = members.map(function(m){
+    var bm = getBirthdayMonth(m.ic);
+    return [m.id,m.namaSyarikat,m.namaPIC,m.daerah,m.jantina,bm?BULAN[bm]:'',m.fasal,m.emel,m.hp,m.status,m.tarikhDaftar||'',m.tarikhBayar2025||'',m.tarikhBayar2026||'',m.ssmDeadline||'']
+      .map(function(v){ return '"'+(v||'').toString().replace(/"/g,'""')+'"'; }).join(',');
+  });
+  var csv = '\uFEFF' + hdr.join(',') + '\n' + rows.join('\n');
+  var blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = 'DPMM_query_' + new Date().toISOString().slice(0,10) + '.csv'; a.click();
+  addAdminBotMessage('CSV dieksport: ' + members.length + ' rekod.');
+}
+
+function executeMeetingQuery(params) {
+  if (!MEETINGS_CACHE.length) {
+    supabaseClient.from('DPMM_MESYUARAT').select('mesyuarat_id,nama,tarikh,tempat,aktif')
+      .order('tarikh', {ascending:false}).limit(20)
+      .then(function(res){ MEETINGS_CACHE = res.data||[]; _renderMeetingResults(MEETINGS_CACHE, params); })
+      .catch(function(){ addAdminBotMessage('Gagal memuatkan data mesyuarat. Cuba semula.'); });
+  } else {
+    _renderMeetingResults(MEETINGS_CACHE, params);
+  }
+}
+
+function _renderMeetingResults(meetings, params) {
+  var filtered = meetings;
+  if (params && params.filter === 'active') filtered = meetings.filter(function(m){ return m.aktif; });
+  if (!filtered.length) { addAdminBotMessage('Tiada mesyuarat dijumpai.'); return; }
+  var rows = filtered.map(function(m){
+    var tarikh = m.tarikh ? new Date(m.tarikh).toLocaleDateString('ms-MY') : '&#8212;';
+    var badge = m.aktif
+      ? '<span style="background:#DCFCE7;color:#15803D;font-size:10px;font-weight:700;padding:1px 6px;border-radius:999px;">AKTIF</span>'
+      : '<span style="background:#F1F5F9;color:#64748B;font-size:10px;padding:1px 6px;border-radius:999px;">SELESAI</span>';
+    return '<tr style="border-bottom:1px solid #EBE9F1;">' +
+      '<td style="padding:4px 6px;font-size:11px;font-family:monospace;font-weight:700;color:#6C5CE7;">'+(m.mesyuarat_id||'&#8212;')+'</td>' +
+      '<td style="padding:4px 6px;font-size:11px;font-weight:600;">'+(m.nama||'&#8212;')+'</td>' +
+      '<td style="padding:4px 6px;font-size:11px;color:#6E6B7B;">'+tarikh+'</td>' +
+      '<td style="padding:4px 6px;font-size:11px;color:#6E6B7B;">'+(m.tempat||'&#8212;')+'</td>' +
+      '<td style="padding:4px 6px;">'+badge+'</td></tr>';
+  }).join('');
+  addBotHTML('<div style="font-size:12px;"><div style="font-weight:700;margin-bottom:6px;">Mesyuarat DPMM &#8212; '+filtered.length+' rekod</div>' +
+    '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">' +
+    '<thead><tr style="background:#EEE9FD;">' +
+    '<th style="padding:4px 6px;text-align:left;color:#6C5CE7;font-size:10px;">ID</th>' +
+    '<th style="padding:4px 6px;text-align:left;color:#6C5CE7;font-size:10px;">Nama</th>' +
+    '<th style="padding:4px 6px;text-align:left;color:#6C5CE7;font-size:10px;">Tarikh</th>' +
+    '<th style="padding:4px 6px;text-align:left;color:#6C5CE7;font-size:10px;">Tempat</th>' +
+    '<th style="padding:4px 6px;text-align:left;color:#6C5CE7;font-size:10px;">Status</th>' +
+    '</tr></thead><tbody>'+rows+'</tbody></table></div></div>');
 }
 
 function buildSendQueue(members) {
@@ -6432,7 +6598,7 @@ function selectDisambig(idx) {
   var m = _clerk.disambigMembers[idx];
   if (!m) return;
   addAdminUserMessage(m.namaSyarikat||m.namaPIC||m.id||'Ahli');
-  executeQuery({filter:'by_name',name:m.namaSyarikat||m.namaPIC||''});
+  executeComputedFilter([m], m.namaSyarikat||m.namaPIC||m.id||'Butiran Ahli');
 }
 
 async function sendAdminMessage() {
