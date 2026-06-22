@@ -6,6 +6,7 @@
 <title>SISTEM PENGURUSAN AHLI — DPMM NEGERI JOHOR</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <style>
 /* ══════════════════════════════════════════
    VUEXY-INSPIRED DESIGN SYSTEM
@@ -2135,6 +2136,10 @@ var SUPABASE_ANON_KEY = (typeof CONFIG !== 'undefined' && CONFIG.SUPABASE_KEY &&
 var supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 var TABLE_NAME = 'AHLI DPMM JOHOR';
 var GROQ_KEY = (typeof CONFIG !== 'undefined' && CONFIG.GROQ_KEY && !CONFIG.GROQ_KEY.startsWith('YOUR_')) ? CONFIG.GROQ_KEY : '';
+var EMAILJS_KEY = (typeof CONFIG !== 'undefined' && CONFIG.EMAILJS_KEY && !CONFIG.EMAILJS_KEY.startsWith('YOUR_')) ? CONFIG.EMAILJS_KEY : '';
+var EMAILJS_SVC = 'service_a3kt2zm';
+var EMAILJS_BLAST_TEMPLATE = (typeof CONFIG !== 'undefined' && CONFIG.EMAILJS_BLAST_TEMPLATE && !CONFIG.EMAILJS_BLAST_TEMPLATE.startsWith('YOUR_')) ? CONFIG.EMAILJS_BLAST_TEMPLATE : '';
+if (EMAILJS_KEY && typeof emailjs !== 'undefined') { emailjs.init(EMAILJS_KEY); }
 
 // ── LIVE DATE / YEAR ──────────────────────────────────────
 // These update dynamically — always reflect current system date
@@ -6234,8 +6239,51 @@ function executeEmailBlast(members) {
     '</div></div>');
 }
 
-function confirmEmailBlast(recipients) {
-  addAdminBotMessage('Menghantar e-mel kepada '+recipients.length+' ahli... (EmailJS template perlu dikonfigurasi terlebih dahulu.)');
+async function confirmEmailBlast(recipients) {
+  if (typeof emailjs === 'undefined') {
+    addAdminBotMessage('\u26a0\ufe0f EmailJS SDK tidak dimuatkan. Semak sambungan internet dan muat semula halaman.');
+    return;
+  }
+  if (!EMAILJS_KEY) {
+    addAdminBotMessage('\u26a0\ufe0f EMAILJS_KEY belum dikonfigurasi dalam config-local.js. Tambah: EMAILJS_KEY: "key_xxxx"');
+    return;
+  }
+  if (!EMAILJS_BLAST_TEMPLATE) {
+    addAdminBotMessage('\u26a0\ufe0f EMAILJS_BLAST_TEMPLATE belum dikonfigurasi. Buat template baru di emailjs.com dengan medan: to_name, to_email, no_ahli, message — kemudian tambah ke config-local.js: EMAILJS_BLAST_TEMPLATE: "template_xxxx"');
+    return;
+  }
+  var validRecips = recipients.filter(function(r){ return r.emel && r.emel.includes('@'); });
+  if (!validRecips.length) { addAdminBotMessage('Tiada penerima dengan alamat e-mel yang sah dalam senarai ini.'); return; }
+  var total = validRecips.length;
+  var sent = 0; var failed = 0;
+  var statusEl = document.createElement('div');
+  statusEl.className = 'aclerk-msg html-card';
+  statusEl.innerHTML = '<div style="font-size:12px;"><div style="font-weight:600;">\ud83d\udce7 Menghantar e-mel... <span id="blast-progress">0</span>/'+total+'</div><div style="margin-top:6px;height:4px;background:#EBE9F1;border-radius:2px;"><div id="blast-bar" style="height:4px;background:#6C5CE7;border-radius:2px;width:0%;transition:width .3s;"></div></div></div>';
+  document.getElementById('admin-clerk-messages').appendChild(statusEl);
+  document.getElementById('admin-clerk-messages').scrollTop = 99999;
+  for (var i = 0; i < total; i++) {
+    var m = validRecips[i];
+    try {
+      await emailjs.send(EMAILJS_SVC, EMAILJS_BLAST_TEMPLATE, {
+        to_name:  m.namaSyarikat || m.namaPIC || 'Ahli DPMM',
+        to_email: m.emel,
+        no_ahli:  m.id || '',
+        message:  'Salam ' + (m.namaSyarikat || m.namaPIC || 'Ahli') + ',\n\nYuran tahunan DPMM Negeri Johor anda masih belum dijelaskan. Sila hubungi urusetia untuk maklumat lanjut.\n\nTerima kasih.\nUrusetia DPMM Negeri Johor'
+      });
+      sent++;
+    } catch(e) {
+      console.error('Email blast error [' + (m.emel||'?') + ']:', e);
+      failed++;
+    }
+    var pct = Math.round(((sent+failed)/total)*100);
+    var progEl = document.getElementById('blast-progress');
+    var barEl = document.getElementById('blast-bar');
+    if (progEl) progEl.textContent = (sent+failed);
+    if (barEl) barEl.style.width = pct+'%';
+    if (i < total-1) await new Promise(function(r){ setTimeout(r,350); });
+  }
+  var color = failed===0?'#00D4A0':'#FFA94D';
+  statusEl.innerHTML = '<div style="font-size:12px;"><div style="font-weight:700;color:'+color+';margin-bottom:4px;">'+(failed===0?'\u2705':'\u26a0\ufe0f')+' E-mel selesai: '+sent+' berjaya'+(failed>0?', '+failed+' gagal':'')+' daripada '+total+'</div>'+(failed>0?'<div style="font-size:11px;color:#FF6B6B;">Semak console (F12) untuk butiran ralat.</div>':'')+'</div>';
 }
 
 function mkKPI(label, value, color, bg) {
@@ -6309,7 +6357,8 @@ async function sendAdminMessage() {
         _clerk.history.push({role:'assistant',content:reply});
         routeAction(parseGroqIntent(reply));
       } else {
-        addAdminBotMessage('Ralat: AI tidak memberikan respons. Sila cuba semula.');
+        console.error('Admin clerk Groq error:', (data.error&&data.error.message)||data);
+        routeAction(parseGroqIntent(text));
       }
     } catch(e) {
       hideAdminTyping();
