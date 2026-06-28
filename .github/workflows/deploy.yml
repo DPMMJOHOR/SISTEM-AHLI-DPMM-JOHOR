@@ -24,15 +24,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Generate config-local.js from secrets
-        run: |
-          cat > config-local.js << 'EOF'
-          const CONFIG = {
-            SUPABASE_KEY: '${{ secrets.SUPABASE_KEY }}',
-            EMAILJS_KEY: '${{ secrets.EMAILJS_KEY }}',
-            GROQ_KEY: '${{ secrets.GROQ_KEY }}'
-          };
-          EOF
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
