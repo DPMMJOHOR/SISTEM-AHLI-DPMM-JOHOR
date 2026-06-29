@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <meta name="description" content="Borang Permohonan Keahlian DPMM Negeri Johor - Daftar sebagai ahli Dewan Perniagaan Melayu Malaysia Negeri Johor"/>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://api.emailjs.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: https://lzoloupwtqmjyupvofhh.supabase.co; connect-src 'self' https://lzoloupwtqmjyupvofhh.supabase.co https://api.emailjs.com https://api.ipify.org https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://api.groq.com; frame-src 'none'; object-src 'none';">
+<meta http-equiv="Content-Security-Policy" id="csp-meta" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://api.emailjs.com https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: https://lzoloupwtqmjyupvofhh.supabase.co; connect-src 'self' https://lzoloupwtqmjyupvofhh.supabase.co https://api.emailjs.com https://api.ipify.org https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://api.groq.com https://challenges.cloudflare.com; frame-src 'self' https://challenges.cloudflare.com; object-src 'none';">
 <title>BORANG PERMOHONAN KEAHLIAN — DPMM Negeri Johor</title>
 
 <!-- Supabase -->
@@ -13,6 +13,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <!-- EmailJS -->
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<!-- Cloudflare Turnstile -->
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
 <style>
 /* ============================================================
@@ -398,6 +400,14 @@ textarea.form-control { resize: vertical; min-height: 80px; }
 }
 .field-error.show { 
   display: block; 
+}
+.captcha-container {
+  margin: 20px 0;
+  display: flex;
+  justify-content: center;
+}
+.captcha-container .cf-turnstile {
+  margin: 0 auto;
 }
 .field-success {
   font-size: 0.77rem;
@@ -2707,6 +2717,12 @@ textarea:focus-visible {
           Hantar Permohonan
         </button>
       </div>
+      
+      <!-- Cloudflare Turnstile CAPTCHA -->
+      <div class="captcha-container" id="captcha-container">
+        <div class="cf-turnstile" data-sitekey="YOUR_TURNSTILE_SITE_KEY" data-callback="turnstileCallback" data-theme="light"></div>
+      </div>
+      <span class="field-error" id="err-captcha">Sila lengkapkan CAPTCHA untuk mengesahkan bahawa anda bukan robot.</span>
     </div>
   </div>
 
@@ -2799,42 +2815,51 @@ textarea:focus-visible {
   </div>
 </div>
 
-<script src="config-local.js"></script>
 <script>
 /* ============================================================
-   KONFIGURASI — UBAH NILAI INI
+   KONFIGURASI — DIMUAT DARI SERVER
    ============================================================ */
-const SUPABASE_URL  = 'https://lzoloupwtqmjyupvofhh.supabase.co';
-const SUPABASE_KEY  = (typeof CONFIG !== 'undefined' && CONFIG.SUPABASE_KEY) ? CONFIG.SUPABASE_KEY : 'YOUR_SUPABASE_KEY_HERE'; // anon key — BETUL untuk borang awam. JANGAN gantikan dengan service role key.
-const EMAILJS_SVC   = 'service_a3kt2zm';
-const EMAILJS_TPL_ADMIN = 'template_vud79xb';
-const EMAILJS_TPL_APPLICANT = 'template_553fkme';
-const EMAILJS_KEY   = (typeof CONFIG !== 'undefined' && CONFIG.EMAILJS_KEY) ? CONFIG.EMAILJS_KEY : 'Bq94zNa6cDvdTUCU8';
-const ADMIN_EMAIL   = 'dpmmnj.pengurusan@gmail.com';
-const ADMIN_WHATSAPP = '60175592722'; // No. WhatsApp Urusetia DPMM Negeri Johor
-const GROQ_KEY      = (typeof CONFIG !== 'undefined' && CONFIG.GROQ_KEY) ? CONFIG.GROQ_KEY : 'YOUR_GROQ_KEY_HERE';  // Add Groq API key — https://console.groq.com (shared with chatbot)
+// Configuration is loaded from server via fetchConfig()
+// Fallback values are for development only - DO NOT use in production
+const SUPABASE_URL  = (typeof window !== 'undefined' && window.CONFIG && window.CONFIG.supabaseUrl) ? window.CONFIG.supabaseUrl : null;
+const SUPABASE_KEY  = null; // API keys are server-side only - not exposed to client
+const EMAILJS_SVC   = (typeof window !== 'undefined' && window.CONFIG && window.CONFIG.emailjs && window.CONFIG.emailjs.serviceId) ? window.CONFIG.emailjs.serviceId : null;
+const EMAILJS_TPL_ADMIN = (typeof window !== 'undefined' && window.CONFIG && window.CONFIG.emailjs && window.CONFIG.emailjs.templateAdmin) ? window.CONFIG.emailjs.templateAdmin : null;
+const EMAILJS_TPL_APPLICANT = (typeof window !== 'undefined' && window.CONFIG && window.CONFIG.emailjs && window.CONFIG.emailjs.templateApplicant) ? window.CONFIG.emailjs.templateApplicant : null;
+const EMAILJS_KEY   = null; // API keys are server-side only - not exposed to client
+const ADMIN_EMAIL   = (typeof window !== 'undefined' && window.CONFIG && window.CONFIG.admin && window.CONFIG.admin.email) ? window.CONFIG.admin.email : null;
+const ADMIN_WHATSAPP = (typeof window !== 'undefined' && window.CONFIG && window.CONFIG.admin && window.CONFIG.admin.whatsapp) ? window.CONFIG.admin.whatsapp : null;
+const GROQ_KEY      = null; // API keys are server-side only - not exposed to client
 
 /* ============================================================
    INIT
    ============================================================ */
 const { createClient } = supabase;
 
-// Guard against placeholder values — prevents API calls when keys are not yet configured
-function isKeyConfigured(k) {
-  return !!(k && !k.startsWith('YOUR_') && k.length > 10);
+// Check if configuration is loaded
+function isConfigLoaded() {
+  return typeof window !== 'undefined' && window.CONFIG && Object.keys(window.CONFIG).length > 0;
 }
 
-// Validate keys BEFORE creating client
-if (!isKeyConfigured(SUPABASE_KEY)) {
-  console.error('CRITICAL: Supabase key is not configured. Please ensure config-local.js exists and contains a valid SUPABASE_KEY.');
+// Validate configuration BEFORE creating client
+if (!isConfigLoaded()) {
+  console.warn('Configuration not yet loaded. API calls will be deferred until config is available.');
 }
 
-const sb = isKeyConfigured(SUPABASE_KEY) ? createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+// Create Supabase client only if URL is available (key is server-side)
+const sb = SUPABASE_URL ? createClient(SUPABASE_URL, {
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false
+  }
+}) : null;
 
-if (isKeyConfigured(EMAILJS_KEY)) {
-  emailjs.init(EMAILJS_KEY);
+// EmailJS initialization - API key is server-side, init only if service ID is available
+if (EMAILJS_SVC) {
+  // EmailJS will be initialized server-side for security
+  console.log('EmailJS service ID loaded from configuration');
 } else {
-  console.warn('EmailJS key is not configured. Email notifications will not be sent. Please ensure config-local.js contains a valid EMAILJS_KEY.');
+  console.warn('EmailJS service ID not configured. Email notifications will not be sent.');
 }
 
 // State permohonan
@@ -3126,8 +3151,114 @@ function startFormWithBusinessType() {
   startBorang();
 }
 
+// Fetch configuration from server
+async function fetchConfig() {
+  try {
+    const response = await fetch('/api/config');
+    const data = await response.json();
+    if (data.success && data.config) {
+      window.CONFIG = data.config;
+      console.log('Configuration loaded successfully');
+      
+      // Apply CSP nonce if provided
+      if (data.config.cspNonce) {
+        applyCspNonce(data.config.cspNonce);
+      }
+    } else {
+      console.warn('Failed to load configuration, using defaults');
+      window.CONFIG = {};
+    }
+  } catch (error) {
+    console.error('Error fetching configuration:', error);
+    window.CONFIG = {};
+  }
+}
+
+// Apply CSP nonce to the CSP meta tag
+function applyCspNonce(nonce) {
+  const cspMeta = document.getElementById('csp-meta');
+  if (cspMeta) {
+    const currentCsp = cspMeta.getAttribute('content');
+    // Replace 'unsafe-inline' with nonce for script-src and style-src
+    const updatedCsp = currentCsp
+      .replace(/script-src 'self' 'unsafe-inline'/, `script-src 'self' 'nonce-${nonce}'`)
+      .replace(/style-src 'self' 'unsafe-inline'/, `style-src 'self' 'nonce-${nonce}'`);
+    cspMeta.setAttribute('content', updatedCsp);
+    console.log('CSP nonce applied successfully');
+  }
+}
+
+// CAPTCHA handling
+let captchaToken = null;
+
+function turnstileCallback(token) {
+  captchaToken = token;
+  const errorEl = document.getElementById('err-captcha');
+  if (errorEl) errorEl.style.display = 'none';
+  console.log('CAPTCHA completed successfully');
+}
+
+function validateCaptcha() {
+  if (!window.CONFIG || !window.CONFIG.features || !window.CONFIG.features.captcha) {
+    return true; // CAPTCHA not enabled
+  }
+  
+  if (!captchaToken) {
+    const errorEl = document.getElementById('err-captcha');
+    if (errorEl) errorEl.style.display = 'block';
+    return false;
+  }
+  
+  return true;
+}
+
+function initializeCaptcha() {
+  if (window.CONFIG && window.CONFIG.turnstileSiteKey) {
+    const captchaWidget = document.querySelector('.cf-turnstile');
+    if (captchaWidget) {
+      captchaWidget.setAttribute('data-sitekey', window.CONFIG.turnstileSiteKey);
+    }
+  }
+}
+
+// CSRF token handling
+let csrfToken = null;
+
+function initializeCsrfToken() {
+  if (window.CONFIG && window.CONFIG.csrfToken) {
+    csrfToken = window.CONFIG.csrfToken;
+    // Add CSRF token to all forms
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => {
+      let csrfInput = form.querySelector('input[name="csrf_token"]');
+      if (!csrfInput) {
+        csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrf_token';
+        csrfInput.value = csrfToken;
+        form.appendChild(csrfInput);
+      } else {
+        csrfInput.value = csrfToken;
+      }
+    });
+  }
+}
+
+function getCsrfToken() {
+  return csrfToken;
+}
+
 // Initialize event listener when page loads
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
+  // Fetch configuration first
+  await fetchConfig();
+  
+  // Initialize CAPTCHA if enabled
+  initializeCaptcha();
+  
+  // Initialize CSRF token
+  initializeCsrfToken();
+  
   const selector = document.getElementById('business-type-selector');
   if (selector) {
     selector.addEventListener('change', handleBusinessTypeChange);
@@ -3565,14 +3696,45 @@ function renderDocItem(doc, container, isWajib) {
 function handleFileSelect(input, key) {
   const file = input.files[0];
   if (!file) return;
+  
+  // Security: File size validation
   const maxMB = key === 'slip' ? 5 : 10;
   if (file.size > maxMB * 1024 * 1024) {
     showToast(`Fail terlalu besar. Maksimum ${maxMB}MB.`, 'error');
     input.value = '';
     return;
   }
-  state.uploadedFiles[key] = { file, name: file.name, url: null, fromIsiPintar: false };
+  
+  // Security: File type validation
+  const allowedTypes = {
+    'pdf': 'application/pdf',
+    'jpg': 'image/jpeg',
+    'jpeg': 'image/jpeg',
+    'png': 'image/png'
+  };
+  
+  const fileExtension = file.name.split('.').pop().toLowerCase();
+  const expectedMimeType = allowedTypes[fileExtension];
+  
+  if (!expectedMimeType) {
+    showToast('Jenis fail tidak dibenarkan. Hanya PDF, JPG, JPEG, PNG dibenarkan.', 'error');
+    input.value = '';
+    return;
+  }
+  
+  // Security: MIME type validation
+  if (file.type !== expectedMimeType) {
+    showToast('Jenis fail tidak sah. Sila pilih fail yang betul.', 'error');
+    input.value = '';
+    return;
+  }
+  
+  // Security: File name sanitization
+  const sanitizedName = sanitizeFileName(file.name);
+  
+  state.uploadedFiles[key] = { file, name: sanitizedName, url: null, fromIsiPintar: false };
   const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+  
   // Image preview for passport photo
   if (key === 'gambar_1') {
     const reader = new FileReader();
@@ -3585,16 +3747,39 @@ function handleFileSelect(input, key) {
     };
     reader.readAsDataURL(file);
   }
+  
   // Update UI
   const statusEl = document.getElementById('status-' + key);
   if (statusEl) {
-    statusEl.innerHTML = `<strong>${file.name}</strong> <span style="color:var(--text-muted)">(${sizeMB} MB)</span><button class="btn-remove-file" onclick="removeFile('${key}')" title="Buang fail">✕</button>`;
+    statusEl.innerHTML = `<strong>${sanitizedName}</strong> <span style="color:var(--text-muted)">(${sizeMB} MB)</span><button class="btn-remove-file" onclick="removeFile('${key}')" title="Buang fail">✕</button>`;
     statusEl.className = 'upload-status done';
   }
   const btnEl = document.getElementById('btn-' + key);
   if (btnEl) { btnEl.textContent = 'Tukar'; btnEl.classList.add('uploaded'); }
   // Refresh doc item if in step 5
   if (state.currentStep === 5) renderDocUpload();
+}
+
+// Security: Sanitize file name to prevent path traversal and injection attacks
+function sanitizeFileName(fileName) {
+  // Remove path traversal attempts
+  let sanitized = fileName.replace(/[\/\\]/g, '_');
+  
+  // Remove null bytes
+  sanitized = sanitized.replace(/\0/g, '');
+  
+  // Remove control characters
+  sanitized = sanitized.replace(/[\x00-\x1f\x7f]/g, '');
+  
+  // Limit file name length
+  const maxLength = 255;
+  if (sanitized.length > maxLength) {
+    const extension = sanitized.split('.').pop();
+    const baseName = sanitized.substring(0, sanitized.lastIndexOf('.'));
+    sanitized = baseName.substring(0, maxLength - extension.length - 1) + '.' + extension;
+  }
+  
+  return sanitized;
 }
 
 function removeFile(key) {
@@ -3714,6 +3899,11 @@ function generateReferenceNumber() {
    ============================================================ */
 async function submitPermohonan() {
   if (!validateStep(7)) return;
+  
+  // Security: Validate CAPTCHA before submission
+  if (!validateCaptcha()) {
+    return;
+  }
 
   const submitBtn = document.querySelector('#step-7 .btn-primary, button[onclick*="submitPermohonan"]');
   if (submitBtn) submitBtn.disabled = true;
@@ -3738,7 +3928,7 @@ async function _doSubmit() {
   try {
     // Guard: Supabase must be configured
     if (!sb) {
-      throw new Error('Sistem tidak tersedia: Sambungan ke database tidak dapat diwujudkan. Sila pastikan fail config-local.js dikonfigurasi dengan betul.');
+      throw new Error('Sistem tidak tersedia: Sambungan ke database tidak dapat diwujudkan. Sila pastikan konfigurasi server dimuatkan dengan betul.');
     }
 
     // 1. Generate reference number in new format
@@ -5168,21 +5358,50 @@ document.addEventListener('DOMContentLoaded', function() {
 function onIpFileSelected(type, input) {
   const file = input.files[0];
   if (!file) return;
+  
+  // Security: File size validation
   const maxBytes = type === 'ssm' ? 10 * 1024 * 1024 : 5 * 1024 * 1024;
   if (file.size > maxBytes) {
     showIpError(`Fail terlalu besar. Saiz maksimum adalah ${type === 'ssm' ? '10' : '5'}MB.`);
     input.value = '';
     return;
   }
+  
+  // Security: File type validation
+  const allowedTypes = {
+    'pdf': 'application/pdf',
+    'jpg': 'image/jpeg',
+    'jpeg': 'image/jpeg',
+    'png': 'image/png'
+  };
+  
+  const fileExtension = file.name.split('.').pop().toLowerCase();
+  const expectedMimeType = allowedTypes[fileExtension];
+  
+  if (!expectedMimeType) {
+    showIpError('Jenis fail tidak dibenarkan. Hanya PDF, JPG, JPEG, PNG dibenarkan.');
+    input.value = '';
+    return;
+  }
+  
+  // Security: MIME type validation
+  if (file.type !== expectedMimeType) {
+    showIpError('Jenis fail tidak sah. Sila pilih fail yang betul.');
+    input.value = '';
+    return;
+  }
+  
+  // Security: File name sanitization
+  const sanitizedName = sanitizeFileName(file.name);
   if (type === 'ic') {
     _ip.icFile = file;
     document.getElementById('zone-ic').classList.add('has-file');
-    document.getElementById('fname-ic').textContent = '\u2713 ' + file.name;
+    document.getElementById('fname-ic').textContent = '\u2713 ' + sanitizedName;
   } else {
     _ip.ssmFile = file;
     document.getElementById('zone-ssm').classList.add('has-file');
-    document.getElementById('fname-ssm').textContent = '\u2713 ' + file.name;
-    renderIpSsmChecklist(file.name);
+    document.getElementById('fname-ssm').textContent = '\u2713 ' + sanitizedName;
+    renderIpSsmChecklist(sanitizedName);
   }
   updateIpAnalyzeBtn();
 }

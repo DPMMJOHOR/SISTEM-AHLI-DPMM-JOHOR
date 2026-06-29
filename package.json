@@ -11,14 +11,18 @@
     "test:coverage": "vitest --coverage"
   },
   "devDependencies": {
-    "vite": "^5.0.0",
-    "eslint": "^8.0.0",
-    "vitest": "^1.0.0",
-    "jsdom": "^23.0.0",
     "@vitest/coverage-v8": "^1.0.0",
-    "pptxgenjs": "^4.0.1"
+    "eslint": "^8.0.0",
+    "jsdom": "^23.0.0",
+    "pptxgenjs": "^4.0.1",
+    "vite": "^5.0.0",
+    "vitest": "^1.0.0"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.0.0"
+    "@supabase/supabase-js": "^2.0.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "zod": "^4.4.3"
   }
 }
