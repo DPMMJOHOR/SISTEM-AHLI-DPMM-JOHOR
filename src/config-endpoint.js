@@ -282,11 +282,13 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 // Start server
-if (import.meta.url === `file://${process.argv[1]}`) {
-  app.listen(PORT, () => {
-    console.log(`Configuration server running on port ${PORT}`);
-    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-  });
-}
+app.listen(PORT, () => {
+  console.log(`Configuration server running on port ${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`API endpoints available:`);
+  console.log(`  - GET  /api/config`);
+  console.log(`  - POST /api/send-email`);
+  console.log(`  - GET  /api/health`);
+});
 
 export default app;
