@@ -178,6 +178,45 @@ function securityLogger(req, res, next) {
 // Apply security logging
 app.use(securityLogger);
 
+// Email sending endpoint using Resend
+app.post('/api/send-email', async (req, res) => {
+  try {
+    const { template, toEmail, data } = req.body;
+    
+    if (!process.env.RESEND_API_KEY) {
+      return res.status(500).json({
+        success: false,
+        error: 'Resend API key not configured'
+      });
+    }
+    
+    // Import Resend SDK
+    const Resend = require('resend');
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    
+    let emailData = {
+      from: process.env.RESEND_FROM_EMAIL || 'noreply@dpmmjohor.org',
+      to: toEmail,
+      subject: data.subject || 'DPMM Johor - Permohonan Keahlian',
+      html: data.html || ''
+    };
+    
+    // Send email
+    const response = await resend.emails.send(emailData);
+    
+    res.json({
+      success: true,
+      data: response
+    });
+  } catch (error) {
+    console.error('Email sending error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to send email'
+    });
+  }
+});
+
 // Configuration endpoint - returns only safe, non-sensitive values
 app.get('/api/config', (req, res) => {
   try {
@@ -192,10 +231,11 @@ app.get('/api/config', (req, res) => {
       // CSP nonce for inline scripts
       cspNonce: res.locals.nonce,
       // EmailJS configuration (service and template IDs are not secrets)
-      emailjs: {
-        serviceId: process.env.EMAILJS_SERVICE_ID || null,
-        templateAdmin: process.env.EMAILJS_TEMPLATE_ADMIN || null,
-        templateApplicant: process.env.EMAILJS_TEMPLATE_APPLICANT || null
+      resend: {
+        apiKey: null, // Never expose API key to client
+        fromEmail: process.env.RESEND_FROM_EMAIL || null,
+        templateAdmin: process.env.RESEND_ADMIN_TEMPLATE_ID || null,
+        templateApplicant: process.env.RESEND_APPLICANT_TEMPLATE_ID || null
       },
       // Admin contact information (not secrets)
       admin: {

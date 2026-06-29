@@ -4,15 +4,13 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <meta name="description" content="Borang Permohonan Keahlian DPMM Negeri Johor - Daftar sebagai ahli Dewan Perniagaan Melayu Malaysia Negeri Johor"/>
-<meta http-equiv="Content-Security-Policy" id="csp-meta" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://api.emailjs.com https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: https://lzoloupwtqmjyupvofhh.supabase.co; connect-src 'self' https://lzoloupwtqmjyupvofhh.supabase.co https://api.emailjs.com https://api.ipify.org https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://api.groq.com https://challenges.cloudflare.com; frame-src 'self' https://challenges.cloudflare.com; object-src 'none';">
+<meta http-equiv="Content-Security-Policy" id="csp-meta" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: https://lzoloupwtqmjyupvofhh.supabase.co; connect-src 'self' https://lzoloupwtqmjyupvofhh.supabase.co https://api.ipify.org https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://api.groq.com https://challenges.cloudflare.com; frame-src 'self' https://challenges.cloudflare.com; object-src 'none';">
 <title>BORANG PERMOHONAN KEAHLIAN — DPMM Negeri Johor</title>
 
 <!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <!-- jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<!-- EmailJS -->
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <!-- Cloudflare Turnstile -->
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
@@ -2823,10 +2821,10 @@ textarea:focus-visible {
 // Fallback values are for development only - DO NOT use in production
 const SUPABASE_URL  = (typeof window !== 'undefined' && window.CONFIG && window.CONFIG.supabaseUrl) ? window.CONFIG.supabaseUrl : null;
 const SUPABASE_KEY  = null; // API keys are server-side only - not exposed to client
-const EMAILJS_SVC   = (typeof window !== 'undefined' && window.CONFIG && window.CONFIG.emailjs && window.CONFIG.emailjs.serviceId) ? window.CONFIG.emailjs.serviceId : null;
-const EMAILJS_TPL_ADMIN = (typeof window !== 'undefined' && window.CONFIG && window.CONFIG.emailjs && window.CONFIG.emailjs.templateAdmin) ? window.CONFIG.emailjs.templateAdmin : null;
-const EMAILJS_TPL_APPLICANT = (typeof window !== 'undefined' && window.CONFIG && window.CONFIG.emailjs && window.CONFIG.emailjs.templateApplicant) ? window.CONFIG.emailjs.templateApplicant : null;
-const EMAILJS_KEY   = null; // API keys are server-side only - not exposed to client
+const RESEND_FROM_EMAIL = (typeof window !== 'undefined' && window.CONFIG && window.CONFIG.resend && window.CONFIG.resend.fromEmail) ? window.CONFIG.resend.fromEmail : null;
+const RESEND_TPL_ADMIN = (typeof window !== 'undefined' && window.CONFIG && window.CONFIG.resend && window.CONFIG.resend.templateAdmin) ? window.CONFIG.resend.templateAdmin : null;
+const RESEND_TPL_APPLICANT = (typeof window !== 'undefined' && window.CONFIG && window.CONFIG.resend && window.CONFIG.resend.templateApplicant) ? window.CONFIG.resend.templateApplicant : null;
+const RESEND_API_KEY = null; // API keys are server-side only - not exposed to client
 const ADMIN_EMAIL   = (typeof window !== 'undefined' && window.CONFIG && window.CONFIG.admin && window.CONFIG.admin.email) ? window.CONFIG.admin.email : null;
 const ADMIN_WHATSAPP = (typeof window !== 'undefined' && window.CONFIG && window.CONFIG.admin && window.CONFIG.admin.whatsapp) ? window.CONFIG.admin.whatsapp : null;
 const GROQ_KEY      = null; // API keys are server-side only - not exposed to client
@@ -2854,12 +2852,12 @@ const sb = SUPABASE_URL ? createClient(SUPABASE_URL, {
   }
 }) : null;
 
-// EmailJS initialization - API key is server-side, init only if service ID is available
-if (EMAILJS_SVC) {
-  // EmailJS will be initialized server-side for security
-  console.log('EmailJS service ID loaded from configuration');
+// Resend initialization - API key is server-side, init only if from email is available
+if (RESEND_FROM_EMAIL) {
+  // Resend will be initialized server-side for security
+  console.log('Resend from email loaded from configuration');
 } else {
-  console.warn('EmailJS service ID not configured. Email notifications will not be sent.');
+  console.warn('Resend from email not configured. Email notifications will not be sent.');
 }
 
 // State permohonan
@@ -4159,7 +4157,7 @@ async function _doSubmit() {
     const finalRef = inserted.ref_id || tempRef;
     state.refId = finalRef;
 
-    // 6a. EmailJS — Notifikasi kepada Setiausaha (admin)
+    // 6a. Resend — Notifikasi kepada Setiausaha (admin)
     try {
       const DOC_LABEL = {
         ic_pemohon_depan:    'IC Pemohon (Hadapan)',
@@ -4190,48 +4188,75 @@ async function _doSubmit() {
         .map(([key, url]) => (DOC_LABEL[key] || key) + ':\n' + url)
         .join('\n\n');
 
-      await emailjs.send(EMAILJS_SVC, EMAILJS_TPL_ADMIN, {
-        to_email:      ADMIN_EMAIL,
-        ref_id:        finalRef,
-        jenis:         JENIS_LABEL[jenis] + ' (' + jenis + ')',
-        fasal:         fasalVal,
-        nama_entiti:   val('nama_entiti'),
-        proksi_nama:   val('proksi_nama') || 'Pemunya Tunggal',
-        proksi_hp:     val('proksi_hp'),
-        proksi_emel:   val('proksi_emel') || val('emel_syarikat'),
-        jumlah:        'RM ' + total.toLocaleString(),
-        tarikh:        new Date().toLocaleDateString('ms-MY'),
-        ip_address:    clientIp,
-        dokumen_links: dokumenLines || '(Tiada dokumen dimuat naik)',
-        pesan:         '[ADMIN ALERT] Permohonan baharu diterima. Sila log masuk ke sistem untuk semakan.',
+      const emailHtml = `
+        <h2>Permohonan Keahlian Baharu - DPMM Negeri Johor</h2>
+        <p><strong>No. Rujukan:</strong> ${finalRef}</p>
+        <p><strong>Jenis:</strong> ${JENIS_LABEL[jenis]} (${jenis})</p>
+        <p><strong>Fasal:</strong> ${fasalVal}</p>
+        <p><strong>Nama Entiti:</strong> ${val('nama_entiti')}</p>
+        <p><strong>Proksi/Wakil:</strong> ${val('proksi_nama') || 'Pemunya Tunggal'}</p>
+        <p><strong>No. HP Proksi:</strong> ${val('proksi_hp')}</p>
+        <p><strong>E-mel Proksi:</strong> ${val('proksi_emel') || val('emel_syarikat')}</p>
+        <p><strong>Jumlah Bayaran:</strong> RM ${total.toLocaleString()}</p>
+        <p><strong>Tarikh:</strong> ${new Date().toLocaleDateString('ms-MY')}</p>
+        <p><strong>IP Address:</strong> ${clientIp}</p>
+        <h3>Dokumen Dimuat Naik:</h3>
+        <pre>${dokumenLines || '(Tiada dokumen dimuat naik)'}</pre>
+        <p><strong>[ADMIN ALERT]</strong> Permohonan baharu diterima. Sila log masuk ke sistem untuk semakan.</p>
+      `;
+
+      await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          template: 'admin',
+          toEmail: ADMIN_EMAIL,
+          data: {
+            subject: `Permohonan Baharu - ${finalRef}`,
+            html: emailHtml
+          }
+        })
       });
     } catch (emailErr) {
-      console.warn('EmailJS admin error (non-critical):', emailErr);
+      console.warn('Resend admin error (non-critical):', emailErr);
     }
 
-    // 6b. EmailJS — Notifikasi kepada pemohon (pengesahan penerimaan + disclaimer)
+    // 6b. Resend — Notifikasi kepada pemohon (pengesahan penerimaan + disclaimer)
     const pemohonEmail = val('proksi_emel') || val('emel_syarikat');
     if (pemohonEmail) {
       try {
-        await emailjs.send(EMAILJS_SVC, EMAILJS_TPL_APPLICANT, {
-          to_email:    pemohonEmail,
-          ref_id:      finalRef,
-          jenis:       JENIS_LABEL[jenis] + ' (' + jenis + ')',
-          fasal:       fasalVal,
-          nama_entiti: val('nama_entiti'),
-          proksi_nama: val('proksi_nama') || val('nama_entiti'),
-          proksi_hp:   val('proksi_hp'),
-          proksi_emel: pemohonEmail,
-          jumlah:      'RM ' + total.toLocaleString(),
-          tarikh:      new Date().toLocaleDateString('ms-MY'),
-          ip_address:  clientIp,
-          pesan:       'Terima kasih kerana menghantar permohonan keahlian DPMM Negeri Johor. ' +
-                       'DISCLAIMER: E-mel ini adalah pengesahan PENERIMAAN sahaja dan BUKAN merupakan kelulusan automatik. ' +
-                       'Permohonan anda sedang dalam proses semakan oleh Jawatankuasa DPMM Negeri Johor. ' +
-                       'Keputusan muktamad akan dimaklumkan kemudian. No. Rujukan Sementara anda: ' + finalRef,
+        const emailHtml = `
+          <h2>Pengesahan Penerimaan Permohonan - DPMM Negeri Johor</h2>
+          <p>Terima kasih kerana memohon untuk menjadi ahli DPMM Negeri Johor.</p>
+          <p><strong>No. Rujukan Permohonan:</strong> ${finalRef}</p>
+          <p><strong>Jenis:</strong> ${JENIS_LABEL[jenis]} (${jenis})</p>
+          <p><strong>Fasal:</strong> ${fasalVal}</p>
+          <p><strong>Nama Entiti:</strong> ${val('nama_entiti')}</p>
+          <p><strong>Proksi/Wakil:</strong> ${val('proksi_nama') || val('nama_entiti')}</p>
+          <p><strong>No. HP Proksi:</strong> ${val('proksi_hp')}</p>
+          <p><strong>Jumlah Bayaran:</strong> RM ${total.toLocaleString()}</p>
+          <p><strong>Tarikh:</strong> ${new Date().toLocaleDateString('ms-MY')}</p>
+          <div style="background: #fff8e1; border: 1.5px solid #e8b800; border-radius: 10px; padding: 16px; margin: 20px 0;">
+            <strong>DISCLAIMER — SILA BACA:</strong><br>
+            E-mel ini adalah <u>pengesahan penerimaan sahaja</u> dan <strong>BUKAN kelulusan automatik</strong>. Permohonan ini tertakluk kepada pertimbangan Jawatankuasa DPMM Negeri Johor (Fasal 7.1). Keputusan muktamad akan dimaklumkan kemudian.
+          </div>
+          <p>Sila simpan no. rujukan ini untuk rujukan masa hadapan.</p>
+        `;
+
+        await fetch('/api/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            template: 'applicant',
+            toEmail: pemohonEmail,
+            data: {
+              subject: `Pengesahan Permohonan - ${finalRef}`,
+              html: emailHtml
+            }
+          })
         });
       } catch (emailErr) {
-        console.warn('EmailJS pemohon error (non-critical):', emailErr);
+        console.warn('Resend pemohon error (non-critical):', emailErr);
       }
     }
 
