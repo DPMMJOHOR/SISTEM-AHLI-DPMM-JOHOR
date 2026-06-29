@@ -4,7 +4,7 @@
 // ============================================================
 
 import { describe, it, expect } from 'vitest';
-import { isValidEmail, isValidPhone, isValidIC } from '../../src/utils/shared-utils.js';
+import { isValidEmail, isValidPhone, isValidIC, formatIC, formatPhone, formatDate } from '../../src/utils/shared-utils.js';
 
 describe('Validation Functions', () => {
   describe('isValidEmail', () => {
