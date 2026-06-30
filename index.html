@@ -3862,7 +3862,7 @@ function openEditMemberModal(id) {
   document.getElementById('add-member-modal').classList.add('show');
 }
 
-function saveMember() {
+async function saveMember() {
   var id = document.getElementById('fm-id').value.trim().toUpperCase();
   if (!id) { alert('Sila masukkan No. Ahli.'); return; }
 
