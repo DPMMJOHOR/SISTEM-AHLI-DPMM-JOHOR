@@ -2527,7 +2527,14 @@ function doLogin() {
   _loadUsersFromSupabase().then(function() {
     var user = null;
     for (var i=0; i<USERS.length; i++) {
-      if (USERS[i].id.toLowerCase() === uid.toLowerCase() && bcrypt.compareSync(pwd, USERS[i].pass)) { user = USERS[i]; break; }
+      if (USERS[i].id.toLowerCase() === uid.toLowerCase()) {
+        if (typeof bcrypt !== 'undefined' && bcrypt.compareSync) {
+          if (bcrypt.compareSync(pwd, USERS[i].pass)) { user = USERS[i]; break; }
+        } else {
+          // Fallback to plain text if bcrypt not available
+          if (USERS[i].pass === pwd) { user = USERS[i]; break; }
+        }
+      }
     }
     if (!user) {
       if (btn) { btn.textContent = 'LOG MASUK'; btn.disabled = false; }
@@ -2539,7 +2546,14 @@ function doLogin() {
     console.warn('_loadUsersFromSupabase failed, using hardcoded fallback:', err.message || err);
     var user = null;
     for (var i=0; i<USERS.length; i++) {
-      if (USERS[i].id.toLowerCase() === uid.toLowerCase() && bcrypt.compareSync(pwd, USERS[i].pass)) { user = USERS[i]; break; }
+      if (USERS[i].id.toLowerCase() === uid.toLowerCase()) {
+        if (typeof bcrypt !== 'undefined' && bcrypt.compareSync) {
+          if (bcrypt.compareSync(pwd, USERS[i].pass)) { user = USERS[i]; break; }
+        } else {
+          // Fallback to plain text if bcrypt not available
+          if (USERS[i].pass === pwd) { user = USERS[i]; break; }
+        }
+      }
     }
     if (!user) {
       if (btn) { btn.textContent = 'LOG MASUK'; btn.disabled = false; }
