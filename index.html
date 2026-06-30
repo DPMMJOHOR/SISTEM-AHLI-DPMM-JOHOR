@@ -2172,17 +2172,14 @@ tr.row-unpaid { background: #fff0f0 !important; }
 // ═══════════════════════════════════════════════════════════
 // SUPABASE CONFIGURATION
 // ═══════════════════════════════════════════════════════════
-var SUPABASE_URL = 'https://lzoloupwtqmjyupvofhh.supabase.co';
-// Use config-local.js key if available, otherwise fall back to hardcoded key (for local dev)
-var SUPABASE_ANON_KEY = (typeof CONFIG !== 'undefined' && CONFIG.SUPABASE_KEY && !CONFIG.SUPABASE_KEY.startsWith('YOUR_'))
-  ? CONFIG.SUPABASE_KEY
-  : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx6b2xvdXB3dHFtanl1cHZvZmhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5NTMxMTEsImV4cCI6MjA4ODUyOTExMX0.tBcGc6KfPyjUmJngbLTBHv-GZkSoSoyWGXwlXFZ0ShE';
+var SUPABASE_URL = window.CONFIG.SUPABASE_URL;
+var SUPABASE_ANON_KEY = window.CONFIG.SUPABASE_ANON_KEY;
 var supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 var TABLE_NAME = 'AHLI DPMM JOHOR';
-var GROQ_KEY = (typeof CONFIG !== 'undefined' && CONFIG.GROQ_KEY && !CONFIG.GROQ_KEY.startsWith('YOUR_')) ? CONFIG.GROQ_KEY : '';
-var EMAILJS_KEY = (typeof CONFIG !== 'undefined' && CONFIG.EMAILJS_KEY && !CONFIG.EMAILJS_KEY.startsWith('YOUR_')) ? CONFIG.EMAILJS_KEY : '';
+var GROQ_KEY = window.CONFIG.GROQ_KEY;
+var EMAILJS_KEY = window.CONFIG.RESEND_API_KEY;
 var EMAILJS_SVC = 'service_a3kt2zm';
-var EMAILJS_BLAST_TEMPLATE = (typeof CONFIG !== 'undefined' && CONFIG.EMAILJS_BLAST_TEMPLATE && !CONFIG.EMAILJS_BLAST_TEMPLATE.startsWith('YOUR_')) ? CONFIG.EMAILJS_BLAST_TEMPLATE : '';
+var EMAILJS_BLAST_TEMPLATE = '';
 if (EMAILJS_KEY && typeof emailjs !== 'undefined') { emailjs.init(EMAILJS_KEY); }
 
 // ── LIVE DATE / YEAR ──────────────────────────────────────
@@ -6812,7 +6809,7 @@ async function sendAdminMessage() {
   input.value = '';
   addAdminUserMessage(text);
 
-  var isKeyOk = (typeof GROQ_KEY !== 'undefined') && GROQ_KEY && !GROQ_KEY.startsWith('YOUR_') && GROQ_KEY.length > 20;
+  var isKeyOk = (typeof window.CONFIG.GROQ_KEY !== 'undefined') && window.CONFIG.GROQ_KEY && !window.CONFIG.GROQ_KEY.startsWith('YOUR_') && window.CONFIG.GROQ_KEY.length > 20;
 
   if (isKeyOk) {
     showAdminTyping();
@@ -6821,7 +6818,7 @@ async function sendAdminMessage() {
     try {
       var resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method:'POST',
-        headers:{'Authorization':'Bearer '+GROQ_KEY,'Content-Type':'application/json'},
+        headers:{'Authorization':'Bearer '+window.CONFIG.GROQ_KEY,'Content-Type':'application/json'},
         body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'system',content:buildAdminSystemPrompt()},..._clerk.history],max_tokens:900})
       });
       var data = await resp.json();
