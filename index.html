@@ -7,6 +7,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<script src="src/config-loader.js"></script>
+<script src="src/sentry-config.js"></script>
 <style>
 /* ══════════════════════════════════════════
    VUEXY-INSPIRED DESIGN SYSTEM
@@ -3108,8 +3110,26 @@ function deleteMember(id) {
   addLog('Ahli dipadam: ' + id);
   // Delete from Supabase if we have the db id
   if (target && target._dbId) {
-    supabaseClient.from(TABLE_NAME).delete().eq('id', target._dbId)
-      .then(function(res){ if(res.error) console.error('Supabase delete error:', res.error); });
+    // Fetch old values for audit log
+    supabaseClient.from(TABLE_NAME).select('*').eq('id', target._dbId).single().then(function(res) {
+      var oldData = res.data;
+      supabaseClient.from(TABLE_NAME).delete().eq('id', target._dbId).then(function(delRes){
+        if(delRes.error) console.error('Supabase delete error:', delRes.error);
+        else {
+          // Log the deletion
+          supabaseClient.from('DPMM_AUDIT_LOG').insert({
+            user_id: currentUser ? currentUser.email : 'anonymous',
+            action: 'DELETE',
+            table_name: TABLE_NAME,
+            record_id: String(target._dbId),
+            old_values: oldData,
+            new_values: null,
+            ip_address: null,
+            user_agent: navigator.userAgent
+          });
+        }
+      });
+    });
   }
   updateSidebarCount(); renderAllPages();
 }
@@ -3218,6 +3238,15 @@ async function _loadTemplatesFromSupabase() {
 
 async function _upsertTemplateToSupabase(templateId, t) {
   var dbId = t._dbId || null;
+  var isUpdate = !!dbId;
+  var oldData = null;
+  
+  if (isUpdate) {
+    // Fetch old values for audit log
+    var { data: old } = await supabaseClient.from('DPMM_TEMPLATES').select('*').eq('id', dbId).single();
+    oldData = old;
+  }
+  
   var payload = {
     template_key: templateId,
     nama:         t.name,
@@ -3227,19 +3256,62 @@ async function _upsertTemplateToSupabase(templateId, t) {
   if (dbId) {
     var res = await supabaseClient.from('DPMM_TEMPLATES').update(payload).eq('id', dbId);
     if (res.error) console.warn('Template update error:', res.error.message);
+    else {
+      // Log the update
+      await supabaseClient.from('DPMM_AUDIT_LOG').insert({
+        user_id: currentUser ? currentUser.email : 'anonymous',
+        action: 'UPDATE',
+        table_name: 'DPMM_TEMPLATES',
+        record_id: String(dbId),
+        old_values: oldData,
+        new_values: payload,
+        ip_address: null,
+        user_agent: navigator.userAgent
+      });
+    }
   } else {
     payload.created_by = currentUser ? currentUser.id : null;
     var res = await supabaseClient.from('DPMM_TEMPLATES').insert([payload]).select();
     if (res.error) { console.warn('Template insert error:', res.error.message); }
-    else if (res.data && res.data[0]) { TEMPLATES[templateId]._dbId = res.data[0].id; }
+    else if (res.data && res.data[0]) { 
+      TEMPLATES[templateId]._dbId = res.data[0].id;
+      // Log the insert
+      await supabaseClient.from('DPMM_AUDIT_LOG').insert({
+        user_id: currentUser ? currentUser.email : 'anonymous',
+        action: 'INSERT',
+        table_name: 'DPMM_TEMPLATES',
+        record_id: String(res.data[0].id),
+        old_values: null,
+        new_values: payload,
+        ip_address: null,
+        user_agent: navigator.userAgent
+      });
+    }
   }
 }
 
 async function _deleteTemplateFromSupabase(templateId) {
   var t = TEMPLATES[templateId];
   if (!t || !t._dbId) return;
+  
+  // Fetch old values for audit log
+  var { data: oldData } = await supabaseClient.from('DPMM_TEMPLATES').select('*').eq('id', t._dbId).single();
+  
   var res = await supabaseClient.from('DPMM_TEMPLATES').delete().eq('id', t._dbId);
   if (res.error) console.warn('Template delete error:', res.error.message);
+  else {
+    // Log the deletion
+    await supabaseClient.from('DPMM_AUDIT_LOG').insert({
+      user_id: currentUser ? currentUser.email : 'anonymous',
+      action: 'DELETE',
+      table_name: 'DPMM_TEMPLATES',
+      record_id: String(t._dbId),
+      old_values: oldData,
+      new_values: null,
+      ip_address: null,
+      user_agent: navigator.userAgent
+    });
+  }
 }
 
 function genWaMsg(m, id) {
@@ -3841,7 +3913,10 @@ function saveMember() {
     renderAllPages();
     /* --- Sync to Supabase --- */
     if (target._dbId) {
-      supabaseClient.from(TABLE_NAME).update({
+      // Fetch old values for audit log
+      var { data: oldMemberData } = await supabaseClient.from(TABLE_NAME).select('*').eq('id', target._dbId).single();
+      
+      var updatePayload = {
         JAWATAN: target.jawatan,
         NAMA_AHLI: target.namaSyarikat,
         NAMA: target.namaPIC,
@@ -3861,9 +3936,24 @@ function saveMember() {
         TEMPOH_BAYARAN_YURAN: target.bilanganTahunDibayar,
         TARIKH_BAYARAN_2025: target.yuranTahun ? (hist.find(function(e){return e.tahun===YURAN_YEAR;})||{tarikh:null}).tarikh : null,
         KAEDAH_BAYARAN: target.yuranTahun ? 'BANK TF' : null
-      }).eq('id', target._dbId).then(function(res){
+      };
+      
+      supabaseClient.from(TABLE_NAME).update(updatePayload).eq('id', target._dbId).then(function(res){
         if (res.error) console.error('Supabase update error:', res.error);
-        else console.log('Ahli updated in Supabase:', target.id);
+        else {
+          console.log('Ahli updated in Supabase:', target.id);
+          // Log the update to audit table
+          supabaseClient.from('DPMM_AUDIT_LOG').insert({
+            user_id: currentUser ? currentUser.email : 'anonymous',
+            action: 'UPDATE',
+            table_name: TABLE_NAME,
+            record_id: target.id,
+            old_values: oldMemberData,
+            new_values: updatePayload,
+            ip_address: null,
+            user_agent: navigator.userAgent
+          });
+        }
       });
     }
     alert('Ahli ' + target.id + ' berjaya dikemaskini!');
@@ -3916,7 +4006,7 @@ function saveMember() {
   updateSidebarCount(); renderAllPages();
   // Write new member to Supabase
   var newMember = MEMBERS[MEMBERS.length - 1];
-  supabaseClient.from(TABLE_NAME).insert([{
+  var memberPayload = {
     NO_AHLI: newMember.id,
     JAWATAN: newMember.jawatan,
     FASAL_AHLI: newMember.fasal,
@@ -3938,9 +4028,23 @@ function saveMember() {
     TEMPOH_BAYARAN_YURAN: newMember.tempohBayar,
     TARIKH_BAYARAN_2025: newMember.tarikhBayar2025,
     KAEDAH_BAYARAN: newMember.kaedahBayar
-  }]).then(function(res) {
+  };
+  supabaseClient.from(TABLE_NAME).insert([memberPayload]).then(function(res) {
     if (res.error) { console.error('Supabase insert error:', res.error); }
-    else { console.log('Ahli saved to Supabase:', newMember.id); }
+    else { 
+      console.log('Ahli saved to Supabase:', newMember.id);
+      // Log the insert to audit table
+      supabaseClient.from('DPMM_AUDIT_LOG').insert({
+        user_id: currentUser ? currentUser.email : 'anonymous',
+        action: 'INSERT',
+        table_name: TABLE_NAME,
+        record_id: newMember.id,
+        old_values: null,
+        new_values: memberPayload,
+        ip_address: null,
+        user_agent: navigator.userAgent
+      });
+    }
   });
   alert('Ahli ' + id + ' berjaya ditambah!');
 }
@@ -4344,6 +4448,15 @@ async function _dokFetchAll() {
 }
 
 async function _dokUpsert(doc) {
+  var isUpdate = !!doc._dbId;
+  var oldData = null;
+  
+  if (isUpdate) {
+    // Fetch old values for audit log
+    var { data: old } = await supabaseClient.from('DPMM_DOKUMEN').select('*').eq('id', doc._dbId).single();
+    oldData = old;
+  }
+  
   var payload = {
     dok_id:     doc.id,
     kategori:   doc.kat,
@@ -4355,18 +4468,60 @@ async function _dokUpsert(doc) {
   if (doc._dbId) {
     var res = await supabaseClient.from('DPMM_DOKUMEN').update(payload).eq('id', doc._dbId);
     if (res.error) console.warn('Dokumen update error:', res.error.message);
+    else {
+      // Log the update
+      await supabaseClient.from('DPMM_AUDIT_LOG').insert({
+        user_id: currentUser ? currentUser.email : 'anonymous',
+        action: 'UPDATE',
+        table_name: 'DPMM_DOKUMEN',
+        record_id: String(doc._dbId),
+        old_values: oldData,
+        new_values: payload,
+        ip_address: null,
+        user_agent: navigator.userAgent
+      });
+    }
   } else {
     payload.created_by = currentUser ? currentUser.id : null;
     payload.created_at = new Date().toISOString();
     var res = await supabaseClient.from('DPMM_DOKUMEN').insert([payload]).select();
     if (res.error) { console.warn('Dokumen insert error:', res.error.message); }
-    else if (res.data && res.data[0]) { doc._dbId = res.data[0].id; }
+    else if (res.data && res.data[0]) { 
+      doc._dbId = res.data[0].id;
+      // Log the insert
+      await supabaseClient.from('DPMM_AUDIT_LOG').insert({
+        user_id: currentUser ? currentUser.email : 'anonymous',
+        action: 'INSERT',
+        table_name: 'DPMM_DOKUMEN',
+        record_id: String(doc._dbId),
+        old_values: null,
+        new_values: payload,
+        ip_address: null,
+        user_agent: navigator.userAgent
+      });
+    }
   }
 }
 
 async function _dokDeleteFromSupabase(dbId) {
+  // Fetch old values for audit log
+  var { data: oldData } = await supabaseClient.from('DPMM_DOKUMEN').select('*').eq('id', dbId).single();
+  
   var res = await supabaseClient.from('DPMM_DOKUMEN').delete().eq('id', dbId);
   if (res.error) console.warn('Dokumen delete error:', res.error.message);
+  else {
+    // Log the deletion
+    await supabaseClient.from('DPMM_AUDIT_LOG').insert({
+      user_id: currentUser ? currentUser.email : 'anonymous',
+      action: 'DELETE',
+      table_name: 'DPMM_DOKUMEN',
+      record_id: String(dbId),
+      old_values: oldData,
+      new_values: null,
+      ip_address: null,
+      user_agent: navigator.userAgent
+    });
+  }
 }
 
 function renderDokumenPage() {
@@ -5815,6 +5970,9 @@ function buildTabAdmin(p) {
 
 /* ── UPDATE STATUS ───────────────────────────────────────── */
 async function updatePermohonanStatus(id, newStatus) {
+  // Fetch old values for audit log
+  var { data: oldData } = await supabaseClient.from('PERMOHONAN_AHLI').select('*').eq('id', id).single();
+  
   var payload = { status: newStatus };
   var now = new Date().toISOString();
   if (newStatus === 'DOKUMEN_LENGKAP' || newStatus === 'DOKUMEN_TIDAK_LENGKAP')  payload.semakan_at  = now;
@@ -5826,6 +5984,19 @@ async function updatePermohonanStatus(id, newStatus) {
 
   var { error } = await supabaseClient.from('PERMOHONAN_AHLI').update(payload).eq('id', id);
   if (error) { showToast && showToast('Ralat kemaskini status: ' + error.message, 'error'); return; }
+  
+  // Log the update to audit table
+  await supabaseClient.from('DPMM_AUDIT_LOG').insert({
+    user_id: currentUser ? currentUser.email : 'anonymous',
+    action: 'UPDATE',
+    table_name: 'PERMOHONAN_AHLI',
+    record_id: String(id),
+    old_values: oldData,
+    new_values: payload,
+    ip_address: null,
+    user_agent: navigator.userAgent
+  });
+  
   await renderPermohonanPage();
   showSnack && showSnack('Status dikemaskini: ' + (P_STATUS[newStatus] || {}).label);
 }
@@ -5879,23 +6050,54 @@ async function confirmLulus() {
   };
 
   // 2. Insert ke AHLI DPMM JOHOR
-  var { error: insErr } = await supabaseClient.from('AHLI DPMM JOHOR').insert([ahliPayload]);
+  var { error: insErr, data: insData } = await supabaseClient.from('AHLI DPMM JOHOR').insert([ahliPayload]).select();
   if (insErr) {
     errEl.textContent = 'Ralat menambah ahli: ' + insErr.message;
     errEl.style.display = 'block';
     return;
   }
+  
+  // Log the insert to audit table
+  if (insData && insData[0]) {
+    await supabaseClient.from('DPMM_AUDIT_LOG').insert({
+      user_id: currentUser ? currentUser.email : 'anonymous',
+      action: 'INSERT',
+      table_name: 'AHLI DPMM JOHOR',
+      record_id: String(insData[0].id),
+      old_values: null,
+      new_values: ahliPayload,
+      ip_address: null,
+      user_agent: navigator.userAgent
+    });
+  }
 
   // 3. Update PERMOHONAN_AHLI
   var now = new Date().toISOString();
-  await supabaseClient.from('PERMOHONAN_AHLI').update({
+  var permohonanPayload = {
     status:              'LULUS',
     no_ahli:             noAhli,
     tarikh_kuatkuasa:    tarikh,
     no_minit_mesyuarat:  minit,
     keputusan_at:        now,
     keputusan_oleh:      currentUser ? currentUser.name : '—',
-  }).eq('id', p.id);
+  };
+  
+  // Fetch old values for audit log
+  var { data: oldPermohonanData } = await supabaseClient.from('PERMOHONAN_AHLI').select('*').eq('id', p.id).single();
+  
+  await supabaseClient.from('PERMOHONAN_AHLI').update(permohonanPayload).eq('id', p.id);
+  
+  // Log the update to audit table
+  await supabaseClient.from('DPMM_AUDIT_LOG').insert({
+    user_id: currentUser ? currentUser.email : 'anonymous',
+    action: 'UPDATE',
+    table_name: 'PERMOHONAN_AHLI',
+    record_id: String(p.id),
+    old_values: oldPermohonanData,
+    new_values: permohonanPayload,
+    ip_address: null,
+    user_agent: navigator.userAgent
+  });
 
   closeLulusModal();
   await renderPermohonanPage();
@@ -5937,14 +6139,31 @@ async function confirmTolak() {
   errEl.style.display = 'none';
 
   var now = new Date().toISOString();
-  await supabaseClient.from('PERMOHONAN_AHLI').update({
+  var payload = {
     status:           'TIDAK_LULUS',
     sebab_tolak:      sebab,
     pulangan_yuran:   pulangan,
     maklumat_pulangan: maklumat || null,
     keputusan_at:     now,
     keputusan_oleh:   currentUser ? currentUser.name : '—',
-  }).eq('id', p.id);
+  };
+  
+  // Fetch old values for audit log
+  var { data: oldData } = await supabaseClient.from('PERMOHONAN_AHLI').select('*').eq('id', p.id).single();
+  
+  await supabaseClient.from('PERMOHONAN_AHLI').update(payload).eq('id', p.id);
+  
+  // Log the update to audit table
+  await supabaseClient.from('DPMM_AUDIT_LOG').insert({
+    user_id: currentUser ? currentUser.email : 'anonymous',
+    action: 'UPDATE',
+    table_name: 'PERMOHONAN_AHLI',
+    record_id: String(p.id),
+    old_values: oldData,
+    new_values: payload,
+    ip_address: null,
+    user_agent: navigator.userAgent
+  });
 
   closeTolakModal();
   permohonanTab = 'TIDAK_LULUS';
@@ -5956,7 +6175,24 @@ async function confirmTolak() {
 /* ── SAVE NOTA ADMIN ─────────────────────────────────────── */
 async function saveAdminNota(id) {
   var nota = document.getElementById('admin-nota').value;
+  
+  // Fetch old values for audit log
+  var { data: oldData } = await supabaseClient.from('PERMOHONAN_AHLI').select('*').eq('id', id).single();
+  
   await supabaseClient.from('PERMOHONAN_AHLI').update({ catatan_admin: nota }).eq('id', id);
+  
+  // Log the update to audit table
+  await supabaseClient.from('DPMM_AUDIT_LOG').insert({
+    user_id: currentUser ? currentUser.email : 'anonymous',
+    action: 'UPDATE',
+    table_name: 'PERMOHONAN_AHLI',
+    record_id: String(id),
+    old_values: oldData,
+    new_values: { catatan_admin: nota },
+    ip_address: null,
+    user_agent: navigator.userAgent
+  });
+  
   var p = permohonanData.find(function(x){ return x.id === id; });
   if (p) p.catatan_admin = nota;
   showSnack && showSnack('Nota admin disimpan.');
@@ -5967,11 +6203,29 @@ async function saveBayaranSahkan(id) {
   var resit    = document.getElementById('bkh-resit').value.trim();
   var tarikh   = document.getElementById('bkh-tarikh').value;
   var disahkan = document.getElementById('bkh-sahkan').checked;
-  await supabaseClient.from('PERMOHONAN_AHLI').update({
+  var payload = {
     no_resit:         resit || null,
     tarikh_resit:     tarikh || null,
     bayaran_disahkan: disahkan,
-  }).eq('id', id);
+  };
+  
+  // Fetch old values for audit log
+  var { data: oldData } = await supabaseClient.from('PERMOHONAN_AHLI').select('*').eq('id', id).single();
+  
+  await supabaseClient.from('PERMOHONAN_AHLI').update(payload).eq('id', id);
+  
+  // Log the update to audit table
+  await supabaseClient.from('DPMM_AUDIT_LOG').insert({
+    user_id: currentUser ? currentUser.email : 'anonymous',
+    action: 'UPDATE',
+    table_name: 'PERMOHONAN_AHLI',
+    record_id: String(id),
+    old_values: oldData,
+    new_values: payload,
+    ip_address: null,
+    user_agent: navigator.userAgent
+  });
+  
   var p = permohonanData.find(function(x){ return x.id === id; });
   if (p) { p.no_resit = resit; p.tarikh_resit = tarikh; p.bayaran_disahkan = disahkan; }
   showSnack && showSnack('Pengesahan bayaran disimpan.');

@@ -1,0 +1,46 @@
+// ============================================================
+// CONFIG LOADER
+// Loads configuration from environment variables or window object
+// ============================================================
+
+// Configuration object
+const CONFIG = {
+  // Supabase
+  SUPABASE_URL: window.SUPABASE_URL || 'https://lzoloupwtqmjyupvofhh.supabase.co',
+  SUPABASE_ANON_KEY: window.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx6b2xvdXB3dHFtanl1cHZvZmhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5NTMxMTEsImV4cCI6MjA4ODUyOTExMX0.tBcGc6KfPyjUmJngbLTBHv-GZkSoSoyWGXwlXFZ0ShE',
+  
+  // AI Services
+  GROQ_KEY: window.GROQ_KEY || '',
+  GEMINI_KEY: window.GEMINI_KEY || '',
+  
+  // Email
+  RESEND_API_KEY: window.RESEND_API_KEY || '',
+  
+  // CAPTCHA
+  TURNSTILE_SITE_KEY: window.TURNSTILE_SITE_KEY || '',
+  
+  // Admin Contact
+  ADMIN_EMAIL: window.ADMIN_EMAIL || 'dpmmnj.pengurusan@gmail.com',
+  ADMIN_WHATSAPP: window.ADMIN_WHATSAPP || '60175592722'
+};
+
+// Make available globally
+window.CONFIG = CONFIG;
+
+// Also set individual window variables for backward compatibility
+window.SUPABASE_URL = CONFIG.SUPABASE_URL;
+window.SUPABASE_ANON_KEY = CONFIG.SUPABASE_ANON_KEY;
+window.GROQ_KEY = CONFIG.GROQ_KEY;
+window.GEMINI_KEY = CONFIG.GEMINI_KEY;
+window.RESEND_API_KEY = CONFIG.RESEND_API_KEY;
+window.TURNSTILE_SITE_KEY = CONFIG.TURNSTILE_SITE_KEY;
+window.ADMIN_EMAIL = CONFIG.ADMIN_EMAIL;
+window.ADMIN_WHATSAPP = CONFIG.ADMIN_WHATSAPP;
+
+console.log('Config loaded:', {
+  supabaseUrl: CONFIG.SUPABASE_URL ? 'configured' : 'missing',
+  groqKey: CONFIG.GROQ_KEY ? 'configured' : 'missing',
+  geminiKey: CONFIG.GEMINI_KEY ? 'configured' : 'missing',
+  resendKey: CONFIG.RESEND_API_KEY ? 'configured' : 'missing',
+  turnstileKey: CONFIG.TURNSTILE_SITE_KEY ? 'configured' : 'missing'
+});
