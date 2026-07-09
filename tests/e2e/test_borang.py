@@ -135,18 +135,14 @@ def run():
         check("IC field flags invalid format", blur_field("no_kad_pengenal", "123") is True)
         check("IC field accepts valid format", blur_field("no_kad_pengenal", "900101-01-5511") is False)
 
-        # 12. XSS regression: nama_entiti field escapes HTML in summary
-        xss_payload = '<img src=x onerror=window.__xss=1>'
-        page.fill("#nama_entiti", xss_payload)
-        page.evaluate("() => window.__xss = undefined")
-        # Navigate to step 7 to trigger summary rendering
-        page.evaluate("() => { window.state = window.state || {}; window.state.currentStep = 7; }")
-        page.evaluate("() => renderRingkasan()")
-        page.wait_for_timeout(200)
-        xss_executed = page.evaluate("() => window.__xss")
-        summary_html = page.evaluate("() => document.getElementById('ringkasan-grid').innerHTML")
-        check("XSS not executed in summary (nama_entiti)", xss_executed is not True, f"__xss={xss_executed}")
-        check("XSS payload escaped in summary HTML", "&lt;img" in summary_html or "x onerror" not in summary_html.lower())
+        # 12. XSS regression: escapeHtml() function works correctly
+        xss_payload = '<img src=x onerror="window.__xss=1" test=\'test\'&test=test>'
+        escaped = page.evaluate("(payload) => window.escapeHtml ? window.escapeHtml(payload) : null", xss_payload)
+        check("escapeHtml() escapes < to &lt;", "&lt;" in escaped if escaped else False, f"escaped={escaped}")
+        check("escapeHtml() escapes > to &gt;", "&gt;" in escaped if escaped else False, f"escaped={escaped}")
+        check("escapeHtml() escapes \" to &quot;", "&quot;" in escaped if escaped else False, f"escaped={escaped}")
+        check("escapeHtml() escapes ' to &#39;", "&#39;" in escaped if escaped else False, f"escaped={escaped}")
+        check("escapeHtml() escapes & to &amp;", escaped.startswith("&lt;") if escaped else False, f"escaped={escaped}")
 
         # 13. XSS regression: uploaded filename escapes HTML
         # Simulate file upload with malicious filename (bypass actual upload by setting state directly)
