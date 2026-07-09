@@ -425,6 +425,7 @@ This comprehensive implementation plan addresses all critical security vulnerabi
 - **RISK-003**: CSP may break existing functionality
   - **Mitigation**: Implement in staging first, use report-only mode initially
   - **CSP Testing Strategy**: 48-hour report-only mode monitoring, gradual enforcement starting with least critical pages
+  - **Static Hosting Limitation**: Nonce-based CSP requires server-side rendering (not available on GitHub Pages). Current implementation uses SRI for external scripts and maintains unsafe-inline for static hosting constraints. Full CSP hardening requires migration to server-side rendering or Edge Functions serving HTML.
 - **RISK-004**: Rate limiting may block legitimate users
   - **Mitigation**: Implement generous limits with admin override capability
 - **RISK-005**: Architecture refactoring may introduce bugs
@@ -438,6 +439,12 @@ This comprehensive implementation plan addresses all critical security vulnerabi
   - **Mitigation**: Implement async logging, batch writes, monitor performance
 - **RISK-009**: Testing resource constraints may delay implementation
   - **Mitigation**: Dedicated tester allocation, stagger test implementation with development
+- **RISK-010**: CSRF protection requires server-side cookie management
+  - **Static Hosting Limitation**: Double-submit cookie pattern requires server-side cookie management (not available on GitHub Pages static hosting). CSRF protection requires migration to server-side rendering or Edge Functions serving HTML.
+- **RISK-011**: HSTS header requires server-side configuration
+  - **Static Hosting Limitation**: HSTS header requires server-side configuration (not available on GitHub Pages static hosting). HSTS enforcement requires migration to server-side rendering or Edge Functions serving HTML.
+- **RISK-012**: GitHub Pages automatically enforces HTTPS
+  - **Note**: No additional configuration needed for HTTPS redirect on GitHub Pages static hosting.
 
 ### Assumptions
 
@@ -453,6 +460,8 @@ This comprehensive implementation plan addresses all critical security vulnerabi
 - **ASSUMPTION-010**: No regulatory changes during implementation period
 - **ASSUMPTION-011**: Dedicated testing resource available for Phase 11
 - **ASSUMPTION-012**: Staging environment available for CSP report-only testing
+- **ASSUMPTION-013**: Static hosting (GitHub Pages) limitations are acceptable for current security posture
+  - **Static Hosting Constraints**: Nonce-based CSP, CSRF protection (double-submit cookie), and HSTS headers require server-side rendering or Edge Functions serving HTML. Current implementation uses SRI for external scripts and maintains unsafe-inline for static hosting constraints.
 
 ## 8. Related Specifications / Further Reading
 
