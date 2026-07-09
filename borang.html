@@ -3720,7 +3720,7 @@ function renderDocItem(doc, container, isWajib) {
         ${fromIsiPintar ? '<span style="background:#dcfce7;color:#166534;font-size:0.68rem;font-weight:700;padding:2px 7px;border-radius:8px;margin-left:6px;">Dari Isi Pintar</span>' : ''}
       </div>
       <div class="doc-meta">Format: ${doc.accept.replace(/\./g,'').replace(/,/g,' / ').toUpperCase()} | Max: ${doc.max}MB
-        ${uploaded ? '<strong style="color:var(--success)"> — ' + uploaded.name + '</strong>' : ''}
+        ${uploaded ? '<strong style="color:var(--success)"> — ' + escapeHtml(uploaded.name) + '</strong>' : ''}
       </div>
       ${(doc.key === 'gambar_1') ? `<img id="preview-${doc.key}" class="doc-preview" style="display:none" alt="Preview">` : ''}
     </div>
@@ -3803,6 +3803,17 @@ function handleFileSelect(input, key) {
   if (state.currentStep === 5) renderDocUpload();
 }
 
+// Security: Escape HTML metacharacters to prevent XSS
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 // Security: Sanitize file name to prevent path traversal and injection attacks
 function sanitizeFileName(fileName) {
   // Remove path traversal attempts
@@ -3813,6 +3824,9 @@ function sanitizeFileName(fileName) {
   
   // Remove control characters
   sanitized = sanitized.replace(/[\x00-\x1f\x7f]/g, '');
+  
+  // Remove HTML metacharacters to prevent XSS when used with innerHTML
+  sanitized = sanitized.replace(/[<>"'&]/g, '_');
   
   // Limit file name length
   const maxLength = 255;
@@ -3918,7 +3932,7 @@ function renderRingkasan() {
   items.forEach(([k, v]) => {
     const div = document.createElement('div');
     div.className = 'ringkasan-group';
-    div.innerHTML = `<h5>${k}</h5><p>${v || '—'}</p>`;
+    div.innerHTML = `<h5>${k}</h5><p>${escapeHtml(v) || '—'}</p>`;
     grid.appendChild(div);
   });
 }
@@ -3978,6 +3992,9 @@ async function _doSubmit() {
     const tempRef = await generateReferenceNumber();
 
     // 1b. Audit — dapatkan IP pemohon
+    // Privacy: IP address is obtained via api.ipify.org for audit trail purposes only.
+    // This is a third-party service that returns the public IP address without storing it.
+    // The IP is included in admin email notifications for security auditing.
     let clientIp = 'unknown';
     try {
       const ipRes = await fetch('https://api.ipify.org?format=json');
@@ -4238,10 +4255,10 @@ async function _doSubmit() {
         <p><strong>No. Rujukan:</strong> ${finalRef}</p>
         <p><strong>Jenis:</strong> ${JENIS_LABEL[jenis]} (${jenis})</p>
         <p><strong>Fasal:</strong> ${fasalVal}</p>
-        <p><strong>Nama Entiti:</strong> ${val('nama_entiti')}</p>
-        <p><strong>Proksi/Wakil:</strong> ${val('proksi_nama') || 'Pemunya Tunggal'}</p>
-        <p><strong>No. HP Proksi:</strong> ${val('proksi_hp')}</p>
-        <p><strong>E-mel Proksi:</strong> ${val('proksi_emel') || val('emel_syarikat')}</p>
+        <p><strong>Nama Entiti:</strong> ${escapeHtml(val('nama_entiti'))}</p>
+        <p><strong>Proksi/Wakil:</strong> ${escapeHtml(val('proksi_nama')) || 'Pemunya Tunggal'}</p>
+        <p><strong>No. HP Proksi:</strong> ${escapeHtml(val('proksi_hp'))}</p>
+        <p><strong>E-mel Proksi:</strong> ${escapeHtml(val('proksi_emel')) || escapeHtml(val('emel_syarikat'))}</p>
         <p><strong>Jumlah Bayaran:</strong> RM ${total.toLocaleString()}</p>
         <p><strong>Tarikh:</strong> ${new Date().toLocaleDateString('ms-MY')}</p>
         <p><strong>IP Address:</strong> ${clientIp}</p>
@@ -4276,9 +4293,9 @@ async function _doSubmit() {
           <p><strong>No. Rujukan Permohonan:</strong> ${finalRef}</p>
           <p><strong>Jenis:</strong> ${JENIS_LABEL[jenis]} (${jenis})</p>
           <p><strong>Fasal:</strong> ${fasalVal}</p>
-          <p><strong>Nama Entiti:</strong> ${val('nama_entiti')}</p>
-          <p><strong>Proksi/Wakil:</strong> ${val('proksi_nama') || val('nama_entiti')}</p>
-          <p><strong>No. HP Proksi:</strong> ${val('proksi_hp')}</p>
+          <p><strong>Nama Entiti:</strong> ${escapeHtml(val('nama_entiti'))}</p>
+          <p><strong>Proksi/Wakil:</strong> ${escapeHtml(val('proksi_nama')) || escapeHtml(val('nama_entiti'))}</p>
+          <p><strong>No. HP Proksi:</strong> ${escapeHtml(val('proksi_hp'))}</p>
           <p><strong>Jumlah Bayaran:</strong> RM ${total.toLocaleString()}</p>
           <p><strong>Tarikh:</strong> ${new Date().toLocaleDateString('ms-MY')}</p>
           <div style="background: #fff8e1; border: 1.5px solid #e8b800; border-radius: 10px; padding: 16px; margin: 20px 0;">
@@ -4320,6 +4337,8 @@ function showSuccess(refId) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
   // Hide progress bar
   document.querySelector('.progress-wrapper').style.display = 'none';
+  // Security: Clear draft PII from localStorage after successful submission
+  clearDraft();
 }
 
 /* ============================================================
@@ -4742,7 +4761,14 @@ function loadDraft() {
   const saved = localStorage.getItem(STORAGE_KEY);
   if (!saved) return null;
   try {
-    return JSON.parse(saved);
+    const draft = JSON.parse(saved);
+    // Security: Purge expired drafts (24-hour TTL) to reduce PII persistence
+    const TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+    if (draft.timestamp && Date.now() - draft.timestamp > TTL_MS) {
+      localStorage.removeItem(STORAGE_KEY);
+      return null;
+    }
+    return draft;
   } catch (e) {
     console.error('Draft load error:', e);
     return null;
@@ -4793,6 +4819,7 @@ function showResumePrompt(draft) {
     <div class="resume-content">
       <h3>Draf Borang Ditemui</h3>
       <p>Draf borang disimpan pada: <strong>${date}</strong></p>
+      <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:12px;">Nota: Draf ini disimpan secara tempatan pada peranti ini dan akan dipadam selepas 24 jam atau selepas penghantaran berjaya.</p>
       <p>Adakah anda ingin meneruskan pengisian borang ini?</p>
       <div class="resume-actions">
         <button class="btn btn-secondary" onclick="clearDraft(); document.querySelector('.resume-modal').remove();">Mula Baru</button>
@@ -5125,6 +5152,8 @@ async function sendChatMessage() {
   }
   
   // Groq FAQ
+  // Security: GROQ_KEY MUST come from a backend proxy and must NEVER be embedded in the deployed client bundle.
+  // Current implementation uses null client-side key; production should use server-side proxy.
   if (isKeyConfigured(GROQ_KEY)) {
     showTyping();
     _chat.history.push({ role: 'user', content: text });
@@ -5163,6 +5192,7 @@ async function sendChatMessage() {
       handleGroqError(e, text);
     }
   } else {
+    // Graceful degradation: When GROQ_KEY is null, fall back to scripted FAQ responses
     _chat.history.push({ role: 'user', content: text });
     const reply = showScriptedFAQ(text);
     _chat.history.push({ role: 'assistant', content: reply });
@@ -5499,7 +5529,7 @@ function renderIpSsmChecklist(fileName) {
   }).join('');
 
   checklistEl.innerHTML = `
-    <div class="ip-ssm-checklist-title">Fail "${fileName}" mengandungi:</div>
+    <div class="ip-ssm-checklist-title">Fail "${escapeHtml(fileName)}" mengandungi:</div>
     <p style="font-size:0.76rem;color:#92400e;margin:0 0 8px">Tandakan semua dokumen yang terkandung dalam fail ini. Ia akan diisi secara automatik di Langkah 5.</p>
     ${itemsHtml}`;
   checklistEl.style.display = 'block';
@@ -5551,6 +5581,8 @@ function compressImage(file, maxPx) {
 }
 
 async function callGroqVision(base64DataUrl, prompt) {
+  // Security: GROQ_KEY MUST come from a backend proxy and must NEVER be embedded in the deployed client bundle.
+  // Current implementation uses null client-side key; production should use server-side proxy.
   if (!isKeyConfigured(GROQ_KEY)) throw new Error('GROQ_KEY tidak dikonfigurasi. Sila isi secara manual.');
   var parts = base64DataUrl.split(',');
   var mimeMatch = parts[0].match(/:(.*?);/);
