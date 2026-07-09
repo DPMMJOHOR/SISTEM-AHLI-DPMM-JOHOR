@@ -4,6 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <meta name="description" content="Borang Permohonan Keahlian DPMM Negeri Johor - Daftar sebagai ahli Dewan Perniagaan Melayu Malaysia Negeri Johor"/>
+<link rel="icon" type="image/png" href="dpmm-logo-color.png"/>
 <meta http-equiv="Content-Security-Policy" id="csp-meta" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: https://lzoloupwtqmjyupvofhh.supabase.co; connect-src 'self' https://lzoloupwtqmjyupvofhh.supabase.co https://api.ipify.org https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://api.groq.com https://challenges.cloudflare.com; frame-src 'self' https://challenges.cloudflare.com; object-src 'none';">
 <title>BORANG PERMOHONAN KEAHLIAN — DPMM Negeri Johor</title>
 
@@ -2720,9 +2721,9 @@ textarea:focus-visible {
         </button>
       </div>
       
-      <!-- Cloudflare Turnstile CAPTCHA -->
-      <div class="captcha-container" id="captcha-container">
-        <div class="cf-turnstile" data-sitekey="YOUR_TURNSTILE_SITE_KEY" data-callback="turnstileCallback" data-theme="light"></div>
+      <!-- Cloudflare Turnstile CAPTCHA (rendered explicitly only when a site key is configured) -->
+      <div class="captcha-container" id="captcha-container" style="display:none;">
+        <div id="turnstile-widget"></div>
       </div>
       <span class="field-error" id="err-captcha">Sila lengkapkan CAPTCHA untuk mengesahkan bahawa anda bukan robot.</span>
     </div>
@@ -3153,26 +3154,40 @@ function startFormWithBusinessType() {
   startBorang();
 }
 
-// Fetch configuration from server
+// Fetch configuration from server.
+// On static hosting (GitHub Pages) there is no /api/config endpoint — the
+// embedded config from src/config-loader.js (window.CONFIG) is authoritative.
+// This function only augments that config when a backend is present; it must
+// NEVER overwrite or clear the embedded window.CONFIG on failure.
 async function fetchConfig() {
+  // Skip the network call on static hosting (no backend). The embedded config
+  // from src/config-loader.js is authoritative. Opt in with window.CONFIG.enableServerConfig.
+  if (!window.CONFIG || window.CONFIG.enableServerConfig !== true) {
+    return;
+  }
   try {
     const response = await fetch('/api/config');
+    if (!response.ok) {
+      // Expected on static hosting — keep embedded window.CONFIG untouched.
+      console.info('No /api/config endpoint; using embedded configuration.');
+      return;
+    }
     const data = await response.json();
     if (data.success && data.config) {
-      window.CONFIG = data.config;
-      console.log('Configuration loaded successfully');
-      
+      // Merge server config over embedded config (do not replace).
+      window.CONFIG = Object.assign({}, window.CONFIG, data.config);
+      console.log('Configuration loaded from server.');
+
       // Apply CSP nonce if provided
       if (data.config.cspNonce) {
         applyCspNonce(data.config.cspNonce);
       }
     } else {
-      console.warn('Failed to load configuration, using defaults');
-      window.CONFIG = {};
+      console.warn('Server config response invalid; using embedded configuration.');
     }
   } catch (error) {
-    console.error('Error fetching configuration:', error);
-    window.CONFIG = {};
+    // Network/parse error — retain embedded window.CONFIG.
+    console.info('Configuration fetch skipped; using embedded configuration.');
   }
 }
 
@@ -3215,11 +3230,37 @@ function validateCaptcha() {
 }
 
 function initializeCaptcha() {
-  if (window.CONFIG && window.CONFIG.turnstileSiteKey) {
-    const captchaWidget = document.querySelector('.cf-turnstile');
-    if (captchaWidget) {
-      captchaWidget.setAttribute('data-sitekey', window.CONFIG.turnstileSiteKey);
-    }
+  const siteKey = window.CONFIG && window.CONFIG.turnstileSiteKey;
+  const container = document.getElementById('captcha-container');
+  const target = document.getElementById('turnstile-widget');
+
+  // No site key configured (e.g. static hosting without a key): keep the widget
+  // hidden and do not invoke Turnstile — avoids the 400020 placeholder error.
+  if (!siteKey || !container || !target) {
+    return;
+  }
+
+  const render = () => {
+    if (!window.turnstile || target.dataset.rendered === 'true') return;
+    window.turnstile.render(target, {
+      sitekey: siteKey,
+      theme: 'light',
+      callback: turnstileCallback
+    });
+    target.dataset.rendered = 'true';
+    container.style.display = '';
+  };
+
+  if (window.turnstile) {
+    render();
+  } else {
+    // Turnstile api.js is async/defer — poll briefly until it is available.
+    let tries = 0;
+    const timer = setInterval(() => {
+      tries++;
+      if (window.turnstile) { clearInterval(timer); render(); }
+      else if (tries > 40) { clearInterval(timer); } // ~10s cap
+    }, 250);
   }
 }
 

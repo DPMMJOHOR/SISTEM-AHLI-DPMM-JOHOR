@@ -28,6 +28,30 @@ const CONFIG = {
   ADMIN_WHATSAPP: window.ADMIN_WHATSAPP || '60175592722'
 };
 
+// ------------------------------------------------------------
+// camelCase / nested aliases consumed by borang.html
+// borang.html reads window.CONFIG.supabaseUrl, .turnstileSiteKey,
+// .features.captcha, .admin.*, .resend.* — expose them here so the
+// embedded config resolves on static hosting (GitHub Pages).
+// SECURITY: only publishable keys live here. GROQ/secret keys stay server-side.
+// ------------------------------------------------------------
+CONFIG.supabaseUrl = CONFIG.SUPABASE_URL;
+CONFIG.turnstileSiteKey = CONFIG.TURNSTILE_SITE_KEY;
+CONFIG.sentryDsn = CONFIG.SENTRY_DSN;
+CONFIG.features = {
+  // CAPTCHA is enabled only when a real Turnstile site key is configured
+  captcha: !!CONFIG.TURNSTILE_SITE_KEY
+};
+CONFIG.admin = {
+  email: CONFIG.ADMIN_EMAIL,
+  whatsapp: CONFIG.ADMIN_WHATSAPP
+};
+CONFIG.resend = {
+  fromEmail: window.RESEND_FROM_EMAIL || '',
+  templateAdmin: window.RESEND_TPL_ADMIN || '',
+  templateApplicant: window.RESEND_TPL_APPLICANT || ''
+};
+
 // Make available globally
 window.CONFIG = CONFIG;
 
