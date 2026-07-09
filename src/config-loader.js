@@ -17,6 +17,9 @@ const CONFIG = {
   RESEND_API_KEY: window.RESEND_API_KEY || '',
   
   // CAPTCHA
+  // SECURITY: Turnstile site key must be configured in production.
+  // Set via window.TURNSTILE_SITE_KEY or environment variable.
+  // Obtain from Cloudflare Turnstile dashboard: https://dash.cloudflare.com/
   TURNSTILE_SITE_KEY: window.TURNSTILE_SITE_KEY || '',
   
   // Sentry
