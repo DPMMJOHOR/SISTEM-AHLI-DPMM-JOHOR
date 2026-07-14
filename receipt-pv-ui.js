@@ -250,23 +250,54 @@ async function loadReceipts() {
     if (error) throw error;
     
     if (data.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" class="text-center">No receipts found</td></tr>';
+      const tr = document.createElement('tr');
+      const td = document.createElement('td');
+      td.colSpan = 7;
+      td.className = 'text-center';
+      td.textContent = 'No receipts found';
+      tr.appendChild(td);
+      tbody.appendChild(tr);
       return;
     }
     
-    tbody.innerHTML = data.map(receipt => `
-      <tr>
-        <td>${receipt.receipt_number}</td>
-        <td>${new Date(receipt.receipt_date).toLocaleDateString()}</td>
-        <td>${receipt.member_name}</td>
-        <td>RM${parseFloat(receipt.amount).toFixed(2)}</td>
-        <td>${receipt.payment_method}</td>
-        <td>${receipt.transaction_id || 'N/A'}</td>
-        <td>
-          <button onclick="downloadReceiptPDF('${receipt.receipt_pdf_url}')" class="btn btn-sm btn-outline">Download PDF</button>
-        </td>
-      </tr>
-    `).join('');
+    tbody.innerHTML = '';
+    data.forEach(receipt => {
+      const tr = document.createElement('tr');
+      
+      const tdNumber = document.createElement('td');
+      tdNumber.textContent = receipt.receipt_number;
+      tr.appendChild(tdNumber);
+      
+      const tdDate = document.createElement('td');
+      tdDate.textContent = new Date(receipt.receipt_date).toLocaleDateString();
+      tr.appendChild(tdDate);
+      
+      const tdName = document.createElement('td');
+      tdName.textContent = receipt.member_name;
+      tr.appendChild(tdName);
+      
+      const tdAmount = document.createElement('td');
+      tdAmount.textContent = 'RM' + parseFloat(receipt.amount).toFixed(2);
+      tr.appendChild(tdAmount);
+      
+      const tdMethod = document.createElement('td');
+      tdMethod.textContent = receipt.payment_method;
+      tr.appendChild(tdMethod);
+      
+      const tdTransId = document.createElement('td');
+      tdTransId.textContent = receipt.transaction_id || 'N/A';
+      tr.appendChild(tdTransId);
+      
+      const tdAction = document.createElement('td');
+      const btn = document.createElement('button');
+      btn.textContent = 'Download PDF';
+      btn.className = 'btn btn-sm btn-outline';
+      btn.onclick = () => downloadReceiptPDF(receipt.receipt_pdf_url);
+      tdAction.appendChild(btn);
+      tr.appendChild(tdAction);
+      
+      tbody.appendChild(tr);
+    });
   } catch (err) {
     console.error('Error loading receipts:', err);
     tbody.innerHTML = '<tr><td colspan="7" class="text-center">Error loading receipts</td></tr>';
@@ -287,28 +318,62 @@ async function loadVouchers() {
     if (error) throw error;
     
     if (data.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="8" class="text-center">No vouchers found</td></tr>';
+      const tr = document.createElement('tr');
+      const td = document.createElement('td');
+      td.colSpan = 8;
+      td.className = 'text-center';
+      td.textContent = 'No vouchers found';
+      tr.appendChild(td);
+      tbody.appendChild(tr);
       return;
     }
     
-    tbody.innerHTML = data.map(voucher => `
-      <tr>
-        <td>${voucher.voucher_number}</td>
-        <td>${new Date(voucher.created_at).toLocaleDateString()}</td>
-        <td>${voucher.payable_to}</td>
-        <td>${voucher.payment_purpose}</td>
-        <td>RM${parseFloat(voucher.amount).toFixed(2)}</td>
-        <td>${voucher.payment_method}</td>
-td>
-          <span class="badge ${voucher.approval_status === 'approved' ? 'badge-success' : voucher.approval_status === 'rejected' ? 'badge-danger' : 'badge-warning'}">
-            ${voucher.approval_status}
-          </span>
-        </td>
-        <td>
-          <button onclick="downloadVoucherPDF('${voucher.voucher_pdf_url}')" class="btn btn-sm btn-outline">Download PDF</button>
-        </td>
-      </tr>
-    `).join('');
+    tbody.innerHTML = '';
+    data.forEach(voucher => {
+      const tr = document.createElement('tr');
+      
+      const tdNumber = document.createElement('td');
+      tdNumber.textContent = voucher.voucher_number;
+      tr.appendChild(tdNumber);
+      
+      const tdDate = document.createElement('td');
+      tdDate.textContent = new Date(voucher.created_at).toLocaleDateString();
+      tr.appendChild(tdDate);
+      
+      const tdPayable = document.createElement('td');
+      tdPayable.textContent = voucher.payable_to;
+      tr.appendChild(tdPayable);
+      
+      const tdPurpose = document.createElement('td');
+      tdPurpose.textContent = voucher.payment_purpose;
+      tr.appendChild(tdPurpose);
+      
+      const tdAmount = document.createElement('td');
+      tdAmount.textContent = 'RM' + parseFloat(voucher.amount).toFixed(2);
+      tr.appendChild(tdAmount);
+      
+      const tdMethod = document.createElement('td');
+      tdMethod.textContent = voucher.payment_method;
+      tr.appendChild(tdMethod);
+      
+      const tdStatus = document.createElement('td');
+      const span = document.createElement('span');
+      const statusClass = voucher.approval_status === 'approved' ? 'badge-success' : voucher.approval_status === 'rejected' ? 'badge-danger' : 'badge-warning';
+      span.className = 'badge ' + statusClass;
+      span.textContent = voucher.approval_status;
+      tdStatus.appendChild(span);
+      tr.appendChild(tdStatus);
+      
+      const tdAction = document.createElement('td');
+      const btn = document.createElement('button');
+      btn.textContent = 'Download PDF';
+      btn.className = 'btn btn-sm btn-outline';
+      btn.onclick = () => downloadVoucherPDF(voucher.voucher_pdf_url);
+      tdAction.appendChild(btn);
+      tr.appendChild(tdAction);
+      
+      tbody.appendChild(tr);
+    });
   } catch (err) {
     console.error('Error loading vouchers:', err);
     tbody.innerHTML = '<tr><td colspan="8" class="text-center">Error loading vouchers</td></tr>';
@@ -330,23 +395,54 @@ async function loadPendingApprovals() {
     if (error) throw error;
     
     if (data.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" class="text-center">No pending approvals</td></tr>';
+      const tr = document.createElement('tr');
+      const td = document.createElement('td');
+      td.colSpan = 7;
+      td.className = 'text-center';
+      td.textContent = 'No pending approvals';
+      tr.appendChild(td);
+      tbody.appendChild(tr);
       return;
     }
     
-    tbody.innerHTML = data.map(voucher => `
-      <tr>
-        <td>${voucher.voucher_number}</td>
-        <td>${new Date(voucher.created_at).toLocaleDateString()}</td>
-        <td>${voucher.payable_to}</td>
-        <td>${voucher.payment_purpose}</td>
-        <td>RM${parseFloat(voucher.amount).toFixed(2)}</td>
-        <td>${voucher.prepared_by}</td>
-        <td>
-          <button onclick="reviewVoucher('${voucher.id}')" class="btn btn-sm btn-primary">Review</button>
-        </td>
-      </tr>
-    `).join('');
+    tbody.innerHTML = '';
+    data.forEach(voucher => {
+      const tr = document.createElement('tr');
+      
+      const tdNumber = document.createElement('td');
+      tdNumber.textContent = voucher.voucher_number;
+      tr.appendChild(tdNumber);
+      
+      const tdDate = document.createElement('td');
+      tdDate.textContent = new Date(voucher.created_at).toLocaleDateString();
+      tr.appendChild(tdDate);
+      
+      const tdPayable = document.createElement('td');
+      tdPayable.textContent = voucher.payable_to;
+      tr.appendChild(tdPayable);
+      
+      const tdPurpose = document.createElement('td');
+      tdPurpose.textContent = voucher.payment_purpose;
+      tr.appendChild(tdPurpose);
+      
+      const tdAmount = document.createElement('td');
+      tdAmount.textContent = 'RM' + parseFloat(voucher.amount).toFixed(2);
+      tr.appendChild(tdAmount);
+      
+      const tdPrepared = document.createElement('td');
+      tdPrepared.textContent = voucher.prepared_by;
+      tr.appendChild(tdPrepared);
+      
+      const tdAction = document.createElement('td');
+      const btn = document.createElement('button');
+      btn.textContent = 'Review';
+      btn.className = 'btn btn-sm btn-primary';
+      btn.onclick = () => reviewVoucher(voucher.id);
+      tdAction.appendChild(btn);
+      tr.appendChild(tdAction);
+      
+      tbody.appendChild(tr);
+    });
   } catch (err) {
     console.error('Error loading approvals:', err);
     tbody.innerHTML = '<tr><td colspan="7" class="text-center">Error loading approvals</td></tr>';
@@ -428,32 +524,112 @@ async function reviewVoucher(voucherId) {
     const reviewModal = document.createElement('div');
     reviewModal.className = 'modal';
     reviewModal.style.display = 'block';
-    reviewModal.innerHTML = `
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3>Review Payment Voucher</h3>
-          <button onclick="this.closest('.modal').remove()" class="btn btn-sm btn-outline">Close</button>
-        </div>
-        <div class="modal-body">
-          <p><strong>Voucher Number:</strong> ${data.voucher_number}</p>
-          <p><strong>Payable To:</strong> ${data.payable_to}</p>
-          <p><strong>Purpose:</strong> ${data.payment_purpose}</p>
-          <p><strong>Amount:</strong> RM${parseFloat(data.amount).toFixed(2)}</p>
-          <p><strong>Payment Method:</strong> ${data.payment_method}</p>
-          <p><strong>Prepared By:</strong> ${data.prepared_by}</p>
-          
-          <div class="form-group">
-            <label>Rejection Reason (if rejecting)</label>
-            <textarea id="rejection-reason" class="form-control" rows="2"></textarea>
-          </div>
-          
-          <div class="modal-footer">
-            <button onclick="approveVoucher('${voucherId}')" class="btn btn-success">Approve</button>
-            <button onclick="rejectVoucher('${voucherId}')" class="btn btn-danger">Reject</button>
-          </div>
-        </div>
-      </div>
-    `;
+    
+    const modalContent = document.createElement('div');
+    modalContent.className = 'modal-content';
+    reviewModal.appendChild(modalContent);
+    
+    const modalHeader = document.createElement('div');
+    modalHeader.className = 'modal-header';
+    modalContent.appendChild(modalHeader);
+    
+    const title = document.createElement('h3');
+    title.textContent = 'Review Payment Voucher';
+    modalHeader.appendChild(title);
+    
+    const closeBtn = document.createElement('button');
+    closeBtn.textContent = 'Close';
+    closeBtn.className = 'btn btn-sm btn-outline';
+    closeBtn.onclick = () => reviewModal.remove();
+    modalHeader.appendChild(closeBtn);
+    
+    const modalBody = document.createElement('div');
+    modalBody.className = 'modal-body';
+    modalContent.appendChild(modalBody);
+    
+    const pVoucherNumber = document.createElement('p');
+    const strongVoucher = document.createElement('strong');
+    strongVoucher.textContent = 'Voucher Number: ';
+    pVoucherNumber.appendChild(strongVoucher);
+    const spanVoucher = document.createElement('span');
+    spanVoucher.textContent = data.voucher_number;
+    pVoucherNumber.appendChild(spanVoucher);
+    modalBody.appendChild(pVoucherNumber);
+    
+    const pPayableTo = document.createElement('p');
+    const strongPayable = document.createElement('strong');
+    strongPayable.textContent = 'Payable To: ';
+    pPayableTo.appendChild(strongPayable);
+    const spanPayable = document.createElement('span');
+    spanPayable.textContent = data.payable_to;
+    pPayableTo.appendChild(spanPayable);
+    modalBody.appendChild(pPayableTo);
+    
+    const pPurpose = document.createElement('p');
+    const strongPurpose = document.createElement('strong');
+    strongPurpose.textContent = 'Purpose: ';
+    pPurpose.appendChild(strongPurpose);
+    const spanPurpose = document.createElement('span');
+    spanPurpose.textContent = data.payment_purpose;
+    pPurpose.appendChild(spanPurpose);
+    modalBody.appendChild(pPurpose);
+    
+    const pAmount = document.createElement('p');
+    const strongAmount = document.createElement('strong');
+    strongAmount.textContent = 'Amount: ';
+    pAmount.appendChild(strongAmount);
+    const spanAmount = document.createElement('span');
+    spanAmount.textContent = 'RM' + parseFloat(data.amount).toFixed(2);
+    pAmount.appendChild(spanAmount);
+    modalBody.appendChild(pAmount);
+    
+    const pMethod = document.createElement('p');
+    const strongMethod = document.createElement('strong');
+    strongMethod.textContent = 'Payment Method: ';
+    pMethod.appendChild(strongMethod);
+    const spanMethod = document.createElement('span');
+    spanMethod.textContent = data.payment_method;
+    pMethod.appendChild(spanMethod);
+    modalBody.appendChild(pMethod);
+    
+    const pPrepared = document.createElement('p');
+    const strongPrepared = document.createElement('strong');
+    strongPrepared.textContent = 'Prepared By: ';
+    pPrepared.appendChild(strongPrepared);
+    const spanPrepared = document.createElement('span');
+    spanPrepared.textContent = data.prepared_by;
+    pPrepared.appendChild(spanPrepared);
+    modalBody.appendChild(pPrepared);
+    
+    const formGroup = document.createElement('div');
+    formGroup.className = 'form-group';
+    modalBody.appendChild(formGroup);
+    
+    const label = document.createElement('label');
+    label.textContent = 'Rejection Reason (if rejecting)';
+    formGroup.appendChild(label);
+    
+    const textarea = document.createElement('textarea');
+    textarea.id = 'rejection-reason';
+    textarea.className = 'form-control';
+    textarea.rows = 2;
+    formGroup.appendChild(textarea);
+    
+    const modalFooter = document.createElement('div');
+    modalFooter.className = 'modal-footer';
+    modalContent.appendChild(modalFooter);
+    
+    const approveBtn = document.createElement('button');
+    approveBtn.textContent = 'Approve';
+    approveBtn.className = 'btn btn-success';
+    approveBtn.onclick = () => approveVoucher(voucherId);
+    modalFooter.appendChild(approveBtn);
+    
+    const rejectBtn = document.createElement('button');
+    rejectBtn.textContent = 'Reject';
+    rejectBtn.className = 'btn btn-danger';
+    rejectBtn.onclick = () => rejectVoucher(voucherId);
+    modalFooter.appendChild(rejectBtn);
     
     document.body.appendChild(reviewModal);
   } catch (err) {

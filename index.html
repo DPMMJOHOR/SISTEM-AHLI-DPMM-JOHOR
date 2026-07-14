@@ -6857,9 +6857,49 @@ async function sendAdminMessage() {
 // RECEIPT AND PAYMENT VOUCHER SYSTEM FUNCTIONS
 // ============================================================
 
+// Validation Helper Functions
+function validateAmount(amount) {
+  const num = parseFloat(amount);
+  if (isNaN(num)) return { valid: false, error: 'Invalid amount' };
+  if (num <= 0) return { valid: false, error: 'Amount must be positive' };
+  if (num > 1000000) return { valid: false, error: 'Amount exceeds maximum limit' };
+  return { valid: true };
+}
+
+function validateFile(file) {
+  const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+  const maxSize = 5 * 1024 * 1024; // 5MB
+  
+  if (!allowedTypes.includes(file.type)) {
+    return { valid: false, error: 'Invalid file type. Only PNG and JPG allowed.' };
+  }
+  if (file.size > maxSize) {
+    return { valid: false, error: 'File size exceeds 5MB limit' };
+  }
+  return { valid: true };
+}
+
+function validateDate(dateString) {
+  const date = new Date(dateString);
+  const now = new Date();
+  if (isNaN(date.getTime())) return { valid: false, error: 'Invalid date' };
+  if (date > now) return { valid: false, error: 'Date cannot be in the future' };
+  return { valid: true };
+}
+
 // Payment Slip Upload
 async function uploadPaymentSlip(imageFile, memberId, amount, paymentMethod, paymentDate) {
   try {
+    // Validate inputs
+    const amountCheck = validateAmount(amount);
+    if (!amountCheck.valid) return { success: false, error: amountCheck.error };
+    
+    const fileCheck = validateFile(imageFile);
+    if (!fileCheck.valid) return { success: false, error: fileCheck.error };
+    
+    const dateCheck = validateDate(paymentDate);
+    if (!dateCheck.valid) return { success: false, error: dateCheck.error };
+    
     // Upload to Supabase Storage
     const timestamp = Date.now();
     const fileName = `slip_${timestamp}.png`;
@@ -6872,6 +6912,10 @@ async function uploadPaymentSlip(imageFile, memberId, amount, paymentMethod, pay
     if (error) throw error;
     
     const imageUrl = data.path;
+    
+    // Get authenticated user ID from Supabase auth
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    const userId = user?.id || 'anonymous';
     
     // Generate slip number using get_next_number
     const yearMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
@@ -6891,7 +6935,7 @@ async function uploadPaymentSlip(imageFile, memberId, amount, paymentMethod, pay
         payment_date: paymentDate,
         slip_image_url: imageUrl,
         ocr_status: 'pending',
-        uploaded_by: 'current_user_id' // Will be set from auth
+        uploaded_by: userId
       });
     
     if (slipError) throw slipError;
@@ -7053,6 +7097,11 @@ async function createPaymentVoucher(payableTo, purpose, amount, paymentMethod, p
 
 // Approval Function
 async function approveVoucher(voucherId, approvedBy, rejectionReason) {
+  // Authorization check
+  if (!currentUser || currentUser.role !== 'admin') {
+    return { success: false, error: 'Unauthorized: Admin role required' };
+  }
+  
   try {
     // Update approval status
     const approvalStatus = rejectionReason ? 'rejected' : 'approved';
@@ -7110,6 +7159,10 @@ async function loadImage(imagePath) {
 
 // PDF Generation - Receipt
 async function generateReceiptPDF(receiptNumber, memberDetails, amount, paymentMethod, paymentDate, transactionId) {
+  // Validate amount
+  const amountCheck = validateAmount(amount);
+  if (!amountCheck.valid) return { success: false, error: amountCheck.error };
+  
   const doc = new jsPDF();
   
   // DPMM Johor header with logo
@@ -7184,6 +7237,10 @@ async function generateReceiptPDF(receiptNumber, memberDetails, amount, paymentM
 
 // PDF Generation - Payment Voucher
 async function generateVoucherPDF(voucherNumber, payableTo, purpose, amount, paymentMethod, preparedBy) {
+  // Validate amount
+  const amountCheck = validateAmount(amount);
+  if (!amountCheck.valid) return { success: false, error: amountCheck.error };
+  
   const doc = new jsPDF();
   
   // DPMM Johor header with logo
