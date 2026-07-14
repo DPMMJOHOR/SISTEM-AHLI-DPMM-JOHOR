@@ -220,7 +220,7 @@ async function loadMembers() {
   if (!select) return;
   
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('AHLI DPMM JOHOR')
       .select('id, nama, nombor_ahli')
       .order('nama');
@@ -246,7 +246,7 @@ async function loadReceipts() {
   if (!tbody) return;
   
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('receipts')
       .select('*')
       .order('receipt_date', { ascending: false });
@@ -314,7 +314,7 @@ async function loadVouchers() {
   if (!tbody) return;
   
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('payment_vouchers')
       .select('*')
       .order('created_at', { ascending: false });
@@ -390,7 +390,7 @@ async function loadPendingApprovals() {
   if (!tbody) return;
   
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('payment_vouchers')
       .select('*')
       .eq('approval_status', 'pending')
@@ -517,7 +517,7 @@ async function createPaymentVoucher() {
 // Review voucher
 async function reviewVoucher(voucherId) {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('payment_vouchers')
       .select('*')
       .eq('id', voucherId)
@@ -668,15 +668,15 @@ function addReceiptPVNavigation() {
   // Create nav items once (guard against duplicates)
   if (!document.getElementById('receipt-nav-item')) {
     const navItems = `
-      <div class="nav-item" onclick="showPage('receipts')" id="receipt-nav-item" style="display:none;">
+      <div class="nav-item" onclick="showPage('page-receipts')" id="receipt-nav-item" style="display:none;">
         <div class="nav-icon">📄</div>
         <div class="nav-text">Receipts</div>
       </div>
-      <div class="nav-item" onclick="showPage('vouchers')" id="voucher-nav-item" style="display:none;">
+      <div class="nav-item" onclick="showPage('page-vouchers')" id="voucher-nav-item" style="display:none;">
         <div class="nav-icon">💳</div>
         <div class="nav-text">Vouchers</div>
       </div>
-      <div class="nav-item" onclick="showPage('approvals')" id="approval-nav-item" style="display:none;">
+      <div class="nav-item" onclick="showPage('page-approvals')" id="approval-nav-item" style="display:none;">
         <div class="nav-icon">✅</div>
         <div class="nav-text">Approvals</div>
       </div>
@@ -737,11 +737,11 @@ window.showPage = function(pageId) {
   }
   
   // Handle new pages
-  if (pageId === 'receipts') {
+  if (pageId === 'page-receipts') {
     showReceiptsPage();
-  } else if (pageId === 'vouchers') {
+  } else if (pageId === 'page-vouchers') {
     showVouchersPage();
-  } else if (pageId === 'approvals') {
+  } else if (pageId === 'page-approvals') {
     showApprovalsPage();
   } else if (originalShowPage) {
     originalShowPage(pageId);
