@@ -7097,8 +7097,15 @@ async function createPaymentVoucher(payableTo, purpose, amount, paymentMethod, p
 
 // Approval Function
 async function approveVoucher(voucherId, approvedBy, rejectionReason) {
-  // Authorization check
-  if (!currentUser || currentUser.role !== 'admin') {
+  // Authorization check using Supabase auth session
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  if (!user) {
+    return { success: false, error: 'Unauthorized: Authentication required' };
+  }
+  
+  // Check if user has admin role (assuming role stored in user_metadata)
+  const userRole = user.user_metadata?.role || 'user';
+  if (userRole !== 'admin') {
     return { success: false, error: 'Unauthorized: Admin role required' };
   }
   
