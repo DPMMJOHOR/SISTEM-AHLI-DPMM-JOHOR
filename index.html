@@ -62,6 +62,12 @@
   --head:   'Montserrat', sans-serif;
   --mono:   'JetBrains Mono', monospace;
 
+  /* Spacing system for consistent margins */
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+
   --sidebar-w: 260px;
   --header-h:  80px;
   --topbar-h:  62px;
@@ -77,6 +83,34 @@ html { font-size: 15px; -webkit-font-smoothing: antialiased; }
 body { font-family: var(--sans); background: var(--body-bg); color: var(--text); min-height: 100vh; }
 a { text-decoration: none; color: inherit; }
 input, select, textarea, button { font-family: var(--sans); }
+
+/* Font hierarchy for Receipt and Payment Voucher system */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--head);
+  font-weight: 700;
+  line-height: 1.2;
+}
+h1 { font-size: 1.5rem; }
+h2 { font-size: 1.25rem; }
+h3 { font-size: 1.125rem; }
+
+body, p, span, div, td, th {
+  font-family: var(--sans);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+label {
+  font-family: var(--sans);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+small {
+  font-family: var(--sans);
+  font-size: 0.75rem;
+  font-weight: 400;
+}
 
 /* ══════════════════════════════════════════
    LOGIN SCREEN
@@ -259,9 +293,14 @@ input, select, textarea, button { font-family: var(--sans); }
   text-transform: uppercase; text-align: center;
 }
 .nav-item {
-  display: flex; align-items: center; justify-content: center;
-  padding: 10px 12px; cursor: pointer;
-  font-size: 11.5px; font-weight: 700; color: var(--text2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 16px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text2);
   border-left: 3px solid transparent;
   border-radius: 0 8px 8px 0;
   margin: 1px 10px 1px 0;
@@ -269,21 +308,69 @@ input, select, textarea, button { font-family: var(--sans); }
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  gap: 6px;
 }
-.nav-item .nav-icon { font-size: 14px; color: var(--gray3); flex-shrink: 0; }
-.nav-item .nav-text { flex: 1; text-align: center; }
 .nav-item:hover {
-  background: var(--primary-lt); color: var(--primary);
+  background: var(--primary-lt);
+  color: var(--primary);
   border-left-color: transparent;
 }
-.nav-item:hover .nav-icon { color: var(--primary); }
 .nav-item.active {
-  background: var(--primary-lt); color: var(--primary);
-  border-left-color: var(--primary); font-weight: 800;
+  background: var(--primary-lt);
+  color: var(--primary);
+  border-left-color: var(--primary);
+  font-weight: 800;
   box-shadow: 0 4px 18px rgba(var(--primary-rgb),.2);
 }
-.nav-item.active .nav-icon { color: var(--primary); }
+
+/* Card styles for Receipt and Payment Voucher system */
+.card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: var(--spacing-xl);
+  margin-bottom: var(--spacing-lg);
+  border: 1px solid var(--border);
+  border-top: 4px solid var(--primary);
+}
+.card-header {
+  padding: 0 0 var(--spacing-md) 0;
+  margin-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--border);
+}
+.card-body {
+  padding: 0;
+}
+
+/* Form styles for Receipt and Payment Voucher system */
+.form-group {
+  margin-bottom: 20px;
+}
+.form-control {
+  margin-bottom: 8px;
+}
+.form-row {
+  margin-bottom: var(--spacing-lg);
+}
+
+/* Table styles for Receipt and Payment Voucher system */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+}
+.table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.875rem;
+  border-bottom: 2px solid var(--border);
+}
+.table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9375rem;
+}
+
 .nav-badge {
   background: var(--danger); color: var(--white);
   font-size: 10px; font-weight: 800; padding: 2px 7px;

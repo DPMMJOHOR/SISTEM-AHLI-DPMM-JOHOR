@@ -7,47 +7,47 @@ function showReceiptsPage() {
   const container = document.getElementById('receipts-list');
   if (!container) return;
   container.innerHTML = `
-    <div class="page-header">
-      <h2>Receipt Management</h2>
-      <p>Generate and manage membership fee receipts</p>
+    <div class="page-header" style="margin-bottom: 24px; padding: 0;">
+      <h2 style="font-size: 1.5rem; margin-bottom: 8px;">Pengurusan Resit</h2>
+      <p style="font-size: 1rem; color: var(--text-muted);">Jana dan urus resit yuran keahlian</p>
     </div>
     
-    <div class="card">
+    <div class="card" style="margin-bottom: 24px;">
       <div class="card-header">
-        <h3>Generate New Receipt</h3>
+        <h3 style="font-size: 1.25rem;">Jana Resit Baru</h3>
       </div>
       <div class="card-body">
         <div class="form-group">
-          <label>Member (for membership fees)</label>
+          <label>Ahli (untuk yuran keahlian)</label>
           <select id="receipt-member-select" class="form-control">
-            <option value="">Select member...</option>
+            <option value="">Pilih ahli...</option>
           </select>
         </div>
         
         <div class="form-group">
-          <label>Amount (RM)</label>
+          <label>Jumlah (RM)</label>
           <input type="number" id="receipt-amount" class="form-control" placeholder="0.00" step="0.01">
         </div>
         
         <div class="form-group">
-          <label>Payment Method</label>
+          <label>Kaedah Pembayaran</label>
           <select id="receipt-payment-method" class="form-control">
-            <option value="cash">Cash</option>
-            <option value="online">Online Transfer</option>
-            <option value="cheque">Cheque</option>
-            <option value="other">Other</option>
+            <option value="cash">Tunai</option>
+            <option value="online">Pindahan Dalam Talian</option>
+            <option value="cheque">Cek</option>
+            <option value="other">Lain-lain</option>
           </select>
         </div>
         
         <div class="form-group">
-          <label>Payment Date</label>
+          <label>Tarikh Pembayaran</label>
           <input type="date" id="receipt-payment-date" class="form-control">
         </div>
         
         <div class="form-group">
-          <label>Payment Slip (optional)</label>
+          <label>Slip Pembayaran (pilihan)</label>
           <input type="file" id="receipt-payment-slip" class="form-control" accept="image/*">
-          <small class="text-muted">Upload payment slip for OCR processing</small>
+          <small class="text-muted">Muat naik slip pembayaran untuk pemprosesan OCR</small>
         </div>
         
         <div id="ocr-status" class="alert" style="display:none;">
@@ -55,34 +55,34 @@ function showReceiptsPage() {
         </div>
         
         <div id="transaction-id-display" class="alert alert-success" style="display:none;">
-          <strong>Transaction ID:</strong> <span id="transaction-id-text"></span>
+          <strong>ID Transaksi:</strong> <span id="transaction-id-text"></span>
         </div>
         
-        <button onclick="generateReceipt()" class="btn btn-primary">Generate Receipt</button>
+        <button onclick="generateReceipt()" class="btn btn-primary">Jana Resit</button>
       </div>
     </div>
     
-    <div class="card">
+    <div class="card" style="margin-bottom: 24px;">
       <div class="card-header">
-        <h3>Receipt History</h3>
+        <h3 style="font-size: 1.25rem;">Sejarah Resit</h3>
       </div>
       <div class="card-body">
         <div class="table-responsive">
           <table class="table">
             <thead>
               <tr>
-                <th>Receipt Number</th>
-                <th>Date</th>
-                <th>Member</th>
-                <th>Amount</th>
-                <th>Method</th>
-                <th>Transaction ID</th>
-                <th>Actions</th>
+                <th>Nombor Resit</th>
+                <th>Tarikh</th>
+                <th>Ahli</th>
+                <th>Jumlah</th>
+                <th>Kaedah</th>
+                <th>ID Transaksi</th>
+                <th>Tindakan</th>
               </tr>
             </thead>
             <tbody id="receipts-table-body">
               <tr>
-                <td colspan="7" class="text-center">Loading receipts...</td>
+                <td colspan="7" class="text-center">Memuatkan resit...</td>
               </tr>
             </tbody>
           </table>
@@ -100,67 +100,67 @@ function showVouchersPage() {
   const container = document.getElementById('vouchers-list');
   if (!container) return;
   container.innerHTML = `
-    <div class="page-header">
-      <h2>Payment Vouchers</h2>
-      <p>Manage payment vouchers for third-party payments</p>
+    <div class="page-header" style="margin-bottom: 24px; padding: 0;">
+      <h2 style="font-size: 1.5rem; margin-bottom: 8px;">Baucar Pembayaran</h2>
+      <p style="font-size: 1rem; color: var(--text-muted);">Urus baucar pembayaran pihak ketiga</p>
     </div>
     
-    <div class="card">
+    <div class="card" style="margin-bottom: 24px;">
       <div class="card-header">
-        <h3>Create Payment Voucher</h3>
+        <h3 style="font-size: 1.25rem;">Cipta Baucar Pembayaran</h3>
       </div>
       <div class="card-body">
         <div class="form-group">
-          <label>Payable To</label>
-          <input type="text" id="voucher-payable-to" class="form-control" placeholder="Company or individual name">
+          <label>Dibayar Kepada</label>
+          <input type="text" id="voucher-payable-to" class="form-control" placeholder="Nama syarikat atau individu">
         </div>
         
         <div class="form-group">
-          <label>Payment Purpose</label>
-          <textarea id="voucher-purpose" class="form-control" rows="3" placeholder="Description of payment"></textarea>
+          <label>Tujuan Pembayaran</label>
+          <textarea id="voucher-purpose" class="form-control" rows="3" placeholder="Penerangan pembayaran"></textarea>
         </div>
         
         <div class="form-group">
-          <label>Amount (RM)</label>
+          <label>Jumlah (RM)</label>
           <input type="number" id="voucher-amount" class="form-control" placeholder="0.00" step="0.01">
         </div>
         
         <div class="form-group">
-          <label>Payment Method</label>
+          <label>Kaedah Pembayaran</label>
           <select id="voucher-payment-method" class="form-control">
-            <option value="cash">Cash</option>
-            <option value="cheque">Cheque</option>
-            <option value="online">Online Transfer</option>
-            <option value="other">Other</option>
+            <option value="cash">Tunai</option>
+            <option value="cheque">Cek</option>
+            <option value="online">Pindahan Dalam Talian</option>
+            <option value="other">Lain-lain</option>
           </select>
         </div>
         
-        <button onclick="createPaymentVoucher()" class="btn btn-primary">Create Voucher</button>
+        <button onclick="createPaymentVoucher()" class="btn btn-primary">Cipta Baucar</button>
       </div>
     </div>
     
-    <div class="card">
+    <div class="card" style="margin-bottom: 24px;">
       <div class="card-header">
-        <h3>Payment Voucher List</h3>
+        <h3 style="font-size: 1.25rem;">Senarai Baucar Pembayaran</h3>
       </div>
       <div class="card-body">
         <div class="table-responsive">
           <table class="table">
             <thead>
               <tr>
-                <th>Voucher Number</th>
-                <th>Date</th>
-                <th>Payable To</th>
-                <th>Purpose</th>
-                <th>Amount</th>
-                <th>Method</th>
+                <th>Nombor Baucar</th>
+                <th>Tarikh</th>
+                <th>Dibayar Kepada</th>
+                <th>Tujuan</th>
+                <th>Jumlah</th>
+                <th>Kaedah</th>
                 <th>Status</th>
-                <th>Actions</th>
+                <th>Tindakan</th>
               </tr>
             </thead>
             <tbody id="vouchers-table-body">
               <tr>
-                <td colspan="8" class="text-center">Loading vouchers...</td>
+                <td colspan="8" class="text-center">Memuatkan baucar...</td>
               </tr>
             </tbody>
           </table>
@@ -177,32 +177,32 @@ function showApprovalsPage() {
   const container = document.getElementById('approvals-list');
   if (!container) return;
   container.innerHTML = `
-    <div class="page-header">
-      <h2>Approval Dashboard</h2>
-      <p>Review and approve payment vouchers</p>
+    <div class="page-header" style="margin-bottom: 24px; padding: 0;">
+      <h2 style="font-size: 1.5rem; margin-bottom: 8px;">Papan Pemuka Kelulusan</h2>
+      <p style="font-size: 1rem; color: var(--text-muted);">Semak dan lulus baucar pembayaran</p>
     </div>
     
-    <div class="card">
+    <div class="card" style="margin-bottom: 24px;">
       <div class="card-header">
-        <h3>Pending Approvals</h3>
+        <h3 style="font-size: 1.25rem;">Kelulusan Tertunda</h3>
       </div>
       <div class="card-body">
         <div class="table-responsive">
           <table class="table">
             <thead>
               <tr>
-                <th>Voucher Number</th>
-                <th>Date</th>
-                <th>Payable To</th>
-                <th>Purpose</th>
-                <th>Amount</th>
-                <th>Prepared By</th>
-                <th>Actions</th>
+                <th>Nombor Baucar</th>
+                <th>Tarikh</th>
+                <th>Dibayar Kepada</th>
+                <th>Tujuan</th>
+                <th>Jumlah</th>
+                <th>Disediakan Oleh</th>
+                <th>Tindakan</th>
               </tr>
             </thead>
             <tbody id="approvals-table-body">
               <tr>
-                <td colspan="7" class="text-center">Loading pending approvals...</td>
+                <td colspan="7" class="text-center">Memuatkan kelulusan...</td>
               </tr>
             </tbody>
           </table>
@@ -669,16 +669,13 @@ function addReceiptPVNavigation() {
   if (!document.getElementById('receipt-nav-item')) {
     const navItems = `
       <div class="nav-item" onclick="showPage('page-receipts')" id="receipt-nav-item" style="display:none;">
-        <div class="nav-icon">📄</div>
-        <div class="nav-text">Receipts</div>
+        <div class="nav-text">Resit</div>
       </div>
       <div class="nav-item" onclick="showPage('page-vouchers')" id="voucher-nav-item" style="display:none;">
-        <div class="nav-icon">💳</div>
-        <div class="nav-text">Vouchers</div>
+        <div class="nav-text">Baucar</div>
       </div>
       <div class="nav-item" onclick="showPage('page-approvals')" id="approval-nav-item" style="display:none;">
-        <div class="nav-icon">✅</div>
-        <div class="nav-text">Approvals</div>
+        <div class="nav-text">Kelulusan</div>
       </div>
     `;
     
