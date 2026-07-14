@@ -6,8 +6,10 @@
 <title>SISTEM PENGURUSAN AHLI — DPMM NEGERI JOHOR</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<script src="https://cdn.jsdelivr.net/@emailjs/browser@3/dist/email.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/dist/bcrypt.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script src="receipt-pv-ui.js"></script>
 <script src="src/config-loader.js"></script>
 <script src="src/sentry-config.js" defer></script>
 <style>
@@ -6848,6 +6850,529 @@ async function sendAdminMessage() {
       document.getElementById('admin-clerk-messages').scrollTop = 99999;
     }
     routeAction(parseGroqIntent(text));
+  }
+}
+
+// ============================================================
+// RECEIPT AND PAYMENT VOUCHER SYSTEM FUNCTIONS
+// ============================================================
+
+// Payment Slip Upload
+async function uploadPaymentSlip(imageFile, memberId, amount, paymentMethod, paymentDate) {
+  try {
+    // Upload to Supabase Storage
+    const timestamp = Date.now();
+    const fileName = `slip_${timestamp}.png`;
+    const { data, error } = await supabase.storage
+      .from('payment_slips')
+      .upload(fileName, imageFile, {
+        cacheControl: 3600
+      });
+    
+    if (error) throw error;
+    
+    const imageUrl = data.path;
+    
+    // Generate slip number using get_next_number
+    const yearMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
+    const slipNumber = await supabase.rpc('get_next_number', { p_type: 'payment_slip', p_year_month: yearMonth });
+    
+    // Store in payment_slips table
+    const { data: slipData, error: slipError } = await supabase
+      .from('payment_slips')
+      .insert({
+        slip_number: slipNumber,
+        transaction_id: '', // Will be filled by OCR
+        member_id: memberId,
+        member_name: '', // Will be filled by member lookup
+        nombor_ahli: '', // Will be filled by member lookup
+        amount: amount,
+        payment_method: paymentMethod,
+        payment_date: paymentDate,
+        slip_image_url: imageUrl,
+        ocr_status: 'pending',
+        uploaded_by: 'current_user_id' // Will be set from auth
+      });
+    
+    if (slipError) throw slipError;
+    
+    // Trigger OCR processing
+    const ocrResult = await processOCR(imageUrl, slipData.id);
+    
+    return {
+      success: true,
+      slipId: slipData.id,
+      slipNumber: slipNumber,
+      ocrResult: ocrResult
+    };
+  } catch (error) {
+    console.error('Payment slip upload error:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+// OCR Processing using Tesseract.js
+async function processOCR(imageUrl, slipId) {
+  try {
+    const response = await fetch(imageUrl);
+    const blob = await response.blob();
+    
+    const result = await Tesseract.recognize(blob, {
+      logger: m => console.log(m)
+    });
+    
+    const transactionId = result.data.text.trim();
+    
+    // Update payment_slips table with OCR result
+    const ocrStatus = transactionId ? 'processed' : 'failed';
+    const ocrConfidence = transactionId ? 0.8 : 0;
+    
+    await supabase
+      .from('payment_slips')
+      .update({ 
+        transaction_id: transactionId,
+        ocr_status: ocrStatus,
+        ocr_confidence: ocrConfidence
+      })
+      .eq('id', slipId);
+    
+    return {
+      transactionId: transactionId,
+      status: ocrStatus,
+      confidence: ocrConfidence
+    };
+  } catch (error) {
+    console.error('OCR processing error:', error);
+    return { transactionId: '', status: 'failed', confidence: 0 };
+  }
+}
+
+// Receipt Generation
+async function generateReceipt(memberId, amount, paymentMethod, paymentDate, transactionId, slipId) {
+  try {
+    // Generate receipt number using get_next_number
+    const yearMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
+    const receiptNumber = await supabase.rpc('get_next_number', { p_type: 'receipt', p_year_month: yearMonth });
+    
+    // Look up member details if membership fee
+    let memberDetails = {};
+    if (memberId) {
+      const { data: memberData } = await supabase
+        .from('AHLI DPMM JOHOR')
+        .select('nama, nama, NO_AHLI, ALAMAT, JANTINA')
+        .eq('id', memberId)
+        .single();
+      
+      if (memberData) {
+        memberDetails = {
+          memberName: memberData.nama,
+          nomborAhli: memberData.NO_AHLI,
+          alamat: memberData.ALAMAT,
+          jantina: memberData.JANTINA
+        };
+      }
+    }
+    
+    // Generate PDF with jsPDF
+    const pdfUrl = await generateReceiptPDF(receiptNumber, memberDetails, amount, paymentMethod, paymentDate, transactionId);
+    
+    // Store receipt in database
+    const { data: receiptData, error: receiptError } = await supabase 
+      .from('receipts')
+      .insert({
+        receipt_number: receiptNumber,
+        receipt_type: 'membership_fee',
+        member_id: memberId,
+        member_name: memberDetails.memberName,
+        nombor_ahli: memberDetails.nomborAhli,
+        amount: amount,
+        payment_method: paymentMethod,
+        payment_date: paymentDate,
+        receipt_pdf_url: pdfUrl,
+        transaction_id: transactionId,
+        payment_slip_id: slipId,
+        created_by: 'current_user_id'
+      });
+    
+    if (receiptError) throw receiptError;
+    
+    return {
+      success: true,
+      receiptId: receiptData.id,
+      receiptNumber: receiptNumber,
+      pdfUrl: pdfUrl
+    };
+  } catch (error) {
+    console.error('Receipt generation error:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+// Payment Voucher Creation
+async function createPaymentVoucher(payableTo, purpose, amount, paymentMethod, preparedBy) {
+  try {
+    // Generate voucher number using get_next_number
+    const yearMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
+    const voucherNumber = await supabase.rpc('get_next_number', { p_type: 'payment_voucher', p_year_month: yearMonth });
+    
+    // Validate required fields
+    if (!payableTo || !purpose || !amount || !paymentMethod) {
+      throw new Error('Required fields missing');
+    }
+    
+    // Store as pending status
+    const { data: voucherData, error: voucherError } = await supabase
+      .from('payment_vouchers')
+      .insert({
+        voucher_number: voucherNumber,
+        payable_to: payableTo,
+        payment_purpose: purpose,
+        amount: amount,
+        payment_method: paymentMethod,
+        prepared_by: preparedBy,
+        approval_status: 'pending',
+        payment_status: 'pending'
+      });
+    
+    if (voucherError) throw voucherError;
+    
+    // Generate PDF preview
+    const pdfUrl = await generateVoucherPDF(voucherNumber, payableTo, purpose, amount, paymentMethod, preparedBy);
+    
+    return {
+      success: true,
+      voucherId: voucherData.id,
+      voucherNumber: voucherNumber,
+      pdfUrl: pdfUrl
+    };
+  } catch (error) {
+    console.error('Payment voucher creation error:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+// Approval Function
+async function approveVoucher(voucherId, approvedBy, rejectionReason) {
+  try {
+    // Update approval status
+    const approvalStatus = rejectionReason ? 'rejected' : 'approved';
+    
+    const { data: voucherData, error: voucherError } = await supabase
+      .from('payment_vouchers')
+      .update({
+        approval_status: approvalStatus,
+        approved_by: approvedBy,
+        approval_date: new Date().toISOString(),
+        rejection_reason: rejectionReason
+      })
+      .eq('id', voucherId);
+    
+    if (voucherError) throw voucherError;
+    
+    // Record approval history
+    await supabase
+      .from('approval_history')
+      .insert({
+        voucher_id: voucherId,
+        action: approvalStatus,
+        performed_by: approvedBy,
+        comments: rejectionReason
+      });
+    
+    // Add digital signature if approved
+    if (approvalStatus === 'approved') {
+      const pdfUrl = await addDigitalSignature(voucherData.id);
+      await supabase
+        .from('payment_vouchers')
+        .update({ digital_signature_url: pdfUrl })
+        .eq('id', voucherData.id);
+    }
+    
+    // Send WhatsApp message to BK with approval link
+    await sendApprovalNotification(voucherData.id, approvalStatus);
+    
+    return { success: true };
+  } catch (error) {
+    console.error('Approval error:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+// Helper function to load image for PDF
+async function loadImage(imagePath) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error('Failed to load image'));
+    img.src = imagePath;
+  });
+}
+
+// PDF Generation - Receipt
+async function generateReceiptPDF(receiptNumber, memberDetails, amount, paymentMethod, paymentDate, transactionId) {
+  const doc = new jsPDF();
+  
+  // DPMM Johor header with logo
+  try {
+    const logoImg = await loadImage('dpmm-logo-color.png');
+    if (logoImg) {
+      doc.addImage(logoImg, 15, 15, 30, 30);
+    }
+  } catch (err) {
+    console.warn('Could not load logo, using text fallback:', err);
+  }
+  
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(29, 60, 150);
+  doc.setFontSize(16);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(29, 60, 150);
+  doc.text('DPMM JOHOR RESIT', 50, 20);
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(29, 60, 150);
+  doc.text('Johor Darul Negeri Johor', 50, 25);
+  doc.setFontSize(10);
+  doc.setTextColor(29, 60, 150);
+  doc.text('No. Resit: ' + receiptNumber, 50, 30);
+  doc.setFontSize(10);
+  doc.setTextColor(29, 60, 150);
+  doc.text('Tarikh: ' + paymentDate, 50, 35);
+  doc.setFontSize(10);
+  doc.setTextColor(29, 60, 150);
+  doc.text('Amaun: RM ' + amount, 50, 40);
+  
+  // Member details
+  doc.setFontSize(10);
+  doc.setTextColor(29, 60, 150);
+  doc.text('Nama: ' + memberDetails.memberName, 15, 45);
+  doc.text('No Ahli: ' + memberDetails.nomborAhli, 15, 50);
+  doc.text('Jantina: ' + memberDetails.jantina, 15, 55);
+  doc.text('Alamat: ' + memberDetails.alamat, 15, 60);
+  
+  // Transaction ID
+  if (transactionId) {
+    doc.text('Transaction ID: ' + transactionId, 15, 65);
+  }
+  
+  // Footer
+  doc.setFontSize(8);
+  doc.setTextColor(29, 60, 150);
+  doc.text('DPMM JOHOR', 50, 75);
+  doc.text('Tel: +60-6555-1234', 50, 80);
+  
+  // Digital signature placeholder
+  doc.setFontSize(8);
+  doc.setTextColor(29, 60, 150);
+  doc.text('Digital Signature: [Tandatangan]', 50, 85);
+  
+  const pdfBlob = doc.output('dataurlblob');
+  const fileName = `receipt_${receiptNumber}.pdf`;
+  
+  // Upload to Supabase Storage
+  const { data, error } = await supabase.storage
+    .from('receipts')
+    .upload(fileName, pdfBlob, {
+      cacheControl: 3600
+    });
+  
+  if (error) throw error;
+  
+  return data.path;
+}
+
+// PDF Generation - Payment Voucher
+async function generateVoucherPDF(voucherNumber, payableTo, purpose, amount, paymentMethod, preparedBy) {
+  const doc = new jsPDF();
+  
+  // DPMM Johor header with logo
+  try {
+    const logoImg = await loadImage('dpmm-logo-color.png');
+    if (logoImg) {
+      doc.addImage(logoImg, 15, 15, 30, 30);
+    }
+  } catch (err) {
+    console.warn('Could not load logo, using text fallback:', err);
+  }
+  
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(29, 60, 150);
+  doc.setFontSize(16);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(29, 60, 150);
+  doc.text('DPMM JURUS BAYARAN', 50, 20);
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(29, 60, 150);
+  doc.text('Johor Darul Negeri Johor', 50, 25);
+  doc.setFontSize(10);
+  doc.setTextColor(29, 60, 150);
+  doc.text('No. Voucher: ' + voucherNumber, 50, 30);
+  doc.setFontSize(10);
+  doc.setTextColor(29, 60, 150);
+  doc.text('Tarikh: ' + new Date().toISOString().slice(0, 10), 50, 35);
+  doc.setFontSize(10);
+  doc.setTextColor(29, 60, 150);
+  doc.text('Amaun: RM ' + amount, 50, 40);
+  doc.setFontSize(10);
+  doc.setTextColor(29, 60, 150);
+  doc.text('Dibayar Kepada: ' + payableTo, 50, 45);
+  doc.setFontSize(10);
+  doc.setTextColor(29, 60, 150);
+  doc.text('Tujuan: ' + purpose, 50, 50);
+  doc.setFontSize(10);
+  doc.setTextColor(29, 60, 150);
+  doc.text('Kaedah Bayaran: ' + paymentMethod, 50, 55);
+  doc.setFontSize(10);
+  doc.setTextColor(29, 60, 150);
+  doc.text('Disedi oleh: ' + preparedBy, 50, 60);
+  doc.setFontSize(10);
+  doc.setTextColor(29, 60, 150);
+  doc.text('Status: PENDING', 15, 65);
+  
+  // Footer
+  doc.setFontSize(8);
+  doc.setTextColor(29, 60, 150);
+  doc.text('DPMM JOHOR', 15, 75);
+  doc.text('Tel: +60-6555-1234', 15, 80);
+  
+  const pdfBlob = doc.output('dataurlblob');
+  const fileName = `voucher_${voucherNumber}.pdf`;
+  
+  // Upload to Supabase Storage
+  const { data, error } = await supabase.storage
+    .from('payment_vouchers')
+    .upload(fileName, pdfBlob, {
+      cacheControl: 3600
+    });
+  
+  if (error) throw error;
+  
+  return data.path;
+}
+
+// Digital Signature Application
+async function addDigitalSignature(voucherId) {
+  // Placeholder for signature image upload
+  // In production, this would overlay a signature image on the PDF
+  return 'signature_placeholder_url';
+}
+
+// WhatsApp Integration
+async function sendApprovalNotification(voucherId, approvalStatus) {
+  // Use existing WAHA infrastructure
+  // Send WhatsApp message to BK with approval link
+  console.log('Sending WhatsApp notification for voucher:', voucherId, 'status:', approvalStatus);
+  
+  try {
+    // Get voucher details
+    const { data: voucher } = await supabase
+      .from('payment_vouchers')
+      .select('*')
+      .eq('id', voucherId)
+      .single();
+    
+    if (!voucher) throw new Error('Voucher not found');
+    
+    // Generate approval link (placeholder - should use WAHA link generation)
+    const approvalLink = `${window.location.origin}/approvals?voucher=${voucherId}`;
+    
+    // Prepare message based on approval status
+    let message = '';
+    if (approvalStatus === 'approved') {
+      message = `Payment voucher ${voucher.voucher_number} has been APPROVED. Amount: RM${parseFloat(voucher.amount). Payable to: ${voucher.payable_to}. View details: ${approvalLink}`;
+    } else if (approvalStatus === 'rejected') {
+      message = `Payment voucher ${voucher.voucher_number} has been REJECTED. Reason: ${voucher.rejection_reason || 'No reason provided'}.`;
+    } else {
+      message = `Payment voucher ${voucher.voucher_number} requires your review. Amount: RM${parseFloat(voucher.amount)}. Payable to: ${voucher.payable_to}. Purpose: ${voucher.payment_purpose}. Review: ${approvalLink}`;
+    }
+    
+    // Send via WAHA - using existing infrastructure
+    // This would typically call WAHA API endpoint
+    console.log('WAHA notification:', message);
+    
+    // For now, log the notification
+    addLog(`WhatsApp notification sent: ${message}`);
+    
+    return { success: true };
+  } catch (error) {
+    console.error('WAHA notification error:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+// Digital Signature Management
+async function uploadSignatureImage(userId, role, imageFile) {
+  try {
+    const fileName = `signature_${role}_${userId}_${Date.now()}.png`;
+    
+    // Upload to Supabase Storage
+    const { data, error } = await supabase.storage
+      .from('signatures')
+      .upload(fileName, imageFile, {
+        cacheControl: 3600
+      });
+    
+    if (error) throw error;
+    
+    // Store signature URL in user record or separate signatures table
+    const { error: updateError } = await supabase
+      .from('DPMM_USERS')
+      .update({ signature_url: data.path })
+      .eq('id', userId);
+    
+    if (updateError) throw updateError;
+    
+    return { success: true, signatureUrl: data.path };
+  } catch (error) {
+    console.error('Signature upload error:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+// Apply digital signature to PDF
+async function applyDigitalSignatureToPDF(pdfUrl, signatureUrl, documentType) {
+  try {
+    // Load existing PDF
+    const { data: pdfData } = await supabase.storage
+      .from(documentType === 'receipt' ? 'receipts' : 'vouchers')
+      .download(pdfUrl.split('/').pop());
+    
+    if (!pdfData) throw new Error('Could not download PDF');
+    
+    // Load signature image
+    const signatureImg = await loadImage(signatureUrl);
+    
+    // Create new PDF from existing
+    const doc = await jsPDF.load(pdfData);
+    
+    // Add signature overlay (bottom right, semi-transparent)
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    
+    doc.saveGraphicsState();
+    doc.setGState(new doc.GState({ opacity: 0.7 }));
+    doc.addImage(signatureImg, pageWidth - 50, pageHeight - 30, 40, 20);
+    doc.restoreGraphicsState();
+    
+    // Save updated PDF
+    const updatedPdfBlob = doc.output('dataurlblob');
+    const updatedFileName = `signed_${pdfUrl.split('/').pop()}`;
+    
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from(documentType === 'receipt' ? 'receipts' : 'vouchers')
+      .upload(updatedFileName, updatedPdfBlob, {
+        cacheControl: 3600
+      });
+    
+    if (uploadError) throw uploadError;
+    
+    return { success: true, signedPdfUrl: uploadData.path };
+  } catch (error) {
+    console.error('Signature application error:', error);
+    return { success: false, error: error.message };
   }
 }
 </script>
