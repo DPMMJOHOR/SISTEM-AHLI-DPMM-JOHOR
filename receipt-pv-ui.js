@@ -1,5 +1,6 @@
 // Receipt and Payment Voucher System - Frontend UI Components
 // Integrated with Sistem Ahli
+// Cache-bust: 2026-07-14-16-13
 
 // Receipt Management Section
 function showReceiptsPage() {
