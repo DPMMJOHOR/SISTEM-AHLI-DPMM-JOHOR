@@ -658,7 +658,7 @@ function downloadVoucherPDF(pdfUrl) {
 
 // Add navigation items to sidebar
 function addReceiptPVNavigation() {
-  const navContainer = document.querySelector('.sidebar');
+  const navContainer = document.querySelector('nav.sb-nav');
   if (!navContainer) return;
   
   // Create nav items once (guard against duplicates)
