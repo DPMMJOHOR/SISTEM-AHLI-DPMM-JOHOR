@@ -661,44 +661,52 @@ function addReceiptPVNavigation() {
   const navContainer = document.querySelector('.sidebar');
   if (!navContainer) return;
   
-  // Check if already added
-  if (document.getElementById('receipt-nav-item')) return;
-  
-  const navItems = `
-    <div class="nav-item" onclick="showPage('receipts')" id="receipt-nav-item" style="display:none;">
-      <div class="nav-icon">📄</div>
-      <div class="nav-text">Receipts</div>
-    </div>
-    <div class="nav-item" onclick="showPage('vouchers')" id="voucher-nav-item" style="display:none;">
-      <div class="nav-icon">💳</div>
-      <div class="nav-text">Vouchers</div>
-    </div>
-    <div class="nav-item" onclick="showPage('approvals')" id="approval-nav-item" style="display:none;">
-      <div class="nav-icon">✅</div>
-      <div="nav-text">Approvals</div>
-    </div>
-  `;
-  
-  // Insert before admin nav item
-  const adminNavItem = document.getElementById('admin-nav-item');
-  if (adminNavItem) {
-    adminNavItem.insertAdjacentHTML('beforebegin', navItems);
-  } else {
-    navContainer.insertAdjacentHTML('beforeend', navItems);
+  // Create nav items once (guard against duplicates)
+  if (!document.getElementById('receipt-nav-item')) {
+    const navItems = `
+      <div class="nav-item" onclick="showPage('receipts')" id="receipt-nav-item" style="display:none;">
+        <div class="nav-icon">📄</div>
+        <div class="nav-text">Receipts</div>
+      </div>
+      <div class="nav-item" onclick="showPage('vouchers')" id="voucher-nav-item" style="display:none;">
+        <div class="nav-icon">💳</div>
+        <div class="nav-text">Vouchers</div>
+      </div>
+      <div class="nav-item" onclick="showPage('approvals')" id="approval-nav-item" style="display:none;">
+        <div class="nav-icon">✅</div>
+        <div class="nav-text">Approvals</div>
+      </div>
+    `;
+    
+    // Insert before admin nav item
+    const adminNavItem = document.getElementById('admin-nav-item');
+    if (adminNavItem) {
+      adminNavItem.insertAdjacentHTML('beforebegin', navItems);
+    } else {
+      navContainer.insertAdjacentHTML('beforeend', navItems);
+    }
   }
   
-  // Show based on role
-  const userRole = currentUser?.role;
-  if (userRole === 'admin' || userRole === 'bendahari') {
-    document.getElementById('receipt-nav-item').style.display = 'flex';
-    document.getElementById('voucher-nav-item').style.display = 'flex';
-  }
-  if (userRole === 'admin' || userRole === 'ydp' || userRole === 'tydp' || userRole === 'nydp') {
-    document.getElementById('approval-nav-item').style.display = 'flex';
-  }
+  // Always refresh visibility based on the current user's role
+  updateReceiptPVNavVisibility();
 }
 
-// Initialize navigation on page load
+// Update nav item visibility based on current role (admin-only)
+function updateReceiptPVNavVisibility() {
+  const receiptNav = document.getElementById('receipt-nav-item');
+  const voucherNav = document.getElementById('voucher-nav-item');
+  const approvalNav = document.getElementById('approval-nav-item');
+  if (!receiptNav || !voucherNav || !approvalNav) return;
+  
+  const userRole = (typeof currentUser !== 'undefined' && currentUser) ? currentUser.role : null;
+  const display = userRole === 'admin' ? 'flex' : 'none';
+  
+  receiptNav.style.display = display;
+  voucherNav.style.display = display;
+  approvalNav.style.display = display;
+}
+
+// Initialize navigation on page load (creates hidden items; visibility set after login)
 document.addEventListener('DOMContentLoaded', function() {
   addReceiptPVNavigation();
 });

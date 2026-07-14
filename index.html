@@ -2572,6 +2572,7 @@ function _continueLogin(user, btn) {
   var dn = user.role==='admin'?'ADMIN':user.pass.replace(/[^A-Z]/g,'');
   document.getElementById('sidebar-userid').textContent = dn;
   if (user.role === 'admin') document.getElementById('admin-nav-item').style.display = 'flex';
+  if (typeof addReceiptPVNavigation === 'function') addReceiptPVNavigation();
   sessionStartTime = new Date();
   addLog('Log masuk: ' + user.name);
 
@@ -2620,6 +2621,7 @@ function doLogout() {
   document.getElementById('login-pass').value = '';
   document.getElementById('login-err').style.display = 'none';
   document.getElementById('admin-nav-item').style.display = 'none';
+  if (typeof updateReceiptPVNavVisibility === 'function') updateReceiptPVNavVisibility();
 }
 
 function addLog(msg) {
