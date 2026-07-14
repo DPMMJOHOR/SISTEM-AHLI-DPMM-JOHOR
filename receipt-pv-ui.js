@@ -3,7 +3,8 @@
 
 // Receipt Management Section
 function showReceiptsPage() {
-  const container = document.getElementById('main-content');
+  const container = document.getElementById('receipts-list');
+  if (!container) return;
   container.innerHTML = `
     <div class="page-header">
       <h2>Receipt Management</h2>
@@ -95,7 +96,8 @@ function showReceiptsPage() {
 
 // Payment Voucher Section
 function showVouchersPage() {
-  const container = document.getElementById('main-content');
+  const container = document.getElementById('vouchers-list');
+  if (!container) return;
   container.innerHTML = `
     <div class="page-header">
       <h2>Payment Vouchers</h2>
@@ -171,7 +173,8 @@ function showVouchersPage() {
 
 // Approval Dashboard
 function showApprovalsPage() {
-  const container = document.getElementById('main-content');
+  const container = document.getElementById('approvals-list');
+  if (!container) return;
   container.innerHTML = `
     <div class="page-header">
       <h2>Approval Dashboard</h2>
