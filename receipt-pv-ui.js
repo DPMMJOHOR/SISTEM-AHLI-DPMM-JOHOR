@@ -715,25 +715,12 @@ document.addEventListener('DOMContentLoaded', function() {
 // Extend showPage function to handle new pages
 const originalShowPage = window.showPage;
 window.showPage = function(pageId) {
-  // Call original showPage for standard pages
-  if (originalShowPage && pageId !== 'page-receipts' && pageId !== 'page-vouchers' && pageId !== 'page-approvals') {
+  // Call original showPage for ALL pages (including new ones)
+  if (originalShowPage) {
     originalShowPage(pageId);
-    return;
   }
   
-  // Handle new pages
-  CURRENT_PAGE = pageId;
-  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
-  document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
-  
-  var pg = document.getElementById(pageId);
-  if (pg) pg.classList.add('active');
-  
-  document.querySelectorAll('.nav-item').forEach(function(n){
-    if (n.getAttribute('onclick') && n.getAttribute('onclick').indexOf("'" + pageId + "'") !== -1) n.classList.add('active');
-  });
-  
-  // Handle new pages
+  // Additional handling for new pages if needed
   if (pageId === 'page-receipts') {
     showReceiptsPage();
   } else if (pageId === 'page-vouchers') {
@@ -741,6 +728,4 @@ window.showPage = function(pageId) {
   } else if (pageId === 'page-approvals') {
     showApprovalsPage();
   }
-  
-  closeSidebar();
 };
