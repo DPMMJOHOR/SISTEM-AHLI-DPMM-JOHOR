@@ -6548,7 +6548,7 @@ document.addEventListener('DOMContentLoaded', function(){
 var _clerk = { history: [], maxHistory: 10, briefingShown: false, disambigMembers: [] };
 var adminClerkOpen = false;
 
-function toggleAdminClerk() {
+window.toggleAdminClerk = function() {
   adminClerkOpen = !adminClerkOpen;
   var win = document.getElementById('admin-clerk-window');
   if (adminClerkOpen) {
@@ -7471,7 +7471,7 @@ async function sendApprovalNotification(voucherId, approvalStatus) {
     // Prepare message based on approval status
     let message = '';
     if (approvalStatus === 'approved') {
-      message = `Payment voucher ${voucher.voucher_number} has been APPROVED. Amount: RM${parseFloat(voucher.amount). Payable to: ${voucher.payable_to}. View details: ${approvalLink}`;
+      message = `Payment voucher ${voucher.voucher_number} has been APPROVED. Amount: RM${parseFloat(voucher.amount)}. Payable to: ${voucher.payable_to}. View details: ${approvalLink}`;
     } else if (approvalStatus === 'rejected') {
       message = `Payment voucher ${voucher.voucher_number} has been REJECTED. Reason: ${voucher.rejection_reason || 'No reason provided'}.`;
     } else {
