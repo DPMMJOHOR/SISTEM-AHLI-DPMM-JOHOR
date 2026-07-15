@@ -6552,17 +6552,30 @@ var _clerk = { history: [], maxHistory: 10, briefingShown: false, disambigMember
 var adminClerkOpen = false;
 
 window.toggleAdminClerk = function() {
-  adminClerkOpen = !adminClerkOpen;
-  var win = document.getElementById('admin-clerk-window');
-  if (adminClerkOpen) {
-    win.classList.add('open');
-    document.getElementById('admin-clerk-input').focus();
-    if (document.getElementById('admin-clerk-messages').children.length === 0) {
-      _clerk.briefingShown = true;
-      buildDailyBriefing();
+  try {
+    adminClerkOpen = !adminClerkOpen;
+    var win = document.getElementById('admin-clerk-window');
+    if (!win) {
+      console.error('admin-clerk-window element not found');
+      return;
     }
-  } else {
-    win.classList.remove('open');
+    if (adminClerkOpen) {
+      win.classList.add('open');
+      var input = document.getElementById('admin-clerk-input');
+      if (input) input.focus();
+      if (document.getElementById('admin-clerk-messages').children.length === 0) {
+        _clerk.briefingShown = true;
+        if (typeof buildDailyBriefing === 'function') {
+          buildDailyBriefing();
+        } else {
+          console.warn('buildDailyBriefing function not found');
+        }
+      }
+    } else {
+      win.classList.remove('open');
+    }
+  } catch (e) {
+    console.error('toggleAdminClerk error:', e);
   }
 }
 
