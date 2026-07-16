@@ -315,7 +315,7 @@ async function loadVouchers() {
   
   try {
     const { data, error } = await supabaseClient
-      .from('payment_vouchers')
+      .from('vouchers')
       .select('*')
       .order('created_at', { ascending: false });
     
@@ -391,7 +391,7 @@ async function loadPendingApprovals() {
   
   try {
     const { data, error } = await supabaseClient
-      .from('payment_vouchers')
+      .from('vouchers')
       .select('*')
       .eq('approval_status', 'pending')
       .order('created_at', { ascending: false });
@@ -518,7 +518,7 @@ async function createPaymentVoucher() {
 async function reviewVoucher(voucherId) {
   try {
     const { data, error } = await supabaseClient
-      .from('payment_vouchers')
+      .from('vouchers')
       .select('*')
       .eq('id', voucherId)
       .single();

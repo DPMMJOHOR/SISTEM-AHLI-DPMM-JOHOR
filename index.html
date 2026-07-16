@@ -7207,7 +7207,7 @@ async function createPaymentVoucher(payableTo, purpose, amount, paymentMethod, p
     
     // Store as pending status
     const { data: voucherData, error: voucherError } = await supabase
-      .from('payment_vouchers')
+      .from('vouchers')
       .insert({
         voucher_number: voucherNumber,
         payable_to: payableTo,
@@ -7255,7 +7255,7 @@ async function approveVoucher(voucherId, approvedBy, rejectionReason) {
     const approvalStatus = rejectionReason ? 'rejected' : 'approved';
     
     const { data: voucherData, error: voucherError } = await supabase
-      .from('payment_vouchers')
+      .from('vouchers')
       .update({
         approval_status: approvalStatus,
         approved_by: approvedBy,
@@ -7280,7 +7280,7 @@ async function approveVoucher(voucherId, approvedBy, rejectionReason) {
     if (approvalStatus === 'approved') {
       const pdfUrl = await addDigitalSignature(voucherData.id);
       await supabase
-        .from('payment_vouchers')
+        .from('vouchers')
         .update({ digital_signature_url: pdfUrl })
         .eq('id', voucherData.id);
     }
@@ -7448,7 +7448,7 @@ async function generateVoucherPDF(voucherNumber, payableTo, purpose, amount, pay
   
   // Upload to Supabase Storage
   const { data, error } = await supabase.storage
-    .from('payment_vouchers')
+    .from('signatures')
     .upload(fileName, pdfBlob, {
       cacheControl: 3600
     });
@@ -7474,7 +7474,7 @@ async function sendApprovalNotification(voucherId, approvalStatus) {
   try {
     // Get voucher details
     const { data: voucher } = await supabase
-      .from('payment_vouchers')
+      .from('vouchers')
       .select('*')
       .eq('id', voucherId)
       .single();
