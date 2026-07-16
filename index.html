@@ -254,7 +254,7 @@ small {
 }
 .sb-sys-name {
   font-family: var(--head);
-  font-size: clamp(10px, 1.4vw, 13px);
+  font-size: 12px;
   font-weight: 900;
   color: var(--primary);
   text-transform: uppercase;
@@ -271,8 +271,8 @@ small {
   border-radius: 8px; padding: 10px 12px; margin: 0 14px 4px;
   text-align: center;
 }
-.sb-user-label { font-size: 9.5px; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
-.sb-user-name { font-size: 13px; font-weight: 800; color: var(--text); margin-top: 3px; line-height: 1.3; text-align: center; }
+.sb-user-label { font-size: 12px; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; font-weight: 800; }
+.sb-user-name { font-size: 12px; font-weight: 800; color: var(--text); margin-top: 3px; line-height: 1.3; text-align: center; }
 
 .sb-stats {
   padding: 10px 16px 12px;
@@ -283,12 +283,12 @@ small {
 }
 .sb-count { font-family: var(--mono); font-size: 36px; font-weight: 700; color: var(--info); line-height: 1; }
 .sb-stats-right { text-align: left; }
-.sb-count-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 800; }
+.sb-count-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 800; }
 .sb-datetime { font-size: 10px; color: #000; font-family: var(--mono); margin-top: 3px; font-weight: 600; }
 
 .sb-nav { flex: 1; padding: 8px 0; }
 .sb-section-label {
-  font-size: 9px; font-weight: 900; letter-spacing: 2px;
+  font-size: 12px; font-weight: 800; letter-spacing: 1px;
   color: var(--gray3); padding: 10px 16px 4px;
   text-transform: uppercase; text-align: center;
 }
@@ -299,7 +299,7 @@ small {
   padding: 14px 16px;
   cursor: pointer;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--text2);
   border-left: 3px solid transparent;
   border-radius: 0 8px 8px 0;
@@ -307,7 +307,7 @@ small {
   transition: all .15s;
   text-align: center;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
 }
 .nav-item:hover {
   background: var(--primary-lt);
@@ -565,7 +565,7 @@ small {
 /* ══════════════════════════════════════════
    PAGE CONTENT
 ══════════════════════════════════════════ */
-.page { display: none; padding: 24px 28px; flex: 1; }
+.page { display: none; padding: 24px 28px; flex: 1; position: relative; z-index: 1; }
 .page.active { display: block; }
 
 /* ── KPI CARDS ── */
@@ -580,6 +580,7 @@ small {
   transition: box-shadow .2s, transform .2s;
   text-align: center;
   isolation: isolate;
+  z-index: 1;
 }
 .kpi-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
 .kpi-card::before {
@@ -640,6 +641,8 @@ small {
   background: var(--white); border-radius: var(--radius-lg);
   border: 1px solid var(--gray1); box-shadow: var(--shadow-sm);
   margin-bottom: 20px; overflow: hidden;
+  position: relative;
+  z-index: 1;
 }
 .sec-head {
   padding: 14px 20px; display: flex; align-items: center;
@@ -828,14 +831,14 @@ tr.row-unpaid { background: #fff0f0 !important; }
   padding: 12px 14px; max-width: 90%;
   box-shadow: 0 1px 4px rgba(0,0,0,.1);
   white-space: pre-wrap; line-height: 1.65; font-size: 13.5px;
-  font-family: 'Segoe UI', sans-serif; color: #111;
+  font-family: var(--sans); color: #111;
 }
 .wa-time { font-size: 10px; color: #777; text-align: right; margin-top: 5px; }
 
 /* ── TEMPLATE TEXTAREA ── */
 .tmpl-textarea {
   width: 100%; padding: 12px 14px; border: 1.5px solid var(--gray2);
-  border-radius: 8px; font-family: 'Segoe UI', sans-serif;
+  border-radius: 8px; font-family: var(--sans);
   font-size: 14px; line-height: 1.7; min-height: 190px;
   resize: vertical; color: var(--text);
 }
@@ -3024,6 +3027,10 @@ function showPage(id) {
     }
   }
   if (tla) { tla.innerHTML = ''; }
+  if (id === 'dashboard') renderDashboard();
+  if (id === 'senarai') renderMainTable();
+  if (id === 'daerah') renderDistrictPage();
+  if (id === 'yuran') renderYuranPage();
   if (id === 'backup') { renderBackupPage(); loadSupabaseBackups(); }
   if (id === 'admin') renderAdminPage();
   if (id === 'ssm') renderSSMPage();
@@ -3033,6 +3040,9 @@ function showPage(id) {
   if (id === 'dokumen') renderDokumenPage();
   if (id === 'mesyuarat') loadMesyuarat();
   if (id === 'permohonan') renderPermohonanPage();
+  if (id === 'page-receipts' && typeof showReceiptsPage === 'function') showReceiptsPage();
+  if (id === 'page-vouchers' && typeof showVouchersPage === 'function') showVouchersPage();
+  if (id === 'page-approvals' && typeof showApprovalsPage === 'function') showApprovalsPage();
   closeSidebar();
 }
 
@@ -5082,7 +5092,7 @@ function generateReport() {
 
   var css = '@page{size:A4 landscape;margin:6mm 8mm}'
     + '*{box-sizing:border-box;margin:0;padding:0}'
-    + 'body{font-family:"Segoe UI",Arial,sans-serif;font-size:13px;color:#1a1a2e;-webkit-print-color-adjust:exact;print-color-adjust:exact;line-height:1.45}'
+    + 'body{font-family:var(--sans),Arial,sans-serif;font-size:13px;color:#1a1a2e;-webkit-print-color-adjust:exact;print-color-adjust:exact;line-height:1.45}'
     + 'table{width:100%;border-collapse:collapse;table-layout:auto}'
     + 'th{background:#1a3f7a;color:#fff;padding:5px 9px;text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.3px;font-weight:700;white-space:nowrap}'
     + 'td{padding:4px 9px;border-bottom:1px solid #e0e0e0;vertical-align:middle;font-size:12.5px}'
@@ -6541,18 +6551,31 @@ document.addEventListener('DOMContentLoaded', function(){
 var _clerk = { history: [], maxHistory: 10, briefingShown: false, disambigMembers: [] };
 var adminClerkOpen = false;
 
-function toggleAdminClerk() {
-  adminClerkOpen = !adminClerkOpen;
-  var win = document.getElementById('admin-clerk-window');
-  if (adminClerkOpen) {
-    win.classList.add('open');
-    document.getElementById('admin-clerk-input').focus();
-    if (document.getElementById('admin-clerk-messages').children.length === 0) {
-      _clerk.briefingShown = true;
-      buildDailyBriefing();
+window.toggleAdminClerk = function() {
+  try {
+    adminClerkOpen = !adminClerkOpen;
+    var win = document.getElementById('admin-clerk-window');
+    if (!win) {
+      console.error('admin-clerk-window element not found');
+      return;
     }
-  } else {
-    win.classList.remove('open');
+    if (adminClerkOpen) {
+      win.classList.add('open');
+      var input = document.getElementById('admin-clerk-input');
+      if (input) input.focus();
+      if (document.getElementById('admin-clerk-messages').children.length === 0) {
+        _clerk.briefingShown = true;
+        if (typeof buildDailyBriefing === 'function') {
+          buildDailyBriefing();
+        } else {
+          console.warn('buildDailyBriefing function not found');
+        }
+      }
+    } else {
+      win.classList.remove('open');
+    }
+  } catch (e) {
+    console.error('toggleAdminClerk error:', e);
   }
 }
 
@@ -7464,11 +7487,11 @@ async function sendApprovalNotification(voucherId, approvalStatus) {
     // Prepare message based on approval status
     let message = '';
     if (approvalStatus === 'approved') {
-      message = `Payment voucher ${voucher.voucher_number} has been APPROVED. Amount: RM${parseFloat(voucher.amount). Payable to: ${voucher.payable_to}. View details: ${approvalLink}`;
+      message = `Payment voucher ${voucher.voucher_number} has been APPROVED. Amount: RM` + parseFloat(voucher.amount) + `. Payable to: ${voucher.payable_to}. View details: ${approvalLink}`;
     } else if (approvalStatus === 'rejected') {
       message = `Payment voucher ${voucher.voucher_number} has been REJECTED. Reason: ${voucher.rejection_reason || 'No reason provided'}.`;
     } else {
-      message = `Payment voucher ${voucher.voucher_number} requires your review. Amount: RM${parseFloat(voucher.amount)}. Payable to: ${voucher.payable_to}. Purpose: ${voucher.payment_purpose}. Review: ${approvalLink}`;
+      message = `Payment voucher ${voucher.voucher_number} requires your review. Amount: RM` + parseFloat(voucher.amount) + `. Payable to: ${voucher.payable_to}. Purpose: ${voucher.payment_purpose}. Review: ${approvalLink}`;
     }
     
     // Send via WAHA - using existing infrastructure

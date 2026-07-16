@@ -2637,7 +2637,7 @@ textarea:focus-visible {
             </div>
             <div class="doc-upload">
               <input type="file" id="file-slip" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="handleFileSelect(this,'slip')">
-              <button class="btn-upload" id="btn-slip" onclick="document.getElementById('file-slip').click()">Pilih Fail</button>
+              <button class="btn-upload" id="btn-slip" onclick="try{document.getElementById('file-slip').click()}catch(e){console.error('Slip upload click error:',e)}">Pilih Fail</button>
               <div class="upload-status" id="status-slip"></div>
             </div>
           </div>
@@ -3123,7 +3123,7 @@ function startFormWithBusinessType() {
   const selector = document.getElementById('business-type-selector');
   const selectedType = selector.value;
   if (!selectedType) {
-    alert('Sila pilih jenis perniagaan anda terlebih dahulu.');
+    showToast('Sila pilih jenis perniagaan anda terlebih dahulu.', 'warning');
     return;
   }
   

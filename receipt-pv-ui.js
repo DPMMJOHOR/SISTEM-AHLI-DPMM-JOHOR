@@ -715,32 +715,32 @@ document.addEventListener('DOMContentLoaded', function() {
 // Extend showPage function to handle new pages
 const originalShowPage = window.showPage;
 window.showPage = function(pageId) {
-  // Hide all pages
-  document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
-  
-  // Remove active class from all nav items
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  
-  // Show selected page
-  const page = document.getElementById(pageId);
-  if (page) {
-    page.style.display = 'block';
+  // Call original showPage for standard pages ONLY (exclude new pages)
+  if (originalShowPage && pageId !== 'page-receipts' && pageId !== 'page-vouchers' && pageId !== 'page-approvals') {
+    originalShowPage(pageId);
+    closeSidebar();
+    return;
   }
+
+  // Handle new pages with custom logic
+  CURRENT_PAGE = pageId;
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
   
-  // Set active nav item
-  const navItem = document.querySelector(`.nav-item[onclick="showPage('${pageId}')"]`);
-  if (navItem) {
-    navItem.classList.add('active');
-  }
+  var pg = document.getElementById(pageId);
+  if (pg) pg.classList.add('active');
   
-  // Handle new pages
+  document.querySelectorAll('.nav-item').forEach(function(n){
+    if (n.getAttribute('onclick') && n.getAttribute('onclick').indexOf("'" + pageId + "'") !== -1) n.classList.add('active');
+  });
+  
   if (pageId === 'page-receipts') {
     showReceiptsPage();
   } else if (pageId === 'page-vouchers') {
     showVouchersPage();
   } else if (pageId === 'page-approvals') {
     showApprovalsPage();
-  } else if (originalShowPage) {
-    originalShowPage(pageId);
   }
+  
+  closeSidebar();
 };
