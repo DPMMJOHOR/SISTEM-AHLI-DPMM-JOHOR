@@ -7487,11 +7487,11 @@ async function sendApprovalNotification(voucherId, approvalStatus) {
     // Prepare message based on approval status
     let message = '';
     if (approvalStatus === 'approved') {
-      message = `Payment voucher ${voucher.voucher_number} has been APPROVED. Amount: RM${parseFloat(voucher.amount)}. Payable to: ${voucher.payable_to}. View details: ${approvalLink}`;
+      message = `Payment voucher ${voucher.voucher_number} has been APPROVED. Amount: RM` + parseFloat(voucher.amount) + `. Payable to: ${voucher.payable_to}. View details: ${approvalLink}`;
     } else if (approvalStatus === 'rejected') {
       message = `Payment voucher ${voucher.voucher_number} has been REJECTED. Reason: ${voucher.rejection_reason || 'No reason provided'}.`;
     } else {
-      message = `Payment voucher ${voucher.voucher_number} requires your review. Amount: RM${parseFloat(voucher.amount)}. Payable to: ${voucher.payable_to}. Purpose: ${voucher.payment_purpose}. Review: ${approvalLink}`;
+      message = `Payment voucher ${voucher.voucher_number} requires your review. Amount: RM` + parseFloat(voucher.amount) + `. Payable to: ${voucher.payable_to}. Purpose: ${voucher.payment_purpose}. Review: ${approvalLink}`;
     }
     
     // Send via WAHA - using existing infrastructure
