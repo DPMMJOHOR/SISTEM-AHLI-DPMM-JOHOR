@@ -20,7 +20,7 @@
 <script>
 // Wait for Supabase library to be available
 function initSupabaseWhenReady() {
-  if (typeof createClient === 'undefined') {
+  if (typeof window.supabase === 'undefined' || typeof window.supabase.createClient === 'undefined') {
     setTimeout(initSupabaseWhenReady, 100);
     return;
   }
@@ -30,7 +30,7 @@ function initSupabaseWhenReady() {
   const key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx6b2xvdXB3dHFtanl1cHZvZmhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5NTMxMTEsImV4cCI6MjA4ODUyOTExMX0.tBcGc6KfPyjUmJngbLTBHv-GZkSoSoyWGXwlXFZ0ShE';
   
   try {
-    window.sb = createClient(url, key, {
+    window.sb = window.supabase.createClient(url, key, {
       auth: {
         persistSession: false,
         autoRefreshToken: false
