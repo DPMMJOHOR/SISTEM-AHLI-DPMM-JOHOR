@@ -185,6 +185,62 @@ CREATE POLICY "Public no access" ON "AHLI DPMM JOHOR"
   USING (false);
 ```
 
+#### PERMOHONAN_AHLI (Membership Applications)
+```sql
+-- Anonymous users can SELECT (read applications)
+CREATE POLICY "anon_select_permohonan"
+ON "PERMOHONAN_AHLI"
+FOR SELECT
+TO anon
+USING (true);
+
+-- Anonymous users can INSERT (submit new applications) with validation
+CREATE POLICY "anon_insert_permohonan"
+ON "PERMOHONAN_AHLI"
+FOR INSERT
+TO anon
+WITH CHECK (
+  -- Basic validation checks
+  ref_id IS NOT NULL AND
+  jenis_keahlian IS NOT NULL AND
+  fasal IS NOT NULL AND
+  nama_entiti IS NOT NULL AND
+  LENGTH(TRIM(nama_entiti)) >= 3 AND
+  -- IC validation for Malaysian IC format
+  no_kad_pengenalan ~ '^\d{6}-\d{2}-\d{4}$' OR
+  no_kad_pengenalan ~ '^\d{12}$' OR
+  no_kad_pengenalan IS NULL
+);
+
+-- Authenticated users can SELECT all applications
+CREATE POLICY "authenticated_select_permohonan"
+ON "PERMOHONAN_AHLI"
+FOR SELECT
+TO authenticated
+USING (true);
+
+-- Authenticated users can UPDATE applications
+CREATE POLICY "authenticated_update_permohonan"
+ON "PERMOHONAN_AHLI"
+FOR UPDATE
+TO authenticated
+USING (true)
+WITH CHECK (true);
+
+-- Admin users can DELETE applications
+CREATE POLICY "authenticated_delete_permohonan"
+ON "PERMOHONAN_AHLI"
+FOR DELETE
+TO authenticated
+USING (
+  -- Only allow deletion for admin users
+  EXISTS (
+    SELECT 1 FROM "DPMM_USERS"
+    WHERE id = auth.uid AND role = 'admin'
+  )
+);
+```
+
 ### Cross-System Access
 
 #### Meeting System Read Access to Members

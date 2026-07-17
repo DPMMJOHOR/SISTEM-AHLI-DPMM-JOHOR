@@ -3,8 +3,9 @@
 Sistem pengurusan ahli berasaskan web untuk Dewan Perniagaan Melayu Malaysia (DPMM) Negeri Johor.
 
 ## 🌐 Live App
-Setelah deploy ke GitHub Pages, akses di:
-`https://<username>.github.io/<repo-name>/`
+**Live URL:** https://dpmmjohor.github.io/SISTEM-AHLI-DPMM-JOHOR/
+- **Main Dashboard:** https://dpmmjohor.github.io/SISTEM-AHLI-DPMM-JOHOR/index.html
+- **Membership Form:** https://dpmmjohor.github.io/SISTEM-AHLI-DPMM-JOHOR/borang.html
 
 ## 📋 Ciri-ciri
 - Dashboard ringkasan ahli
@@ -19,6 +20,12 @@ Setelah deploy ke GitHub Pages, akses di:
   - Papan pemuka kelulusan
   - Sokongan OCR untuk slip pembayaran
   - Antaramuka dalam Bahasa Malaysia sepenuhnya
+- **Sistem Permohonan Keahlian** (borang.html)
+  - Borang permohonan keahlian dalam talian
+  - Pengesahan dokumen automatik
+  - Penjanaan PDF borang
+  - Notifikasi emel melalui EmailJS
+  - Sistem audit log untuk keselamatan
 
 ## 🛠️ Teknologi
 - HTML / CSS / JavaScript (satu fail)
@@ -63,6 +70,28 @@ README.md              ← Dokumentasi ini
 - Hash kata laluan menggunakan bcryptjs
 
 ## 📝 Perubahan Terkini (Julai 2026)
+
+### EmailJS Integration & Security Enhancements (18 Julai 2026)
+- **EmailJS Integration:**
+  - Migrasi dari Resend ke EmailJS untuk notifikasi emel client-side
+  - EmailJS Service ID: service_a3kt2zm
+  - EmailJS Public Key: Bq94zNa6cDvdTUCU8
+  - Template emel untuk admin dan pemohon
+  - Resend kekal untuk endpoint server-side /api/send-email
+- **Security Improvements:**
+  - Groq API diproxy melalui /api/groq untuk keselamatan
+  - RLS policies komprehensif untuk PERMOHONAN_AHLI
+  - Pengesahan format IC dalam RLS (XXXXXX-XX-XXXX atau 12 digit)
+  - Index prestasi untuk pertanyaan biasa
+- **UI Fixes:**
+  - Dropdown menu eksport diperbaiki di index.html
+  - Event listener pemilih jenis perniagaan diperbaiki di borang.html
+- **Testing:**
+  - Suite ujian komprehensif dibuat (test-comprehensive.js)
+  - Semua 15 ujian lulus (100% kadar kejayaan)
+- **Deployment:**
+  - Changes committed and pushed to GitHub main branch
+  - Live URL updated and verified
 
 ### AIMAN Language Improvements & Security Fixes
 - **English Language Support:** AIMAN kini boleh bertindak balas dalam Bahasa Inggeris apabila pengguna bertanya dalam Bahasa Inggeris
