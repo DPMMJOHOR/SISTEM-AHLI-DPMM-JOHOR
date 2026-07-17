@@ -2431,13 +2431,13 @@ textarea:focus-visible {
       </div>
 
       <div class="form-section" id="proksi-section">
-        <div class="section-heading">Maklumat Proksi / Wakil</div>
-        <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:14px">Diperlukan untuk entiti selain Pemunya Tunggal. Proksi ialah pegawai yang dilantik mewakili entiti.</p>
+        <div class="section-heading">Maklumat Nama Pemohon</div>
+        <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:14px">Diperlukan untuk entiti selain Pemunya Tunggal. Nama pemohon ialah pegawai yang dilantik mewakili entiti.</p>
         <div class="form-row cols-2">
           <div class="form-group">
-            <label class="form-label">Nama Proksi / Wakil <span class="req">*</span></label>
+            <label class="form-label">Nama Pemohon <span class="req">*</span></label>
             <input type="text" class="form-control" id="proksi_nama" placeholder="Nama penuh">
-            <span class="field-error" id="err-proksi_nama">Sila isi nama proksi.</span>
+            <span class="field-error" id="err-proksi_nama">Sila isi nama pemohon.</span>
           </div>
           <div class="form-group">
             <label class="form-label">No. MyKAD <span class="req">*</span></label>
@@ -2445,7 +2445,7 @@ textarea:focus-visible {
             <span class="field-error" id="err-proksi_ic">Sila isi no. MyKAD.</span>
           </div>
         </div>
-        <div class="form-row cols-3">
+        <div class="form-row cols-2">
           <div class="form-group">
             <label class="form-label">Jawatan</label>
             <select class="form-control" id="proksi_jawatan">
@@ -2458,13 +2458,8 @@ textarea:focus-visible {
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">No. HP <span class="req">*</span></label>
-            <input type="text" class="form-control" id="proksi_hp" placeholder="01x-xxxx xxxx" inputmode="tel" oninput="maskPhone(this)">
-            <span class="field-error" id="err-proksi_hp">Sila isi no. HP.</span>
-          </div>
-          <div class="form-group">
-            <label class="form-label">E-mel Proksi</label>
-            <input type="email" class="form-control" id="proksi_emel" placeholder="proksi@email.com">
+            <label class="form-label">E-mel Pemohon</label>
+            <input type="email" class="form-control" id="proksi_emel" placeholder="pemohon@email.com">
           </div>
         </div>
       </div>
@@ -3420,7 +3415,6 @@ function validateStep(n) {
     if (getRadio('jenis_entiti') !== 'Pemunya Tunggal') {
       if (!val('proksi_nama'))           { showErr('err-proksi_nama'); ok = false; }
       if (!val('proksi_ic'))             { showErr('err-proksi_ic'); ok = false; }
-      if (!val('proksi_hp'))             { showErr('err-proksi_hp'); ok = false; }
     }
   }
   if (n === 4) {
@@ -3950,7 +3944,6 @@ function renderRingkasan() {
     ['E-mel Syarikat', val('emel_syarikat')],
     ['Proksi / Wakil', val('proksi_nama') || '(Pemunya Tunggal)'],
     ['Nombor Kad Pengenalan', val('proksi_ic') || '—'],
-    ['No. HP Proksi', val('proksi_hp') || '—'],
     ['Alamat', val('alamat') + ', ' + val('poskod') + ' ' + val('bandar')],
     ['Yuran Pendaftaran (Once in a lifetime)', fi === 0 ? 'Percuma' : 'RM ' + fi.toLocaleString()],
     ['Yuran (' + tempoh + ' Tahun)', yr === 0 ? 'Percuma' : 'RM ' + (yr * tempoh).toLocaleString()],
@@ -4311,8 +4304,7 @@ async function _doSubmit() {
         <p><strong>Fasal:</strong> ${fasalVal}</p>
         <p><strong>Nama Entiti:</strong> ${escapeHtml(val('nama_entiti'))}</p>
         <p><strong>Proksi/Wakil:</strong> ${escapeHtml(val('proksi_nama')) || 'Pemunya Tunggal'}</p>
-        <p><strong>No. HP Proksi:</strong> ${escapeHtml(val('proksi_hp'))}</p>
-        <p><strong>E-mel Proksi:</strong> ${escapeHtml(val('proksi_emel')) || escapeHtml(val('emel_syarikat'))}</p>
+        <p><strong>E-mel Pemohon:</strong> ${escapeHtml(val('proksi_emel')) || escapeHtml(val('emel_syarikat'))}</p>
         <p><strong>Jumlah Bayaran:</strong> RM ${total.toLocaleString()}</p>
         <p><strong>Tarikh:</strong> ${new Date().toLocaleDateString('ms-MY')}</p>
         <p><strong>IP Address:</strong> ${clientIp}</p>
@@ -4349,7 +4341,6 @@ async function _doSubmit() {
           <p><strong>Fasal:</strong> ${fasalVal}</p>
           <p><strong>Nama Entiti:</strong> ${escapeHtml(val('nama_entiti'))}</p>
           <p><strong>Proksi/Wakil:</strong> ${escapeHtml(val('proksi_nama')) || escapeHtml(val('nama_entiti'))}</p>
-          <p><strong>No. HP Proksi:</strong> ${escapeHtml(val('proksi_hp'))}</p>
           <p><strong>Jumlah Bayaran:</strong> RM ${total.toLocaleString()}</p>
           <p><strong>Tarikh:</strong> ${new Date().toLocaleDateString('ms-MY')}</p>
           <div style="background: #fff8e1; border: 1.5px solid #e8b800; border-radius: 10px; padding: 16px; margin: 20px 0;">
@@ -4473,8 +4464,7 @@ async function sendEmailsInBackground(refId, payload, uploadedUrls, jenis, fasal
         <p><strong>Fasal:</strong> ${fasalVal}</p>
         <p><strong>Nama Entiti:</strong> ${escapeHtml(payload.nama_entiti)}</p>
         <p><strong>Proksi/Wakil:</strong> ${escapeHtml(payload.nama_lengkap_pemohon) || 'Pemunya Tunggal'}</p>
-        <p><strong>No. HP Proksi:</strong> ${escapeHtml(payload.proksi_hp)}</p>
-        <p><strong>E-mel Proksi:</strong> ${escapeHtml(payload.proksi_emel) || escapeHtml(payload.emel_syarikat)}</p>
+        <p><strong>E-mel Pemohon:</strong> ${escapeHtml(payload.proksi_emel) || escapeHtml(payload.emel_syarikat)}</p>
         <p><strong>Jumlah Bayaran:</strong> RM ${total.toLocaleString()}</p>
         <p><strong>Tarikh:</strong> ${new Date().toLocaleDateString('ms-MY')}</p>
         <p><strong>IP Address:</strong> ${payload.ip_address}</p>
@@ -4863,11 +4853,10 @@ function downloadPDFWithJsPDF() {
   rowWithUnderline('Modal Pusingan', val('modal_pusingan') ? 'RM ' + parseFloat(val('modal_pusingan')).toLocaleString() : '');
   y += 5;
 
-  sectionTitle('D. PROKSI / WAKIL');
-  rowWithUnderline('Nama Proksi', val('proksi_nama') || '(Pemunya Tunggal)');
+  sectionTitle('D. NAMA PEMOHON');
+  rowWithUnderline('Nama Pemohon', val('proksi_nama') || '(Pemunya Tunggal)');
   rowWithUnderline('Nombor Kad Pengenalan', val('proksi_ic'));
   rowWithUnderline('Jawatan', document.getElementById('proksi_jawatan').value);
-  rowWithUnderline('No. HP', val('proksi_hp'));
   rowWithUnderline('E-mel', val('proksi_emel'));
   y += 5;
 
@@ -6300,6 +6289,10 @@ function mapExtractedToForm(icData, ssmData) {
     applyIpField('poskod', icData.poskod);
     applyIpField('bandar', icData.bandar);
     applyIpField('negeri', icData.negeri);
+    
+    // Auto-fill proksi fields with IC data
+    applyIpField('proksi_nama', icData.nama);
+    applyIpField('proksi_ic', icFormatted);
   }
   if (ssmData) {
     applyIpField('nama_entiti', ssmData.nama_perniagaan);
