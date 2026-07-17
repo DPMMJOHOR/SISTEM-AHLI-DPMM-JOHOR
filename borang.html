@@ -3347,6 +3347,8 @@ document.addEventListener('DOMContentLoaded', async function() {
   
   const selector = document.getElementById('business-type-selector');
   if (selector) {
+    // Remove any existing listeners to prevent duplicates
+    selector.removeEventListener('change', handleBusinessTypeChange);
     selector.addEventListener('change', handleBusinessTypeChange);
   }
   // Check for saved draft
