@@ -8,11 +8,42 @@
 <!-- CSP: unsafe-inline required for static hosting with inline event handlers and styles. 
      Removing would require major refactoring to addEventListener and CSS classes. 
      XSS protection achieved via escapeHtml() on all user input interpolation. -->
-<meta http-equiv="Content-Security-Policy" id="csp-meta" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: https://lzoloupwtqmjyupvofhh.supabase.co; connect-src 'self' https://lzoloupwtqmjyupvofhh.supabase.co https://api.ipify.org https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://api.groq.com https://challenges.cloudflare.com; frame-src 'self' https://challenges.cloudflare.com; object-src 'none';">
+<meta http-equiv="Content-Security-Policy" id="csp-meta" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://challenges.cloudflare.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: https://lzoloupwtqmjyupvofhh.supabase.co; connect-src 'self' https://lzoloupwtqmjupvofhh.supabase.co https://api.ipify.org https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://api.groq.com https://challenges.cloudflare.com; frame-src 'self' https://challenges.cloudflare.com; object-src 'none';">
 <title>BORANG PERMOHONAN KEAHLIAN — DPMM Negeri Johor</title>
 
 <!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- PDF Libraries -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+<!-- Initialize Supabase - ensure library is loaded first -->
+<script>
+// Wait for Supabase library to be available
+function initSupabaseWhenReady() {
+  if (typeof createClient === 'undefined') {
+    setTimeout(initSupabaseWhenReady, 100);
+    return;
+  }
+  
+  const url = window.SUPABASE_URL || 'https://lzoloupwtqmjyupvofhh.supabase.co';
+// Anon key for public form access - NOT a service role key
+  const key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx6b2xvdXB3dHFtanl1cHZvZmhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5NTMxMTEsImV4cCI6MjA4ODUyOTExMX0.tBcGc6KfPyjUmJngbLTBHv-GZkSoSoyWGXwlXFZ0ShE';
+  
+  try {
+    window.sb = createClient(url, key, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false
+      }
+    });
+    console.log('Supabase client initialized successfully');
+  } catch (e) {
+    console.error('Failed to create Supabase client:', e);
+  }
+}
+
+initSupabaseWhenReady();
+</script>
 <!-- jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <!-- Cloudflare Turnstile -->
@@ -755,7 +786,6 @@ textarea.form-control { resize: vertical; min-height: 80px; }
   gap: 12px;
   align-items: flex-start;
   padding: 10px 0;
-  border-bottom: 1px solid var(--grey-100);
   font-size: 0.88rem;
   line-height: 1.5;
 }
@@ -2174,10 +2204,10 @@ textarea:focus-visible {
 
       <div class="form-section">
         <div class="section-heading">Maklumat Operasi</div>
-        <div class="form-row cols-2">
-          <div class="form-group">
+        <div class="form-row">
+          <div class="form-group" style="flex: 1;">
             <label class="form-label">Industri Utama <span class="req">*</span></label>
-            <div class="check-group" id="industri-group" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--border); padding: 12px; border-radius: 8px; background: var(--bg-light);">
+            <div class="check-group" id="industri-group" style="display: flex; flex-wrap: wrap; gap: 8px; max-height: 200px; overflow-y: auto; border: 1px solid var(--border); padding: 12px; border-radius: 8px; background: var(--bg-light);">
               <label class="check-item"><input type="checkbox" name="industri" value="Acara"> Acara</label>
               <label class="check-item"><input type="checkbox" name="industri" value="Automotif"> Automotif</label>
               <label class="check-item"><input type="checkbox" name="industri" value="Baik-Pulih"> Baik-Pulih</label>
@@ -2613,16 +2643,21 @@ textarea:focus-visible {
       <div class="form-section">
         <div class="section-heading">Maklumat Akaun Pembayaran</div>
         <div class="bank-info">
-          <h5 style="font-size:1.1rem;font-weight:600;color:var(--primary);margin-bottom:12px;">SILA BUAT PEMBAYARAN AMAUN SEPERTI DI ATAS KE AKAUN BERIKUT :-</h5>
-          <div style="text-align:center;font-size:1.1rem;font-weight:600;color:var(--primary);line-height:1.8;">
-            <div>Bank</div>
-            <div>Maybank (MBB)</div>
-            <div>No. Akaun</div>
-            <div>0010 1126 2244</div>
-            <div>Atas Nama</div>
-            <div>Dewan Perniagaan Melayu Malaysia Negeri Johor</div>
-            <div>Rujukan</div>
-            <div>&lt;NAMA SYARIKAT&gt; — &lt;NAMA PEMOHON&gt;</div>
+          <div class="bank-row">
+            <div class="bank-key">BANK</div>
+            <div class="bank-val">MAYBANK</div>
+          </div>
+          <div class="bank-row">
+            <div class="bank-key">NAMA AKAUN</div>
+            <div class="bank-val">DEWAN PERNIAGAAN MELAYU MALAYSIA NEGERI JOHOR</div>
+          </div>
+          <div class="bank-row">
+            <div class="bank-key">NO. AKAUN</div>
+            <div class="bank-val">0010 1126 2244</div>
+          </div>
+          <div class="bank-row">
+            <div class="bank-key">RUJUKAN PEMBAYARAN</div>
+            <div class="bank-val">NAMA PEMOHON DAN NAMA SYARIKAT PEMOHON</div>
           </div>
         </div>
       </div>
@@ -2832,33 +2867,21 @@ const SUPABASE_KEY  = null; // API keys are server-side only - not exposed to cl
 const RESEND_FROM_EMAIL = (typeof window !== 'undefined' && window.CONFIG && window.CONFIG.resend && window.CONFIG.resend.fromEmail) ? window.CONFIG.resend.fromEmail : null;
 const RESEND_TPL_ADMIN = (typeof window !== 'undefined' && window.CONFIG && window.CONFIG.resend && window.CONFIG.resend.templateAdmin) ? window.CONFIG.resend.templateAdmin : null;
 const RESEND_TPL_APPLICANT = (typeof window !== 'undefined' && window.CONFIG && window.CONFIG.resend && window.CONFIG.resend.templateApplicant) ? window.CONFIG.resend.templateApplicant : null;
-const RESEND_API_KEY = null; // API keys are server-side only - not exposed to client
+const RESEND_API_KEY = (typeof window !== 'undefined' && window.CONFIG && window.CONFIG.RESEND_API_KEY) ? window.CONFIG.RESEND_API_KEY : null;
 const ADMIN_EMAIL   = (typeof window !== 'undefined' && window.CONFIG && window.CONFIG.admin && window.CONFIG.admin.email) ? window.CONFIG.admin.email : null;
 const ADMIN_WHATSAPP = (typeof window !== 'undefined' && window.CONFIG && window.CONFIG.admin && window.CONFIG.admin.whatsapp) ? window.CONFIG.admin.whatsapp : null;
-const GROQ_KEY      = null; // API keys are server-side only - not exposed to client
+const GROQ_KEY      = (typeof window !== 'undefined' && window.CONFIG && window.CONFIG.GROQ_KEY) ? window.CONFIG.GROQ_KEY : null;
 
-/* ============================================================
-   INIT
-   ============================================================ */
-const { createClient } = supabase;
-
-// Check if configuration is loaded
-function isConfigLoaded() {
-  return typeof window !== 'undefined' && window.CONFIG && Object.keys(window.CONFIG).length > 0;
+// Guard against placeholder values — prevents API calls when keys are not yet configured
+function isKeyConfigured(k) {
+  if (!k) return false;
+  if (k.startsWith('YOUR_')) return false;
+  if (k.length === 0) return false;
+  return k.length > 10;
 }
 
-// Validate configuration BEFORE creating client
-if (!isConfigLoaded()) {
-  console.warn('Configuration not yet loaded. API calls will be deferred until config is available.');
-}
-
-// Create Supabase client only if URL is available (key is server-side)
-const sb = SUPABASE_URL ? createClient(SUPABASE_URL, {
-  auth: {
-    persistSession: false,
-    autoRefreshToken: false
-  }
-}) : null;
+// Supabase client is now initialized in the separate script tag above
+// window.sb is available after config-loader.js loads
 
 // Resend initialization - API key is server-side, init only if from email is available
 if (RESEND_FROM_EMAIL) {
@@ -3482,7 +3505,12 @@ function showFieldSuccess(id, message) {
     }
   }
 }
-function val(id) { return (document.getElementById(id)?.value || '').trim(); }
+function val(id) { 
+  const el = document.getElementById(id);
+  if (!el) return '';
+  const value = el.value || '';
+  return value.trim();
+}
 function getRadio(name) {
   const el = document.querySelector(`input[name="${name}"]:checked`);
   return el ? el.value : '';
@@ -3921,7 +3949,7 @@ function renderRingkasan() {
     ['No. Telefon Bimbit', val('no_tel_bimbit')],
     ['E-mel Syarikat', val('emel_syarikat')],
     ['Proksi / Wakil', val('proksi_nama') || '(Pemunya Tunggal)'],
-    ['No. MyKAD Proksi', val('proksi_ic') || '—'],
+    ['Nombor Kad Pengenalan', val('proksi_ic') || '—'],
     ['No. HP Proksi', val('proksi_hp') || '—'],
     ['Alamat', val('alamat') + ', ' + val('poskod') + ' ' + val('bandar')],
     ['Yuran Pendaftaran (Once in a lifetime)', fi === 0 ? 'Percuma' : 'RM ' + fi.toLocaleString()],
@@ -3971,7 +3999,7 @@ async function submitPermohonan() {
   showLoading('Sedang memuat naik dokumen...');
 
   const uploadTimeout = new Promise((_, reject) =>
-    setTimeout(() => reject(new Error('Masa tamat (60 saat). Sila semak sambungan internet dan cuba semula.')), 60000)
+    setTimeout(() => reject(new Error('Masa tamat (120 saat). Sila semak sambungan internet dan cuba semula.')), 120000)
   );
 
   try {
@@ -3980,14 +4008,27 @@ async function submitPermohonan() {
     hideLoading();
     if (submitBtn) submitBtn.disabled = false;
     console.error('submitPermohonan error:', err);
-    showToast('Ralat: ' + err.message, 'error');
+    
+    // Enhanced error messages based on error type
+    var errorMsg = err.message || 'Ralat tidak diketahui';
+    if (errorMsg.includes('Masa tamat')) {
+      showToast('Masa tamat. Sila semak sambungan internet dan cuba semula.', 'error');
+    } else if (errorMsg.includes('Upload gagal')) {
+      showToast('Gagal memuat naik dokumen. Sila semak sambungan internet dan cuba semula.', 'error');
+    } else if (errorMsg.includes('Insert gagal')) {
+      showToast('Gagal menyimpan permohonan. Sila cuba lagi atau hubungi admin.', 'error');
+    } else if (errorMsg.includes('Sistem tidak tersedia')) {
+      showToast('Sistem tidak tersedia. Sila cuba lagi kemudian.', 'error');
+    } else {
+      showToast('Ralat: ' + errorMsg, 'error');
+    }
   }
 }
 
 async function _doSubmit() {
   try {
     // Guard: Supabase must be configured
-    if (!sb) {
+    if (!window.sb) {
       throw new Error('Sistem tidak tersedia: Sambungan ke database tidak dapat diwujudkan. Sila pastikan konfigurasi server dimuatkan dengan betul.');
     }
 
@@ -4008,6 +4049,7 @@ async function _doSubmit() {
     const userAgent   = navigator.userAgent;
 
     // 2. Upload semua fail ke Supabase Storage
+    // TEMPORARY: Skip upload for PDF testing
     const uploadedUrls = {};
     const filesToUpload = Object.entries(state.uploadedFiles);
     for (let i = 0; i < filesToUpload.length; i++) {
@@ -4025,7 +4067,7 @@ async function _doSubmit() {
         try {
           console.log(`Upload attempt ${retry + 1}/${maxRetries} for file: ${key}, path: ${path}`);
           
-          const { data, error } = await sb.storage
+          const { data, error } = await window.sb.storage
             .from('permohonan-dokumen')
             .upload(path, fileData.file, { upsert: true, cacheControl: '3600' });
           
@@ -4047,7 +4089,7 @@ async function _doSubmit() {
             throw new Error(errorMsg);
           }
           
-          const { data: urlData } = sb.storage.from('permohonan-dokumen').getPublicUrl(path);
+          const { data: urlData } = window.sb.storage.from('permohonan-dokumen').getPublicUrl(path);
           uploadedUrls[key] = urlData.publicUrl;
           uploadSuccess = true;
           console.log(`Successfully uploaded ${key} to: ${urlData.publicUrl}`);
@@ -4065,7 +4107,7 @@ async function _doSubmit() {
         // Fallback: Try signed URL upload if direct upload fails
         console.log('Direct upload failed, trying signed URL method...');
         try {
-          const { data: signedUrlData, error: signedUrlError } = await sb.storage
+          const { data: signedUrlData, error: signedUrlError } = await window.sb.storage
             .from('permohonan-dokumen')
             .createSignedUploadUrl(path);
           
@@ -4086,7 +4128,7 @@ async function _doSubmit() {
             throw new Error('Signed URL upload failed: ' + uploadResponse.statusText);
           }
           
-          const { data: urlData } = sb.storage.from('permohonan-dokumen').getPublicUrl(path);
+          const { data: urlData } = window.sb.storage.from('permohonan-dokumen').getPublicUrl(path);
           uploadedUrls[key] = urlData.publicUrl;
           console.log(`Successfully uploaded ${key} via signed URL: ${urlData.publicUrl}`);
           
@@ -4134,92 +4176,101 @@ async function _doSubmit() {
 
     // 5. Insert ke Supabase
     const payload = {
-      ref_id:               tempRef,
-      jenis_keahlian:       jenis,
-      jenis_keahlian_label: JENIS_LABEL[jenis],
-      fasal:                fasalVal,
-      yuran_daftar:         fi,
-      yuran_tahunan:        yr2,
-      jenis_entiti:         getRadio('jenis_entiti'),
-      sektor:               getRadio('sektor'),
-      industri:             getCheckboxes('industri'),
-      rantaian_bekalan:     getCheckboxes('rantaian'),
-      saiz_entiti:          getRadio('saiz_entiti'),
-      persijilan:           getCheckboxes('persijilan'),
-      persijilan_lain:      val('persijilan_lain'),
-      jenama:               val('jenama'),
-      aktiviti_perniagaan:  val('aktiviti_perniagaan'),
-      nama_entiti:          val('nama_entiti'),
+      // Existing database columns
+      BIL:                  tempRef,
+      FASAL_AHLI:           fasalVal,
+      NO_AHLI:              tempRef,
+      NAMA_AHLI:            val('nama_lengkap_pemohon'),
+      NAMA:                 val('nama_entiti'),
+      KAD_PENGENALAN:       val('no_kad_pengenal'),
+      ALAMAT:               val('alamat'),
+      EMEL:                 val('emel_syarikat'),
+      NO_HP:                val('no_tel_bimbit'),
+      JENIS_PERNIAGAAN:     jenis,
+      TARIKH_DAFTAR:        val('tarikh_daftar') || null,
+      STATUS:               'BARU',
+      NO_SSM:               val('no_pendaftaran'),
+      SSM_DATELINE:         val('tarikh_luput') || null,
+      YURAN_PENDAFTARAN:    fi,
+      YURAN_1_TAHUN:        yr2,
+      JUMLAH_YURAN_TAHUNAN: yr2 * tempoh,
+      JUMLAH_YURAN_KESELURUHAN: total,
+      TEMPOH_BAYARAN_YURAN: tempoh,
+      TARIKH_BAYARAN_2025:  new Date().toISOString().split('T')[0],
+      KAEDAH_BAYARAN:        'Online Transfer',
+      JAWATAN:              document.getElementById('proksi_jawatan').value,
+      DAERAH:               document.getElementById('negeri').value,
+      tarikh_bayaran_2026:   new Date().toISOString().split('T')[0],
+      
+      // New fields from manual form migration
+      kategori_ahli:        'B', // Default to Biasa
+      kuatkuasa_keahlian:   '',
+      no_mm:                '',
+      bil:                  '',
+      fi_daftar:             fi,
+      jumlah_bayaran_terima: total,
+      no_resit:              '',
+      tarikh_luput_daftar:  val('tarikh_luput') || null,
+      mat:                  '',
+      nama_pemohon:         val('nama_lengkap_pemohon'),
+      nama_syarikat:        val('nama_entiti'),
+      no_mykad:             val('no_kad_pengenal'),
+      cop_syarikat:         '',
+      jenis_entiti_perniagaan: getRadio('jenis_entiti'),
+      nama_entiti_perniagaan: val('nama_entiti'),
       no_pendaftaran:       val('no_pendaftaran'),
+      alamat_pejabat_perniagaan: val('alamat'),
       tarikh_daftar:        val('tarikh_daftar') || null,
-      tarikh_luput:         val('tarikh_luput') || null,
-      alamat:               val('alamat'),
-      poskod:               val('poskod'),
-      bandar:               val('bandar'),
-      negeri:               document.getElementById('negeri').value,
-      no_tel_syarikat:      val('no_tel_syarikat'),
-      no_tel_bimbit:        val('no_tel_bimbit'),
-      url_syarikat:         val('url_syarikat'),
-      emel_syarikat:        val('emel_syarikat'),
-      modal_berbayar:       parseFloat(document.getElementById('modal_berbayar').value) || null,
-      modal_pusingan:       parseFloat(document.getElementById('modal_pusingan').value) || null,
-      nama_lengkap_pemohon: val('nama_lengkap_pemohon'),
-      no_kad_pengenal:     val('no_kad_pengenal'),
-      jualan_tahunan:       jualan,
-      proksi_nama:          val('proksi_nama'),
-      proksi_ic:            val('proksi_ic'),
-      proksi_jawatan:       document.getElementById('proksi_jawatan').value,
-      proksi_hp:            val('proksi_hp'),
-      proksi_emel:          val('proksi_emel'),
-      pemegang_saham:       pemegang_saham,
-      ahli_lembaga:         ahli_lembaga,
-      url_gambar_1:         uploadedUrls['gambar_1'] || null,
-      url_gambar_2:         uploadedUrls['gambar_2'] || null,
-      url_insolvensi_entiti: uploadedUrls['insolvensi_entiti'] || null,
-      url_insolvensi_pemohon: uploadedUrls['insolvensi_pemohon'] || null,
-      url_ssm_sijil:        uploadedUrls['ssm_sijil'] || null,
-      url_m_aa:             uploadedUrls['m_aa'] || null,
-      url_borang_9:         uploadedUrls['borang_9'] || null,
-      url_borang_24:        uploadedUrls['borang_24'] || null,
-      url_borang_49:        uploadedUrls['borang_49'] || null,
-      url_sijil_profesional: uploadedUrls['sijil_profesional'] || null,
-      url_surat_kebenaran:  uploadedUrls['surat_kebenaran'] || null,
-      url_sijil_perbadanan: uploadedUrls['sijil_perbadanan'] || null,
-      url_surat_pelantikan: uploadedUrls['surat_pelantikan'] || null,
-      url_sijil_koperasi:   uploadedUrls['sijil_koperasi'] || null,
-      url_senarai_lembaga:  uploadedUrls['senarai_lembaga'] || null,
-      url_surat_proksi:     uploadedUrls['surat_proksi'] || null,
-      url_ssm_maklumat:     uploadedUrls['ssm_maklumat'] || null,
-      url_dokumen_tambahan: uploadedUrls['tambahan'] || null,
-      tempoh_yuran:         tempoh,
-      jumlah_fi_daftar:     fi,
-      jumlah_yuran:         yr2 * tempoh,
-      jumlah_bayar:         total,
-      kaedah_bayar:         'Online Transfer',
-      url_bukti_bayaran:    uploadedUrls['slip'] || null,
-      url_ic_pemohon_depan:    uploadedUrls['ic_pemohon_depan'] || null,
-      url_ic_pemohon_belakang: uploadedUrls['ic_pemohon_belakang'] || null,
-      url_profil_ssm:       uploadedUrls['profil_ssm'] || null,
-      status:               'BARU',
-      akuan_maklumat_benar:     true,
-      akuan_fi_tidak_pulang:    true,
-      akuan_pdpa:               document.getElementById('akuan4').checked,
-      akuan_maklumat_palsu:     document.getElementById('akuan5').checked,
-      akuan_penafian_kelulusan: document.getElementById('akuan6').checked,
-      ip_address:           clientIp,
-      submitted_at:         submittedAt,
-      user_agent:           userAgent,
+      no_tel:               val('no_tel_syarikat'),
+      no_hp:                val('no_tel_bimbit'),
+      aktiviti_perniagaan:  '',
+      butiran_perniagaan:  '',
+      persijilan:           getCheckboxes('persijilan'),
+      sijil_pendaftaran_perniagaan: uploadedUrls['ssm_sijil'] || null,
+      maklumat_perniagaan:  '',
+      sijil_daftar_plt:      uploadedUrls['sijil_plt'] || null,
+      maklumat_perkongsian_terkini: '',
+      maklumat_pemilik_perniagaan: '',
+      sijil_amalan_professional: uploadedUrls['sijil_profesional'] || null,
+      surat_kebenaran_beramal: uploadedUrls['surat_kebenaran'] || null,
+      sijil_pemerbadanan_syarikat: uploadedUrls['sijil_perbadanan'] || null,
+      salinan_sah_surat_pelantikan: uploadedUrls['surat_pelantikan'] || null,
+      sijil_pendaftaran_koperasi: uploadedUrls['sijil_koperasi'] || null,
+      salinan_sah_senarai_ahli_lembaga: uploadedUrls['senarai_lembaga'] || null,
+      sijil_pemerbadanan:   uploadedUrls['sijil_pemerbadanan'] || null,
+      sijil_persatuan_kelab: uploadedUrls['sijil_persatuan'] || null,
+      salinan_terkini_ssm:  uploadedUrls['profil_ssm'] || null,
+      salinan_terkini_skm:  uploadedUrls['ssm_maklumat'] || null,
+      salinan_terkini_professional: uploadedUrls['sijil_profesional'] || null,
+      laporan_carian_insolvensi: '',
+      salinan_kad_pengenal_depan: uploadedUrls['ic_pemohon_depan'] || null,
+      salinan_kad_pengenal_belakang: uploadedUrls['ic_pemohon_belakang'] || null,
+      gambar_passport_1:     uploadedUrls['gambar_1'] || null,
+      gambar_passport_2:     uploadedUrls['gambar_2'] || null,
+      borang_keahlian_lengkap: uploadedUrls['borang_9'] || null,
+      tandatangan_pengarah:  '',
+      tandatangan_pemohon:   '',
+      tarikh_tandatangan_pengarah: '',
+      tarikh_tandatangan_pemohon: '',
+      nama_pengarah:        '',
+      jawatan_pengarah:     document.getElementById('proksi_jawatan').value,
+      status_permohonan:    'BARU',
+      tarikh_permohonan:     new Date().toISOString(),
+      tarikh_semak:         null,
+      disemak_oleh:         null,
+      cop_rasmi:            null,
+      catatan:              null
     };
 
-    const { data: inserted, error: insertErr } = await sb
-      .from('PERMOHONAN_AHLI')
+    const { data: inserted, error: insertErr } = await window.sb
+      .from('AHLI DPMM JOHOR')
       .insert([payload])
       .select()
       .single();
 
     if (insertErr) throw new Error('Insert gagal: ' + insertErr.message);
 
-    const finalRef = inserted.ref_id || tempRef;
+    const finalRef = inserted.BIL || tempRef;
     state.refId = finalRef;
 
     // 6a. Resend — Notifikasi kepada Setiausaha (admin)
@@ -4325,8 +4376,20 @@ async function _doSubmit() {
       }
     }
 
+    // Update audit fields
+    await window.sb.from('AHLI DPMM JOHOR')
+      .update({ 
+        created_by_ip: clientIp,
+        created_by_user_agent: userAgent
+      })
+      .eq('ref_id', finalRef);
+
+    // Show success immediately (email is non-blocking)
     hideLoading();
     showSuccess(finalRef);
+
+    // Send emails in background (non-blocking)
+    sendEmailsInBackground(finalRef, payload, uploadedUrls, jenis, fasalVal, total);
 
   } catch (err) {
     throw err;
@@ -4342,12 +4405,189 @@ function showSuccess(refId) {
   document.querySelector('.progress-wrapper').style.display = 'none';
   // Security: Clear draft PII from localStorage after successful submission
   clearDraft();
+  
+  // Update success message as per user requirements
+  const successContainer = document.getElementById('screen-success');
+  if (successContainer) {
+    successContainer.innerHTML = `
+      <div style="text-align:center;padding:40px 20px;">
+        <div style="font-size:48px;margin-bottom:20px;">✅</div>
+        <h2 style="color:var(--primary);margin-bottom:16px;">Permohonan anda Berjaya Dihantar</h2>
+        <div style="background:var(--body-bg);padding:20px;border-radius:12px;margin:20px 0;">
+          <div style="font-size:14px;color:var(--muted);margin-bottom:8px;">No. Rujukan:</div>
+          <div style="font-size:24px;font-weight:700;color:var(--text);font-family:var(--mono);">${refId}</div>
+        </div>
+        <p style="font-size:14px;color:var(--text);margin-bottom:12px;">Sila semak emel anda untuk salinan permohonan anda.</p>
+        <p style="font-size:12px;color:var(--muted);">Sila simpan no. rujukan ini untuk rujukan masa hadapan.</p>
+        <button onclick="window.location.reload()" style="margin-top:20px;padding:12px 24px;background:var(--primary);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">Mohon Baru</button>
+      </div>
+    `;
+  }
 }
 
 /* ============================================================
-   PDF GENERATION
+   BACKGROUND EMAIL SENDING (Non-blocking)
    ============================================================ */
+async function sendEmailsInBackground(refId, payload, uploadedUrls, jenis, fasalVal, total) {
+  try {
+    // Update admin email status
+    await window.sb.from('AHLI DPMM JOHOR')
+      .update({ email_admin_sent: true, email_admin_sent_at: new Date().toISOString() })
+      .eq('ref_id', refId);
+    
+    // Send admin email
+    try {
+      const DOC_LABEL = {
+        ic_pemohon_depan:    'IC Pemohon (Hadapan)',
+        ic_pemohon_belakang: 'IC Pemohon (Belakang)',
+        ssm_sijil:           'Sijil Pendaftaran SSM',
+        profil_ssm:          'Profil SSM Terkini',
+        ssm_maklumat:        'Maklumat SSM',
+        m_aa:                'Memorandum & Artikel Asosiasi',
+        borang_9:            'Borang 9',
+        borang_24:           'Borang 24',
+        borang_49:           'Borang 49',
+        sijil_profesional:   'Sijil Profesional',
+        surat_kebenaran:     'Surat Kebenaran',
+        sijil_perbadanan:    'Sijil Perbadanan',
+        surat_pelantikan:    'Surat Pelantikan',
+        sijil_koperasi:      'Sijil Koperasi',
+        senarai_lembaga:     'Senarai Ahli Lembaga',
+        surat_proksi:        'Surat Proksi',
+        insolvensi_entiti:   'Akuan Insolvensi (Entiti)',
+        insolvensi_pemohon:  'Akuan Insolvensi (Pemohon)',
+        gambar_1:            'Gambar Premis 1',
+        gambar_2:            'Gambar Premis 2',
+        tambahan:            'Dokumen Tambahan',
+        slip:                'Bukti Bayaran',
+      };
+      const dokumenLines = Object.entries(uploadedUrls)
+        .filter(([, url]) => url)
+        .map(([key, url]) => (DOC_LABEL[key] || key) + ':\n' + url)
+        .join('\n\n');
+
+      const emailHtml = `
+        <h2>Permohonan Keahlian Baharu - DPMM Negeri Johor</h2>
+        <p><strong>No. Rujukan:</strong> ${refId}</p>
+        <p><strong>Jenis:</strong> ${JENIS_LABEL[jenis]} (${jenis})</p>
+        <p><strong>Fasal:</strong> ${fasalVal}</p>
+        <p><strong>Nama Entiti:</strong> ${escapeHtml(payload.nama_entiti)}</p>
+        <p><strong>Proksi/Wakil:</strong> ${escapeHtml(payload.nama_lengkap_pemohon) || 'Pemunya Tunggal'}</p>
+        <p><strong>No. HP Proksi:</strong> ${escapeHtml(payload.proksi_hp)}</p>
+        <p><strong>E-mel Proksi:</strong> ${escapeHtml(payload.proksi_emel) || escapeHtml(payload.emel_syarikat)}</p>
+        <p><strong>Jumlah Bayaran:</strong> RM ${total.toLocaleString()}</p>
+        <p><strong>Tarikh:</strong> ${new Date().toLocaleDateString('ms-MY')}</p>
+        <p><strong>IP Address:</strong> ${payload.ip_address}</p>
+        <h3>Dokumen Dimuat Naik:</h3>
+        <pre>${dokumenLines || '(Tiada dokumen dimuat naik)'}</pre>
+        <p><strong>[ADMIN ALERT]</strong> Permohonan baharu diterima. Sila log masuk ke sistem untuk semakan.</p>
+      `;
+
+      await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          template: 'admin',
+          toEmail: ADMIN_EMAIL,
+          data: {
+            subject: `Permohonan Baharu - ${refId}`,
+            html: emailHtml
+          }
+        })
+      });
+    } catch (adminEmailErr) {
+      await window.sb.from('AHLI DPMM JOHOR')
+        .update({ email_error: 'Admin email failed: ' + adminEmailErr.message })
+        .eq('ref_id', refId);
+      console.warn('Admin email failed (non-critical):', adminEmailErr);
+    }
+    
+    // Send applicant email
+    const pemohonEmail = payload.proksi_emel || payload.emel_syarikat;
+    if (pemohonEmail) {
+      try {
+        await window.sb.from('AHLI DPMM JOHOR')
+          .update({ email_applicant_sent: true, email_applicant_sent_at: new Date().toISOString() })
+          .eq('ref_id', refId);
+        
+        const applicantEmailHtml = `
+          <h2>Pengesahan Penerimaan Permohonan - DPMM Negeri Johor</h2>
+          <p>Terima kasih kerana memohon untuk menjadi ahli DPMM Negeri Johor.</p>
+          <p><strong>No. Rujukan Permohonan:</strong> ${refId}</p>
+          <p><strong>Jenis:</strong> ${JENIS_LABEL[jenis]} (${jenis})</p>
+          <p><strong>Fasal:</strong> ${fasalVal}</p>
+          <p><strong>Nama Entiti:</strong> ${escapeHtml(payload.nama_entiti)}</p>
+          <p><strong>Proksi/Wakil:</strong> ${escapeHtml(payload.nama_lengkap_pemohon) || escapeHtml(payload.nama_entiti)}</p>
+          <p><strong>No. HP Proksi:</strong> ${escapeHtml(payload.proksi_hp)}</p>
+          <p><strong>Jumlah Bayaran:</strong> RM ${total.toLocaleString()}</p>
+          <p><strong>Tarikh:</strong> ${new Date().toLocaleDateString('ms-MY')}</p>
+          <div style="background: #fff8e1; border: 1.5px solid #e8b800; border-radius: 10px; padding: 16px; margin: 20px 0;">
+            <strong>DISCLAIMER — SILA BACA:</strong><br>
+            E-mel ini adalah <u>pengesahan penerimaan sahaja</u> dan <strong>BUKAN kelulusan automatik</strong>. Permohonan ini tertakluk kepada pertimbangan Jawatankuasa DPMM Negeri Johor (Fasal 7.1). Keputusan muktamad akan dimaklumkan kemudian.
+          </div>
+          <p>Sila simpan no. rujukan ini untuk rujukan masa hadapan.</p>
+        `;
+
+        await fetch('/api/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            template: 'applicant',
+            toEmail: pemohonEmail,
+            data: {
+              subject: `Pengesahan Permohonan - ${refId}`,
+              html: applicantEmailHtml
+            }
+          })
+        });
+      } catch (applicantEmailErr) {
+        await window.sb.from('AHLI DPMM JOHOR')
+          .update({ email_error: 'Applicant email failed: ' + applicantEmailErr.message })
+          .eq('ref_id', refId);
+        console.warn('Applicant email failed (non-critical):', applicantEmailErr);
+      }
+    }
+    
+  } catch (emailErr) {
+    // Log error but don't fail submission
+    await window.sb.from('AHLI DPMM JOHOR')
+      .update({ email_error: emailErr.message })
+      .eq('ref_id', refId);
+    console.warn('Email process failed (non-critical):', emailErr);
+  }
+}
+
+/* ============================================================
+   PDF GENERATION - Matches Manual Form Layout
+   ============================================================ */
+
+// PDF Generation Method Selection
+const PDF_METHOD = {
+  JSPDF: 'jspdf',           // Generate from scratch using jsPDF
+  TEMPLATE: 'template'      // Fill existing PDF template using pdf-lib
+};
+
+// Current method (can be changed via UI or config)
+let currentPDFMethod = PDF_METHOD.TEMPLATE; // Default to template method for testing
+
+// Function to switch PDF method
+function switchPDFMethod(method) {
+  currentPDFMethod = method;
+  console.log('PDF method switched to:', method);
+  showToast(`PDF method: ${method === PDF_METHOD.JSPDF ? 'jsPDF Generation' : 'Template Filling'}`, 'info');
+}
+
 function downloadPDF() {
+  // Choose PDF generation method based on current setting
+  if (currentPDFMethod === PDF_METHOD.TEMPLATE) {
+    downloadPDFFromTemplate();
+  } else {
+    downloadPDFWithJsPDF();
+  }
+}
+
+// Method 1: jsPDF Generation (Current Implementation)
+function downloadPDFWithJsPDF() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const W = 210; const margin = 15;
@@ -4358,205 +4598,290 @@ function downloadPDF() {
   const greyLight = [245, 245, 245];
 
   function header() {
-    // Clean professional header
+    // Match manual form header layout
     let headerY = 8;
     
-    // Add logo on left - professional size
+    // Add logo on left - match manual form size
     try {
       const img = new Image();
       img.src = 'dpmm-logo-color.png';
-      doc.addImage(img, 'PNG', margin, headerY, 25, 25);
+      doc.addImage(img, 'PNG', margin, headerY, 30, 30);
     } catch (e) {
       console.warn('Logo not loaded:', e);
     }
 
-    // Organization name - clean typography
+    // Organization name - match manual form (Arial bold, centered)
     doc.setTextColor(0, 0, 0);
     doc.setFontSize(18);
-    doc.setFont('times', 'bold');
+    doc.setFont('helvetica', 'bold');
     doc.text('DEWAN PERNIAGAAN MELAYU MALAYSIA', W / 2, headerY + 10, { align: 'center' });
-    headerY += 7;
+    headerY += 8;
 
-    // Subtitle with clean styling
+    // Subtitle - match manual form
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
     doc.text('NEGERI JOHOR', W / 2, headerY + 10, { align: 'center' });
-    headerY += 7;
-
-    // Form title
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text('BORANG PERMOHONAN KEAHLIAN', W / 2, headerY + 10, { align: 'center' });
     headerY += 8;
-    
-    // Reference number in clean box
-    doc.setFillColor(245, 245, 245);
-    doc.setDrawColor(0, 0, 0);
-    doc.setLineWidth(1);
-    const refBoxWidth = 80;
-    const refBoxX = (W - refBoxWidth) / 2;
-    doc.rect(refBoxX, headerY + 5, refBoxWidth, 12, 'FD');
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(0, 0, 0);
-    doc.text('No. Rujukan:', refBoxX + 5, headerY + 10);
-    doc.setFont('helvetica', 'normal');
-    doc.text(state.refId, refBoxX + 5, headerY + 15);
-    
-    headerY += 25;
 
-    // Clean separator line
+    // Form title - match manual form "BORANG KEAHLIAN BARU"
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.text('BORANG KEAHLIAN BARU', W / 2, headerY + 10, { align: 'center' });
+    headerY += 6;
+
+    // Entity type subtitle - match manual form
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'italic');
+    const jenisEntiti = getRadio('jenis_entiti') || '';
+    doc.text('(Ent Perkongsian / Sdn Bhd / Koperasi / Professional)', W / 2, headerY + 10, { align: 'center' });
+    headerY += 10;
+    
+    // Reference number - match manual form positioning
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(0, 0, 0);
+    doc.text('No. Rujukan: ' + state.refId, margin, headerY + 5);
+    
+    headerY += 10;
+
+    // Separator line
     doc.setDrawColor(0, 0, 0);
-    doc.setLineWidth(1);
+    doc.setLineWidth(0.5);
     doc.line(margin, headerY, W - margin, headerY);
-    y = headerY + 10;
+    y = headerY + 8;
   }
 
   function sectionTitle(title) {
     if (y > 250) { doc.addPage(); header(); }
     
-    // Clean section header with border
-    doc.setFillColor(245, 245, 245);
-    doc.rect(margin, y, W - margin * 2, 8, 'F');
-    
-    // Black text on light background
+    // Manual form uses bold section headers without background
     doc.setTextColor(0, 0, 0);
-    doc.setFontSize(10);
+    doc.setFontSize(11);
     doc.setFont('helvetica', 'bold');
-    doc.text(title, margin + 5, y + 5);
-    
-    // Clean border
-    doc.setDrawColor(0, 0, 0);
-    doc.setLineWidth(0.5);
-    doc.rect(margin, y, W - margin * 2, 8, 'S');
-    
-    y += 12;
+    doc.text(title, margin, y);
+    y += 6;
   }
 
-  function row(label, value) {
+  function rowWithUnderline(label, value) {
     if (y > 250) { doc.addPage(); header(); }
     
-    // Clean alternating row background
-    const rowHeight = 7;
-    if ((Math.floor(y / rowHeight) % 2) === 0) {
-      doc.setFillColor(248, 249, 250);
-      doc.rect(margin, y - 1, W - margin * 2, rowHeight, 'F');
-    }
-    
-    // Label with clean styling
-    doc.setTextColor(0, 0, 0);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(9);
-    doc.text(label + ':', margin + 2, y + 4);
-    
-    // Value with proper spacing
-    doc.setTextColor(0, 0, 0);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-    const lines = doc.splitTextToSize(String(value || '—'), W - margin * 2 - 45);
-    doc.text(lines, margin + 45, y + 4);
-    
-    // Clean row separator
-    doc.setDrawColor(200, 200, 200);
-    doc.setLineWidth(0.2);
-    doc.line(margin, y + rowHeight - 0.5, W - margin, y + rowHeight - 0.5);
-    
-    y += rowHeight + 1;
-  }
-
-  function emptyRow(label) {
-    if (y > 250) { doc.addPage(); header(); }
-    
-    const rowHeight = 7;
+    const rowHeight = 8;
     
     // Label
     doc.setTextColor(0, 0, 0);
     doc.setFontSize(9);
     doc.setFont('helvetica', 'bold');
-    doc.text(label + ':', margin + 2, y + 4);
+    doc.text(label, margin, y + 4);
     
-    // Clean input field
+    // Underline for value (match manual form style)
     doc.setDrawColor(0, 0, 0);
-    doc.setLineWidth(0.8);
-    doc.setLineDashPattern([2, 2], 0);
-    doc.line(margin + 45, y + 3.5, W - margin - 5, y + 3.5);
-    doc.setLineDashPattern([], 0);
+    doc.setLineWidth(0.5);
+    const labelWidth = doc.getTextWidth(label);
+    doc.line(margin + labelWidth + 3, y + 3.5, W - margin, y + 3.5);
     
-    // Row separator
-    doc.setDrawColor(200, 200, 200);
-    doc.setLineWidth(0.2);
-    doc.line(margin, y + rowHeight - 0.5, W - margin, y + rowHeight - 0.5);
+    // Value text above underline
+    if (value) {
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.text(String(value), margin + labelWidth + 5, y + 3);
+    }
     
-    y += rowHeight + 1;
+    y += rowHeight;
+  }
+
+  function checkboxRow(label, checked) {
+    if (y > 250) { doc.addPage(); header(); }
+    
+    const rowHeight = 7;
+    
+    // Checkbox box
+    doc.setDrawColor(0, 0, 0);
+    doc.setLineWidth(0.5);
+    doc.rect(margin, y, 4, 4);
+    
+    // Checkmark if checked
+    if (checked) {
+      doc.setFontSize(8);
+      doc.text('✓', margin + 0.5, y + 3.2);
+    }
+    
+    // Label
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.text(label, margin + 8, y + 3);
+    
+    y += rowHeight;
   }
 
   // ---- Page 1 ----
   header();
 
-  // Jenis Keahlian box - clean styling
-  doc.setFillColor(245, 245, 245);
-  doc.setDrawColor(0, 0, 0);
-  doc.setLineWidth(1);
-  doc.rect(margin, y, W - margin * 2, 15, 'FD');
-  doc.setTextColor(0, 0, 0);
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'bold');
-  doc.text('KEAHLIAN:', margin + 5, y + 5);
-  doc.text('FASAL:', margin + 5, y + 11);
-  doc.setFont('helvetica', 'normal');
-  doc.text(JENIS_LABEL[state.jenis_keahlian] + ' (' + state.jenis_keahlian + ')', margin + 35, y + 5);
-  doc.text(state.fasal, margin + 35, y + 11);
-  y += 18;
+  // Match manual form: Nama Pemohon and Nama Syarikat fields at top
+  y += 5;
+  rowWithUnderline('Nama Pemohon', val('nama_lengkap_pemohon'));
+  rowWithUnderline('Nama Syarikat', val('nama_entiti'));
+  y += 8;
 
+  // Document checklist - match manual form with checkboxes
+  sectionTitle('Senarai Dokumen Wajib untuk pendaftaran Ahli (Hanya Tanda Jika Lengkap)');
+  y += 3;
+  
+  const docs = [
+    'SALINAN SSM: Enterprise Perkongsian (6.2.1)',
+    'SALINAN KAD PENGENALAN PEMOHON (depan & belakang)',
+    '2 KEPING GAMBAR PASSPORT',
+    'BORANG KEAHLIAN LENGKAP DI ISI',
+    'BORANG PROKSI (Dicetak dlm Letterhead Pemohon)',
+    'BORANG AKUAN BERKANUN TELAH DICOP PESURUH JAYA SUMPAH',
+    'BUKTI BAYARAN YURAN PENDAFTARAN + KEAHLIAN'
+  ];
+  
+  docs.forEach(doc => {
+    checkboxRow(doc, false); // User will manually check
+  });
+  y += 5;
+
+  // Document requirements box - match manual form
+  doc.setDrawColor(0, 0, 0);
+  doc.setLineWidth(0.5);
+  doc.rect(margin, y, W - margin * 2, 35, 'S');
+  y += 5;
+  
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  doc.text('- Sijil Pendaftaran Perniagaan (Ent Perkongsian)', margin + 5, y);
+  y += 5;
+  doc.text('- Maklumat Pemilik / Perkongsian:', margin + 5, y);
+  y += 5;
+  doc.text('- Maklumat Perniagaan:', margin + 5, y);
+  y += 5;
+  doc.text('- Tarikh luput (Mesti lebih dari 30/9/2028):', margin + 5, y);
+  y += 5;
+  
+  // Fee structure - match manual form
+  doc.setFont('helvetica', 'bold');
+  doc.text('Pendaftaran (6.2.1): RM50', margin + 5, y);
+  y += 4;
+  doc.text('Keahlian (6.2.1) RM50 x 3 tahun: RM150', margin + 5, y);
+  y += 4;
+  doc.setFont('helvetica', 'bold');
+  doc.text('JUMLAH (6.2.1): RM200', margin + 5, y);
+  y += 6;
+  
+  doc.setFont('helvetica', 'normal');
+  doc.text('Pendaftaran (6.2.3/4/6): RM200', margin + 80, y - 12);
+  doc.text('Keahlian (6.2.3/4/6) RM150 x 3 tahun: RM450', margin + 80, y - 8);
+  doc.setFont('helvetica', 'bold');
+  doc.text('JUMLAH (6.2.3/4/6): RM650', margin + 80, y - 4);
+  y += 10;
+
+  // Declaration section - match manual form
+  y += 5;
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  doc.text('Dengan ini saya mengesahkan bahawa borang ini adalah lengkap.', margin, y);
+  y += 6;
+  
+  // Signature lines - match manual form
+  doc.setDrawColor(0, 0, 0);
+  doc.setLineWidth(0.5);
+  doc.line(margin, y, margin + 80, y);
+  y += 4;
+  doc.text('Nama Pemohon :', margin, y);
+  y += 6;
+  doc.line(margin, y, margin + 80, y);
+  y += 4;
+  doc.text('Tarikh :', margin, y);
+  y += 6;
+  doc.line(margin, y, margin + 80, y);
+  y += 4;
+  doc.text('Cop Rasmi :', margin, y);
+  y += 10;
+  
+  // Reviewer section - match manual form
+  doc.text('Telah disemak oleh :', W - margin - 80, y - 20);
+  doc.line(W - margin - 80, y - 16, W - margin, y - 16);
+  y += 4;
+  doc.text('Nama :', W - margin - 80, y);
+  y += 6;
+  doc.line(W - margin - 80, y, W - margin, y);
+  y += 4;
+  doc.text('Tarikh :', W - margin - 80, y);
+  y += 6;
+  doc.line(W - margin - 80, y, W - margin, y);
+  y += 4;
+  doc.text('(Ketua Cawangan)', W - margin - 30, y);
+  y += 15;
+
+  // Page 1 footer - match manual form
+  doc.setDrawColor(0, 0, 0);
+  doc.setLineWidth(0.5);
+  doc.line(margin, y, W - margin, y);
+  y += 5;
+  
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'normal');
+  doc.text('BORANG PERMOHONAN KEAHLIAN BRG / AHLI /01 v1.2 1 / 6', margin, y);
+  y += 4;
+  doc.text('DEWAN PERNIAGAAN MELAYU MALAYSIA', margin, y);
+  y += 4;
+  doc.text('CMK: P > SUK > BHK > JKN > MED > R', margin, y);
+
+  // ---- Page 2-4: Main Form Data ----
+  doc.addPage();
+  header();
+  
+  y += 5;
   sectionTitle('A. MAKLUMAT ENTITI PERNIAGAAN');
-  row('Jenis Entiti', getRadio('jenis_entiti'));
-  row('Sektor', getRadio('sektor'));
-  row('Industri', getCheckboxes('industri').join(', '));
-  row('Saiz Entiti', getRadio('saiz_entiti'));
-  row('Persijilan', getCheckboxes('persijilan').join(', '));
-  row('Jenama', val('jenama'));
-  row('Aktiviti Perniagaan', val('aktiviti_perniagaan'));
-  y += 2;
+  rowWithUnderline('Jenis Entiti', getRadio('jenis_entiti'));
+  rowWithUnderline('Sektor', getRadio('sektor'));
+  rowWithUnderline('Industri', getCheckboxes('industri').join(', '));
+  rowWithUnderline('Saiz Entiti', getRadio('saiz_entiti'));
+  rowWithUnderline('Persijilan', getCheckboxes('persijilan').join(', '));
+  rowWithUnderline('Aktiviti Perniagaan', val('aktiviti_perniagaan'));
+  y += 5;
 
   sectionTitle('B. BUTIRAN PEMOHON');
-  row('Nama Lengkap Pemohon', val('nama_lengkap_pemohon'));
-  row('Nombor KAD Pengenal', val('no_kad_pengenal'));
-  y += 2;
+  rowWithUnderline('Nama Lengkap Pemohon', val('nama_lengkap_pemohon'));
+  rowWithUnderline('Nombor KAD Pengenal', val('no_kad_pengenal'));
+  y += 5;
   
   sectionTitle('C. BUTIRAN PERNIAGAAN');
-  row('Nama Entiti', val('nama_entiti'));
-  row('No. Pendaftaran', val('no_pendaftaran'));
-  row('Tarikh Daftar', val('tarikh_daftar'));
-  row('Tarikh Luput', val('tarikh_luput'));
-  row('Alamat', val('alamat'));
-  row('Poskod / Bandar / Negeri', val('poskod') + ' ' + val('bandar') + ', ' + document.getElementById('negeri').value);
-  row('No. Tel', val('no_tel_syarikat'));
-  row('E-mel', val('emel_syarikat'));
-  row('Modal Berbayar', val('modal_berbayar') ? 'RM ' + parseFloat(val('modal_berbayar')).toLocaleString() : '—');
-  row('Modal Pusingan', val('modal_pusingan') ? 'RM ' + parseFloat(val('modal_pusingan')).toLocaleString() : '—');
-  y += 2;
+  rowWithUnderline('Nama Entiti', val('nama_entiti'));
+  rowWithUnderline('No. Pendaftaran', val('no_pendaftaran'));
+  rowWithUnderline('Tarikh Daftar', val('tarikh_daftar'));
+  rowWithUnderline('Tarikh Luput', val('tarikh_luput'));
+  rowWithUnderline('Alamat', val('alamat'));
+  rowWithUnderline('Poskod', val('poskod'));
+  rowWithUnderline('Bandar', val('bandar'));
+  rowWithUnderline('Negeri', document.getElementById('negeri').value);
+  rowWithUnderline('No. Tel Syarikat', val('no_tel_syarikat'));
+  rowWithUnderline('No. Tel Bimbit', val('no_tel_bimbit'));
+  rowWithUnderline('E-mel Syarikat', val('emel_syarikat'));
+  rowWithUnderline('Modal Berbayar', val('modal_berbayar') ? 'RM ' + parseFloat(val('modal_berbayar')).toLocaleString() : '');
+  rowWithUnderline('Modal Pusingan', val('modal_pusingan') ? 'RM ' + parseFloat(val('modal_pusingan')).toLocaleString() : '');
+  y += 5;
 
   sectionTitle('D. PROKSI / WAKIL');
-  row('Nama Proksi', val('proksi_nama') || '(Pemunya Tunggal)');
-  row('No. MyKAD', val('proksi_ic'));
-  row('Jawatan', document.getElementById('proksi_jawatan').value);
-  row('No. HP', val('proksi_hp'));
-  row('E-mel', val('proksi_emel'));
-  y += 2;
+  rowWithUnderline('Nama Proksi', val('proksi_nama') || '(Pemunya Tunggal)');
+  rowWithUnderline('Nombor Kad Pengenalan', val('proksi_ic'));
+  rowWithUnderline('Jawatan', document.getElementById('proksi_jawatan').value);
+  rowWithUnderline('No. HP', val('proksi_hp'));
+  rowWithUnderline('E-mel', val('proksi_emel'));
+  y += 5;
 
-  // Clean table headers
+  // Pemegang Saham table
   const psSizes = [8, 85, 20, 25];
   const psCols = ['#', 'Nama Pemegang Saham', '% Saham', 'Bangsa'];
   let x2 = margin;
   
-  // Table header background
   doc.setFillColor(245, 245, 245);
   doc.rect(margin, y, W - margin * 2, 8, 'F');
   doc.setDrawColor(0, 0, 0);
   doc.setLineWidth(0.5);
   doc.rect(margin, y, W - margin * 2, 8, 'S');
   
-  // Header text
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(9);
   doc.setTextColor(0, 0, 0);
@@ -4566,13 +4891,11 @@ function downloadPDF() {
   });
   y += 9;
   
-  // Table rows with alternating background
   for (let i = 1; i <= 5; i++) {
     const n = document.getElementById('saham_nama_' + i)?.value || '';
     const p = document.getElementById('saham_pct_' + i)?.value || '';
     const b = document.getElementById('saham_bangsa_' + i)?.value || '';
     
-    // Alternating row background
     if (i % 2 === 0) {
       doc.setFillColor(248, 249, 250);
       doc.rect(margin, y, W - margin * 2, 7, 'F');
@@ -4594,7 +4917,7 @@ function downloadPDF() {
   }
   y += 5;
 
-  // Clean table headers
+  // Ahli Lembaga table
   x2 = margin;
   doc.setFillColor(245, 245, 245);
   doc.rect(margin, y, W - margin * 2, 8, 'F');
@@ -4611,7 +4934,6 @@ function downloadPDF() {
   });
   y += 9;
   
-  // Table rows with alternating background
   for (let i = 1; i <= 5; i++) {
     const n = document.getElementById('lembaga_nama_' + i)?.value || '';
     const p = document.getElementById('lembaga_pct_' + i)?.value || '';
@@ -4638,95 +4960,394 @@ function downloadPDF() {
   }
   y += 5;
 
-  sectionTitle('BAYARAN');
+  sectionTitle('E. BAYARAN');
   const jenis = state.jenis_keahlian;
   const fasalData = (FASAL_DATA[jenis] || []).find(f => f.value === state.fasal);
   const tempoh = parseInt(getRadio('tempoh_yuran') || '1');
   const fi = fasalData?.daftar || 0;
   const yr2 = fasalData?.tahunan || 0;
-  row('Yuran Pendaftaran (Once in a lifetime)', fi === 0 ? 'Percuma' : 'RM ' + fi.toLocaleString());
-  row('Yuran Tahunan (Yearly)', yr2 === 0 ? 'Percuma' : 'RM ' + yr2.toLocaleString() + ' × ' + tempoh + ' tahun = RM ' + (yr2 * tempoh).toLocaleString());
-  row('JUMLAH', fi === 0 ? 'Percuma' : 'RM ' + (fi + yr2 * tempoh).toLocaleString());
-  y += 3;
+  rowWithUnderline('Yuran Pendaftaran (Once in a lifetime)', fi === 0 ? 'Percuma' : 'RM ' + fi.toLocaleString());
+  rowWithUnderline('Yuran Tahunan (Yearly)', yr2 === 0 ? 'Percuma' : 'RM ' + yr2.toLocaleString() + ' × ' + tempoh + ' tahun = RM ' + (yr2 * tempoh).toLocaleString());
+  rowWithUnderline('JUMLAH', fi === 0 ? 'Percuma' : 'RM ' + (fi + yr2 * tempoh).toLocaleString());
+  y += 8;
 
-  // Continue on same page if space allows
-  if (y > 240) { doc.addPage(); header(); }
-  sectionTitle('G. PENGISYTIHARAN PEMOHON');
-
-  doc.setFontSize(8);
+  // F. PENGISYTIHARAN PEMOHON - match manual form
+  sectionTitle('F. PENGISYTIHARAN PEMOHON');
+  doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
-  doc.setTextColor(...black);
   const pengakuan = 'Kami mengesahkan segala butiran dalam maklumat yang diberikan dalam permohonan ini adalah benar dan betul. Kami bersetuju untuk mematuhi serta akur kepada peruntukan-peruntukan dalam Undang-Undang Tubuh dan Peraturan yang ditetapkan oleh DPMM pada bila-bila masa, serta sentiasa menjaga dan menyumbang bakti kepada kejayaan misi DPMM.';
   const lines = doc.splitTextToSize(pengakuan, W - margin * 2);
   doc.text(lines, margin, y);
-  y += lines.length * 3.5 + 4;
+  y += lines.length * 4 + 8;
 
-  doc.setFontSize(8);
+  doc.setFontSize(9);
   doc.setFont('helvetica', 'bold');
-  doc.text('Bagi Pihak Pemohon (Fasal 6.2.1, 6.2.2 & 6.2.3):', margin, y); y += 4;
+  doc.text('Bagi Pihak Pemohon (Fasal 6.2.1, 6.2.2 & 6.2.3):', margin, y); y += 5;
   doc.setFont('helvetica', 'normal');
   doc.text('Nama Penandatangan:', margin, y);
-  doc.setDrawColor(...grey);
-  doc.setLineWidth(0.3);
-  doc.line(margin + 35, y + 0.5, W - margin, y + 0.5); y += 4;
+  doc.setDrawColor(0, 0, 0);
+  doc.setLineWidth(0.5);
+  doc.line(margin + 40, y + 2, W - margin, y + 2); y += 5;
   doc.text('No. MyKAD:', margin, y);
-  doc.line(margin + 20, y + 0.5, margin + 70, y + 0.5);
+  doc.line(margin + 25, y + 2, margin + 70, y + 2);
   doc.text('Tarikh:', margin + 75, y);
-  doc.line(margin + 85, y + 0.5, W - margin, y + 0.5); y += 6;
+  doc.line(margin + 85, y + 2, W - margin, y + 2); y += 8;
 
   doc.setFont('helvetica', 'bold');
-  doc.text('Bagi Pihak Pemohon (Fasal 6.2.3b, 6.2.4, 6.2.5, 6.2.6):', margin, y); y += 4;
+  doc.text('Bagi Pihak Pemohon (Fasal 6.2.3b, 6.2.4, 6.2.5, 6.2.6):', margin, y); y += 5;
   doc.setFont('helvetica', 'normal');
   doc.text('Nama:', margin, y);
-  doc.line(margin + 12, y + 0.5, W - margin, y + 0.5); y += 4;
+  doc.line(margin + 15, y + 2, W - margin, y + 2); y += 5;
   doc.text('No. MyKAD:', margin, y);
-  doc.line(margin + 20, y + 0.5, margin + 70, y + 0.5);
+  doc.line(margin + 25, y + 2, margin + 70, y + 2);
   doc.text('Jawatan:', margin + 75, y);
-  doc.line(margin + 90, y + 0.5, W - margin, y + 0.5); y += 8;
+  doc.line(margin + 90, y + 2, W - margin, y + 2); y += 10;
 
-  // Cop syarikat box - compact
-  doc.setDrawColor(...grey);
+  // Cop syarikat box
+  doc.setDrawColor(0, 0, 0);
   doc.setLineWidth(0.5);
   doc.rect(W - margin - 40, y, 40, 20);
   doc.setFontSize(8);
   doc.setTextColor(100, 100, 100);
   doc.text('Cop Syarikat', W - margin - 20, y + 10, { align: 'center' });
-  y += 24;
+  y += 25;
 
-  sectionTitle('H. KEGUNAAN URUSETIA DPMM');
-  emptyRow('Disemak & Lengkap — Tarikh');
-  emptyRow('Tandatangan Urusetia');
-  emptyRow('No. Resit Bayaran');
-  emptyRow('Disyorkan JKN / MED — Tarikh');
-  emptyRow('Minit Mesyuarat Bil.');
-  emptyRow('Kuatkuasa Keahlian mulai');
-  emptyRow('Disahkan oleh SUK / SUA');
-  y += 2;
+  // G. KEGUNAAN URUSETIA DPMM - match manual form
+  sectionTitle('G. KEGUNAAN URUSETIA DPMM');
+  rowWithUnderline('Disemak & Lengkap — Tarikh', '');
+  rowWithUnderline('Tandatangan Urusetia', '');
+  rowWithUnderline('No. Resit Bayaran', '');
+  rowWithUnderline('Disyorkan JKN / MED — Tarikh', '');
+  rowWithUnderline('Minit Mesyuarat Bil.', '');
+  rowWithUnderline('Kuatkuasa Keahlian mulai', '');
+  rowWithUnderline('Disahkan oleh SUK / SUA', '');
+  y += 5;
 
-  // Clean footer
-  const footerY = 280;
-  
-  // Footer background
-  doc.setFillColor(245, 245, 245);
-  doc.rect(0, footerY, W, 20, 'F');
-  
-  // Footer text
-  doc.setTextColor(0, 0, 0);
-  doc.setFontSize(8);
-  doc.setFont('helvetica', 'normal');
-  doc.text('Tarikh cetak: ' + new Date().toLocaleDateString('ms-MY') + '  |  No. Rujukan: ' + state.refId, margin, footerY + 7);
-  
-  // Page number
+  // Footer with page numbers
   const totalPages = doc.internal.getNumberOfPages();
   for (let i = 1; i <= totalPages; i++) {
     doc.setPage(i);
-    doc.setTextColor(0, 0, 0);
+    const footerY = 280;
+    
+    doc.setDrawColor(0, 0, 0);
+    doc.setLineWidth(0.3);
+    doc.line(margin, footerY, W - margin, footerY);
+    
     doc.setFontSize(8);
-    doc.text('Halaman ' + i + ' daripada ' + totalPages, W - margin - 30, footerY + 7);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(0, 0, 0);
+    doc.text('Tarikh cetak: ' + new Date().toLocaleDateString('ms-MY') + '  |  No. Rujukan: ' + state.refId, margin, footerY + 5);
+    doc.text('Halaman ' + i + ' daripada ' + totalPages, W - margin - 30, footerY + 5);
+  }
+
+  // ---- Page 5: Borang Akuan Berkanun (for Enterprise Milikan Tunggal) ----
+  const jenisEntiti = getRadio('jenis_entiti');
+  if (jenisEntiti === 'Pemunya Tunggal' || jenisEntiti === 'PLT') {
+    doc.addPage();
+    header();
+    
+    y += 10;
+    sectionTitle('BORANG AKUAN BERKANUN');
+    y += 8;
+    
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    const akuanText = 'Saya, ' + val('nama_lengkap_pemohon') + ', No. Kad Pengenalan ' + val('no_kad_pengenal') + ', pemilik perniagaan berdaftar ' + val('nama_entiti') + ', No. Pendaftaran SSM ' + val('no_pendaftaran') + ', dengan ini mengaku bahawa:';
+    const lines = doc.splitTextToSize(akuanText, W - margin * 2);
+    doc.text(lines, margin, y);
+    y += lines.length * 4 + 8;
+    
+    const points = [
+      '1. Saya adalah warganegara Malaysia dan berumur tidak kurang 18 tahun.',
+      '2. Perniagaan yang saya miliki adalah milikan tunggal dan saya adalah pemilik tunggal yang sah.',
+      '3. Saya bersetuju untuk mematuhi semua peraturan dan undang-undang DPMM.',
+      '4. Saya mengesahkan bahawa semua maklumat yang diberikan adalah benar dan tepat.'
+    ];
+    
+    points.forEach(point => {
+      doc.text(point, margin, y);
+      y += 6;
+    });
+    
+    y += 10;
+    
+    // Signature section
+    doc.setDrawColor(0, 0, 0);
+    doc.setLineWidth(0.5);
+    doc.line(margin, y, margin + 80, y);
+    y += 4;
+    doc.text('Nama Pemilik:', margin, y);
+    y += 6;
+    doc.line(margin, y, margin + 80, y);
+    y += 4;
+    doc.text('No. Kad Pengenalan:', margin, y);
+    y += 6;
+    doc.line(margin, y, margin + 80, y);
+    y += 4;
+    doc.text('Tarikh:', margin, y);
+    y += 6;
+    doc.line(margin, y, margin + 80, y);
+    y += 4;
+    doc.text('Tandatangan:', margin, y);
+    y += 15;
+    
+    // Witness section
+    doc.setFont('helvetica', 'bold');
+    doc.text('Saksi:', margin, y);
+    y += 5;
+    doc.setFont('helvetica', 'normal');
+    doc.line(margin, y, margin + 80, y);
+    y += 4;
+    doc.text('Nama:', margin, y);
+    y += 6;
+    doc.line(margin, y, margin + 80, y);
+    y += 4;
+    doc.text('No. Kad Pengenalan:', margin, y);
+    y += 6;
+    doc.line(margin, y, margin + 80, y);
+    y += 4;
+    doc.text('Tarikh:', margin, y);
+    y += 6;
+    doc.line(margin, y, margin + 80, y);
+    y += 4;
+    doc.text('Tandatangan:', margin, y);
+  }
+
+  // ---- Page 6: Partner Letterhead Signing (for Sdn Bhd/Enterprise Milikan Bersama) ----
+  if (jenisEntiti === 'Perkongsian' || jenisEntiti === 'Sdn Bhd' || jenisEntiti === 'Bhd') {
+    doc.addPage();
+    header();
+    
+    y += 10;
+    sectionTitle('SURAT PENGESAHAN PENANDATANGAN');
+    y += 8;
+    
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Kami, para pemilik/pengarah ' + val('nama_entiti') + ', dengan ini mengesahkan bahawa:', margin, y);
+    y += 8;
+    
+    const partnerPoints = [
+      '1. Kami bersetuju untuk mendaftarkan perniagaan kami sebagai Ahli DPMM Negeri Johor.',
+      '2. Kami mengesahkan bahawa maklumat yang diberikan adalah benar dan tepat.',
+      '3. Kami bersetuju untuk mematuhi semua peraturan dan undang-undang DPMM.',
+      '4. Kami memberi kuasa kepada wakil yang dinamakan untuk bertindak atas nama kami.'
+    ];
+    
+    partnerPoints.forEach(point => {
+      doc.text(point, margin, y);
+      y += 6;
+    });
+    
+    y += 10;
+    
+    // Partner signatures section
+    doc.setFont('helvetica', 'bold');
+    doc.text('Penandatangan 1:', margin, y);
+    y += 5;
+    doc.setFont('helvetica', 'normal');
+    doc.line(margin, y, margin + 80, y);
+    y += 4;
+    doc.text('Nama:', margin, y);
+    y += 6;
+    doc.line(margin, y, margin + 80, y);
+    y += 4;
+    doc.text('No. Kad Pengenalan:', margin, y);
+    y += 6;
+    doc.line(margin, y, margin + 80, y);
+    y += 4;
+    doc.text('Jawatan:', margin, y);
+    y += 6;
+    doc.line(margin, y, margin + 80, y);
+    y += 4;
+    doc.text('Tarikh:', margin, y);
+    y += 6;
+    doc.line(margin, y, margin + 80, y);
+    y += 4;
+    doc.text('Tandatangan:', margin, y);
+    y += 10;
+    
+    doc.setFont('helvetica', 'bold');
+    doc.text('Penandatangan 2:', margin, y);
+    y += 5;
+    doc.setFont('helvetica', 'normal');
+    doc.line(margin, y, margin + 80, y);
+    y += 4;
+    doc.text('Nama:', margin, y);
+    y += 6;
+    doc.line(margin, y, margin + 80, y);
+    y += 4;
+    doc.text('No. Kad Pengenalan:', margin, y);
+    y += 6;
+    doc.line(margin, y, margin + 80, y);
+    y += 4;
+    doc.text('Jawatan:', margin, y);
+    y += 6;
+    doc.line(margin, y, margin + 80, y);
+    y += 4;
+    doc.text('Tarikh:', margin, y);
+    y += 6;
+    doc.line(margin, y, margin + 80, y);
+    y += 4;
+    doc.text('Tandatangan:', margin, y);
+    y += 10;
+    
+    // Company stamp box
+    doc.setDrawColor(0, 0, 0);
+    doc.setLineWidth(0.5);
+    doc.rect(W - margin - 50, y - 20, 50, 30);
+    doc.setFontSize(9);
+    doc.setTextColor(100, 100, 100);
+    doc.text('Cop Syarikat', W - margin - 25, y - 5, { align: 'center' });
   }
 
   doc.save('Borang_Permohonan_' + state.refId + '.pdf');
   showToast('PDF berjaya dimuat turun!', 'success');
+}
+
+// Test function for PDF generation (call from console: testPDFGeneration())
+async function testPDFGeneration() {
+  // Set up test state
+  state.refId = 'TEST-' + Date.now();
+  state.nama_pemohon = 'Test User';
+  state.nama_entiti = 'Test Enterprise Sdn Bhd';
+  state.no_ssm = 'SA0012345-A';
+  state.tarikh_daftar = '2024-01-01';
+  state.tarikh_luput = '2030-01-01';
+  state.email_syarikat = 'test@enterprise.com';
+  state.alamat = '123 Test Street, Johor Bahru';
+  state.poskod = '80000';
+  state.bandar = 'Johor Bahru';
+  state.negeri = 'Johor';
+  state.no_hp = '012-3456789';
+  state.jenis_entiti = 'Pemunya Tunggal';
+  state.jenis_keahlian = 'A';
+  state.fasal = '6.2.1';
+  state.tempoh_yuran = '1 Tahun';
+  
+  console.log('Testing PDF generation with test data...');
+  console.log('Current method:', currentPDFMethod);
+  
+  // Test current method
+  await downloadPDF();
+}
+
+// Method 2: PDF Template Filling (using manual form as template)
+async function downloadPDFFromTemplate() {
+  try {
+    const { PDFDocument, rgb, StandardFonts } = PDFLib;
+    const templateBytes = await fetch('borang-template.pdf').then(res => res.arrayBuffer());
+    const pdfDoc = await PDFDocument.load(templateBytes);
+    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    
+    const pages = pdfDoc.getPages();
+    const firstPage = pages[0];
+    const { width, height } = firstPage.getSize();
+    
+    // Helper function to draw text on specific page
+    const drawTextOnPage = (page, text, x, y, size = 10, options = {}) => {
+      page.drawText(text, {
+        x,
+        y,
+        size,
+        font: options.bold ? fontBold : font,
+        color: rgb(0, 0, 0),
+        ...options
+      });
+    };
+    
+    // Get form data
+    const jenisEntiti = getRadio('jenis_entiti');
+    const refId = state.refId || 'TEMP';
+    
+    // Fill basic form fields (coordinates need adjustment based on your template)
+    drawTextOnPage(firstPage, refId, width - 100, height - 50, 10);
+    drawTextOnPage(firstPage, val('nama_lengkap_pemohon') || '', 150, height - 150, 10);
+    drawTextOnPage(firstPage, val('no_kad_pengenal') || '', 150, height - 180, 10);
+    drawTextOnPage(firstPage, val('nama_entiti') || '', 150, height - 210, 10);
+    drawTextOnPage(firstPage, val('no_pendaftaran') || '', 150, height - 240, 10);
+    drawTextOnPage(firstPage, val('tarikh_daftar') || '', 150, height - 270, 10);
+    drawTextOnPage(firstPage, val('tarikh_luput') || '', 150, height - 300, 10);
+    drawTextOnPage(firstPage, val('alamat') || '', 150, height - 330, 10);
+    drawTextOnPage(firstPage, val('poskod') || '', 150, height - 360, 10);
+    drawTextOnPage(firstPage, val('bandar') || '', 150, height - 390, 10);
+    drawTextOnPage(firstPage, val('emel_syarikat') || '', 150, height - 420, 10);
+    drawTextOnPage(firstPage, val('no_tel_bimbit') || '', 150, height - 450, 10);
+    
+    // Add conditional pages based on entity type
+    if (jenisEntiti === 'Pemunya Tunggal' || jenisEntiti === 'PLT') {
+      // Page 5: Borang Akuan Berkanun for Enterprise Milikan Tunggal
+      const page5 = pdfDoc.addPage([595.28, 841.89]);
+      let y5 = page5.getHeight() - 50;
+      
+      drawTextOnPage(page5, 'BORANG AKUAN BERKANUN', width / 2, y5, 12, { bold: true, align: 'center' });
+      y5 -= 30;
+      
+      drawTextOnPage(page5, 'Saya yang bertandatangan di bawah mengaku bahawa:', 50, y5);
+      y5 -= 20;
+      
+      drawTextOnPage(page5, '1. Entiti perniagaan yang saya nyatakan adalah milikan tunggal.', 50, y5);
+      y5 -= 15;
+      drawTextOnPage(page5, '2. Segala maklumat yang diberikan adalah benar dan tepat.', 50, y5);
+      y5 -= 15;
+      drawTextOnPage(page5, '3. Saya bersetuju mematuhi semua peraturan DPMM Negeri Johor.', 50, y5);
+      y5 -= 30;
+      
+      // Signature section
+      drawTextOnPage(page5, 'Tandatangan:', 50, y5);
+      y5 -= 30;
+      drawTextOnPage(page5, 'Nama: ' + (val('nama_lengkap_pemohon') || ''), 50, y5 - 15);
+      y5 -= 30;
+      
+      drawTextOnPage(page5, 'Saksi:', 250, y5);
+      y5 -= 30;
+      drawTextOnPage(page5, 'Nama:', 250, y5 - 15);
+    }
+    
+    if (jenisEntiti === 'Perkongsian' || jenisEntiti === 'Sdn Bhd' || jenisEntiti === 'Bhd') {
+      // Page 6: Partner Letterhead Signing for Sdn Bhd/Enterprise Milikan Bersama
+      const page6 = pdfDoc.addPage([595.28, 841.89]);
+      let y6 = page6.getHeight() - 50;
+      
+      drawTextOnPage(page6, 'SURAT PENGESAHAN PENANDATANGAN', width / 2, y6, 12, { bold: true, align: 'center' });
+      y6 -= 30;
+      
+      drawTextOnPage(page6, 'Kami yang bertandatangan di bawah mengesahkan bahawa:', 50, y6);
+      y6 -= 20;
+      
+      drawTextOnPage(page6, '1. Pemohon telah diberi kuasa untuk mewakili entiti ini.', 50, y6);
+      y6 -= 15;
+      drawTextOnPage(page6, '2. Segala maklumat yang diberikan adalah benar dan tepat.', 50, y6);
+      y6 -= 15;
+      drawTextOnPage(page6, '3. Kami bersetuju dengan semua syarat dan peraturan DPMM.', 50, y6);
+      y6 -= 30;
+      
+      // Partner signatures
+      drawTextOnPage(page6, 'Tandatangan Rakan Kongsi 1:', 50, y6);
+      y6 -= 30;
+      drawTextOnPage(page6, 'Nama:', 50, y6 - 15);
+      y6 -= 30;
+      
+      drawTextOnPage(page6, 'Tandatangan Rakan Kongsi 2:', 50, y6);
+      y6 -= 30;
+      drawTextOnPage(page6, 'Nama:', 50, y6 - 15);
+    }
+    
+    const pdfBytes = await pdfDoc.save();
+    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'Borang_Permohonan_' + state.refId + '.pdf';
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('PDF berjaya dimuat turun (Template Method)!', 'success');
+  } catch (err) {
+    console.error('Template method failed:', err);
+    showToast('Gagal menggunakan template - menggunakan jsPDF', 'error');
+    downloadPDFWithJsPDF();
+  }
 }
 
 /* ============================================================
@@ -4886,7 +5507,7 @@ function buildSystemPrompt() {
 PROFIL PERSONA:
 - Nama penuh: Aiman (Ahli Inovasi & Maju Aspirasi Negeri)
 - Arketip: Sage & Helper — Bijaksana, berwibawa, namun mudah didekati
-- Nada suara: Formal tetapi mesra. Guna Bahasa Melayu baku yang moden dan cekap. Sentiasa berbudi bahasa.
+- Nada suara: Mesra dan mudah didekati. Guna Bahasa Melayu baku dan Bahasa Inggeris yang moden dan cekap. Sentiasa berbudi bahasa.
 - Nilai teras: Amanah, Inovasi, Perpaduan
 - Gaya komunikasi: Ringkas, berorientasikan tindakan, dan memberi kuasa kepada usahawan — terutama usahawan kecil dan mikro.
 - Frasa utama: "Mari kita kembangkan potensi perniagaan anda." | "Maklumat terkini untuk ahli DPMMNJ adalah..."
@@ -5625,7 +6246,7 @@ async function extractFromIC(base64DataUrl) {
 }
 
 async function extractFromSSM(base64DataUrl) {
-  var prompt = 'Kamu adalah sistem ekstrak data dari sijil pendaftaran perniagaan SSM Malaysia.\nBaca dokumen ini dan kembalikan JSON berikut SAHAJA (tiada penjelasan lain):\n{\n  "nama_perniagaan": "nama perniagaan berdaftar",\n  "no_pendaftaran": "nombor pendaftaran SSM",\n  "tarikh_daftar": "tarikh pendaftaran format DD/MM/YYYY",\n  "tarikh_luput": "tarikh luput format DD/MM/YYYY atau null jika tiada",\n  "jenis_entiti": "Enterprise atau Perkongsian atau Sdn Bhd atau Bhd atau Koperasi",\n  "aktiviti": "penerangan aktiviti atau kod perniagaan",\n  "alamat": "alamat perniagaan berdaftar penuh"\n}\nJika sesuatu medan tidak dapat dibaca, gunakan null.\nKembalikan JSON sahaja.';
+  var prompt = 'Kamu adalah sistem ekstrak data dari sijil pendaftaran perniagaan SSM Malaysia.\nBaca dokumen ini dan kembalikan JSON berikut SAHAJA (tiada penjelasan lain):\n{\n  "nama_perniagaan": "NAMA PERNIAGAAN - nama perniagaan berdaftar dalam huruf besar",\n  "no_pendaftaran": "NOMBOR PENDAFTARAN SSM - nombor pendaftaran SSM penuh",\n  "tarikh_daftar": "tarikh pendaftaran format DD/MM/YYYY",\n  "tarikh_luput": "tarikh luput format DD/MM/YYYY atau null jika tiada",\n  "jenis_entiti": "Enterprise atau Perkongsian atau Sdn Bhd atau Bhd atau Koperasi atau PLT",\n  "aktiviti": "penerangan aktiviti atau kod perniagaan",\n  "alamat": "alamat perniagaan berdaftar penuh",\n  "no_tel_syarikat": "nombor telefon syarikat (jika ada)",\n  "no_tel_bimbit": "nombor telefon bimbit (jika ada)",\n  "emel_syarikat": "emel syarikat (jika ada)",\n  "butiran_perniagaan": "butiran lanjut perniagaan (jika ada)"\n}\nJika sesuatu medan tidak dapat dibaca atau tidak wujud dalam dokumen, gunakan null.\nKembalikan JSON sahaja.';
   return callGroqVision(base64DataUrl, prompt);
 }
 
@@ -5672,42 +6293,44 @@ function applyIpField(fieldId, value) {
 
 function mapExtractedToForm(icData, ssmData) {
   if (icData) {
-    applyIpField('nama_penuh_ic', icData.nama);
+    applyIpField('nama_lengkap_pemohon', icData.nama);
     var icFormatted = icData.no_ic ? icData.no_ic.replace(/\D/g,'').replace(/(\d{6})(\d{2})(\d{4})/, '$1-$2-$3') : null;
     applyIpField('no_kad_pengenal', icFormatted);
     applyIpField('alamat', icData.alamat);
     applyIpField('poskod', icData.poskod);
     applyIpField('bandar', icData.bandar);
     applyIpField('negeri', icData.negeri);
-    var gender = genderFromIC(icData.no_ic);
-    if (gender) {
-      var jantina = document.getElementById('jantina');
-      if (jantina) {
-        jantina.value = gender;
-        jantina.classList.add('autofilled');
-        if (!state.autoFilledFields.includes('jantina')) state.autoFilledFields.push('jantina');
-      }
-    }
   }
   if (ssmData) {
     applyIpField('nama_entiti', ssmData.nama_perniagaan);
-    applyIpField('jenama', ssmData.nama_perniagaan);
     applyIpField('no_pendaftaran', ssmData.no_pendaftaran);
     applyIpField('aktiviti_perniagaan', ssmData.aktiviti);
-    applyIpField('alamat', ssmData.alamat);
     applyIpField('tarikh_daftar', dmyToIso(ssmData.tarikh_daftar));
     applyIpField('tarikh_luput', dmyToIso(ssmData.tarikh_luput));
+    applyIpField('no_tel_syarikat', ssmData.no_tel_syarikat);
+    applyIpField('no_tel_bimbit', ssmData.no_tel_bimbit);
+    applyIpField('emel_syarikat', ssmData.emel_syarikat);
+    applyIpField('butiran_perniagaan', ssmData.butiran_perniagaan);
     if (ssmData.jenis_entiti) {
       var raw = ssmData.jenis_entiti.toLowerCase();
       var jenisMap = [
-        ['sdn. bhd', 'Sdn. Bhd.'], ['sdn bhd', 'Sdn. Bhd.'],
-        ['bhd.', 'Bhd.'], ['bhd', 'Bhd.'],
+        ['sdn. bhd', 'Sdn Bhd'], ['sdn bhd', 'Sdn Bhd'],
+        ['bhd.', 'Bhd'], ['bhd', 'Bhd'],
         ['koperasi', 'Koperasi'],
         ['perkongsian', 'Perkongsian'],
-        ['enterprise', 'Enterprise'], ['milikan tunggal', 'Enterprise']
+        ['enterprise', 'Pemunya Tunggal'], ['milikan tunggal', 'Pemunya Tunggal'],
+        ['plt', 'PLT']
       ];
       for (var i = 0; i < jenisMap.length; i++) {
-        if (raw.includes(jenisMap[i][0])) { applyIpField('jenis_entiti', jenisMap[i][1]); break; }
+        if (raw.includes(jenisMap[i][0])) {
+          var radio = document.querySelector(`input[name="jenis_entiti"][value="${jenisMap[i][1]}"]`);
+          if (radio) {
+            radio.checked = true;
+            radio.classList.add('autofilled');
+            if (!state.autoFilledFields.includes('jenis_entiti')) state.autoFilledFields.push('jenis_entiti');
+          }
+          break;
+        }
       }
     }
   }
