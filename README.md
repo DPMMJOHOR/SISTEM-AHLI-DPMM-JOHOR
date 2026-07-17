@@ -30,14 +30,17 @@ Setelah deploy ke GitHub Pages, akses di:
 ## 📁 Struktur Fail
 ```
 index.html              ← Aplikasi penuh (satu fail)
+borang.html            ← Borang permohonan keahlian
 receipt-pv-ui.js       ← Komponen UI sistem Resit & Baucar
 src/
   config-loader.js      ← Konfigurasi Supabase
   audit-logger.js      ← Sistem log audit
+  sentry-ai-wrapper.js ← Integrasi AI dengan Sentry
   modules/
     unified-auth.js    ← Sistem pengesahan terpadu
 migrations/             ← Skema pangkalan data Supabase
 docs/                  ← Dokumentasi projek
+  plans/               ← Pelan pelaksanaan
 README.md              ← Dokumentasi ini
 ```
 
@@ -60,6 +63,17 @@ README.md              ← Dokumentasi ini
 - Hash kata laluan menggunakan bcryptjs
 
 ## 📝 Perubahan Terkini (Julai 2026)
+
+### AIMAN Language Improvements & Security Fixes
+- **English Language Support:** AIMAN kini boleh bertindak balas dalam Bahasa Inggeris apabila pengguna bertanya dalam Bahasa Inggeris
+- **Conversational Tone:** Persona AIMAN dikemas kini menjadi lebih mesra dan mudah didekati
+- **Security Fixes:**
+  - GROQ_KEY validation diperbaiki untuk mengelakkan kegagalan API
+  - CSP frame-src diperbaiki untuk membenarkan Turnstile CAPTCHA
+  - Komen SUPABASE_KEY diperbetulkan untuk mengelakkan kekeliruan
+- **Branch:** `feat/aiman-language-improvements-security-fixes`
+- **Status:** PR #7 dihantar untuk semakan
+
 ### UI/UX Improvements - Sistem Resit & Baucar
 - Buang ikon emoji dari navigasi panel kiri
 - Standardkan margin dan padding menggunakan sistem spacing (8px, 16px, 24px, 32px)
