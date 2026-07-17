@@ -10,11 +10,15 @@ const CONFIG = {
   SUPABASE_ANON_KEY: window.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx6b2xvdXB3dHFtanl1cHZvZmhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5NTMxMTEsImV4cCI6MjA4ODUyOTExMX0.tBcGc6KfPyjUmJngbLTBHv-GZkSoSoyWGXwlXFZ0ShE',
   
   // AI Services
-  GROQ_KEY: window.GROQ_KEY || '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',
+  GROQ_KEY: window.GROQ_KEY || null, // Must come from backend proxy for security
   GEMINI_KEY: window.GEMINI_KEY || '',
   
   // Email
   RESEND_API_KEY: window.RESEND_API_KEY || '',
+  EMAILJS_SERVICE_ID: window.EMAILJS_SERVICE_ID || 'service_a3kt2zm',
+  EMAILJS_PUBLIC_KEY: window.EMAILJS_PUBLIC_KEY || 'Bq94zNa6cDvdTUCU8',
+  EMAILJS_ADMIN_TEMPLATE_ID: window.EMAILJS_ADMIN_TEMPLATE_ID || 'template_vud79xb',
+  EMAILJS_APPLICANT_TEMPLATE_ID: window.EMAILJS_APPLICANT_TEMPLATE_ID || 'template_553fkme',
   
   // CAPTCHA
   // SECURITY: Turnstile site key must be configured in production.

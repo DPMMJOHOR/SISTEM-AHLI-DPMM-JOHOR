@@ -9,8 +9,11 @@ dotenv.config();
 const app = express();
 const PORT = process.env.CONFIG_PORT || 3001;
 
-// Middleware
-app.use(cors());
+// Middleware - allow CORS for testing
+app.use(cors({
+  origin: ['http://localhost:8080', 'http://localhost:3001', 'http://127.0.0.1:8080', 'http://127.0.0.1:3001'],
+  credentials: true
+}));
 app.use(express.json());
 
 // Simple in-memory rate limiting
@@ -178,7 +181,8 @@ function securityLogger(req, res, next) {
 // Apply security logging
 app.use(securityLogger);
 
-// Email sending endpoint using Resend
+// Email sending endpoint using Resend (server-side)
+// Note: EmailJS is used client-side in borang.html for direct browser calls
 app.post('/api/send-email', async (req, res) => {
   try {
     const { template, toEmail, data } = req.body;
@@ -213,6 +217,58 @@ app.post('/api/send-email', async (req, res) => {
     res.status(500).json({
       success: false,
       error: 'Failed to send email'
+    });
+  }
+});
+
+// Groq AI proxy endpoint - secure server-side proxy for AIMAN chatbot
+app.post('/api/groq', async (req, res) => {
+  try {
+    const { messages, model = 'llama-3.3-70b-versatile', max_tokens = 800 } = req.body;
+    
+    if (!process.env.GROQ_API_KEY) {
+      return res.status(500).json({
+        success: false,
+        error: 'Groq API key not configured'
+      });
+    }
+    
+    if (!messages || !Array.isArray(messages)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid messages format'
+      });
+    }
+    
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model,
+        messages,
+        max_tokens
+      })
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error?.message || `Groq API error: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    res.json({
+      success: true,
+      data
+    });
+  } catch (error) {
+    console.error('Groq API error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to call Groq API'
     });
   }
 });
@@ -288,6 +344,7 @@ app.listen(PORT, () => {
   console.log(`API endpoints available:`);
   console.log(`  - GET  /api/config`);
   console.log(`  - POST /api/send-email`);
+  console.log(`  - POST /api/groq`);
   console.log(`  - GET  /api/health`);
 });
 

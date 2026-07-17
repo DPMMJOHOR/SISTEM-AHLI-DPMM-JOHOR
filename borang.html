@@ -13,6 +13,8 @@
 
 <!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- EmailJS -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <!-- PDF Libraries -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
@@ -43,6 +45,26 @@ function initSupabaseWhenReady() {
 }
 
 initSupabaseWhenReady();
+</script>
+<!-- Initialize EmailJS -->
+<script>
+function initEmailJSWhenReady() {
+  if (typeof emailjs === 'undefined') {
+    setTimeout(initEmailJSWhenReady, 100);
+    return;
+  }
+  
+  const publicKey = window.EMAILJS_PUBLIC_KEY || 'Bq94zNa6cDvdTUCU8';
+  
+  try {
+    emailjs.init(publicKey);
+    console.log('EmailJS initialized successfully');
+  } catch (e) {
+    console.error('Failed to initialize EmailJS:', e);
+  }
+}
+
+initEmailJSWhenReady();
 </script>
 <!-- jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -4167,103 +4189,112 @@ async function _doSubmit() {
     const yr2 = data?.tahunan || 0;
     const total = fi + (yr2 * tempoh);
 
-    // 5. Insert ke Supabase
+    // 5. Insert ke Supabase — PERMOHONAN_AHLI (jadual permohonan menunggu semakan)
+    // NOTA: Permohonan baharu MESTI masuk ke PERMOHONAN_AHLI, BUKAN "AHLI DPMM JOHOR".
+    // "AHLI DPMM JOHOR" hanya untuk ahli sedia ada / diluluskan sahaja.
+    const nowIso = new Date().toISOString();
     const payload = {
-      // Existing database columns
-      BIL:                  tempRef,
-      FASAL_AHLI:           fasalVal,
-      NO_AHLI:              tempRef,
-      NAMA_AHLI:            val('nama_lengkap_pemohon'),
-      NAMA:                 val('nama_entiti'),
-      KAD_PENGENALAN:       val('no_kad_pengenal'),
-      ALAMAT:               val('alamat'),
-      EMEL:                 val('emel_syarikat'),
-      NO_HP:                val('no_tel_bimbit'),
-      JENIS_PERNIAGAAN:     jenis,
-      TARIKH_DAFTAR:        val('tarikh_daftar') || null,
-      STATUS:               'BARU',
-      NO_SSM:               val('no_pendaftaran'),
-      SSM_DATELINE:         val('tarikh_luput') || null,
-      YURAN_PENDAFTARAN:    fi,
-      YURAN_1_TAHUN:        yr2,
-      JUMLAH_YURAN_TAHUNAN: yr2 * tempoh,
-      JUMLAH_YURAN_KESELURUHAN: total,
-      TEMPOH_BAYARAN_YURAN: tempoh,
-      TARIKH_BAYARAN_2025:  new Date().toISOString().split('T')[0],
-      KAEDAH_BAYARAN:        'Online Transfer',
-      JAWATAN:              document.getElementById('proksi_jawatan').value,
-      DAERAH:               document.getElementById('negeri').value,
-      tarikh_bayaran_2026:   new Date().toISOString().split('T')[0],
-      
-      // New fields from manual form migration
-      kategori_ahli:        'B', // Default to Biasa
-      kuatkuasa_keahlian:   '',
-      no_mm:                '',
-      bil:                  '',
-      fi_daftar:             fi,
-      jumlah_bayaran_terima: total,
-      no_resit:              '',
-      tarikh_luput_daftar:  val('tarikh_luput') || null,
-      mat:                  '',
-      nama_pemohon:         val('nama_lengkap_pemohon'),
-      nama_syarikat:        val('nama_entiti'),
-      no_mykad:             val('no_kad_pengenal'),
-      cop_syarikat:         '',
-      jenis_entiti_perniagaan: getRadio('jenis_entiti'),
-      nama_entiti_perniagaan: val('nama_entiti'),
-      no_pendaftaran:       val('no_pendaftaran'),
-      alamat_pejabat_perniagaan: val('alamat'),
-      tarikh_daftar:        val('tarikh_daftar') || null,
-      no_tel:               val('no_tel_syarikat'),
-      no_hp:                val('no_tel_bimbit'),
-      aktiviti_perniagaan:  '',
-      butiran_perniagaan:  '',
+      ref_id:               tempRef,
+      jenis_keahlian:       jenis,
+      jenis_keahlian_label: JENIS_LABEL[jenis] || jenis,
+      fasal:                fasalVal,
+      yuran_daftar:         fi,
+      yuran_tahunan:        yr2,
+
+      // Maklumat entiti perniagaan
+      jenis_entiti:         getRadio('jenis_entiti'),
+      sektor:               getRadio('sektor'),
+      industri:             getCheckboxes('industri'),
+      rantaian_bekalan:     getCheckboxes('rantaian_bekalan'),
+      saiz_entiti:          getRadio('saiz_entiti'),
       persijilan:           getCheckboxes('persijilan'),
-      sijil_pendaftaran_perniagaan: uploadedUrls['ssm_sijil'] || null,
-      maklumat_perniagaan:  '',
-      sijil_daftar_plt:      uploadedUrls['sijil_plt'] || null,
-      maklumat_perkongsian_terkini: '',
-      maklumat_pemilik_perniagaan: '',
-      sijil_amalan_professional: uploadedUrls['sijil_profesional'] || null,
-      surat_kebenaran_beramal: uploadedUrls['surat_kebenaran'] || null,
-      sijil_pemerbadanan_syarikat: uploadedUrls['sijil_perbadanan'] || null,
-      salinan_sah_surat_pelantikan: uploadedUrls['surat_pelantikan'] || null,
-      sijil_pendaftaran_koperasi: uploadedUrls['sijil_koperasi'] || null,
-      salinan_sah_senarai_ahli_lembaga: uploadedUrls['senarai_lembaga'] || null,
-      sijil_pemerbadanan:   uploadedUrls['sijil_pemerbadanan'] || null,
-      sijil_persatuan_kelab: uploadedUrls['sijil_persatuan'] || null,
-      salinan_terkini_ssm:  uploadedUrls['profil_ssm'] || null,
-      salinan_terkini_skm:  uploadedUrls['ssm_maklumat'] || null,
-      salinan_terkini_professional: uploadedUrls['sijil_profesional'] || null,
-      laporan_carian_insolvensi: '',
-      salinan_kad_pengenal_depan: uploadedUrls['ic_pemohon_depan'] || null,
-      salinan_kad_pengenal_belakang: uploadedUrls['ic_pemohon_belakang'] || null,
-      gambar_passport_1:     uploadedUrls['gambar_1'] || null,
-      gambar_passport_2:     uploadedUrls['gambar_2'] || null,
-      borang_keahlian_lengkap: uploadedUrls['borang_9'] || null,
-      tandatangan_pengarah:  '',
-      tandatangan_pemohon:   '',
-      tarikh_tandatangan_pengarah: '',
-      tarikh_tandatangan_pemohon: '',
-      nama_pengarah:        '',
-      jawatan_pengarah:     document.getElementById('proksi_jawatan').value,
-      status_permohonan:    'BARU',
-      tarikh_permohonan:     new Date().toISOString(),
-      tarikh_semak:         null,
-      disemak_oleh:         null,
-      cop_rasmi:            null,
-      catatan:              null
+      persijilan_lain:      val('persijilan_lain') || null,
+      jenama:               val('jenama') || null,
+      aktiviti_perniagaan:  val('aktiviti_perniagaan') || null,
+      nama_entiti:          val('nama_entiti'),
+      no_pendaftaran:       val('no_pendaftaran'),
+      tarikh_daftar:        val('tarikh_daftar') || null,
+      tarikh_luput:         val('tarikh_luput') || null,
+      alamat:               val('alamat') || null,
+      poskod:               val('poskod') || null,
+      bandar:               val('bandar') || null,
+      negeri:               val('negeri') || null,
+      no_tel_syarikat:      val('no_tel_syarikat') || null,
+      url_syarikat:         val('url_syarikat') || null,
+      faks:                 val('faks') || null,
+      emel_syarikat:        val('emel_syarikat') || null,
+      modal_berbayar:       parseFloat(val('modal_berbayar')) || null,
+      modal_pusingan:       parseFloat(val('modal_pusingan')) || null,
+      jualan_tahunan:       jualan,
+
+      // Proksi / Pemohon
+      proksi_nama:          val('proksi_nama') || null,
+      proksi_ic:            val('proksi_ic') || null,
+      proksi_jawatan:       val('proksi_jawatan') || null,
+      proksi_hp:            val('proksi_hp') || null,
+      proksi_emel:          val('proksi_emel') || null,
+      nama_lengkap_pemohon: val('nama_lengkap_pemohon') || null,
+      no_kad_pengenal:      val('no_kad_pengenal') || null,
+      no_tel_bimbit:        val('no_tel_bimbit') || null,
+
+      // Pemegang saham & ahli lembaga
+      pemegang_saham:       pemegang_saham,
+      ahli_lembaga:         ahli_lembaga,
+
+      // Dokumen (URL storage)
+      url_ic_pemohon_depan:    uploadedUrls['ic_pemohon_depan'] || null,
+      url_ic_pemohon_belakang: uploadedUrls['ic_pemohon_belakang'] || null,
+      url_profil_ssm:          uploadedUrls['profil_ssm'] || null,
+      url_ssm_sijil:           uploadedUrls['ssm_sijil'] || null,
+      url_ssm_maklumat:        uploadedUrls['ssm_maklumat'] || null,
+      url_m_aa:                uploadedUrls['m_aa'] || null,
+      url_borang_9:            uploadedUrls['borang_9'] || null,
+      url_borang_24:           uploadedUrls['borang_24'] || null,
+      url_borang_49:           uploadedUrls['borang_49'] || null,
+      url_sijil_profesional:   uploadedUrls['sijil_profesional'] || null,
+      url_surat_kebenaran:     uploadedUrls['surat_kebenaran'] || null,
+      url_sijil_perbadanan:    uploadedUrls['sijil_perbadanan'] || null,
+      url_surat_pelantikan:    uploadedUrls['surat_pelantikan'] || null,
+      url_sijil_koperasi:      uploadedUrls['sijil_koperasi'] || null,
+      url_senarai_lembaga:     uploadedUrls['senarai_lembaga'] || null,
+      url_surat_proksi:        uploadedUrls['surat_proksi'] || null,
+      url_dokumen_tambahan:    uploadedUrls['tambahan'] || null,
+      url_gambar_1:            uploadedUrls['gambar_1'] || null,
+      url_gambar_2:            uploadedUrls['gambar_2'] || null,
+      url_insolvensi_entiti:   uploadedUrls['insolvensi_entiti'] || null,
+      url_insolvensi_pemohon:  uploadedUrls['insolvensi_pemohon'] || null,
+
+      // Bayaran
+      tempoh_yuran:         tempoh,
+      jumlah_fi_daftar:     fi,
+      jumlah_yuran:         yr2 * tempoh,
+      jumlah_bayar:         total,
+      kaedah_bayar:         'Online Transfer',
+      url_bukti_bayaran:    uploadedUrls['slip'] || null,
+
+      // Akuan / persetujuan
+      akuan_maklumat_benar:      !!(document.getElementById('akuan1') && document.getElementById('akuan1').checked),
+      akuan_fi_tidak_pulang:     !!(document.getElementById('akuan2') && document.getElementById('akuan2').checked),
+      akuan_pdpa:                !!(document.getElementById('akuan4') && document.getElementById('akuan4').checked),
+      akuan_maklumat_palsu:      !!(document.getElementById('akuan5') && document.getElementById('akuan5').checked),
+      akuan_penafian_kelulusan:  !!(document.getElementById('akuan6') && document.getElementById('akuan6').checked),
+
+      // Status & audit
+      status:               'BARU',
+      submitted_at:         nowIso,
+      ip_address:           clientIp,
+      user_agent:           userAgent
     };
 
     const { data: inserted, error: insertErr } = await window.sb
-      .from('AHLI DPMM JOHOR')
+      .from('PERMOHONAN_AHLI')
       .insert([payload])
       .select()
       .single();
 
     if (insertErr) throw new Error('Insert gagal: ' + insertErr.message);
 
-    const finalRef = inserted.BIL || tempRef;
+    const finalRef = inserted.ref_id || tempRef;
     state.refId = finalRef;
 
     // 6a. Resend — Notifikasi kepada Setiausaha (admin)
@@ -4313,65 +4344,67 @@ async function _doSubmit() {
         <p><strong>[ADMIN ALERT]</strong> Permohonan baharu diterima. Sila log masuk ke sistem untuk semakan.</p>
       `;
 
-      await fetch('/api/send-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          template: 'admin',
-          toEmail: ADMIN_EMAIL,
-          data: {
-            subject: `Permohonan Baharu - ${finalRef}`,
-            html: emailHtml
-          }
-        })
-      });
-    } catch (emailErr) {
-      console.warn('Resend admin error (non-critical):', emailErr);
+      // EmailJS - Admin notification
+      try {
+        const params = {
+          to_email: ADMIN_EMAIL,
+          ref_id: finalRef,
+          jenis: JENIS_LABEL[jenis] || jenis,
+          fasal: fasalVal,
+          nama_entiti: val('nama_entiti'),
+          proksi_nama: val('proksi_nama') || val('nama_entiti'),
+          proksi_hp: val('proksi_hp'),
+          proksi_emel: val('proksi_emel') || val('emel_syarikat'),
+          jumlah: `RM ${total.toLocaleString()}`,
+          tarikh: new Date().toLocaleDateString('ms-MY'),
+          ip_address: clientIp,
+          pesan: '[ADMIN ALERT] Permohonan baharu diterima. Sila log masuk ke sistem untuk semakan.',
+        };
+        
+        await emailjs.send(
+          window.CONFIG.EMAILJS_SERVICE_ID,
+          window.CONFIG.EMAILJS_ADMIN_TEMPLATE_ID,
+          params
+        );
+      } catch (emailErr) {
+        console.warn('EmailJS admin error (non-critical):', emailErr);
+      }
     }
 
-    // 6b. Resend — Notifikasi kepada pemohon (pengesahan penerimaan + disclaimer)
+    // 6b. EmailJS — Notifikasi kepada pemohon (pengesahan penerimaan + disclaimer)
     const pemohonEmail = val('proksi_emel') || val('emel_syarikat');
     if (pemohonEmail) {
       try {
-        const emailHtml = `
-          <h2>Pengesahan Penerimaan Permohonan - DPMM Negeri Johor</h2>
-          <p>Terima kasih kerana memohon untuk menjadi ahli DPMM Negeri Johor.</p>
-          <p><strong>No. Rujukan Permohonan:</strong> ${finalRef}</p>
-          <p><strong>Jenis:</strong> ${JENIS_LABEL[jenis]} (${jenis})</p>
-          <p><strong>Fasal:</strong> ${fasalVal}</p>
-          <p><strong>Nama Entiti:</strong> ${escapeHtml(val('nama_entiti'))}</p>
-          <p><strong>Proksi/Wakil:</strong> ${escapeHtml(val('proksi_nama')) || escapeHtml(val('nama_entiti'))}</p>
-          <p><strong>Jumlah Bayaran:</strong> RM ${total.toLocaleString()}</p>
-          <p><strong>Tarikh:</strong> ${new Date().toLocaleDateString('ms-MY')}</p>
-          <div style="background: #fff8e1; border: 1.5px solid #e8b800; border-radius: 10px; padding: 16px; margin: 20px 0;">
-            <strong>DISCLAIMER — SILA BACA:</strong><br>
-            E-mel ini adalah <u>pengesahan penerimaan sahaja</u> dan <strong>BUKAN kelulusan automatik</strong>. Permohonan ini tertakluk kepada pertimbangan Jawatankuasa DPMM Negeri Johor (Fasal 7.1). Keputusan muktamad akan dimaklumkan kemudian.
-          </div>
-          <p>Sila simpan no. rujukan ini untuk rujukan masa hadapan.</p>
-        `;
-
-        await fetch('/api/send-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            template: 'applicant',
-            toEmail: pemohonEmail,
-            data: {
-              subject: `Pengesahan Permohonan - ${finalRef}`,
-              html: emailHtml
-            }
-          })
-        });
+        const params = {
+          to_email: pemohonEmail,
+          ref_id: finalRef,
+          jenis: JENIS_LABEL[jenis] || jenis,
+          fasal: fasalVal,
+          nama_entiti: val('nama_entiti'),
+          proksi_nama: val('proksi_nama') || val('nama_entiti'),
+          proksi_hp: val('proksi_hp'),
+          proksi_emel: pemohonEmail,
+          jumlah: `RM ${total.toLocaleString()}`,
+          tarikh: new Date().toLocaleDateString('ms-MY'),
+          ip_address: clientIp,
+          pesan: 'Terima kasih kerana menghantar permohonan keahlian DPMM Negeri Johor. E-mel ini adalah pengesahan penerimaan sahaja dan BUKAN kelulusan automatik.',
+        };
+        
+        await emailjs.send(
+          window.CONFIG.EMAILJS_SERVICE_ID,
+          window.CONFIG.EMAILJS_APPLICANT_TEMPLATE_ID,
+          params
+        );
       } catch (emailErr) {
         console.warn('Resend pemohon error (non-critical):', emailErr);
       }
     }
 
     // Update audit fields
-    await window.sb.from('AHLI DPMM JOHOR')
+    await window.sb.from('PERMOHONAN_AHLI')
       .update({ 
-        created_by_ip: clientIp,
-        created_by_user_agent: userAgent
+        ip_address: clientIp,
+        user_agent: userAgent
       })
       .eq('ref_id', finalRef);
 
@@ -4422,7 +4455,7 @@ function showSuccess(refId) {
 async function sendEmailsInBackground(refId, payload, uploadedUrls, jenis, fasalVal, total) {
   try {
     // Update admin email status
-    await window.sb.from('AHLI DPMM JOHOR')
+    await window.sb.from('PERMOHONAN_AHLI')
       .update({ email_admin_sent: true, email_admin_sent_at: new Date().toISOString() })
       .eq('ref_id', refId);
     
@@ -4486,7 +4519,7 @@ async function sendEmailsInBackground(refId, payload, uploadedUrls, jenis, fasal
         })
       });
     } catch (adminEmailErr) {
-      await window.sb.from('AHLI DPMM JOHOR')
+      await window.sb.from('PERMOHONAN_AHLI')
         .update({ email_error: 'Admin email failed: ' + adminEmailErr.message })
         .eq('ref_id', refId);
       console.warn('Admin email failed (non-critical):', adminEmailErr);
@@ -4496,7 +4529,7 @@ async function sendEmailsInBackground(refId, payload, uploadedUrls, jenis, fasal
     const pemohonEmail = payload.proksi_emel || payload.emel_syarikat;
     if (pemohonEmail) {
       try {
-        await window.sb.from('AHLI DPMM JOHOR')
+        await window.sb.from('PERMOHONAN_AHLI')
           .update({ email_applicant_sent: true, email_applicant_sent_at: new Date().toISOString() })
           .eq('ref_id', refId);
         
@@ -4531,7 +4564,7 @@ async function sendEmailsInBackground(refId, payload, uploadedUrls, jenis, fasal
           })
         });
       } catch (applicantEmailErr) {
-        await window.sb.from('AHLI DPMM JOHOR')
+        await window.sb.from('PERMOHONAN_AHLI')
           .update({ email_error: 'Applicant email failed: ' + applicantEmailErr.message })
           .eq('ref_id', refId);
         console.warn('Applicant email failed (non-critical):', applicantEmailErr);
@@ -4540,7 +4573,7 @@ async function sendEmailsInBackground(refId, payload, uploadedUrls, jenis, fasal
     
   } catch (emailErr) {
     // Log error but don't fail submission
-    await window.sb.from('AHLI DPMM JOHOR')
+    await window.sb.from('PERMOHONAN_AHLI')
       .update({ email_error: emailErr.message })
       .eq('ref_id', refId);
     console.warn('Email process failed (non-critical):', emailErr);
@@ -5764,55 +5797,58 @@ async function sendChatMessage() {
     return;
   }
   
-  // Groq FAQ
-  // Security: GROQ_KEY MUST come from a backend proxy and must NEVER be embedded in the deployed client bundle.
-  // Current implementation uses null client-side key; production should use server-side proxy.
-  if (isKeyConfigured(GROQ_KEY)) {
+  // Groq FAQ - use server-side proxy for security
+  try {
     showTyping();
     _chat.history.push({ role: 'user', content: text });
     if (_chat.history.length > _chat.maxHistory * 2) {
       _chat.history = _chat.history.slice(-_chat.maxHistory * 2);
     }
-    try {
-      // SECURITY: GROQ_KEY must come from a backend proxy. Never embed this key in the deployed client bundle.
-      // The current implementation is for development only. Production must use a server-side proxy.
-      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${GROQ_KEY}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
-          messages: [
-            { role: 'system', content: buildSystemPrompt() },
-            ..._chat.history
-          ],
-          max_tokens: 800
-        })
-      });
-      const data = await response.json();
-      hideTyping();
-      if (data.choices && data.choices[0]) {
-        const reply = data.choices[0].message.content;
-        _chat.history.push({ role: 'assistant', content: reply });
-        try { sessionStorage.setItem('dpmm_chat_history', JSON.stringify(_chat.history)); } catch(e) {}
-        addBotMessage(reply);
-      } else {
-        addBotMessage('Maaf, saya tidak dapat menjawab sekarang. Sila hubungi urusetia.');
-        addContactChip();
-      }
-    } catch (e) {
-      hideTyping();
-      handleGroqError(e, text);
+    
+    const response = await fetch('/api/groq', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [
+          { role: 'system', content: buildSystemPrompt() },
+          ..._chat.history
+        ],
+        max_tokens: 800
+      })
+    });
+    
+    const result = await response.json();
+    hideTyping();
+    
+    if (result.success && result.data && result.data.choices && result.data.choices[0]) {
+      const reply = result.data.choices[0].message.content;
+      _chat.history.push({ role: 'assistant', content: reply });
+      try { sessionStorage.setItem('dpmm_chat_history', JSON.stringify(_chat.history)); } catch(e) {}
+      addBotMessage(reply);
+    } else {
+      // Graceful degradation: fall back to scripted FAQ responses
+      _chat.history = _chat.history.slice(0, -1); // Remove the user message we just added
+      const reply = showScriptedFAQ(text);
+      _chat.history.push({ role: 'user', content: text });
+      _chat.history.push({ role: 'assistant', content: reply });
+      if (_chat.history.length > _chat.maxHistory * 2) _chat.history = _chat.history.slice(-_chat.maxHistory * 2);
+      try { sessionStorage.setItem('dpmm_chat_history', JSON.stringify(_chat.history)); } catch(e) {}
+      addBotMessage(reply);
+      addContactChip();
     }
-  } else {
-    // Graceful degradation: When GROQ_KEY is null, fall back to scripted FAQ responses
-    _chat.history.push({ role: 'user', content: text });
+  } catch (e) {
+    hideTyping();
+    // Graceful degradation: fall back to scripted FAQ responses on error
+    _chat.history = _chat.history.slice(0, -1); // Remove the user message we just added
     const reply = showScriptedFAQ(text);
+    _chat.history.push({ role: 'user', content: text });
     _chat.history.push({ role: 'assistant', content: reply });
     if (_chat.history.length > _chat.maxHistory * 2) _chat.history = _chat.history.slice(-_chat.maxHistory * 2);
     try { sessionStorage.setItem('dpmm_chat_history', JSON.stringify(_chat.history)); } catch(e) {}
+    addBotMessage(reply);
     addContactChip();
   }
 }
