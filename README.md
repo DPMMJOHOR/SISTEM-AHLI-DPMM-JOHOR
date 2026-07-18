@@ -23,16 +23,22 @@ Sistem pengurusan ahli berasaskan web untuk Dewan Perniagaan Melayu Malaysia (DP
 - **Sistem Permohonan Keahlian** (borang.html)
   - Borang permohonan keahlian dalam talian
   - Pengesahan dokumen automatik
-  - Penjanaan PDF borang
-  - Notifikasi emel melalui EmailJS
+  - Penjanaan PDF borang dengan header pengesahan dalam talian
+  - **Penyimpanan PDF di Supabase Storage** dengan RLS policies
+  - **Hantar emel dengan lampiran PDF** melalui Supabase Edge Functions (Gmail SMTP)
+  - **Penonton PDF interaktif** di halaman kejayaan dan admin panel
+  - Notifikasi emel melalui EmailJS (fallback)
   - Sistem audit log untuk keselamatan
 
 ## 🛠️ Teknologi
 - HTML / CSS / JavaScript (satu fail)
-- Supabase (pangkalan data)
-- EmailJS (hantar emel)
+- Supabase (pangkalan data & Storage)
+- Supabase Edge Functions (hantar emel dengan lampiran PDF)
+- EmailJS (hantar emel - fallback)
 - Tesseract.js (OCR untuk slip pembayaran)
 - bcryptjs (hash kata laluan)
+- pdf-lib (penjanaan PDF borang)
+- nodemailer (SMTP untuk emel dalam Edge Functions)
 
 ## 📁 Struktur Fail
 ```
@@ -45,9 +51,16 @@ src/
   sentry-ai-wrapper.js ← Integrasi AI dengan Sentry
   modules/
     unified-auth.js    ← Sistem pengesahan terpadu
-migrations/             ← Skema pangkalan data Supabase
+supabase/
+  functions/           ← Supabase Edge Functions
+    email-with-pdf/    ← Edge Function untuk emel dengan lampiran PDF
+    ai-proxy/          ← Edge Function untuk AI (Groq/Gemini)
+  migrations/          ← Skema pangkalan data Supabase
+    storage_rls_policies.sql ← RLS policies untuk bucket permohonan-dokumen
+    add_pdf_url_columns.sql   ← Kolom untuk tracking PDF
 docs/                  ← Dokumentasi projek
   plans/               ← Pelan pelaksanaan
+    feature-pdf-workflow-supabase-1.md ← Pelan PDF workflow
 README.md              ← Dokumentasi ini
 ```
 
@@ -70,6 +83,28 @@ README.md              ← Dokumentasi ini
 - Hash kata laluan menggunakan bcryptjs
 
 ## 📝 Perubahan Terkini (Julai 2026)
+
+### PDF Workflow Enhancement (19 Julai 2026)
+- **PDF Header Addition:**
+  - Header pengesahan dalam talian ditambah ke semua 6 halaman PDF (top right)
+  - URL: https://dpmmjohor.github.io/SISTEM-AHLI-DPMM-JOHOR/borang.html
+- **Supabase Storage Integration:**
+  - PDF borang disimpan secara automatik di bucket `permohonan-dokumen`
+  - RLS policies dikonfigurasi untuk keselamatan storage
+  - Schema database dikemaskini dengan kolom `pdf_url`, `pdf_uploaded_at`, `pdf_file_size`
+- **Email with PDF Attachment:**
+  - Edge Function `email-with-pdf` dibuat untuk hantar emel dengan lampiran PDF
+  - Menggunakan Gmail SMTP untuk penghantaran emel
+  - Fallback ke EmailJS jika Edge Function gagal
+- **PDF Viewer:**
+  - Penonton PDF interaktif di halaman kejayaan (borang.html)
+  - Penonton PDF di admin panel (index.html) dalam modal Semak
+  - Fungsi cetak dan muat turun disediakan
+- **Manual Deployment Required:**
+  - Deploy migrations using Supabase CLI: `supabase db push`
+  - This ensures SQL runs with sufficient privileges to modify storage.objects
+  - Deploy Edge Function: `supabase functions deploy email-with-pdf`
+  - Configure environment variables (SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD)
 
 ### EmailJS Integration & Security Enhancements (18 Julai 2026)
 - **EmailJS Integration:**

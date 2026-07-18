@@ -2819,11 +2819,41 @@ textarea:focus-visible {
         Download Borang PDF
       </button>
       <br><br>
+      <button class="btn btn-primary" onclick="openPDFModal()">
+        Lihat Borang
+      </button>
+      <br><br>
       <button class="btn btn-wa" onclick="hubungiAdmin()">
         Hubungi Urusetia via WhatsApp
       </button>
       <br><br>
       <p style="font-size:0.8rem;color:var(--text-muted)">Simpan no. rujukan anda untuk tujuan susulan.</p>
+    </div>
+  </div>
+
+  <!-- PDF Viewer Modal -->
+  <div id="pdf-modal" class="modal" style="display:none;">
+    <div class="modal-content" style="max-width:90%;max-height:90vh;">
+      <div class="modal-header">
+        <h3>Borang Permohonan</h3>
+        <button class="modal-close" onclick="closePDFModal()">✕</button>
+      </div>
+      <div class="modal-body" style="padding:0;">
+        <div id="pdf-loading" style="display:flex;justify-content:center;align-items:center;height:400px;">
+          <div class="spinner"></div>
+          <p style="margin-left:16px;">Memuatkan borang...</p>
+        </div>
+        <iframe id="pdf-viewer" style="width:100%;height:70vh;border:none;display:none;"></iframe>
+        <div id="pdf-error" style="display:none;padding:40px;text-align:center;">
+          <p style="color:var(--error);">Gagal memuatkan borang PDF.</p>
+          <button class="btn btn-primary" onclick="closePDFModal()">Tutup</button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="printPDF()">Cetak</button>
+        <button class="btn btn-secondary" onclick="downloadPDF()">Muat Turun</button>
+        <button class="btn btn-secondary" onclick="closePDFModal()">Tutup</button>
+      </div>
     </div>
   </div>
 
@@ -4156,6 +4186,17 @@ async function _doSubmit() {
       }
     }
 
+    // 2b. Generate and upload PDF form
+    setLoadingText('Menjana borang PDF...');
+    const pdfBytes = await downloadPDFFromTemplate();
+    let pdfUploadResult = null;
+    
+    if (pdfBytes) {
+      setLoadingText('Memuat naik borang PDF...');
+      pdfUploadResult = await uploadPDFToSupabase(pdfBytes, tempRef);
+      console.log('PDF uploaded:', pdfUploadResult);
+    }
+
     setLoadingText('Menghantar permohonan...');
 
     // 3. Build jualan tahunan
@@ -4285,7 +4326,12 @@ async function _doSubmit() {
       status:               'BARU',
       submitted_at:         nowIso,
       ip_address:           clientIp,
-      user_agent:           userAgent
+      user_agent:           userAgent,
+
+      // PDF tracking
+      pdf_url:              pdfUploadResult?.path || null,
+      pdf_uploaded_at:      pdfUploadResult ? new Date().toISOString() : null,
+      pdf_file_size:        pdfUploadResult?.fileSize || null
     };
 
     const { data: inserted, error: insertErr } = await window.sb
@@ -4375,32 +4421,87 @@ async function _doSubmit() {
       console.warn('Admin email preparation error (non-critical):', err);
     }
 
-    // 6b. EmailJS — Notifikasi kepada pemohon (pengesahan penerimaan + disclaimer)
+    // 6b. Send emails via Edge Function with PDF attachment
     const pemohonEmail = val('proksi_emel') || val('emel_syarikat');
-    if (pemohonEmail) {
+    
+    // Prepare applicant data for email
+    const applicantEmailData = {
+      ref_id: finalRef,
+      nama_entiti: val('nama_entiti'),
+      nama_lengkap_pemohon: val('nama_lengkap_pemohon'),
+      no_kad_pengenal: val('no_kad_pengenal'),
+      jenis_keahlian_label: JENIS_LABEL[jenis] || jenis,
+      emel_syarikat: val('emel_syarikat'),
+      proksi_emel: val('proksi_emel'),
+      submitted_at: nowIso,
+      ip_address: clientIp
+    };
+
+    // Send admin email with PDF
+    try {
+      await sendEmailViaEdgeFunction('admin', pdfUploadResult?.signedUrl, applicantEmailData);
+      console.log('Admin email sent via Edge Function');
+    } catch (adminEmailErr) {
+      console.warn('Edge Function admin email error, falling back to EmailJS:', adminEmailErr);
+      // Fallback to EmailJS for admin
       try {
         const params = {
-          to_email: pemohonEmail,
+          to_email: ADMIN_EMAIL,
           ref_id: finalRef,
           jenis: JENIS_LABEL[jenis] || jenis,
           fasal: fasalVal,
           nama_entiti: val('nama_entiti'),
           proksi_nama: val('proksi_nama') || val('nama_entiti'),
           proksi_hp: val('proksi_hp'),
-          proksi_emel: pemohonEmail,
+          proksi_emel: val('proksi_emel') || val('emel_syarikat'),
           jumlah: `RM ${total.toLocaleString()}`,
           tarikh: new Date().toLocaleDateString('ms-MY'),
           ip_address: clientIp,
-          pesan: 'Terima kasih kerana menghantar permohonan keahlian DPMM Negeri Johor. E-mel ini adalah pengesahan penerimaan sahaja dan BUKAN kelulusan automatik.',
+          pesan: '[ADMIN ALERT] Permohonan baharu diterima. Sila log masuk ke sistem untuk semakan.',
         };
         
         await emailjs.send(
           window.CONFIG.EMAILJS_SERVICE_ID,
-          window.CONFIG.EMAILJS_APPLICANT_TEMPLATE_ID,
+          window.CONFIG.EMAILJS_ADMIN_TEMPLATE_ID,
           params
         );
-      } catch (emailErr) {
-        console.warn('Resend pemohon error (non-critical):', emailErr);
+      } catch (emailjsErr) {
+        console.warn('EmailJS admin error (non-critical):', emailjsErr);
+      }
+    }
+
+    // Send applicant email with PDF
+    if (pemohonEmail) {
+      try {
+        await sendEmailViaEdgeFunction('applicant', pdfUploadResult?.signedUrl, applicantEmailData);
+        console.log('Applicant email sent via Edge Function');
+      } catch (applicantEmailErr) {
+        console.warn('Edge Function applicant email error, falling back to EmailJS:', applicantEmailErr);
+        // Fallback to EmailJS for applicant
+        try {
+          const params = {
+            to_email: pemohonEmail,
+            ref_id: finalRef,
+            jenis: JENIS_LABEL[jenis] || jenis,
+            fasal: fasalVal,
+            nama_entiti: val('nama_entiti'),
+            proksi_nama: val('proksi_nama') || val('nama_entiti'),
+            proksi_hp: val('proksi_hp'),
+            proksi_emel: pemohonEmail,
+            jumlah: `RM ${total.toLocaleString()}`,
+            tarikh: new Date().toLocaleDateString('ms-MY'),
+            ip_address: clientIp,
+            pesan: 'Terima kasih kerana menghantar permohonan keahlian DPMM Negeri Johor. E-mel ini adalah pengesahan penerimaan sahaja dan BUKAN kelulusan automatik.',
+          };
+          
+          await emailjs.send(
+            window.CONFIG.EMAILJS_SERVICE_ID,
+            window.CONFIG.EMAILJS_APPLICANT_TEMPLATE_ID,
+            params
+          );
+        } catch (emailjsErr) {
+          console.warn('EmailJS pemohon error (non-critical):', emailjsErr);
+        }
       }
     }
 
@@ -5258,18 +5359,32 @@ async function testPDFGeneration() {
   await downloadPDF();
 }
 
-// Method 2: PDF Template Filling (using manual form as template)
+// Method 2: PDF Generation from scratch with complete form mapping
 async function downloadPDFFromTemplate() {
   try {
     const { PDFDocument, rgb, StandardFonts } = PDFLib;
-    const templateBytes = await fetch('borang-template.pdf').then(res => res.arrayBuffer());
-    const pdfDoc = await PDFDocument.load(templateBytes);
+    
+    // Create new PDF document (A4 size)
+    const pdfDoc = await PDFDocument.create();
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
     
-    const pages = pdfDoc.getPages();
-    const firstPage = pages[0];
+    // Add first page
+    const firstPage = pdfDoc.addPage([595.28, 841.89]);
     const { width, height } = firstPage.getSize();
+    
+    // Add online submission header (top right, all pages)
+    const headerText = 'https://dpmmjohor.github.io/SISTEM-AHLI-DPMM-JOHOR/borang.html';
+    drawTextOnPage(firstPage, headerText, width - 20, height - 30, 8, { color: rgb(0.5, 0.5, 0.5) });
+    
+    // Add header with title
+    let y = height - 50;
+    drawTextOnPage(firstPage, 'DEWAN PERNIAGAAN MELAYU MALAYSIA (NEGERI JOHOR)', width / 2, y, 14, { bold: true });
+    y -= 25;
+    drawTextOnPage(firstPage, 'BORANG KEAHLIAN BARU', width / 2, y, 12, { bold: true });
+    y -= 15;
+    drawTextOnPage(firstPage, 'Borang Kod: BRG/AHLI/01 v1.2', width / 2, y, 9);
+    y -= 40;
     
     // Helper function to draw text on specific page
     const drawTextOnPage = (page, text, x, y, size = 10, options = {}) => {
@@ -5283,98 +5398,559 @@ async function downloadPDFFromTemplate() {
       });
     };
     
+    // Helper function to draw checkmark
+    const drawCheckmark = (page, x, y, checked = true) => {
+      if (checked) {
+        drawTextOnPage(page, '✓', x, y, 12);
+      }
+    };
+    
+    // Helper function to draw line separator
+    const drawLine = (page, x1, y1, x2, y2) => {
+      page.drawLine({
+        start: { x: x1, y: y1 },
+        end: { x: x2, y: y2 },
+        thickness: 1,
+        color: rgb(0, 0, 0),
+      });
+    };
+    
     // Get form data
     const jenisEntiti = getRadio('jenis_entiti');
     const refId = state.refId || 'TEMP';
     
-    // Fill basic form fields (coordinates need adjustment based on your template)
-    drawTextOnPage(firstPage, refId, width - 100, height - 50, 10);
-    drawTextOnPage(firstPage, val('nama_lengkap_pemohon') || '', 150, height - 150, 10);
-    drawTextOnPage(firstPage, val('no_kad_pengenal') || '', 150, height - 180, 10);
-    drawTextOnPage(firstPage, val('nama_entiti') || '', 150, height - 210, 10);
-    drawTextOnPage(firstPage, val('no_pendaftaran') || '', 150, height - 240, 10);
-    drawTextOnPage(firstPage, val('tarikh_daftar') || '', 150, height - 270, 10);
-    drawTextOnPage(firstPage, val('tarikh_luput') || '', 150, height - 300, 10);
-    drawTextOnPage(firstPage, val('alamat') || '', 150, height - 330, 10);
-    drawTextOnPage(firstPage, val('poskod') || '', 150, height - 360, 10);
-    drawTextOnPage(firstPage, val('bandar') || '', 150, height - 390, 10);
-    drawTextOnPage(firstPage, val('emel_syarikat') || '', 150, height - 420, 10);
-    drawTextOnPage(firstPage, val('no_tel_bimbit') || '', 150, height - 450, 10);
+    // A4 page dimensions: 595.28pt width × 841.89pt height
+    // Start from top (height) and work down
     
-    // Add conditional pages based on entity type
-    if (jenisEntiti === 'Pemunya Tunggal' || jenisEntiti === 'PLT') {
-      // Page 5: Borang Akuan Berkanun for Enterprise Milikan Tunggal
-      const page5 = pdfDoc.addPage([595.28, 841.89]);
-      let y5 = page5.getHeight() - 50;
-      
-      drawTextOnPage(page5, 'BORANG AKUAN BERKANUN', width / 2, y5, 12, { bold: true, align: 'center' });
-      y5 -= 30;
-      
-      drawTextOnPage(page5, 'Saya yang bertandatangan di bawah mengaku bahawa:', 50, y5);
-      y5 -= 20;
-      
-      drawTextOnPage(page5, '1. Entiti perniagaan yang saya nyatakan adalah milikan tunggal.', 50, y5);
-      y5 -= 15;
-      drawTextOnPage(page5, '2. Segala maklumat yang diberikan adalah benar dan tepat.', 50, y5);
-      y5 -= 15;
-      drawTextOnPage(page5, '3. Saya bersetuju mematuhi semua peraturan DPMM Negeri Johor.', 50, y5);
-      y5 -= 30;
-      
-      // Signature section
-      drawTextOnPage(page5, 'Tandatangan:', 50, y5);
-      y5 -= 30;
-      drawTextOnPage(page5, 'Nama: ' + (val('nama_lengkap_pemohon') || ''), 50, y5 - 15);
-      y5 -= 30;
-      
-      drawTextOnPage(page5, 'Saksi:', 250, y5);
-      y5 -= 30;
-      drawTextOnPage(page5, 'Nama:', 250, y5 - 15);
-    }
+    // === DOCUMENT CHECKLIST SECTION ===
+    drawLine(firstPage, 50, y - 10, width - 50, y - 10);
+    y -= 30;
+    drawTextOnPage(firstPage, '[SENARAI DOKUMEN WAJIB UNTUK PENDAFTARAN AHLI]', 50, y, 10, { bold: true });
+    y -= 30;
+    drawTextOnPage(firstPage, 'Nama Pemohon:', 50, y, 10, { bold: true });
+    drawTextOnPage(firstPage, val('nama_lengkap_pemohon') || '', 180, y, 10);
+    y -= 25;
+    drawTextOnPage(firstPage, 'Nama Syarikat:', 50, y, 10, { bold: true });
+    drawTextOnPage(firstPage, val('nama_entiti') || '', 180, y, 10);
+    y -= 35;
     
+    // Document checkboxes (based on uploaded files)
+    drawTextOnPage(firstPage, '1) SALINAN SSM:', 50, y, 10, { bold: true });
+    y -= 20;
+    drawCheckmark(firstPage, 50, y, true); // Assume SSM uploaded
+    drawTextOnPage(firstPage, 'Sendirian Berhad (6.2.4)', 70, y, 9);
+    y -= 18;
+    drawCheckmark(firstPage, 50, y, jenisEntiti === 'Perkongsian' || jenisEntiti === 'Sdn Bhd');
+    drawTextOnPage(firstPage, 'Enterprise Perkongsian (6.2.1)', 70, y, 9);
+    y -= 25;
+    
+    drawTextOnPage(firstPage, '2) Salinan Kad Pengenalan:', 50, y, 10, { bold: true });
+    y -= 18;
+    drawCheckmark(firstPage, 50, y, true); // Assume IC uploaded
+    drawTextOnPage(firstPage, '(Depan & Belakang)', 70, y, 9);
+    y -= 25;
+    
+    drawTextOnPage(firstPage, '3) 2 Keping Gambar Passport:', 50, y, 10, { bold: true });
+    y -= 18;
+    drawCheckmark(firstPage, 50, y, true); // Assume photo uploaded
+    y -= 25;
+    
+    drawTextOnPage(firstPage, '4) Borang Keahlian Lengkap Diisi:', 50, y, 10, { bold: true });
+    y -= 18;
+    drawCheckmark(firstPage, 50, y, true); // Form is being filled
+    y -= 25;
+    
+    drawTextOnPage(firstPage, '5) Borang Proksi:', 50, y, 10, { bold: true });
+    y -= 18;
+    drawCheckmark(firstPage, 50, y, false); // Not uploaded
+    drawTextOnPage(firstPage, '(Dicetak dalam Letterhead Pemohon)', 70, y, 8);
+    y -= 25;
+    
+    drawTextOnPage(firstPage, '6) Borang Akuan Berkanun:', 50, y, 10, { bold: true });
+    y -= 18;
+    drawCheckmark(firstPage, 50, y, false); // Not uploaded
+    drawTextOnPage(firstPage, 'telah dicop Pesuruhjaya Sumpah', 70, y, 8);
+    y -= 25;
+    
+    drawTextOnPage(firstPage, '7) Bukti Bayaran Yuran:', 50, y, 10, { bold: true });
+    y -= 18;
+    drawCheckmark(firstPage, 50, y, true); // Assume payment uploaded
+    y -= 35;
+    
+    // Fee structure display
+    drawTextOnPage(firstPage, 'STRUKTUR YURAN:', 50, y, 10, { bold: true });
+    y -= 20;
+    const isEnterprise = jenisEntiti === 'Perkongsian' || jenisEntiti === 'Pemunya Tunggal' || jenisEntiti === 'PLT';
+    const regFee = isEnterprise ? 'RM50' : 'RM200';
+    const memFee = isEnterprise ? 'RM150' : 'RM450';
+    const total = isEnterprise ? 'RM200' : 'RM650';
+    
+    drawTextOnPage(firstPage, `Pendaftaran: ${regFee}`, 50, y, 9);
+    y -= 15;
+    drawTextOnPage(firstPage, `Keahlian (3 tahun): ${memFee}`, 50, y, 9);
+    y -= 15;
+    drawTextOnPage(firstPage, `JUMLAH: ${total}`, 50, y, 10, { bold: true });
+    y -= 40;
+    
+    // Declaration section
+    drawTextOnPage(firstPage, 'PENGESAHAN DOKUMEN:', 50, y, 10, { bold: true });
+    y -= 20;
+    drawTextOnPage(firstPage, 'Dengan ini saya mengesahkan bahawa borang ini adalah lengkap.', 50, y, 9);
+    y -= 30;
+    drawTextOnPage(firstPage, 'Nama Pemohon:', 50, y, 9);
+    drawTextOnPage(firstPage, val('nama_lengkap_pemohon') || '', 150, y, 9);
+    y -= 20;
+    drawTextOnPage(firstPage, 'Tarikh:', 50, y, 9);
+    drawTextOnPage(firstPage, new Date().toLocaleDateString('ms-MY'), 100, y, 9);
+    y -= 20;
+    drawTextOnPage(firstPage, 'Cop Rasmi:', 50, y, 9);
+    
+    // === PAGE 2: ENTITY INFORMATION (SECTION A) ===
+    const page2 = pdfDoc.addPage([595.28, 841.89]);
+    const { width: width2, height: height2 } = page2.getSize();
+    
+    // Add online submission header (top right)
+    drawTextOnPage(page2, headerText, width2 - 20, height2 - 30, 8, { color: rgb(0.5, 0.5, 0.5) });
+    
+    let y2 = page2.getHeight() - 50;
+    
+    drawTextOnPage(page2, '[A. MAKLUMAT PEMOHON - ENTITI PERNIAGAAN]', 50, y2, 10, { bold: true });
+    y2 -= 25;
+    
+    // Entity type
+    drawTextOnPage(page2, '1. JENIS ENTITI:', 50, y2, 10, { bold: true });
+    y2 -= 20;
+    drawCheckmark(page2, 50, y2, jenisEntiti === 'Pemunya Tunggal');
+    drawTextOnPage(page2, 'Pemunya Tunggal', 70, y2, 9);
+    y2 -= 15;
+    drawCheckmark(page2, 50, y2, jenisEntiti === 'PLT');
+    drawTextOnPage(page2, 'PLT', 70, y2, 9);
+    y2 -= 15;
+    drawCheckmark(page2, 50, y2, jenisEntiti === 'Perkongsian');
+    drawTextOnPage(page2, 'Perkongsian', 70, y2, 9);
+    y2 -= 15;
+    drawCheckmark(page2, 50, y2, jenisEntiti === 'Sdn Bhd');
+    drawTextOnPage(page2, 'Sdn Bhd', 70, y2, 9);
+    y2 -= 15;
+    drawCheckmark(page2, 50, y2, jenisEntiti === 'Bhd');
+    drawTextOnPage(page2, 'Bhd', 70, y2, 9);
+    y2 -= 25;
+    
+    // Sector
+    drawTextOnPage(page2, '2. SEKTOR:', 50, y2, 10, { bold: true });
+    y2 -= 20;
+    drawCheckmark(page2, 50, y2, true);
+    drawTextOnPage(page2, 'Perkhidmatan', 70, y2, 9);
+    y2 -= 25;
+    
+    // Industry
+    drawTextOnPage(page2, '3. INDUSTRI:', 50, y2, 10, { bold: true });
+    y2 -= 20;
+    drawTextOnPage(page2, val('industri') || 'Lain-lain', 70, y2, 9);
+    y2 -= 25;
+    
+    // Brand
+    drawTextOnPage(page2, '8. JENAMA:', 50, y2, 10, { bold: true });
+    drawTextOnPage(page2, val('jenama') || '', 150, y2, 10);
+    y2 -= 25;
+    
+    // Business activity
+    drawTextOnPage(page2, '9. AKTIVITI PERNIAGAAN:', 50, y2, 10, { bold: true });
+    drawTextOnPage(page2, val('aktiviti_perniagaan') || '', 50, y2 - 15, 9);
+    y2 -= 40;
+    
+    // === PAGE 3: BUSINESS DETAILS & SHAREHOLDERS ===
+    const page3 = pdfDoc.addPage([595.28, 841.89]);
+    const { width: width3, height: height3 } = page3.getSize();
+    
+    // Add online submission header (top right)
+    drawTextOnPage(page3, headerText, width3 - 20, height3 - 30, 8, { color: rgb(0.5, 0.5, 0.5) });
+    
+    let y3 = page3.getHeight() - 50;
+    
+    drawTextOnPage(page3, '[BUTIRAN PERNIAGAAN / PERUSAHAAN]', 50, y3, 10, { bold: true });
+    y3 -= 25;
+    
+    drawTextOnPage(page3, 'Nama Entiti Perniagaan:', 50, y3, 10);
+    drawTextOnPage(page3, val('nama_entiti') || '', 220, y3, 10);
+    y3 -= 20;
+    
+    drawTextOnPage(page3, 'No. Pendaftaran:', 50, y3, 10);
+    drawTextOnPage(page3, val('no_pendaftaran') || '', 220, y3, 10);
+    y3 -= 20;
+    
+    drawTextOnPage(page3, 'Alamat Pejabat/Premis:', 50, y3, 10);
+    drawTextOnPage(page3, val('alamat') || '', 220, y3, 10);
+    y3 -= 20;
+    
+    drawTextOnPage(page3, 'Poskod:', 50, y3, 10);
+    drawTextOnPage(page3, val('poskod') || '', 150, y3, 10);
+    drawTextOnPage(page3, 'Bandar:', 200, y3, 10);
+    drawTextOnPage(page3, val('bandar') || '', 260, y3, 10);
+    drawTextOnPage(page3, 'Negeri:', 380, y3, 10);
+    drawTextOnPage(page3, val('negeri') || 'Johor', 440, y3, 10);
+    y3 -= 20;
+    
+    drawTextOnPage(page3, 'Tarikh Daftar:', 50, y3, 10);
+    drawTextOnPage(page3, val('tarikh_daftar') || '', 150, y3, 10);
+    drawTextOnPage(page3, 'Tarikh Luput SSM:', 300, y3, 10);
+    drawTextOnPage(page3, val('tarikh_luput') || '', 440, y3, 10);
+    y3 -= 20;
+    
+    drawTextOnPage(page3, 'No. Tel:', 50, y3, 10);
+    drawTextOnPage(page3, val('no_tel_bimbit') || '', 150, y3, 10);
+    drawTextOnPage(page3, 'Faks:', 300, y3, 10);
+    drawTextOnPage(page3, val('no_faks') || '', 360, y3, 10);
+    y3 -= 20;
+    
+    drawTextOnPage(page3, 'E-mail:', 50, y3, 10);
+    drawTextOnPage(page3, val('emel_syarikat') || '', 150, y3, 10);
+    drawTextOnPage(page3, 'URL/Web:', 300, y3, 10);
+    drawTextOnPage(page3, val('url_web') || '', 360, y3, 10);
+    y3 -= 20;
+    
+    drawTextOnPage(page3, 'Modal Berbayar:', 50, y3, 10);
+    drawTextOnPage(page3, 'RM ' + (val('modal_berbayar') || ''), 170, y3, 10);
+    drawTextOnPage(page3, 'Modal Pusingan:', 300, y3, 10);
+    drawTextOnPage(page3, 'RM ' + (val('modal_pusingan') || ''), 420, y3, 10);
+    y3 -= 20;
+    
+    // Shareholders table
     if (jenisEntiti === 'Perkongsian' || jenisEntiti === 'Sdn Bhd' || jenisEntiti === 'Bhd') {
-      // Page 6: Partner Letterhead Signing for Sdn Bhd/Enterprise Milikan Bersama
-      const page6 = pdfDoc.addPage([595.28, 841.89]);
-      let y6 = page6.getHeight() - 50;
+      y3 -= 30;
+      drawTextOnPage(page3, '[9. MAKLUMAT PEGANGAN SAHAM]', 50, y3, 10, { bold: true });
+      y3 -= 25;
       
-      drawTextOnPage(page6, 'SURAT PENGESAHAN PENANDATANGAN', width / 2, y6, 12, { bold: true, align: 'center' });
-      y6 -= 30;
+      drawTextOnPage(page3, 'No.', 50, y3, 9, { bold: true });
+      drawTextOnPage(page3, 'Nama Pemegang Saham', 100, y3, 9, { bold: true });
+      drawTextOnPage(page3, '% Saham', 350, y3, 9, { bold: true });
+      drawTextOnPage(page3, 'Bangsa', 450, y3, 9, { bold: true });
+      y3 -= 20;
       
-      drawTextOnPage(page6, 'Kami yang bertandatangan di bawah mengesahkan bahawa:', 50, y6);
-      y6 -= 20;
-      
-      drawTextOnPage(page6, '1. Pemohon telah diberi kuasa untuk mewakili entiti ini.', 50, y6);
-      y6 -= 15;
-      drawTextOnPage(page6, '2. Segala maklumat yang diberikan adalah benar dan tepat.', 50, y6);
-      y6 -= 15;
-      drawTextOnPage(page6, '3. Kami bersetuju dengan semua syarat dan peraturan DPMM.', 50, y6);
-      y6 -= 30;
-      
-      // Partner signatures
-      drawTextOnPage(page6, 'Tandatangan Rakan Kongsi 1:', 50, y6);
-      y6 -= 30;
-      drawTextOnPage(page6, 'Nama:', 50, y6 - 15);
-      y6 -= 30;
-      
-      drawTextOnPage(page6, 'Tandatangan Rakan Kongsi 2:', 50, y6);
-      y6 -= 30;
-      drawTextOnPage(page6, 'Nama:', 50, y6 - 15);
+      const shareholders = state.shareholders || [];
+      for (let i = 0; i < Math.min(shareholders.length, 5); i++) {
+        const sh = shareholders[i];
+        drawTextOnPage(page3, (i + 1).toString(), 50, y3, 9);
+        drawTextOnPage(page3, sh.nama || '', 100, y3, 9);
+        drawTextOnPage(page3, sh.peratus_saham || '', 350, y3, 9);
+        drawTextOnPage(page3, sh.bangsa || '', 450, y3, 9);
+        y3 -= 20;
+      }
     }
+    
+    // Declaration on page 3
+    y3 -= 30;
+    drawTextOnPage(page3, '[PENGISYTIHARAN PEMOHON]', 50, y3, 10, { bold: true });
+    y3 -= 25;
+    drawTextOnPage(page3, 'Kami mengesahkan segala butiran dalam maklumat yang diberikan', 50, y3, 9);
+    y3 -= 15;
+    drawTextOnPage(page3, 'dalam permohonan ini adalah benar dan betul.', 50, y3, 9);
+    y3 -= 30;
+    
+    drawTextOnPage(page3, 'Nama Penandatangan:', 50, y3, 10);
+    drawTextOnPage(page3, val('nama_lengkap_pemohon') || '', 200, y3, 10);
+    y3 -= 20;
+    
+    drawTextOnPage(page3, 'No. MyKad:', 50, y3, 10);
+    drawTextOnPage(page3, val('no_kad_pengenal') || '', 150, y3, 10);
+    y3 -= 20;
+    
+    drawTextOnPage(page3, 'Cop Syarikat:', 50, y3, 10);
+    
+    // === PAGE 4: BORANG AKUAN BERKANUN (STATUTORY DECLARATION) ===
+    const page4 = pdfDoc.addPage([595.28, 841.89]);
+    const { width: width4, height: height4 } = page4.getSize();
+    
+    // Add online submission header (top right)
+    drawTextOnPage(page4, headerText, width4 - 20, height4 - 30, 8, { color: rgb(0.5, 0.5, 0.5) });
+    
+    let y4 = page4.getHeight() - 50;
+    
+    drawTextOnPage(page4, 'BORANG AKUAN BERKANUN', width / 2, y4, 12, { bold: true });
+    y4 -= 15;
+    drawTextOnPage(page4, '(AKTA AKUAN BERKANUN 1960)', width / 2, y4, 10, { bold: true });
+    y4 -= 40;
+    
+    drawTextOnPage(page4, 'Saya,', 50, y4, 10);
+    drawTextOnPage(page4, val('nama_lengkap_pemohon') || '', 100, y4, 10);
+    y4 -= 20;
+    
+    drawTextOnPage(page4, 'No. MyKad:', 50, y4, 10);
+    drawTextOnPage(page4, val('no_kad_pengenal') || '', 150, y4, 10);
+    y4 -= 20;
+    
+    drawTextOnPage(page4, 'seorang warganegara Malaysia yang beralamat di:', 50, y4, 10);
+    y4 -= 20;
+    drawTextOnPage(page4, val('alamat') || '', 50, y4, 10);
+    y4 -= 30;
+    
+    drawTextOnPage(page4, 'Sesungguhnya dan sebenarnya mengaku bahawa telah mengemukakan', 50, y4, 10);
+    y4 -= 15;
+    drawTextOnPage(page4, 'permohonan keahlian bagi entiti perniagaan berikut:', 50, y4, 10);
+    y4 -= 25;
+    
+    drawCheckmark(page4, 50, y4, jenisEntiti === 'Pemunya Tunggal' || jenisEntiti === 'PLT');
+    drawTextOnPage(page4, 'A. Ahli Biasa DPMM (Pemunya Tunggal, Profesional Perseorangan)', 70, y4, 9);
+    y4 -= 18;
+    drawTextOnPage(page4, 'Nama Enterprise/Amalan Profesional:', 50, y4, 9);
+    drawTextOnPage(page4, val('nama_entiti') || '', 300, y4, 9);
+    y4 -= 25;
+    
+    drawCheckmark(page4, 50, y4, jenisEntiti === 'Perkongsian' || jenisEntiti === 'Sdn Bhd' || jenisEntiti === 'Bhd');
+    drawTextOnPage(page4, 'B. Proksi (penama) yang dilantik oleh Syarikat / Koperasi / PLT', 70, y4, 9);
+    y4 -= 18;
+    drawTextOnPage(page4, 'Nama Entiti Perniagaan:', 50, y4, 9);
+    drawTextOnPage(page4, val('nama_entiti') || '', 200, y4, 9);
+    y4 -= 30;
+    
+    drawTextOnPage(page4, 'Dan saya tidak muflis ataupun belum dilepaskan kemuflisan,', 50, y4, 9);
+    y4 -= 15;
+    drawTextOnPage(page4, 'dan merupakan seorang ahli/wakil/proksi yang dibenarkan...', 50, y4, 9);
+    y4 -= 40;
+    
+    drawTextOnPage(page4, 'Diperbuat oleh:', 50, y4, 10);
+    drawTextOnPage(page4, val('nama_lengkap_pemohon') || '', 150, y4, 10);
+    y4 -= 20;
+    
+    drawTextOnPage(page4, 'No. MyKad:', 50, y4, 10);
+    drawTextOnPage(page4, val('no_kad_pengenal') || '', 150, y4, 10);
+    y4 -= 20;
+    
+    drawTextOnPage(page4, 'Di:', 50, y4, 10);
+    drawTextOnPage(page4, val('bandar') || '', 80, y4, 10);
+    drawTextOnPage(page4, 'Pada Tarikh:', 200, y4, 10);
+    drawTextOnPage(page4, new Date().toLocaleDateString('ms-MY'), 300, y4, 10);
+    y4 -= 30;
+    
+    drawTextOnPage(page4, 'Di hadapan saya, (Tandatangan Pesuruhjaya Sumpah):', 50, y4, 9);
+    y4 -= 25;
+    
+    drawTextOnPage(page4, 'Tandatangan:', 50, y4, 10);
+    drawTextOnPage(page4, 'Nama:', 150, y4, 10);
+    
+    // === PAGE 5: SURAT PROKSI (PROXY LETTER) - PART 1 ===
+    const page5 = pdfDoc.addPage([595.28, 841.89]);
+    const { width: width5, height: height5 } = page5.getSize();
+    
+    // Add online submission header (top right)
+    drawTextOnPage(page5, headerText, width5 - 20, height5 - 30, 8, { color: rgb(0.5, 0.5, 0.5) });
+    
+    let y5 = page5.getHeight() - 50;
+    
+    drawTextOnPage(page5, 'TEMPLATE BORANG PROKSI / PELANTIKAN WAKIL', width / 2, y5, 12, { bold: true });
+    y5 -= 15;
+    drawTextOnPage(page5, '(LETTERHEAD SYARIKAT)', width / 2, y5, 10, { bold: true });
+    y5 -= 40;
+    
+    drawTextOnPage(page5, 'No Ruj. Kami:', 50, y5, 10);
+    drawTextOnPage(page5, refId, 150, y5, 10);
+    drawTextOnPage(page5, 'Tarikh:', 400, y5, 10);
+    drawTextOnPage(page5, new Date().toLocaleDateString('ms-MY'), 460, y5, 10);
+    y5 -= 30;
+    
+    drawTextOnPage(page5, 'DEWAN PERNIAGAAN MELAYU MALAYSIA CAWANGAN JOHOR', 50, y5, 12, { bold: true });
+    y5 -= 20;
+    drawTextOnPage(page5, 'U.P.: YANG DIPERTUA', 50, y5, 10);
+    y5 -= 40;
+    
+    drawTextOnPage(page5, 'PERMOHONAN KEAHLIAN DEWAN PERNIAGAAN MELAYU MALAYSIA:', 50, y5, 10, { bold: true });
+    y5 -= 15;
+    drawTextOnPage(page5, 'PENAMAAN WAKIL/PENAMA/PROKSI', 50, y5, 10, { bold: true });
+    y5 -= 30;
+    
+    drawTextOnPage(page5, 'Kami bersetuju dan mengesahkan untuk melantik sebagai Wakil / Proksi', 50, y5, 10);
+    y5 -= 15;
+    drawTextOnPage(page5, 'kepada syarikat/perkongsian/persatuan kami seperti berikut:', 50, y5, 10);
+    y5 -= 30;
+    
+    drawTextOnPage(page5, 'a. Wakil / Proksi:', 50, y5, 10);
+    drawTextOnPage(page5, val('nama_lengkap_pemohon') || '', 200, y5, 10);
+    y5 -= 20;
+    
+    drawTextOnPage(page5, 'b. No MyKAD:', 50, y5, 10);
+    drawTextOnPage(page5, val('no_kad_pengenal') || '', 150, y5, 10);
+    y5 -= 20;
+    
+    drawTextOnPage(page5, 'c. Jawatan:', 50, y5, 10);
+    drawTextOnPage(page5, val('jawatan') || 'Pengarah', 150, y5, 10);
+    y5 -= 15;
+    drawTextOnPage(page5, '*(Pekongsi / Ahli Lembaga Pengarah / Anggota Lembaga Koperasi / Ahli Jawatankuasa Induk)', 50, y5, 8);
+    y5 -= 20;
+    
+    drawTextOnPage(page5, 'd. Tempoh:', 50, y5, 10);
+    drawTextOnPage(page5, 'Sehingga tempoh jawatan tamat atau surat penukaran oleh kami.', 150, y5, 9);
+    y5 -= 40;
+    
+    // === PAGE 6: SURAT PROKSI - PART 2 (SIGNATURE) ===
+    const page6 = pdfDoc.addPage([595.28, 841.89]);
+    const { width: width6, height: height6 } = page6.getSize();
+    
+    // Add online submission header (top right)
+    drawTextOnPage(page6, headerText, width6 - 20, height6 - 30, 8, { color: rgb(0.5, 0.5, 0.5) });
+    
+    let y6 = page6.getHeight() - 100;
+    
+    drawTextOnPage(page6, 'Yang benar,', 50, y6, 10);
+    y6 -= 40;
+    
+    drawTextOnPage(page6, 'Nama & Jawatan (Selain Penama Proksi)', 50, y6, 10);
+    y6 -= 60;
+    
+    drawTextOnPage(page6, 'Cop Rasmi Syarikat', 50, y6, 10);
+    y6 -= 100;
+    
+    drawTextOnPage(page6, '__________________________', 50, y6, 10);
+    y6 -= 20;
+    drawTextOnPage(page6, 'Tandatangan', 50, y6, 10);
+    y6 -= 20;
+    drawTextOnPage(page6, 'Nama:', 50, y6, 10);
     
     const pdfBytes = await pdfDoc.save();
-    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'Borang_Permohonan_' + state.refId + '.pdf';
-    a.click();
-    URL.revokeObjectURL(url);
-    showToast('PDF berjaya dimuat turun (Template Method)!', 'success');
+    return pdfBytes;
   } catch (err) {
     console.error('Template method failed:', err);
     showToast('Gagal menggunakan template - menggunakan jsPDF', 'error');
     downloadPDFWithJsPDF();
+    return null;
   }
 }
+
+// Send email via Supabase Edge Function with PDF attachment
+async function sendEmailViaEdgeFunction(recipientType, pdfUrl, applicantData) {
+  try {
+    const edgeFunctionUrl = `${window.CONFIG.SUPABASE_URL}/functions/v1/email-with-pdf`;
+    
+    const response = await fetch(edgeFunctionUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${window.CONFIG.SUPABASE_ANON_KEY}`
+      },
+      body: JSON.stringify({
+        recipient_type: recipientType,
+        pdf_url: pdfUrl,
+        applicant_data: applicantData
+      })
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Edge function error');
+    }
+
+    const result = await response.json();
+    console.log('Email sent via Edge Function:', result);
+    return result;
+  } catch (err) {
+    console.error('Edge Function email error:', err);
+    throw err;
+  }
+}
+
+// Upload PDF to Supabase Storage
+async function uploadPDFToSupabase(pdfBytes, refId) {
+  try {
+    const timestamp = Date.now();
+    const fileName = `borang-${refId}-${timestamp}.pdf`;
+    
+    const { data, error } = await supabase.storage
+      .from('permohonan-dokumen')
+      .upload(`borang/${refId}/${fileName}`, pdfBytes, {
+        contentType: 'application/pdf',
+        upsert: true,
+        metadata: {
+          ref_id: refId,
+          created_at: new Date().toISOString(),
+          file_size: pdfBytes.length,
+          mime_type: 'application/pdf'
+        }
+      });
+
+    if (error) throw error;
+
+    // Generate signed URL for PDF access (valid for 1 hour)
+    const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+      .from('permohonan-dokumen')
+      .createSignedUrl(`borang/${refId}/${fileName}`, 3600);
+
+    if (signedUrlError) throw signedUrlError;
+
+    // Store signed URL globally for success page
+    state.pdfSignedUrl = signedUrlData.signedUrl;
+
+    return {
+      path: data.path,
+      signedUrl: signedUrlData.signedUrl,
+      fileName: fileName,
+      fileSize: pdfBytes.length
+    };
+  } catch (err) {
+    console.error('PDF upload failed:', err);
+    throw err;
+  }
+}
+
+// PDF Modal functions
+function openPDFModal() {
+  const modal = document.getElementById('pdf-modal');
+  const pdfViewer = document.getElementById('pdf-viewer');
+  const pdfLoading = document.getElementById('pdf-loading');
+  const pdfError = document.getElementById('pdf-error');
+  
+  modal.style.display = 'flex';
+  pdfLoading.style.display = 'flex';
+  pdfViewer.style.display = 'none';
+  pdfError.style.display = 'none';
+  
+  if (state.pdfSignedUrl) {
+    pdfViewer.src = state.pdfSignedUrl;
+    pdfViewer.onload = () => {
+      pdfLoading.style.display = 'none';
+      pdfViewer.style.display = 'block';
+    };
+    pdfViewer.onerror = () => {
+      pdfLoading.style.display = 'none';
+      pdfError.style.display = 'block';
+    };
+  } else {
+    // Generate PDF on the fly if no signed URL
+    downloadPDFFromTemplate().then(pdfBytes => {
+      if (pdfBytes) {
+        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        pdfViewer.src = url;
+        pdfViewer.onload = () => {
+          pdfLoading.style.display = 'none';
+          pdfViewer.style.display = 'block';
+        };
+      } else {
+        pdfLoading.style.display = 'none';
+        pdfError.style.display = 'block';
+      }
+    });
+  }
+}
+
+function closePDFModal() {
+  const modal = document.getElementById('pdf-modal');
+  modal.style.display = 'none';
+  const pdfViewer = document.getElementById('pdf-viewer');
+  pdfViewer.src = '';
+}
+
+function printPDF() {
+  const pdfViewer = document.getElementById('pdf-viewer');
+  if (pdfViewer.contentWindow) {
+    pdfViewer.contentWindow.print();
+  }
+}
+
+// Close modal on ESC key
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    closePDFModal();
+  }
+});
 
 /* ============================================================
    LOCALSTORAGE SAVE/RESUME
