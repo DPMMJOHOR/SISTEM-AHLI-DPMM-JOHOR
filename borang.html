@@ -5369,6 +5369,18 @@ async function downloadPDFFromTemplate() {
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
     
+    // Helper function to draw text on specific page
+    const drawTextOnPage = (page, text, x, y, size = 10, options = {}) => {
+      page.drawText(text, {
+        x,
+        y,
+        size,
+        font: options.bold ? fontBold : font,
+        color: rgb(0, 0, 0),
+        ...options
+      });
+    };
+    
     // Add first page
     const firstPage = pdfDoc.addPage([595.28, 841.89]);
     const { width, height } = firstPage.getSize();
@@ -5385,18 +5397,6 @@ async function downloadPDFFromTemplate() {
     y -= 15;
     drawTextOnPage(firstPage, 'Borang Kod: BRG/AHLI/01 v1.2', width / 2, y, 9);
     y -= 40;
-    
-    // Helper function to draw text on specific page
-    const drawTextOnPage = (page, text, x, y, size = 10, options = {}) => {
-      page.drawText(text, {
-        x,
-        y,
-        size,
-        font: options.bold ? fontBold : font,
-        color: rgb(0, 0, 0),
-        ...options
-      });
-    };
     
     // Helper function to draw checkmark
     const drawCheckmark = (page, x, y, checked = true) => {
