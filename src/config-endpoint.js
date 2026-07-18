@@ -9,9 +9,9 @@ dotenv.config();
 const app = express();
 const PORT = process.env.CONFIG_PORT || 3001;
 
-// Middleware - allow CORS for testing
+// Middleware - allow CORS for testing and production
 app.use(cors({
-  origin: ['http://localhost:8080', 'http://localhost:3001', 'http://127.0.0.1:8080', 'http://127.0.0.1:3001'],
+  origin: ['http://localhost:8080', 'http://localhost:3001', 'http://127.0.0.1:8080', 'http://127.0.0.1:3001', 'https://dpmmjohor.github.io'],
   credentials: true
 }));
 app.use(express.json());
@@ -221,10 +221,15 @@ app.post('/api/send-email', async (req, res) => {
   }
 });
 
-// Groq AI proxy endpoint - secure server-side proxy for AIMAN chatbot
+// Groq AI proxy endpoint - secure server-side proxy for AIMAN chatbot and Isi Pintar vision
 app.post('/api/groq', async (req, res) => {
   try {
-    const { messages, model = 'llama-3.3-70b-versatile', max_tokens = 800 } = req.body;
+    const { 
+      messages, 
+      model = 'llama-3.3-70b-versatile', 
+      max_tokens = 800,
+      temperature = 0.7
+    } = req.body;
     
     if (!process.env.GROQ_API_KEY) {
       return res.status(500).json({
@@ -249,7 +254,8 @@ app.post('/api/groq', async (req, res) => {
       body: JSON.stringify({
         model,
         messages,
-        max_tokens
+        max_tokens,
+        temperature
       })
     });
     

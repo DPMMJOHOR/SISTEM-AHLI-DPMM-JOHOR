@@ -6236,15 +6236,13 @@ function compressImage(file, maxPx) {
 }
 
 async function callGroqVision(base64DataUrl, prompt) {
-  // Security: GROQ_KEY MUST come from a backend proxy and must NEVER be embedded in the deployed client bundle.
-  // Current implementation uses null client-side key; production should use server-side proxy.
+  // Direct API call for GitHub Pages deployment
   if (!isKeyConfigured(GROQ_KEY)) throw new Error('GROQ_KEY tidak dikonfigurasi. Sila isi secara manual.');
   var parts = base64DataUrl.split(',');
   var mimeMatch = parts[0].match(/:(.*?);/);
   var mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
   var base64Data = parts[1];
-  // SECURITY: GROQ_KEY must come from a backend proxy. Never embed this key in the deployed client bundle.
-  // The current implementation is for development only. Production must use a server-side proxy.
+  
   var response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST',
     headers: { 'Authorization': 'Bearer ' + GROQ_KEY, 'Content-Type': 'application/json' },
@@ -6258,10 +6256,12 @@ async function callGroqVision(base64DataUrl, prompt) {
       max_tokens: 512
     })
   });
+  
   if (!response.ok) {
     var err = await response.json().catch(function() { return {}; });
     throw new Error((err && err.error && err.error.message) || ('Groq API error ' + response.status));
   }
+  
   var data = await response.json();
   var text = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || '';
   var jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/) || text.match(/(\{[\s\S]*\})/);

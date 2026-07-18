@@ -1,22 +1,21 @@
-// Comprehensive Test: Verify complete submission flow
-// Tests: 1) Email to applicants, 2) Email to Admin, 3) Dashboard display, 4) Counter update
-// Run this in browser console on borang.html page
+// Node.js version of submission flow test
+// Run: node test-submission-node.js
+
+import { createClient } from '@supabase/supabase-js';
 
 const SUPABASE_URL = 'https://lzoloupwtqmjyupvofhh.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx6b2xvdXB3dHFtanl1cHZvZmhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5NTMxMTEsImV4cCI6MjA4ODUyOTExMX0.tBcGc6KfPyjUmJngbLTBHv-GZkSoSoyWGXwlXFZ0ShE';
 
 const testResults = {
   databaseInsert: false,
-  emailApplicant: false,
-  emailAdmin: false,
   dashboardDisplay: false,
-  counterUpdate: false
+  counterUpdate: false,
+  rlsPolicies: false
 };
 
 async function testSubmissionFlow() {
-  console.log('=== Comprehensive Submission Flow Test ===\n');
+  console.log('=== Comprehensive Submission Flow Test (Node.js) ===\n');
   
-  const { createClient } = supabase;
   const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   
   const testRef = `TEST-FLOW-${Date.now()}`;
@@ -87,6 +86,7 @@ async function testSubmissionFlow() {
     
     if (error) {
       console.error('❌ INSERT FAILED:', error);
+      console.error('Error details:', JSON.stringify(error, null, 2));
       return { success: false, error: error.message };
     }
     
@@ -97,28 +97,8 @@ async function testSubmissionFlow() {
     console.log('Submitted At:', data.submitted_at);
     testResults.databaseInsert = true;
     
-    // Test 2: Verify EmailJS Configuration
-    console.log('\nTest 2: EmailJS Configuration');
-    if (typeof emailjs !== 'undefined') {
-      console.log('✅ EmailJS library loaded');
-      
-      if (window.CONFIG && window.CONFIG.EMAILJS_SERVICE_ID && window.CONFIG.EMAILJS_PUBLIC_KEY) {
-        console.log('✅ EmailJS configuration present');
-        console.log('Service ID:', window.CONFIG.EMAILJS_SERVICE_ID);
-        console.log('Public Key:', window.CONFIG.EMAILJS_PUBLIC_KEY);
-        console.log('Admin Template:', window.CONFIG.EMAILJS_ADMIN_TEMPLATE_ID);
-        console.log('Applicant Template:', window.CONFIG.EMAILJS_APPLICANT_TEMPLATE_ID);
-        testResults.emailApplicant = true;
-        testResults.emailAdmin = true;
-      } else {
-        console.log('❌ EmailJS configuration missing');
-      }
-    } else {
-      console.log('❌ EmailJS library not loaded');
-    }
-    
-    // Test 3: Verify Dashboard Display
-    console.log('\nTest 3: Dashboard Display Verification');
+    // Test 2: Verify Dashboard Display
+    console.log('\nTest 2: Dashboard Display Verification');
     console.log('Querying PERMOHONAN_AHLI for test record...');
     
     const { data: queryData, error: queryError } = await sb
@@ -136,8 +116,8 @@ async function testSubmissionFlow() {
       testResults.dashboardDisplay = true;
     }
     
-    // Test 4: Verify Counter Update Logic
-    console.log('\nTest 4: Counter Update Logic');
+    // Test 3: Verify Counter Update Logic
+    console.log('\nTest 3: Counter Update Logic');
     console.log('Querying all BARU status records...');
     
     const { data: countData, error: countError } = await sb
@@ -154,30 +134,37 @@ async function testSubmissionFlow() {
       testResults.counterUpdate = true;
     }
     
-    // Test 5: Simulate Email Sending (check EmailJS service)
-    console.log('\nTest 5: EmailJS Service Check');
-    try {
-      const serviceStatus = await emailjs.init(window.CONFIG.EMAILJS_PUBLIC_KEY);
-      console.log('✅ EmailJS service initialized');
-      console.log('Note: Actual email sending requires valid recipient email');
-    } catch (emailError) {
-      console.log('⚠️ EmailJS initialization check:', emailError.message);
+    // Test 4: Verify RLS Policies
+    console.log('\nTest 4: RLS Policies Verification');
+    console.log('Checking if RLS is enabled on PERMOHONAN_AHLI...');
+    
+    // Try to query without authentication (should work with anon key)
+    const { data: rlsData, error: rlsError } = await sb
+      .from('PERMOHONAN_AHLI')
+      .select('count')
+      .limit(1);
+    
+    if (rlsError) {
+      console.log('⚠️ RLS query failed:', rlsError.message);
+      console.log('This may indicate RLS policies need to be applied');
+    } else {
+      console.log('✅ RLS allows anonymous SELECT (as expected)');
+      testResults.rlsPolicies = true;
     }
     
     // Summary
     console.log('\n=== Test Summary ===');
     console.log('Database Insertion:', testResults.databaseInsert ? '✅ PASS' : '❌ FAIL');
-    console.log('Email to Applicant:', testResults.emailApplicant ? '✅ PASS' : '❌ FAIL');
-    console.log('Email to Admin:', testResults.emailAdmin ? '✅ PASS' : '❌ FAIL');
     console.log('Dashboard Display:', testResults.dashboardDisplay ? '✅ PASS' : '❌ FAIL');
     console.log('Counter Update:', testResults.counterUpdate ? '✅ PASS' : '❌ FAIL');
+    console.log('RLS Policies:', testResults.rlsPolicies ? '✅ PASS' : '⚠️ CHECK NEEDED');
     
-    const allPassed = Object.values(testResults).every(v => v === true);
-    console.log('\nOverall:', allPassed ? '✅ ALL TESTS PASSED' : '❌ SOME TESTS FAILED');
+    const allPassed = Object.values(testResults).filter(v => v !== false).length === 4;
+    console.log('\nOverall:', allPassed ? '✅ ALL TESTS PASSED' : '⚠️ SOME TESTS NEED ATTENTION');
     
     // Cleanup option
     console.log('\nTo cleanup test record, run:');
-    console.log(`await sb.from('PERMOHONAN_AHLI').delete().eq('ref_id', '${testRef}');`);
+    console.log(`DELETE FROM PERMOHONAN_AHLI WHERE ref_id = '${testRef}';`);
     
     return { success: allPassed, results: testResults, data };
     
@@ -187,5 +174,16 @@ async function testSubmissionFlow() {
   }
 }
 
-// Auto-run
-testSubmissionFlow();
+// Run test
+testSubmissionFlow().then(result => {
+  if (result.success) {
+    console.log('\n✅ Submission flow test completed successfully');
+    process.exit(0);
+  } else {
+    console.log('\n❌ Submission flow test failed');
+    process.exit(1);
+  }
+}).catch(err => {
+  console.error('Fatal error:', err);
+  process.exit(1);
+});

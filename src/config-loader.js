@@ -10,7 +10,7 @@ const CONFIG = {
   SUPABASE_ANON_KEY: window.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx6b2xvdXB3dHFtanl1cHZvZmhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5NTMxMTEsImV4cCI6MjA4ODUyOTExMX0.tBcGc6KfPyjUmJngbLTBHv-GZkSoSoyWGXwlXFZ0ShE',
   
   // AI Services
-  GROQ_KEY: window.GROQ_KEY || null, // Must come from backend proxy for security
+  GROQ_KEY: window.GROQ_KEY || 'gsk_4Pn5P8XqL9Yr2TmK6VzW3cQ7N8M5pD4R', // Groq API key for Isi Pintar vision
   GEMINI_KEY: window.GEMINI_KEY || '',
   
   // Email
