@@ -6236,30 +6236,22 @@ function compressImage(file, maxPx) {
 }
 
 async function callGroqVision(base64DataUrl, prompt) {
-  // Direct API call for GitHub Pages deployment
-  if (!isKeyConfigured(GROQ_KEY)) throw new Error('GROQ_KEY tidak dikonfigurasi. Sila isi secara manual.');
-  var parts = base64DataUrl.split(',');
-  var mimeMatch = parts[0].match(/:(.*?);/);
-  var mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
-  var base64Data = parts[1];
-  
-  var response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+  // Call Edge Function proxy for secure API key handling
+  var response = await fetch('https://lzoloupwtqmjyupvofhh.supabase.co/functions/v1/ai-proxy', {
     method: 'POST',
-    headers: { 'Authorization': 'Bearer ' + GROQ_KEY, 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
+      provider: 'groq',
+      type: 'vision',
       model: 'meta-llama/llama-4-scout-17b-16e-instruct',
-      messages: [{ role: 'user', content: [
-        { type: 'text', text: prompt },
-        { type: 'image_url', image_url: { url: 'data:' + mimeType + ';base64,' + base64Data } }
-      ]}],
-      temperature: 0.1,
-      max_tokens: 512
+      image: base64DataUrl,
+      prompt: prompt
     })
   });
   
   if (!response.ok) {
     var err = await response.json().catch(function() { return {}; });
-    throw new Error((err && err.error && err.error.message) || ('Groq API error ' + response.status));
+    throw new Error((err && err.error) || ('AI API error ' + response.status));
   }
   
   var data = await response.json();

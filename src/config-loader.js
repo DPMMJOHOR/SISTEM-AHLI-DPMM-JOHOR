@@ -9,9 +9,9 @@ const CONFIG = {
   SUPABASE_URL: window.SUPABASE_URL || 'https://lzoloupwtqmjyupvofhh.supabase.co',
   SUPABASE_ANON_KEY: window.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx6b2xvdXB3dHFtanl1cHZvZmhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5NTMxMTEsImV4cCI6MjA4ODUyOTExMX0.tBcGc6KfPyjUmJngbLTBHv-GZkSoSoyWGXwlXFZ0ShE',
   
-  // AI Services
-  GROQ_KEY: window.GROQ_KEY || 'gsk_4Pn5P8XqL9Yr2TmK6VzW3cQ7N8M5pD4R', // Groq API key for Isi Pintar vision
-  GEMINI_KEY: window.GEMINI_KEY || '',
+  // AI Services - Keys now managed via Supabase Edge Functions
+  GROQ_KEY: window.GROQ_KEY || '', // Groq API key - use Edge Function proxy
+  GEMINI_KEY: window.GEMINI_KEY || '', // Gemini API key - use Edge Function proxy
   
   // Email
   RESEND_API_KEY: window.RESEND_API_KEY || '',

@@ -7074,44 +7074,37 @@ async function sendAdminMessage() {
   input.value = '';
   addAdminUserMessage(text);
 
-  var isKeyOk = (typeof window.CONFIG.GROQ_KEY !== 'undefined') && window.CONFIG.GROQ_KEY && !window.CONFIG.GROQ_KEY.startsWith('YOUR_') && window.CONFIG.GROQ_KEY.length > 20;
-
-  if (isKeyOk) {
-    showAdminTyping();
-    _clerk.history.push({role:'user',content:text});
-    if (_clerk.history.length > _clerk.maxHistory * 2) _clerk.history = _clerk.history.slice(-_clerk.maxHistory * 2);
-    try {
-      var resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method:'POST',
-        headers:{'Authorization':'Bearer '+window.CONFIG.GROQ_KEY,'Content-Type':'application/json'},
-        body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'system',content:buildAdminSystemPrompt()},..._clerk.history],max_tokens:900})
-      });
-      var data = await resp.json();
-      hideAdminTyping();
-      if (data.choices && data.choices[0]) {
-        var reply = data.choices[0].message.content;
-        var intent = parseGroqIntent(reply);
-        var histSummary = intent.action === 'answer' ? (intent.params.text||reply).slice(0,200) : '[Tindakan: '+intent.action+']';
-        _clerk.history.push({role:'assistant',content:histSummary});
-        routeAction(intent);
-      } else {
-        console.error('Admin clerk Groq error:', (data.error&&data.error.message)||data);
-        routeAction(parseGroqIntent(text));
-      }
-    } catch(e) {
-      hideAdminTyping();
-      console.error('Admin clerk Groq error:',e);
+  // Call Edge Function proxy for secure API key handling
+  showAdminTyping();
+  _clerk.history.push({role:'user',content:text});
+  if (_clerk.history.length > _clerk.maxHistory * 2) _clerk.history = _clerk.history.slice(-_clerk.maxHistory * 2);
+  try {
+    var resp = await fetch('https://lzoloupwtqmjyupvofhh.supabase.co/functions/v1/ai-proxy', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        provider: 'groq',
+        type: 'chat',
+        model: 'llama-3.3-70b-versatile',
+        messages: [{role:'system',content:buildAdminSystemPrompt()},..._clerk.history],
+        max_tokens: 900
+      })
+    });
+    var data = await resp.json();
+    hideAdminTyping();
+    if (data.choices && data.choices[0]) {
+      var reply = data.choices[0].message.content;
+      var intent = parseGroqIntent(reply);
+      var histSummary = intent.action === 'answer' ? (intent.params.text||reply).slice(0,200) : '[Tindakan: '+intent.action+']';
+      _clerk.history.push({role:'assistant',content:histSummary});
+      routeAction(intent);
+    } else {
+      console.error('Admin clerk Groq error:', (data.error&&data.error.message)||data);
       routeAction(parseGroqIntent(text));
     }
-  } else {
-    if (!document.getElementById('aiman-dumb-notice')) {
-      var nb = document.createElement('div');
-      nb.id = 'aiman-dumb-notice';
-      nb.style.cssText = 'margin:6px 12px;padding:7px 10px;background:#FFF4E6;border:1.5px solid #FFA94D;border-radius:8px;font-size:11px;color:#7c5500;';
-      nb.innerHTML = '&#9888;&#65039; Mod Asas aktif (GROQ_KEY tidak dikonfigurasi). Hanya soalan mudah dijawab. Tambah kunci dalam <code>config-local.js</code> untuk AI penuh.';
-      document.getElementById('admin-clerk-messages').appendChild(nb);
-      document.getElementById('admin-clerk-messages').scrollTop = 99999;
-    }
+  } catch(e) {
+    hideAdminTyping();
+    console.error('Admin clerk Groq error:',e);
     routeAction(parseGroqIntent(text));
   }
 }
