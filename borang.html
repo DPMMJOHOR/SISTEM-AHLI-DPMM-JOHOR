@@ -4371,6 +4371,8 @@ async function _doSubmit() {
       } catch (emailErr) {
         console.warn('EmailJS admin error (non-critical):', emailErr);
       }
+    } catch (err) {
+      console.warn('Admin email preparation error (non-critical):', err);
     }
 
     // 6b. EmailJS — Notifikasi kepada pemohon (pengesahan penerimaan + disclaimer)
