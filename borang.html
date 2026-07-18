@@ -4231,12 +4231,12 @@ async function _doSubmit() {
 
       // Proksi / Pemohon
       proksi_nama:          val('proksi_nama') || null,
-      proksi_ic:            val('proksi_ic') || null,
+      proksi_ic:            val('proksi_ic') ? val('proksi_ic').replace(/\D/g, '') : null,
       proksi_jawatan:       val('proksi_jawatan') || null,
       proksi_hp:            val('proksi_hp') || null,
       proksi_emel:          val('proksi_emel') || null,
       nama_lengkap_pemohon: val('nama_lengkap_pemohon') || null,
-      no_kad_pengenal:      val('no_kad_pengenal') || null,
+      no_kad_pengenal:      val('no_kad_pengenal') ? val('no_kad_pengenal').replace(/\D/g, '') : null,
       no_tel_bimbit:        val('no_tel_bimbit') || null,
 
       // Pemegang saham & ahli lembaga
