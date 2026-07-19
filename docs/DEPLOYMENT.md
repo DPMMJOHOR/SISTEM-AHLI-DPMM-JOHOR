@@ -308,3 +308,89 @@ After deployment:
 2. Collect feedback
 3. Plan improvements
 4. Schedule next deployment
+
+## Borang.html Specific Deployment Notes
+
+### Critical Pre-Deployment Checks for borang.html
+
+Before deploying borang.html changes:
+
+1. **JavaScript Scope Verification**
+   - Ensure all variables are defined within their function scope
+   - Check for ReferenceError-prone patterns (variables used before definition)
+   - Verify no global variable dependencies in inner functions
+
+2. **RLS Policy Synchronization**
+   - Frontend validation must match RLS policy requirements exactly
+   - All 6 checkboxes (akuan1-6) must be in payload if RLS requires them
+   - Verify payload construction includes all RLS-required fields
+
+3. **Database Schema Alignment**
+   - If adding database columns, update borang.html payload immediately
+   - Apply migrations before updating frontend code
+   - Verify all INSERT/UPDATE statements include new columns
+
+4. **Code Structure Validation**
+   - Remove orphaned try/catch blocks
+   - Ensure proper error handling structure
+   - Verify no syntax errors (especially in PDF generation functions)
+
+### Post-Deployment Verification for borang.html
+
+After deploying borang.html:
+
+1. **Browser Console Check**
+   - Clear browser cache (Ctrl+Shift+R)
+   - Check for JavaScript errors (ReferenceError, SyntaxError)
+   - Verify no console warnings
+
+2. **Feature Testing**
+   - Test Isi Pintar dropdown functionality
+   - Test Aiman chatbot
+   - Test PDF generation with JPEG templates
+   - Test form submission with all 6 checkboxes
+
+3. **RLS Validation**
+   - Submit test form with all required fields
+   - Verify no 401 RLS policy errors
+   - Check database insert succeeds
+
+### Common borang.html Deployment Issues
+
+#### JavaScript ReferenceError
+- **Cause**: Variable used before definition in function scope
+- **Fix**: Define variables within function scope
+- **Example**: `jenisEntiti`, `isSdnBhd` in `overlayPage1Data`
+
+#### RLS 401 Error
+- **Cause**: Frontend payload missing RLS-required fields
+- **Fix**: Add missing fields to payload (e.g., `akuan_kemaskini_maklumat`)
+- **Check**: Verify RLS policy matches validation requirements
+
+#### JPEG Template 404
+- **Cause**: Files not committed or GitHub Pages caching
+- **Fix**: Verify files in `public/templates/` are committed
+- **Check**: Clear browser cache and verify GitHub Pages URL
+
+#### PDF Generation Error
+- **Cause**: Function called before initialization
+- **Fix**: Move function definitions before usage
+- **Example**: `drawTextOnPage` initialization order
+
+### Emergency Rollback for borang.html
+
+If borang.html regression occurs:
+
+1. Check browser console for specific error
+2. Clear browser cache (Ctrl+Shift+R)
+3. Check git diff to identify changes
+4. Revert to last working commit if needed
+5. Apply fix following regression prevention rules
+
+### Recent Fixes (July 2026)
+
+- **Commit 10010db**: Added `akuan_kemaskini_maklumat` to payload for RLS compliance
+- **Migration**: Added `akuan_kemaskini_maklumat` column to `PERMOHONAN_AHLI`
+- **RLS Policy**: Updated to require all 6 checkboxes (akuan1-6)
+- **JavaScript**: Fixed ReferenceError in `overlayPage1Data` (variable scope)
+- **JavaScript**: Fixed SyntaxError in `overlayPage6Data` (orphaned catch block)
