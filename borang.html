@@ -6819,7 +6819,8 @@ async function callGroqVision(base64DataUrl, prompt) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       provider: 'groq',
-      model: 'llama-3.3-70b-versatile',
+      type: 'vision',
+      model: 'llama-3.2-90b-vision-preview',
       messages: [
         { role: 'user', content: [
           { type: 'text', text: prompt },
