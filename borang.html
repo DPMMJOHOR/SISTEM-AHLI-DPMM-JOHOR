@@ -5412,8 +5412,15 @@ async function downloadPDFFromTemplate() {
     const jenisEntiti = getRadio('jenis_entiti');
     const refId = state.refId || 'TEMP';
     
-    // Process each page
-    for (let pageNum = 0; pageNum < templateImages.length; pageNum++) {
+    // Process each page - conditional based on entity type
+    // Pages 0-3 (JPEG 0-3): Compulsory for ALL applicants
+    // Page 4 (JPEG 4): Borang Akuan Berkanun - Tick A (PLT) or Tick B (Perkongsian/Sdn Bhd)
+    // Page 5 (JPEG 5): ONLY for Perkongsian/Sdn Bhd (proxy letter)
+    const isPerkongsianOrSdnBhd = jenisEntiti === 'Perkongsian' || jenisEntiti === 'Sdn Bhd';
+    const pagesToInclude = isPerkongsianOrSdnBhd ? [0, 1, 2, 3, 4, 5] : [0, 1, 2, 3, 4];
+    
+    for (let i = 0; i < pagesToInclude.length; i++) {
+      const pageNum = pagesToInclude[i];
       const imgPath = templateImages[pageNum];
       
       // Load image
@@ -5427,7 +5434,7 @@ async function downloadPDFFromTemplate() {
       });
       
       // Add new page (except first page)
-      if (pageNum > 0) {
+      if (i > 0) {
         pdf.addPage();
       }
       
@@ -5456,10 +5463,10 @@ async function downloadPDFFromTemplate() {
         // Page 4: Statutory declaration
         overlayPage4Data(pdf, pageWidth, pageHeight);
       } else if (pageNum === 4) {
-        // Page 5: Proxy letter part 1
-        overlayPage5Data(pdf, pageWidth, pageHeight);
+        // Page 5: Borang Akuan Berkanun (Tick A or B)
+        overlayPage5Data(pdf, pageWidth, pageHeight, isPerkongsianOrSdnBhd);
       } else if (pageNum === 5) {
-        // Page 6: Proxy letter part 2
+        // Page 6: Proxy letter (only for Perkongsian/Sdn Bhd)
         overlayPage6Data(pdf, pageWidth, pageHeight);
       }
     }
@@ -5716,35 +5723,69 @@ function overlayPage4Data(pdf, width, height) {
 }
 
 // Page 5 overlay function
-function overlayPage5Data(pdf, width, height) {
-  let y = height - 150;
+function overlayPage5Data(pdf, width, height, isPerkongsianOrSdnBhd) {
+  let y = height - 200;
   
+  // Borang Akuan Berkanun - Tick A or Tick B
   pdf.setFontSize(10);
   pdf.setFont('helvetica', 'bold');
-  pdf.text('No Ruj. Kami:', 50, y);
-  pdf.setFont('helvetica', 'normal');
-  pdf.text(state.refId || 'TEMP', 150, y);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('Tarikh:', 400, y);
-  pdf.text(new Date().toLocaleDateString('ms-MY'), 460, y);
+  pdf.text('BORANG AKUAN BERKANUN', 50, y);
   y -= 30;
   
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('a. Wakil / Proksi:', 50, y);
+  // Tick A: Enterprise Milikan Tunggal (PLT)
+  pdf.text('[ ]', 50, y);
   pdf.setFont('helvetica', 'normal');
-  pdf.text(val('nama_lengkap_pemohon') || '', 200, y);
+  pdf.text('A. Enterprise Milikan Tunggal', 70, y);
+  y -= 20;
+  
+  // Tick B: Enterprise Milikan Bersama / Sdn Bhd
+  pdf.text('[ ]', 50, y);
+  pdf.text('B. Enterprise Milikan Bersama / Sdn Bhd', 70, y);
+  y -= 40;
+  
+  // Fill in the checkmark based on entity type
+  y -= 60; // Go back to the checkbox positions
+  if (!isPerkongsianOrSdnBhd) {
+    // PLT - Tick A
+    pdf.setFontSize(10);
+    pdf.text('[√]', 50, y + 80);
+  } else {
+    // Perkongsian/Sdn Bhd - Tick B
+    pdf.setFontSize(10);
+    pdf.text('[√]', 50, y + 60);
+  }
+  
+  // Add company name and MyKAD
+  y = height - 300;
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Nama Syarikat:', 50, y);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text(val('nama_entiti') || '', 160, y);
   y -= 20;
   
   pdf.setFont('helvetica', 'bold');
-  pdf.text('b. No MyKAD:', 50, y);
+  pdf.text('No. Pendaftaran:', 50, y);
   pdf.setFont('helvetica', 'normal');
-  pdf.text(val('no_kad_pengenal') || '', 150, y);
+  pdf.text(val('no_pendaftaran') || '', 160, y);
   y -= 20;
   
   pdf.setFont('helvetica', 'bold');
-  pdf.text('c. Jawatan:', 50, y);
+  pdf.text('No. MyKAD Pemohon:', 50, y);
   pdf.setFont('helvetica', 'normal');
-  pdf.text(val('jawatan') || 'Pengarah', 150, y);
+  pdf.text(val('no_kad_pengenal') || '', 160, y);
+  y -= 20;
+  
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Tarikh:', 50, y);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text(new Date().toLocaleDateString('ms-MY'), 100, y);
+  y -= 40;
+  
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Tandatangan:', 50, y);
+  y -= 20;
+  pdf.setFont('helvetica', 'normal');
+  pdf.text('_________________________', 50, y);
 }
 
 // Page 6 overlay function
