@@ -6385,12 +6385,13 @@ async function sendChatMessage() {
       _chat.history = _chat.history.slice(-_chat.maxHistory * 2);
     }
     
-    const response = await fetch('/api/groq', {
+    const response = await fetch('https://lzoloupwtqmjyupvofhh.supabase.co/functions/v1/ai-proxy', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
+        provider: 'groq',
         model: 'llama-3.3-70b-versatile',
         messages: [
           { role: 'system', content: buildSystemPrompt() },
@@ -6403,8 +6404,8 @@ async function sendChatMessage() {
     const result = await response.json();
     hideTyping();
     
-    if (result.success && result.data && result.data.choices && result.data.choices[0]) {
-      const reply = result.data.choices[0].message.content;
+    if (result.choices && result.choices[0]) {
+      const reply = result.choices[0].message.content;
       _chat.history.push({ role: 'assistant', content: reply });
       try { sessionStorage.setItem('dpmm_chat_history', JSON.stringify(_chat.history)); } catch(e) {}
       addBotMessage(reply);
