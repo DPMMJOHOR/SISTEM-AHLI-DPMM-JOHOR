@@ -5829,15 +5829,6 @@ function overlayPage6Data(pdf, width, height) {
   pdf.text('Tandatangan', 50, y);
   y -= 20;
   pdf.text('Nama:', 50, y);
-  
-  const pdfBytes = pdf.output('arraybuffer');
-  return new Uint8Array(pdfBytes);
-} catch (err) {
-  console.error('Template method failed:', err);
-  showToast('Gagal menggunakan template - menggunakan jsPDF', 'error');
-  downloadPDFWithJsPDF();
-  return null;
-  }
 }
 
 // Send email via Supabase Edge Function with PDF attachment
