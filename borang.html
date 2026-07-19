@@ -5503,19 +5503,25 @@ function overlayPage1Data(pdf, width, height) {
   pdf.text(val('nama_entiti') || '', 160, y);
   y -= 40;
   
-  // Document checklist with checkmarks
+  // Document checklist with checkmarks - dynamic based on jenis_entiti
   pdf.setFontSize(10);
   pdf.setFont('helvetica', 'bold');
   pdf.text('1. SALINAN SSM:', 50, y);
   y -= 22;
-  pdf.text('[√]', 50, y);
+  
+  // Checkmark based on selected entity type
+  const isSdnBhd = jenisEntiti === 'Sdn Bhd';
+  const isPerkongsian = jenisEntiti === 'Perkongsian';
+  const isPLT = jenisEntiti === 'Pemunya Tunggal' || jenisEntiti === 'PLT';
+  
+  pdf.text(isSdnBhd ? '[√]' : '[ ]', 50, y);
   pdf.setFont('helvetica', 'normal');
   pdf.text('Sendirian Berhad (6.2.4)', 70, y);
   y -= 18;
-  pdf.text('[√]', 50, y);
+  pdf.text(isPerkongsian ? '[√]' : '[ ]', 50, y);
   pdf.text('Enterprise Perkongsian (6.2.1)', 70, y);
   y -= 18;
-  pdf.text('[√]', 50, y);
+  pdf.text(isPLT ? '[√]' : '[ ]', 50, y);
   pdf.text('Pemunya Tunggal (6.2.1)', 70, y);
   y -= 28;
   
