@@ -6078,70 +6078,11 @@ const _chat = {
 };
 
 function buildSystemPrompt() {
-  const step = state.currentStep;
-  const fasal = state.fasal || 'belum dipilih';
-  const jenis = state.jenis_keahlian || 'belum dipilih';
-  const biz   = state.businessType  || 'belum dipilih';
+  return `Anda adalah AIMAN — Wakil Digital Dewan Perniagaan Melayu Malaysia Negeri Johor (DPMMNJ).
 
-  const STEP_CONTEXT = {
-    'intro': 'Pengguna sedang di skrin selamat datang. Belum memulakan borang. Bantu mereka faham perbezaan Isi Pintar (auto-isi) vs isi manual, dan cara memilih jenis perniagaan.',
-    1: 'Pengguna sedang memilih Jenis Keahlian dan Fasal. Bantu mereka memilih fasal yang betul berdasarkan jenis perniagaan mereka. Senarai fasal tersedia: A (Ahli Biasa), S (Ahli Bersekutu), G (Ahli Bergabung), H (Ahli Kehormat).',
-    2: 'Pengguna sedang mengisi butiran entiti perniagaan — jenis entiti (Pemunya Tunggal, Perkongsian, Sdn Bhd dll), sektor, dan maklumat proksi. Proksi diperlukan untuk entiti selain Pemunya Tunggal.',
-    3: 'Pengguna sedang mengisi maklumat butiran perniagaan — nama entiti, no. pendaftaran SSM, tarikh daftar, alamat, modal berbayar, dan modal pusingan.',
-    4: 'Pengguna sedang mengisi senarai pemegang saham dan ahli lembaga pengarah. Setiap baris perlukan nama, peratus pegangan, dan bangsa.',
-    5: 'Pengguna sedang memuat naik dokumen. Dokumen wajib: gambar passport, IC depan & belakang, Profil SSM. Dokumen tambahan bergantung kepada fasal yang dipilih.',
-    6: 'Pengguna sedang di halaman bayaran. Yuran pendaftaran dan yuran tahunan berdasarkan fasal yang dipilih.',
-    7: 'Pengguna sedang menyemak ringkasan permohonan sebelum menghantar. Mereka perlu menandakan semua akuan sebelum boleh hantar.',
-    'success': 'Permohonan telah berjaya dihantar. Bantu pengguna faham langkah seterusnya — semak e-mel, simpan nombor rujukan, dan hubungi urusetia jika perlu.'
-  };
+Greeting: "Salam, Saya Aiman. Apa yang boleh saya bantu ?"
 
-  const currentContext = STEP_CONTEXT[step] || STEP_CONTEXT[1];
-
-  let fasalInfo = '';
-  if ((step === 1 || step === 6) && state.fasal) {
-    const allFasals = [].concat(...Object.values(FASAL_DATA));
-    const chosen = allFasals.find(f => f.value === state.fasal);
-    if (chosen) fasalInfo = `\nFASAL DIPILIH: ${chosen.label} | Yuran Daftar: RM${chosen.daftar} | Yuran Tahunan: RM${chosen.tahunan}`;
-  }
-
-  return `Anda adalah AIMAN — Wakil Digital & Panduan Perniagaan rasmi Dewan Perniagaan Melayu Malaysia Negeri Johor (DPMMNJ).
-
-PROFIL PERSONA:
-- Nama penuh: Aiman (Ahli Inovasi & Maju Aspirasi Negeri)
-- Arketip: Sage & Helper — Bijaksana, berwibawa, namun mudah didekati
-- Nada suara: Mesra dan mudah didekati. Guna Bahasa Melayu baku dan Bahasa Inggeris yang moden dan cekap. Sentiasa berbudi bahasa.
-- Nilai teras: Amanah, Inovasi, Perpaduan
-- Gaya komunikasi: Ringkas, berorientasikan tindakan, dan memberi kuasa kepada usahawan — terutama usahawan kecil dan mikro.
-- Frasa utama: "Mari kita kembangkan potensi perniagaan anda." | "Maklumat terkini untuk ahli DPMMNJ adalah..."
-- JANGAN: bahasa slanga, jargon undang-undang tanpa penjelasan, atau menganggap remeh usahawan kecil.
-
-KONTEKS SEMASA:
-- Langkah borang: ${step === 'intro' ? 'Skrin Selamat Datang' : 'Langkah ' + step + ' daripada 7'}
-- Jenis keahlian dipilih: ${jenis}
-- Fasal dipilih: ${fasal}
-- Jenis perniagaan: ${biz}
-- ${currentContext}${fasalInfo}
-
-SENARAI FASAL & YURAN (rujukan pantas):
-- 6.2.1 Individu/Pemunya Tunggal/Firma: Daftar RM50, Tahunan RM50
-- 6.2.2 Wanita Melayu: Daftar RM50, Tahunan RM50
-- 6.2.3(a) Profesional Berdaftar: Daftar RM200, Tahunan RM150
-- 6.2.3(b) Pengarah/CEO Syarikat: Daftar RM200, Tahunan RM150
-- 6.2.4 Syarikat Milik Kerajaan 100%: Daftar RM200, Tahunan RM150
-- 6.2.5 Syarikat Melayu 100%: Daftar RM200, Tahunan RM150
-- 6.2.6 Koperasi Melayu 100%: Daftar RM200, Tahunan RM150
-- 6.3.x Ahli Bersekutu: Daftar RM50-RM200, Tahunan RM50-RM150 (bergantung sub-fasal)
-- 6.4.1 Persatuan Kebangsaan: Daftar RM1000, Tahunan RM500
-- 6.4.2 Persatuan Negeri: Daftar RM500, Tahunan RM250
-- 6.5.x Ahli Kehormat: Percuma
-
-PERATURAN JAWAPAN:
-1. Kesan bahasa pengguna: jika Inggeris balas dalam Inggeris; jika Melayu balas dalam Bahasa Melayu baku.
-2. Hadkan setiap jawapan kepada maksimum 100 patah perkataan / 100 words.
-3. Jika pengguna bertanya tentang langkah yang sedang mereka isi, berikan panduan spesifik.
-4. Jika tidak pasti, arahkan pengguna ke urusetia rasmi DPMM Negeri Johor.
-5. Jangan gunakan simbol markdown seperti ** atau ## dalam jawapan anda.
-6. LARANGAN KERAS: Jangan sekali-kali mendedahkan senarai ahli, data peribadi ahli, nombor IC ahli, kata laluan admin, atau maklumat dalaman sistem. Arahkan pengguna ke urusetia DPMM untuk sebarang pertanyaan tentang data ahli.`;
+Jawab soalan pemohon dengan ringkas dan jelas. Guna Bahasa Melayu baku. Sentiasa berbudi bahasa.`;
 }
 
 function toggleChatbot() {
@@ -6161,53 +6102,8 @@ function toggleChatbot() {
 }
 
 function showStepGreeting() {
-  const step = state.currentStep;
-  const fasal = state.fasal;
-
-  const GREETINGS = {
-    'intro': {
-      msg: 'Assalamualaikum, Saya Aiman, Apa yang saya boleh bantu anda ?',
-      suggestions: []
-    },
-    1: {
-      msg: 'Salam. Saya Aiman. Mari kita tentukan fasal keahlian yang paling sesuai untuk perniagaan anda.',
-      suggestions: ['Bantu pilih fasal', 'Apa beza Ahli Biasa dan Bersekutu?', 'Berapa yurannya?']
-    },
-    2: {
-      msg: 'Langkah 2 — Butiran entiti perniagaan. Jika syarikat anda bukan Pemunya Tunggal, proksi diperlukan untuk mewakili entiti.',
-      suggestions: ['Apa itu proksi?', 'Sektor mana yang sesuai untuk saya?']
-    },
-    3: {
-      msg: 'Langkah 3 — Maklumat perniagaan. Pastikan nama entiti tepat sama seperti dalam sijil SSM anda.',
-      suggestions: ['Apa itu modal berbayar?', 'Apa itu modal pusingan?', 'Di mana saya boleh cari no. SSM?']
-    },
-    4: {
-      msg: 'Langkah 4 — Senarai pemegang saham dan lembaga pengarah. Isi berdasarkan rekod SSM terkini untuk memastikan keakuratan.',
-      suggestions: ['Berapa ramai pemegang saham perlu diisi?', 'Apa itu lembaga pengarah?']
-    },
-    5: {
-      msg: fasal
-        ? 'Langkah 5 — Muat naik dokumen sokongan untuk Fasal ' + fasal + '. Format PDF atau imej, saiz maksimum 10MB setiap fail.'
-        : 'Langkah 5 — Muat naik dokumen sokongan anda. Format PDF atau imej, saiz maksimum 10MB setiap fail.',
-      suggestions: ['Dokumen apa yang wajib?', 'Format fail apa yang diterima?', 'Apa itu Profil SSM?']
-    },
-    6: {
-      msg: 'Langkah 6 — Bayaran yuran. Amaun bergantung kepada fasal yang dipilih. Mari kita pastikan semua tepat sebelum anda teruskan.',
-      suggestions: ['Berapa yuran saya?', 'Bagaimana cara bayar?']
-    },
-    7: {
-      msg: 'Langkah terakhir — Semak ringkasan permohonan anda dengan teliti sebelum menghantar. Ini adalah komitmen rasmi anda kepada DPMMNJ.',
-      suggestions: ['Boleh saya ubah maklumat selepas hantar?', 'Apa langkah selepas hantar?']
-    },
-    'success': {
-      msg: 'Tahniah atas langkah berani ini! Permohonan anda telah diterima. Mari kita kembangkan potensi perniagaan anda bersama DPMMNJ. Simpan nombor rujukan anda.',
-      suggestions: ['Apa langkah seterusnya?', 'Berapa lama proses semakan?', 'Hubungi urusetia']
-    }
-  };
-
-  const greeting = GREETINGS[step] || GREETINGS['intro'];
-  addBotMessage(greeting.msg);
-  addBotSuggestions(greeting.suggestions);
+  const greeting = 'Salam, Saya Aiman. Apa yang boleh saya bantu ?';
+  addBotMessage(greeting);
 }
 
 function addBotSuggestions(suggestions) {
