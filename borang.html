@@ -5497,6 +5497,12 @@ function getRadio(name) {
 function overlayPage1Data(pdf, width, height) {
   let y = height - 200;
   
+  // Get entity type for dynamic checkboxes
+  const jenisEntiti = getRadio('jenis_entiti');
+  const isSdnBhd = jenisEntiti === 'Sdn Bhd';
+  const isPerkongsian = jenisEntiti === 'Perkongsian';
+  const isPLT = jenisEntiti === 'Pemunya Tunggal' || jenisEntiti === 'PLT';
+  
   pdf.setFontSize(11);
   pdf.setFont('helvetica', 'bold');
   pdf.text('Nama Pemohon:', 50, y);
@@ -5515,11 +5521,6 @@ function overlayPage1Data(pdf, width, height) {
   pdf.setFont('helvetica', 'bold');
   pdf.text('1. SALINAN SSM:', 50, y);
   y -= 22;
-  
-  // Checkmark based on selected entity type
-  const isSdnBhd = jenisEntiti === 'Sdn Bhd';
-  const isPerkongsian = jenisEntiti === 'Perkongsian';
-  const isPLT = jenisEntiti === 'Pemunya Tunggal' || jenisEntiti === 'PLT';
   
   pdf.text(isSdnBhd ? '[√]' : '[ ]', 50, y);
   pdf.setFont('helvetica', 'normal');
