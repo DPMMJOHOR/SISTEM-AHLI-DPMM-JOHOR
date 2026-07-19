@@ -5608,6 +5608,12 @@ function overlayPage1Data(pdf, width, height) {
 function overlayPage2Data(pdf, width, height) {
   let y = height - 150;
   
+  // Get entity type for dynamic checkboxes
+  const jenisEntiti = getRadio('jenis_entiti');
+  const isSdnBhd = jenisEntiti === 'Sdn Bhd';
+  const isPerkongsian = jenisEntiti === 'Perkongsian';
+  const isPLT = jenisEntiti === 'Pemunya Tunggal' || jenisEntiti === 'PLT';
+  
   pdf.setFontSize(10);
   pdf.setFont('helvetica', 'bold');
   pdf.text('Nama Entiti Perniagaan:', 50, y);
@@ -5673,6 +5679,23 @@ function overlayPage2Data(pdf, width, height) {
   pdf.setFont('helvetica', 'bold');
   pdf.text('Modal Pusingan:', 300, y);
   pdf.text('RM ' + (val('modal_pusingan') || ''), 420, y);
+  y -= 40;
+  
+  // Entity type checkboxes in MAKLUMAT ENTITI section (dynamic based on jenis_entiti)
+  pdf.setFontSize(10);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Jenis Entiti:', 50, y);
+  y -= 22;
+  
+  pdf.text(isSdnBhd ? '[√]' : '[ ]', 50, y);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text('Sendirian Berhad (Sdn Bhd)', 70, y);
+  y -= 18;
+  pdf.text(isPerkongsian ? '[√]' : '[ ]', 50, y);
+  pdf.text('Enterprise Perkongsian', 70, y);
+  y -= 18;
+  pdf.text(isPLT ? '[√]' : '[ ]', 50, y);
+  pdf.text('Pemunya Tunggal (PLT)', 70, y);
 }
 
 // Page 3 overlay function
