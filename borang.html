@@ -4282,12 +4282,12 @@ async function _doSubmit() {
 
       // Proksi / Pemohon
       proksi_nama:          val('proksi_nama') || null,
-      proksi_ic:            val('proksi_ic') ? val('proksi_ic').replace(/\D/g, '') : null,
+      proksi_ic:            val('proksi_ic') || null,
       proksi_jawatan:       val('proksi_jawatan') || null,
       proksi_hp:            val('proksi_hp') || null,
       proksi_emel:          val('proksi_emel') || null,
       nama_lengkap_pemohon: val('nama_lengkap_pemohon') || null,
-      no_kad_pengenal:      val('no_kad_pengenal') ? val('no_kad_pengenal').replace(/\D/g, '') : null,
+      no_kad_pengenal:      val('no_kad_pengenal') || null,
       no_tel_bimbit:        val('no_tel_bimbit') || null,
 
       // Pemegang saham & ahli lembaga
@@ -4358,12 +4358,14 @@ async function _doSubmit() {
     };
     const missingRls = Object.keys(rlsRequired).filter(k => !rlsRequired[k]);
     if (missingRls.length) {
+      console.error('Missing RLS fields:', missingRls);
       throw new Error('Sila lengkapkan medan wajib berikut sebelum hantar: ' + missingRls.join(', '));
     }
 
     // Validate IC format (RLS requires: 12 digits OR XXXXXX-XX-XXXX)
     const icPattern = /^[0-9]{12}$|^[0-9]{6}-[0-9]{2}-[0-9]{4}$/;
     if (!icPattern.test(payload.no_kad_pengenal)) {
+      console.error('IC format invalid:', payload.no_kad_pengenal);
       throw new Error('No. Kad Pengenal mesti dalam format XXXXXX-XX-XXXX atau 12 digit.');
     }
 
@@ -4378,8 +4380,11 @@ async function _doSubmit() {
     ];
     const missingAkuan = akuanRequired.filter(k => !payload[k]);
     if (missingAkuan.length) {
+      console.error('Missing akuan checkboxes:', missingAkuan);
       throw new Error('Sila tandakan semua akuan wajib sebelum hantar.');
     }
+
+    console.log('RLS validation passed. Payload keys:', Object.keys(payload));
 
     const { data: inserted, error: insertErr } = await window.sb
       .from('PERMOHONAN_AHLI')
