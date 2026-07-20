@@ -141,13 +141,28 @@ function getApplicantEmailTemplate(data: any) {
 }
 
 Deno.serve(async (req: Request) => {
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response(null, {
+      status: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      }
+    });
+  }
+
   try {
     const { recipient_type, pdf_url, applicant_data } = await req.json();
 
     if (!recipient_type || !applicant_data) {
       return new Response(JSON.stringify({ error: 'recipient_type and applicant_data are required' }), {
         status: 400,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
       });
     }
 
@@ -156,7 +171,10 @@ Deno.serve(async (req: Request) => {
     if (!checkRateLimit(identifier)) {
       return new Response(JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }), {
         status: 429,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
       });
     }
 
@@ -173,14 +191,20 @@ Deno.serve(async (req: Request) => {
     } else {
       return new Response(JSON.stringify({ error: 'Invalid recipient_type. Must be "admin" or "applicant"' }), {
         status: 400,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
       });
     }
 
     if (!toEmail) {
       return new Response(JSON.stringify({ error: 'Recipient email not found' }), {
         status: 400,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
       });
     }
 
@@ -240,7 +264,10 @@ Deno.serve(async (req: Request) => {
       success: true, 
       message: 'Email sent successfully' 
     }), {
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      }
     });
 
   } catch (error) {
@@ -249,7 +276,10 @@ Deno.serve(async (req: Request) => {
       error: error.message || 'Internal server error' 
     }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      }
     });
   }
 });
