@@ -4196,7 +4196,7 @@ async function _doSubmit() {
       }
     }
 
-    // 2b. Generate and upload PDF form
+    // 2b. Generate and upload PDF form using JPEG template overlay
     setLoadingText('Menjana borang PDF...');
     const pdfBytes = await downloadPDFFromTemplate();
     let pdfUploadResult = null;
