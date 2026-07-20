@@ -4352,11 +4352,33 @@ async function _doSubmit() {
       'Fasal': payload.fasal,
       'Nama Entiti': payload.nama_entiti,
       'No. Pendaftaran (SSM)': payload.no_pendaftaran,
-      'E-mel Syarikat': payload.emel_syarikat
+      'E-mel Syarikat': payload.emel_syarikat,
+      'Jenis Entiti': payload.jenis_entiti,
+      'No. Kad Pengenal': payload.no_kad_pengenal
     };
     const missingRls = Object.keys(rlsRequired).filter(k => !rlsRequired[k]);
     if (missingRls.length) {
       throw new Error('Sila lengkapkan medan wajib berikut sebelum hantar: ' + missingRls.join(', '));
+    }
+
+    // Validate IC format (RLS requires: 12 digits OR XXXXXX-XX-XXXX)
+    const icPattern = /^[0-9]{12}$|^[0-9]{6}-[0-9]{2}-[0-9]{4}$/;
+    if (!icPattern.test(payload.no_kad_pengenal)) {
+      throw new Error('No. Kad Pengenal mesti dalam format XXXXXX-XX-XXXX atau 12 digit.');
+    }
+
+    // Validate all 6 akuan checkboxes (RLS requires all true)
+    const akuanRequired = [
+      'akuan_maklumat_benar',
+      'akuan_fi_tidak_pulang',
+      'akuan_kemaskini_maklumat',
+      'akuan_pdpa',
+      'akuan_maklumat_palsu',
+      'akuan_penafian_kelulusan'
+    ];
+    const missingAkuan = akuanRequired.filter(k => !payload[k]);
+    if (missingAkuan.length) {
+      throw new Error('Sila tandakan semua akuan wajib sebelum hantar.');
     }
 
     const { data: inserted, error: insertErr } = await window.sb
