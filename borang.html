@@ -6730,7 +6730,7 @@ function compressImage(file, maxPx) {
 
 async function callGroqVision(base64DataUrl, prompt) {
   // Call Edge Function proxy for secure API key handling
-  var response = await fetch('https://lzoloupwtqmjyupvofhh.supabase.co/functions/v1/ai-proxy', {
+  var response = await fetch('https://lzoloupwtqmjyupvofhh.supabase.co/functions/v1/ai-proxy-fixed', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
