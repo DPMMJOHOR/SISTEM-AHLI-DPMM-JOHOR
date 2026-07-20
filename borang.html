@@ -6728,7 +6728,8 @@ async function compressImage(file, maxPx) {
   if (maxPx === undefined) maxPx = 1024;
   // Groq vision only accepts image formats. PDFs must be rasterized to a JPEG first.
   if (file.type === 'application/pdf') {
-    return await pdfToImageDataUrl(file);
+    var pages = await pdfToImages(file, 1);
+    return pages[0];
   }
   return await new Promise(function(resolve, reject) {
     var reader = new FileReader();
@@ -6752,28 +6753,50 @@ async function compressImage(file, maxPx) {
   });
 }
 
-// Render the first page of a PDF to a JPEG data URL so vision OCR can read it.
-async function pdfToImageDataUrl(file) {
+// Render PDF pages to JPEG data URLs so vision OCR can read them.
+// Handles multi-page/compiled PDFs (e.g. all SSM documents in one file).
+async function pdfToImages(file, maxPages) {
   if (!window.pdfjsLib) throw new Error('Pustaka PDF belum dimuat. Sila muat semula halaman dan cuba lagi.');
+  if (maxPages === undefined) maxPages = 8;
   var buf = await file.arrayBuffer();
   var pdf = await window.pdfjsLib.getDocument({ data: buf }).promise;
-  var page = await pdf.getPage(1);
-  var base = page.getViewport({ scale: 1 });
-  var target = 1600; // long-edge px for legible OCR
-  var scale = target / Math.max(base.width, base.height);
-  if (!isFinite(scale) || scale <= 0) scale = 1.5;
-  var viewport = page.getViewport({ scale: scale });
-  var canvas = document.createElement('canvas');
-  canvas.width = Math.round(viewport.width);
-  canvas.height = Math.round(viewport.height);
-  var ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#FFFFFF';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  await page.render({ canvasContext: ctx, viewport: viewport }).promise;
-  return canvas.toDataURL('image/jpeg', 0.85);
+  var pageCount = Math.min(pdf.numPages, maxPages);
+  var images = [];
+  for (var i = 1; i <= pageCount; i++) {
+    var page = await pdf.getPage(i);
+    var base = page.getViewport({ scale: 1 });
+    var target = 1600; // long-edge px for legible OCR
+    var scale = target / Math.max(base.width, base.height);
+    if (!isFinite(scale) || scale <= 0) scale = 1.5;
+    var viewport = page.getViewport({ scale: scale });
+    var canvas = document.createElement('canvas');
+    canvas.width = Math.round(viewport.width);
+    canvas.height = Math.round(viewport.height);
+    var ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+    images.push(canvas.toDataURL('image/jpeg', 0.82));
+  }
+  return images;
 }
 
-async function callGroqVision(base64DataUrl, prompt) {
+// Convert any uploaded file (image or PDF) into an array of image data URLs for OCR.
+async function fileToImages(file, maxPages) {
+  if (file.type === 'application/pdf') {
+    return await pdfToImages(file, maxPages);
+  }
+  return [await compressImage(file)];
+}
+
+async function callGroqVision(images, prompt) {
+  // Accept a single data URL or an array of data URLs (multi-page PDFs).
+  var imageList = Array.isArray(images) ? images : [images];
+  var content = [{ type: 'text', text: prompt }];
+  imageList.forEach(function(url) {
+    if (url) content.push({ type: 'image_url', image_url: { url: url } });
+  });
+
   // Call Edge Function proxy for secure API key handling
   var response = await fetch('https://lzoloupwtqmjyupvofhh.supabase.co/functions/v1/ai-proxy-fixed', {
     method: 'POST',
@@ -6783,10 +6806,7 @@ async function callGroqVision(base64DataUrl, prompt) {
       type: 'vision',
       model: 'qwen/qwen3.6-27b',
       messages: [
-        { role: 'user', content: [
-          { type: 'text', text: prompt },
-          { type: 'image_url', image_url: { url: base64DataUrl } }
-        ]}
+        { role: 'user', content: content }
       ],
       max_tokens: 512
     })
@@ -6804,14 +6824,46 @@ async function callGroqVision(base64DataUrl, prompt) {
   return JSON.parse(jsonMatch[1]);
 }
 
-async function extractFromIC(base64DataUrl) {
-  var prompt = 'Kamu adalah sistem ekstrak data dari MyKad Malaysia.\nBaca imej kad pengenalan ini dan kembalikan JSON berikut SAHAJA (tiada penjelasan lain):\n{\n  "nama": "nama penuh seperti di IC huruf besar",\n  "no_ic": "nombor IC format XXXXXX-XX-XXXX",\n  "alamat": "alamat penuh seperti di IC",\n  "poskod": "5 digit poskod sahaja",\n  "bandar": "nama bandar",\n  "negeri": "nama negeri penuh"\n}\nJika sesuatu medan tidak dapat dibaca, gunakan null.\nKembalikan JSON sahaja.';
-  return callGroqVision(base64DataUrl, prompt);
+// Extract data page-by-page and merge results. Sending many high-res pages in a
+// single request exceeds Groq's per-request limit (413), so each page is processed
+// separately and non-null fields are merged. Stops early once required keys are found.
+async function extractAcrossPages(images, prompt, requiredKeys) {
+  var list = Array.isArray(images) ? images : [images];
+  var merged = {};
+  var anySuccess = false;
+  for (var i = 0; i < list.length; i++) {
+    var pageRes = null;
+    try {
+      pageRes = await callGroqVision([list[i]], prompt);
+    } catch (e) {
+      // Skip pages that fail or are rate-limited; continue with the rest
+      if (i < list.length - 1) { await new Promise(function(r){ setTimeout(r, 500); }); }
+      continue;
+    }
+    if (pageRes && typeof pageRes === 'object') {
+      anySuccess = true;
+      Object.keys(pageRes).forEach(function(k) {
+        if ((merged[k] == null || merged[k] === '') && pageRes[k] != null && pageRes[k] !== '') {
+          merged[k] = pageRes[k];
+        }
+      });
+    }
+    var haveAll = requiredKeys.every(function(k) { return merged[k] != null && merged[k] !== ''; });
+    if (haveAll) break;
+    if (i < list.length - 1) { await new Promise(function(r){ setTimeout(r, 400); }); }
+  }
+  if (!anySuccess) throw new Error('Tidak dapat membaca dokumen.');
+  return merged;
 }
 
-async function extractFromSSM(base64DataUrl) {
-  var prompt = 'Kamu adalah sistem ekstrak data dari sijil pendaftaran perniagaan SSM Malaysia.\nBaca dokumen ini dan kembalikan JSON berikut SAHAJA (tiada penjelasan lain):\n{\n  "nama_perniagaan": "NAMA PERNIAGAAN - nama perniagaan berdaftar dalam huruf besar",\n  "no_pendaftaran": "NOMBOR PENDAFTARAN SSM - nombor pendaftaran SSM penuh",\n  "tarikh_daftar": "tarikh pendaftaran format DD/MM/YYYY",\n  "tarikh_luput": "tarikh luput format DD/MM/YYYY atau null jika tiada",\n  "jenis_entiti": "Enterprise atau Perkongsian atau Sdn Bhd atau Bhd atau Koperasi atau PLT",\n  "aktiviti": "penerangan aktiviti atau kod perniagaan",\n  "alamat": "alamat perniagaan berdaftar penuh",\n  "no_tel_syarikat": "nombor telefon syarikat (jika ada)",\n  "no_tel_bimbit": "nombor telefon bimbit (jika ada)",\n  "emel_syarikat": "emel syarikat (jika ada)",\n  "butiran_perniagaan": "butiran lanjut perniagaan (jika ada)"\n}\nJika sesuatu medan tidak dapat dibaca atau tidak wujud dalam dokumen, gunakan null.\nKembalikan JSON sahaja.';
-  return callGroqVision(base64DataUrl, prompt);
+async function extractFromIC(images) {
+  var prompt = 'Kamu adalah sistem ekstrak data dari MyKad Malaysia.\nBaca imej kad pengenalan ini dan kembalikan JSON berikut SAHAJA (tiada penjelasan lain):\n{\n  "nama": "nama penuh seperti di IC huruf besar",\n  "no_ic": "nombor IC format XXXXXX-XX-XXXX",\n  "alamat": "alamat penuh seperti di IC",\n  "poskod": "5 digit poskod sahaja",\n  "bandar": "nama bandar",\n  "negeri": "nama negeri penuh"\n}\nJika sesuatu medan tidak dapat dibaca, gunakan null.\nKembalikan JSON sahaja.';
+  return extractAcrossPages(images, prompt, ['nama', 'no_ic']);
+}
+
+async function extractFromSSM(images) {
+  var prompt = 'Kamu adalah sistem ekstrak data dari dokumen pendaftaran perniagaan SSM Malaysia (cth: sijil pendaftaran, profil SSM, maklumat perniagaan, M&A, Borang 9/24/49).\nBaca muka surat ini dan kembalikan JSON berikut SAHAJA (tiada penjelasan lain):\n{\n  "nama_perniagaan": "NAMA PERNIAGAAN - nama perniagaan berdaftar dalam huruf besar",\n  "no_pendaftaran": "NOMBOR PENDAFTARAN SSM - nombor pendaftaran SSM penuh",\n  "tarikh_daftar": "tarikh pendaftaran format DD/MM/YYYY",\n  "tarikh_luput": "tarikh luput format DD/MM/YYYY atau null jika tiada",\n  "jenis_entiti": "Enterprise atau Perkongsian atau Sdn Bhd atau Bhd atau Koperasi atau PLT",\n  "aktiviti": "penerangan aktiviti atau kod perniagaan",\n  "alamat": "alamat perniagaan berdaftar penuh",\n  "no_tel_syarikat": "nombor telefon syarikat (jika ada)",\n  "no_tel_bimbit": "nombor telefon bimbit (jika ada)",\n  "emel_syarikat": "emel syarikat (jika ada)",\n  "butiran_perniagaan": "butiran lanjut perniagaan (jika ada)"\n}\nJika sesuatu medan tidak dapat dibaca atau tidak wujud dalam muka surat ini, gunakan null.\nKembalikan JSON sahaja.';
+  return extractAcrossPages(images, prompt, ['nama_perniagaan', 'no_pendaftaran']);
 }
 
 function genderFromIC(icNum) {
@@ -6910,9 +6962,10 @@ async function runIsiPintar() {
   document.getElementById('isi-pintar-loading').classList.add('active');
   document.getElementById('isi-pintar-actions').style.display = 'none';
   try {
-    var results = await Promise.all([compressImage(_ip.icFile), compressImage(_ip.ssmFile)]);
-    var icB64 = results[0], ssmB64 = results[1];
-    var settled = await Promise.allSettled([extractFromIC(icB64), extractFromSSM(ssmB64)]);
+    // IC is usually a single image/1-page; SSM may be a compiled multi-page PDF.
+    var results = await Promise.all([fileToImages(_ip.icFile, 2), fileToImages(_ip.ssmFile, 8)]);
+    var icImgs = results[0], ssmImgs = results[1];
+    var settled = await Promise.allSettled([extractFromIC(icImgs), extractFromSSM(ssmImgs)]);
     var icData  = settled[0].status === 'fulfilled' ? settled[0].value : null;
     var ssmData = settled[1].status === 'fulfilled' ? settled[1].value : null;
     if (!icData && !ssmData) throw new Error('Tidak dapat membaca kedua-dua dokumen. Sila cuba semula atau isi borang secara manual.');
