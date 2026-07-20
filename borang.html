@@ -4338,6 +4338,20 @@ async function _doSubmit() {
       pdf_file_size:        pdfUploadResult?.fileSize || null
     };
 
+    // Pre-insert guard: these fields MUST be non-null to satisfy the RLS insert policy.
+    // Reports the exact missing field instead of a generic "row-level security policy" error.
+    const rlsRequired = {
+      'Jenis Keahlian': payload.jenis_keahlian,
+      'Fasal': payload.fasal,
+      'Nama Entiti': payload.nama_entiti,
+      'No. Pendaftaran (SSM)': payload.no_pendaftaran,
+      'E-mel Syarikat': payload.emel_syarikat
+    };
+    const missingRls = Object.keys(rlsRequired).filter(k => !rlsRequired[k]);
+    if (missingRls.length) {
+      throw new Error('Sila lengkapkan medan wajib berikut sebelum hantar: ' + missingRls.join(', '));
+    }
+
     const { data: inserted, error: insertErr } = await window.sb
       .from('PERMOHONAN_AHLI')
       .insert([payload])
@@ -5402,7 +5416,7 @@ async function downloadPDFFromTemplate() {
     const pageHeight = 841.89;
     
     // Template image paths (accessible via GitHub Pages)
-    const baseUrl = window.location.origin || 'https://dpmmjohor.github.io/SISTEM-AHLI-DPMM-JOHOR';
+    const baseUrl = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
     const templateImages = [
       `${baseUrl}/public/templates/Borang Keahlian Baru_Perkongsian SDN BHD conv 0.jpeg`,
       `${baseUrl}/public/templates/Borang Keahlian Baru_Perkongsian SDN BHD conv 1.jpeg`,
