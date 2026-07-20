@@ -6301,7 +6301,7 @@ async function sendChatMessage() {
       _chat.history = _chat.history.slice(-_chat.maxHistory * 2);
     }
     
-    const response = await fetch('https://lzoloupwtqmjyupvofhh.supabase.co/functions/v1/ai-proxy', {
+    const response = await fetch('https://lzoloupwtqmjyupvofhh.supabase.co/functions/v1/ai-proxy-fixed', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
