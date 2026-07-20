@@ -5894,7 +5894,7 @@ async function uploadPDFToSupabase(pdfBytes, refId) {
     const timestamp = Date.now();
     const fileName = `borang-${refId}-${timestamp}.pdf`;
     
-    const { data, error } = await supabase.storage
+    const { data, error } = await window.sb.storage
       .from('permohonan-dokumen')
       .upload(`borang/${refId}/${fileName}`, pdfBytes, {
         contentType: 'application/pdf',
@@ -5910,7 +5910,7 @@ async function uploadPDFToSupabase(pdfBytes, refId) {
     if (error) throw error;
 
     // Generate signed URL for PDF access (valid for 1 hour)
-    const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+    const { data: signedUrlData, error: signedUrlError } = await window.sb.storage
       .from('permohonan-dokumen')
       .createSignedUrl(`borang/${refId}/${fileName}`, 3600);
 
