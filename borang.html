@@ -2378,7 +2378,7 @@ textarea:focus-visible {
         </div>
         <div class="form-row cols-2">
           <div class="form-group">
-            <label class="form-label">Tarikh Luput <span class="req">*</span></label>
+            <label class="form-label">Tarikh Luput <span class="req" id="tarikh-luput-req">*</span></label>
             <input type="date" class="form-control" id="tarikh_luput">
             <span class="field-error" id="err-tarikh_luput">Sila isi tarikh luput.</span>
             <span class="field-error" id="err-tarikh_luput_cross">Tarikh luput tidak boleh lebih awal daripada tarikh daftar.</span>
@@ -3459,13 +3459,17 @@ function validateStep(n) {
     if (!val('nama_perniagaan'))             { showErr('err-nama_perniagaan'); ok = false; }
     if (!val('no_pendaftaran'))          { showErr('err-no_pend'); ok = false; }
     if (!val('tarikh_daftar'))           { showErr('err-tarikh_daftar'); ok = false; }
-    if (!val('tarikh_luput'))            { showErr('err-tarikh_luput'); ok = false; }
-    if (val('tarikh_daftar') && val('tarikh_luput')) {
-      const td = new Date(val('tarikh_daftar'));
-      const tl = new Date(val('tarikh_luput'));
-      const today = new Date(); today.setHours(0,0,0,0);
-      if (tl < td)                       { showErr('err-tarikh_luput_cross'); ok = false; }
-      if (ok && tl < today)              { showToast('Amaran: Tarikh luput SSM telah tamat. Sila semak sebelum menghantar.', 'warning'); }
+    // Tarikh Luput only required for Enterprise (Pemunya Tunggal), not for Sdn Bhd/Bhd
+    var jenisEntiti = getRadio('jenis_entiti');
+    if (jenisEntiti === 'Pemunya Tunggal') {
+      if (!val('tarikh_luput'))            { showErr('err-tarikh_luput'); ok = false; }
+      if (val('tarikh_daftar') && val('tarikh_luput')) {
+        const td = new Date(val('tarikh_daftar'));
+        const tl = new Date(val('tarikh_luput'));
+        const today = new Date(); today.setHours(0,0,0,0);
+        if (tl < td)                       { showErr('err-tarikh_luput_cross'); ok = false; }
+        if (ok && tl < today)              { showToast('Amaran: Tarikh luput SSM telah tamat. Sila semak sebelum menghantar.', 'warning'); }
+      }
     }
     if (!val('alamat'))                  { showErr('err-alamat'); ok = false; }
     if (!val('poskod'))                  { showErr('err-poskod'); ok = false; }
@@ -3685,6 +3689,11 @@ function onEntitiChange() {
   // Show/hide proksi section
   const isPemilikan = entiti === 'Pemunya Tunggal';
   document.getElementById('proksi-section').style.display = isPemilikan ? 'none' : 'block';
+  // Show/hide Tarikh Luput required indicator (only required for Enterprise/Pemunya Tunggal)
+  const tarikhLuputReq = document.getElementById('tarikh-luput-req');
+  if (tarikhLuputReq) {
+    tarikhLuputReq.style.display = isPemilikan ? 'inline' : 'none';
+  }
 }
 
 /* ============================================================
@@ -6884,7 +6893,10 @@ async function extractFromIC(images) {
 }
 
 async function extractFromSSM(images) {
-  var prompt = 'Kamu adalah sistem ekstrak data dari dokumen pendaftaran perniagaan SSM Malaysia (cth: sijil pendaftaran, profil SSM, maklumat perniagaan, M&A, Borang 9/24/49).\nBaca muka surat ini dan kembalikan JSON berikut SAHAJA (tiada penjelasan lain):\n{\n  "nama_perniagaan": "nama perniagaan berdaftar (cari label seperti NAMA PERNIAGAAN, NAMA SYARIKAT, NAME OF BUSINESS, atau seumpamanya)",\n  "no_pendaftaran": "nombor pendaftaran SSM penuh (cari label seperti NO. PENDAFTARAN, REGISTRATION NO, SSM NO, atau seumpamanya)",\n  "tarikh_daftar": "tarikh pendaftaran format DD/MM/YYYY (cari label seperti TARIKH DAFTAR, DATE OF REGISTRATION, atau seumpamanya)",\n  "tarikh_luput": "tarikh luput format DD/MM/YYYY atau null jika tiada (cari label seperti TARIKH LUPUT, EXPIRY DATE, atau seumpamanya)",\n  "jenis_entiti": "Enterprise atau Perkongsian atau Sdn Bhd atau Bhd atau Koperasi atau PLT (cari label seperti JENIS ENTITI, BUSINESS TYPE, atau seumpamanya)",\n  "aktiviti": "penerangan aktiviti atau kod perniagaan (cari label seperti AKTIVITI, NATURE OF BUSINESS, atau seumpamanya)",\n  "alamat": "alamat perniagaan berdaftar penuh (cari label seperti ALAMAT, ADDRESS, atau seumpamanya)",\n  "no_tel_syarikat": "nombor telefon syarikat (jika ada)",\n  "no_tel_bimbit": "nombor telefon bimbit (jika ada)",\n  "emel_syarikat": "emel syarikat (jika ada)",\n  "butiran_perniagaan": "butiran lanjut perniagaan (jika ada)"\n}\nPENTING:\n- Cari label yang serupa walaupun berbeza huruf besar/kecil atau ada variasi ejaan\n- Ekstrak nilai yang betul walaupun format berbeza\n- Jika sesuatu medan tidak dapat dibaca atau tidak wujud dalam muka surat ini, gunakan null\n- Kembalikan JSON sahaja tanpa sebarang penjelasan tambahan';
+  // Optimized prompt for single-page extraction - focus on the most informative document
+  // For Enterprise: Use SSM certificate (has Nama, No SSM, Tarikh Ditubuhkan, Tarikh Tamat)
+  // For Sdn Bhd: Use Company Profile (has Nama, No SSM, Tarikh Ditubuhkan only - no expiry)
+  var prompt = 'Kamu adalah sistem ekstrak data dari dokumen pendaftaran perniagaan SSM Malaysia.\nBaca muka surat ini dan kembalikan JSON berikut SAHAJA (tiada penjelasan lain):\n{\n  "nama_perniagaan": "nama perniagaan berdaftar (cari label seperti NAMA PERNIAGAAN, NAMA SYARIKAT, NAME OF BUSINESS, COMPANY NAME)",\n  "no_pendaftaran": "nombor pendaftaran SSM penuh (cari label seperti NO. PENDAFTARAN, REGISTRATION NO, SSM NO, COMPANY NO)",\n  "tarikh_daftar": "tarikh pendaftaran/ditubuhkan format DD/MM/YYYY (cari label seperti TARIKH DITUBUHKAN, TARIKH DAFTAR, DATE OF INCORPORATION, DATE OF REGISTRATION)",\n  "tarikh_luput": "tarikh tamat/luput format DD/MM/YYYY atau null jika tiada (cari label seperti TARIKH TAMAT, TARIKH LUPUT, EXPIRY DATE - biasanya hanya ada untuk Enterprise, Sdn Bhd tiada)",\n  "jenis_entiti": "Enterprise atau Perkongsian atau Sdn Bhd atau Bhd atau Koperasi atau PLT (cari label seperti JENIS ENTITI, BUSINESS TYPE, atau infer dari dokumen)",\n  "aktiviti": "penerangan aktiviti atau kod perniagaan (cari label seperti AKTIVITI, NATURE OF BUSINESS, BUSINESS ACTIVITY)",\n  "alamat": "alamat perniagaan berdaftar penuh (cari label seperti ALAMAT, ADDRESS, REGISTERED ADDRESS)",\n  "no_tel_syarikat": "nombor telefon syarikat (jika ada)",\n  "no_tel_bimbit": "nombor telefon bimbit (jika ada)",\n  "emel_syarikat": "emel syarikat (jika ada)",\n  "butiran_perniagaan": "butiran lanjut perniagaan (jika ada)"\n}\nPENTING:\n- Cari label yang serupa walaupun berbeza huruf besar/kecil atau ada variasi ejaan\n- Ekstrak nilai yang betul walaupun format berbeza\n- Tarikh Tamat hanya wujud untuk Enterprise, Sdn Bhd tiada tarikh tamat\n- Jika sesuatu medan tidak dapat dibaca atau tidak wujud dalam muka surat ini, gunakan null\n- Kembalikan JSON sahaja tanpa sebarang penjelasan tambahan';
   return extractAcrossPages(images, prompt, ['nama_perniagaan', 'no_pendaftaran']);
 }
 
@@ -6985,7 +6997,10 @@ async function runIsiPintar() {
   document.getElementById('isi-pintar-actions').style.display = 'none';
   try {
     // IC is usually a single image/1-page; SSM may be a compiled multi-page PDF.
-    var results = await Promise.all([fileToImages(_ip.icFile, 2), fileToImages(_ip.ssmFile, 8)]);
+    // OPTIMIZATION: Only process first page of SSM document (most informative page)
+    // - Enterprise: First page is SSM certificate (has Nama, No SSM, Tarikh Ditubuhkan, Tarikh Tamat)
+    // - Sdn Bhd: First page is Company Profile (has Nama, No SSM, Tarikh Ditubuhkan - no expiry)
+    var results = await Promise.all([fileToImages(_ip.icFile, 2), fileToImages(_ip.ssmFile, 1)]);
     var icImgs = results[0], ssmImgs = results[1];
     var settled = await Promise.allSettled([extractFromIC(icImgs), extractFromSSM(ssmImgs)]);
     var icData  = settled[0].status === 'fulfilled' ? settled[0].value : null;
