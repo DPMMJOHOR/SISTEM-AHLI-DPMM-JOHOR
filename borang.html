@@ -6562,9 +6562,18 @@ window.addEventListener('DOMContentLoaded', () => {
    Use plain text labels only.
    ============================================================ */
 
-const _ip = { icFile: null, ssmFile: null, allSsmDocs: [], ssmDocKeys: [] };
+const _ip = { consolidatedFile: null, allSsmDocs: [], ssmDocKeys: [] };
 
 function openIsiPintar() {
+  // Update UI based on selected entity type
+  const entiti = getRadio('jenis_entiti');
+  const docInfo = entityDocMap[entiti] || { docName: 'Dokumen SSM', docDesc: 'Sila muat naik dokumen SSM anda.', accept: 'image/*,.pdf' };
+  
+  document.getElementById('isi-pintar-doc-name').textContent = docInfo.docName;
+  document.getElementById('isi-pintar-doc-desc').textContent = docInfo.docDesc;
+  document.getElementById('isi-pintar-upload-label').textContent = docInfo.docName;
+  document.getElementById('file-consolidated').accept = docInfo.accept;
+  
   renderIpSsmGuidance();
   document.getElementById('isi-pintar-overlay').classList.add('active');
   document.body.style.overflow = 'hidden';
@@ -6639,9 +6648,9 @@ function onIpFileSelected(type, input) {
   if (!file) return;
   
   // Security: File size validation
-  const maxBytes = type === 'ssm' ? 10 * 1024 * 1024 : 5 * 1024 * 1024;
+  const maxBytes = 10 * 1024 * 1024; // 10MB for consolidated documents
   if (file.size > maxBytes) {
-    showIpError(`Fail terlalu besar. Saiz maksimum adalah ${type === 'ssm' ? '10' : '5'}MB.`);
+    showIpError('Fail terlalu besar. Saiz maksimum adalah 10MB.');
     input.value = '';
     return;
   }
@@ -6672,16 +6681,10 @@ function onIpFileSelected(type, input) {
   
   // Security: File name sanitization
   const sanitizedName = sanitizeFileName(file.name);
-  if (type === 'ic') {
-    _ip.icFile = file;
-    document.getElementById('zone-ic').classList.add('has-file');
-    document.getElementById('fname-ic').textContent = '\u2713 ' + sanitizedName;
-  } else {
-    _ip.ssmFile = file;
-    document.getElementById('zone-ssm').classList.add('has-file');
-    document.getElementById('fname-ssm').textContent = '\u2713 ' + sanitizedName;
-    renderIpSsmChecklist(sanitizedName);
-  }
+  _ip.consolidatedFile = file;
+  document.getElementById('zone-consolidated').classList.add('has-file');
+  document.getElementById('fname-consolidated').textContent = '\u2713 ' + sanitizedName;
+  renderIpSsmChecklist(sanitizedName);
   updateIpAnalyzeBtn();
 }
 
@@ -6724,7 +6727,7 @@ function updateIpSsmDocKeys() {
 }
 
 function updateIpAnalyzeBtn() {
-  const ready = _ip.icFile && _ip.ssmFile && document.getElementById('consent-ai').checked;
+  const ready = _ip.consolidatedFile && document.getElementById('consent-ai').checked;
   document.getElementById('btn-analyze').disabled = !ready;
 }
 
@@ -6900,6 +6903,78 @@ async function extractFromSSM(images) {
   return extractAcrossPages(images, prompt, ['nama_perniagaan', 'no_pendaftaran']);
 }
 
+// Entity-specific document mapping for Isi Pintar
+const entityDocMap = {
+  'Pemunya Tunggal': {
+    docName: 'MAKLUMAT PEMILIK PERNIAGAAN TERKINI',
+    docDesc: 'Dokumen ini mengandungi maklumat IC pemilik, nama perniagaan, no. SSM, tarikh ditubuhkan dan tarikh tamat.',
+    accept: 'image/*,.pdf'
+  },
+  'Sdn Bhd': {
+    docName: 'Borang 24 / Company Profile',
+    docDesc: 'Dokumen ini mengandungi nama perniagaan, no. SSM, dan tarikh ditubuhkan.',
+    accept: 'image/*,.pdf'
+  },
+  'Bhd': {
+    docName: 'Borang 24 / Company Profile',
+    docDesc: 'Dokumen ini mengandungi nama perniagaan, no. SSM, dan tarikh ditubuhkan.',
+    accept: 'image/*,.pdf'
+  },
+  'Perkongsian': {
+    docName: 'Borang 24 / Company Profile',
+    docDesc: 'Dokumen ini mengandungi nama perniagaan, no. SSM, dan tarikh ditubuhkan.',
+    accept: 'image/*,.pdf'
+  },
+  'PLT': {
+    docName: 'Borang 24 / Company Profile',
+    docDesc: 'Dokumen ini mengandungi nama perniagaan, no. SSM, dan tarikh ditubuhkan.',
+    accept: 'image/*,.pdf'
+  },
+  'Koperasi': {
+    docName: 'Borang 24 / Company Profile',
+    docDesc: 'Dokumen ini mengandungi nama perniagaan, no. SSM, dan tarikh ditubuhkan.',
+    accept: 'image/*,.pdf'
+  },
+  'Pro. Tunggal': {
+    docName: 'Borang 24 / Company Profile',
+    docDesc: 'Dokumen ini mengandungi nama perniagaan, no. SSM, dan tarikh ditubuhkan.',
+    accept: 'image/*,.pdf'
+  },
+  'Pro. Firma': {
+    docName: 'Borang 24 / Company Profile',
+    docDesc: 'Dokumen ini mengandungi nama perniagaan, no. SSM, dan tarikh ditubuhkan.',
+    accept: 'image/*,.pdf'
+  },
+  'Perbadanan': {
+    docName: 'Borang 24 / Company Profile',
+    docDesc: 'Dokumen ini mengandungi nama perniagaan, no. SSM, dan tarikh ditubuhkan.',
+    accept: 'image/*,.pdf'
+  },
+  'Yayasan': {
+    docName: 'Borang 24 / Company Profile',
+    docDesc: 'Dokumen ini mengandungi nama perniagaan, no. SSM, dan tarikh ditubuhkan.',
+    accept: 'image/*,.pdf'
+  },
+  'Persatuan': {
+    docName: 'Borang 24 / Company Profile',
+    docDesc: 'Dokumen ini mengandungi nama perniagaan, no. SSM, dan tarikh ditubuhkan.',
+    accept: 'image/*,.pdf'
+  },
+  'Lain-lain': {
+    docName: 'Borang 24 / Company Profile',
+    docDesc: 'Dokumen ini mengandungi nama perniagaan, no. SSM, dan tarikh ditubuhkan.',
+    accept: 'image/*,.pdf'
+  }
+};
+
+// New unified extraction for consolidated documents (IC + SSM in single file)
+async function extractFromConsolidated(images) {
+  // This handles documents that contain both IC and SSM information
+  // Process first few pages to get all data in one pass
+  var prompt = 'Kamu adalah sistem ekstrak data dari dokumen gabungan Malaysia yang mengandungi maklumat IC dan SSM.\nBaca muka surat ini dan kembalikan JSON berikut SAHAJA (tiada penjelasan lain):\n{\n  "nama": "nama penuh pemohon dari IC (cari label seperti NAMA, NAME, NAMA PENUH)",\n  "no_ic": "nombor IC format XXXXXX-XX-XXXX (cari label seperti NO KAD, NO. KAD PENGENALAN, IC NO, KAD PENGENALAN)",\n  "alamat_ic": "alamat pemohon dari IC (cari label seperti ALAMAT, ADDRESS)",\n  "poskod": "poskod dari IC (cari label seperti POSKOD, POSTCODE)",\n  "bandar": "bandar dari IC (cari label seperti BANDAR, TOWN, CITY)",\n  "negeri": "negeri dari IC (cari label seperti NEGERI, STATE)",\n  "nama_perniagaan": "nama perniagaan berdaftar dari SSM (cari label seperti NAMA PERNIAGAAN, NAMA SYARIKAT, NAME OF BUSINESS, COMPANY NAME)",\n  "no_pendaftaran": "nombor pendaftaran SSM penuh (cari label seperti NO. PENDAFTARAN, REGISTRATION NO, SSM NO, COMPANY NO)",\n  "tarikh_daftar": "tarikh pendaftaran/ditubuhkan format DD/MM/YYYY (cari label seperti TARIKH DITUBUHKAN, TARIKH DAFTAR, DATE OF INCORPORATION, DATE OF REGISTRATION)",\n  "tarikh_luput": "tarikh tamat/luput format DD/MM/YYYY atau null jika tiada (cari label seperti TARIKH TAMAT, TARIKH LUPUT, EXPIRY DATE)",\n  "jenis_entiti": "Enterprise atau Perkongsian atau Sdn Bhd atau Bhd atau Koperasi atau PLT (cari label seperti JENIS ENTITI, BUSINESS TYPE)",\n  "aktiviti": "penerangan aktiviti atau kod perniagaan (cari label seperti AKTIVITI, NATURE OF BUSINESS)",\n  "alamat_syarikat": "alamat perniagaan berdaftar (cari label seperti ALAMAT SYARIKAT, ADDRESS, REGISTERED ADDRESS)",\n  "no_tel_syarikat": "nombor telefon syarikat (jika ada)",\n  "no_tel_bimbit": "nombor telefon bimbit (jika ada)",\n  "emel_syarikat": "emel syarikat (jika ada)"\n}\nPENTING:\n- Dokumen ini mengandungi maklumat IC dan SSM digabungkan\n- Cari label yang serupa walaupun berbeza huruf besar/kecil atau ada variasi ejaan\n- Ekstrak nilai yang betul walaupun format berbeza\n- Tarikh Tamat hanya wujud untuk Enterprise, Sdn Bhd tiada tarikh tamat\n- Jika sesuatu medan tidak dapat dibaca atau tidak wujud dalam muka surat ini, gunakan null\n- Kembalikan JSON sahaja tanpa sebarang penjelasan tambahan';
+  return extractAcrossPages(images, prompt, ['nama', 'no_ic', 'nama_perniagaan', 'no_pendaftaran']);
+}
+
 function genderFromIC(icNum) {
   if (!icNum) return null;
   var digits = icNum.replace(/\D/g, '');
@@ -6946,7 +7021,7 @@ function mapExtractedToForm(icData, ssmData) {
     applyIpField('nama_lengkap_pemohon', icData.nama);
     var icFormatted = icData.no_ic ? icData.no_ic.replace(/\D/g,'').replace(/(\d{6})(\d{2})(\d{4})/, '$1-$2-$3') : null;
     applyIpField('no_kad_pengenal', icFormatted);
-    applyIpField('alamat', icData.alamat);
+    applyIpField('alamat', icData.alamat_ic || icData.alamat);
     applyIpField('poskod', icData.poskod);
     applyIpField('bandar', icData.bandar);
     applyIpField('negeri', icData.negeri);
@@ -6961,6 +7036,7 @@ function mapExtractedToForm(icData, ssmData) {
     applyIpField('aktiviti_perniagaan', ssmData.aktiviti);
     applyIpField('tarikh_daftar', dmyToIso(ssmData.tarikh_daftar));
     applyIpField('tarikh_luput', dmyToIso(ssmData.tarikh_luput));
+    applyIpField('alamat_perniagaan', ssmData.alamat_syarikat || ssmData.alamat);
     applyIpField('no_tel_syarikat', ssmData.no_tel_syarikat);
     applyIpField('no_tel_bimbit', ssmData.no_tel_bimbit);
     applyIpField('emel_syarikat', ssmData.emel_syarikat);
@@ -6996,30 +7072,45 @@ async function runIsiPintar() {
   document.getElementById('isi-pintar-loading').classList.add('active');
   document.getElementById('isi-pintar-actions').style.display = 'none';
   try {
-    // IC is usually a single image/1-page; SSM may be a compiled multi-page PDF.
-    // OPTIMIZATION: Only process first page of SSM document (most informative page)
-    // - Enterprise: First page is SSM certificate (has Nama, No SSM, Tarikh Ditubuhkan, Tarikh Tamat)
-    // - Sdn Bhd: First page is Company Profile (has Nama, No SSM, Tarikh Ditubuhkan - no expiry)
-    var results = await Promise.all([fileToImages(_ip.icFile, 2), fileToImages(_ip.ssmFile, 1)]);
-    var icImgs = results[0], ssmImgs = results[1];
-    var settled = await Promise.allSettled([extractFromIC(icImgs), extractFromSSM(ssmImgs)]);
-    var icData  = settled[0].status === 'fulfilled' ? settled[0].value : null;
-    var ssmData = settled[1].status === 'fulfilled' ? settled[1].value : null;
-    if (!icData && !ssmData) throw new Error('Tidak dapat membaca kedua-dua dokumen. Sila cuba semula atau isi borang secara manual.');
-    // Carry IC front image forward to Step 5 so user only needs to upload back
-    if (_ip.icFile) {
-      state.uploadedFiles['ic_pemohon_depan'] = {
-        file: _ip.icFile, name: _ip.icFile.name, url: null, fromIsiPintar: true
-      };
-    }
-    // Carry SSM file to every doc slot the user confirmed in the checklist
-    if (_ip.ssmFile && _ip.ssmDocKeys.length > 0) {
+    // Use consolidated extraction for entity-specific documents
+    // Process first few pages to get all data (IC + SSM) in one pass
+    var images = await fileToImages(_ip.consolidatedFile, 3);
+    var settled = await Promise.allSettled([extractFromConsolidated(images)]);
+    var data = settled[0].status === 'fulfilled' ? settled[0].value : null;
+    if (!data) throw new Error('Tidak dapat membaca dokumen. Sila cuba semula atau isi borang secara manual.');
+    
+    // Map consolidated data to form fields
+    // The consolidated extraction returns both IC and SSM data in one object
+    var icData = {
+      nama: data.nama,
+      no_ic: data.no_ic,
+      alamat: data.alamat_ic,
+      poskod: data.poskod,
+      bandar: data.bandar,
+      negeri: data.negeri
+    };
+    var ssmData = {
+      nama_perniagaan: data.nama_perniagaan,
+      no_pendaftaran: data.no_pendaftaran,
+      tarikh_daftar: data.tarikh_daftar,
+      tarikh_luput: data.tarikh_luput,
+      jenis_entiti: data.jenis_entiti,
+      aktiviti: data.aktiviti,
+      alamat: data.alamat_syarikat,
+      no_tel_syarikat: data.no_tel_syarikat,
+      no_tel_bimbit: data.no_tel_bimbit,
+      emel_syarikat: data.emel_syarikat
+    };
+    
+    // Carry consolidated file to document slots based on checklist
+    if (_ip.consolidatedFile && _ip.ssmDocKeys.length > 0) {
       _ip.ssmDocKeys.forEach(key => {
         state.uploadedFiles[key] = {
-          file: _ip.ssmFile, name: _ip.ssmFile.name, url: null, fromIsiPintar: true
+          file: _ip.consolidatedFile, name: _ip.consolidatedFile.name, url: null, fromIsiPintar: true
         };
       });
     }
+    
     closeIsiPintar();
     mapExtractedToForm(icData, ssmData);
     startFormWithBusinessType();
@@ -7027,7 +7118,7 @@ async function runIsiPintar() {
     var ssmCount = _ip.ssmDocKeys.length;
     if (typeof showToast === 'function') {
       var msg = count + ' ruangan diisi automatik.';
-      if (ssmCount > 0) msg += ' ' + ssmCount + ' slot dokumen SSM disimpan untuk Langkah 5.';
+      if (ssmCount > 0) msg += ' ' + ssmCount + ' slot dokumen disimpan untuk Langkah 5.';
       showToast(msg, 'success');
     }
   } catch(err) {
@@ -7044,24 +7135,18 @@ async function runIsiPintar() {
     <button class="isi-pintar-close" onclick="closeIsiPintar()" aria-label="Tutup">&times;</button>
 
     <h3 id="isi-pintar-title">Isi Pintar</h3>
-    <p class="panel-sub">Muat naik IC dan Sijil SSM anda. AI akan membaca dan mengisi borang secara automatik.</p>
+    <p class="panel-sub">Muat naik dokumen spesifik untuk entiti anda. AI akan membaca dan mengisi borang secara automatik.</p>
 
     <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px 14px;font-size:0.78rem;color:#1e40af;margin-bottom:12px;">
-      <strong>Isi Pintar hanya untuk bacaan automatik.</strong> Muka depan IC mengandungi semua maklumat yang diperlukan (nama, no. IC, alamat). Muka belakang akan diminta semasa muat naik dokumen di Langkah 5.
+      <strong>Dokumen Diperlukan:</strong> <span id="isi-pintar-doc-name">Sila pilih jenis entiti dahulu</span>
+      <div id="isi-pintar-doc-desc" style="margin-top:4px;color:#3b82f6;"></div>
     </div>
 
-    <div class="upload-zone" id="zone-ic">
-      <input type="file" id="file-ic" accept="image/*" onchange="onIpFileSelected('ic', this)">
-      <span class="upload-zone-label">MyKad — <strong>Muka Depan (Hadapan) Sahaja</strong></span>
-      <span class="upload-zone-sub">JPG atau PNG sahaja — max 5MB</span>
-      <span class="file-name" id="fname-ic"></span>
-    </div>
-
-    <div class="upload-zone" id="zone-ssm">
-      <input type="file" id="file-ssm" accept="image/*" onchange="onIpFileSelected('ssm', this)">
-      <span class="upload-zone-label">Sijil Pendaftaran SSM</span>
-      <span class="upload-zone-sub">JPG atau PNG sahaja — max 5MB</span>
-      <span class="file-name" id="fname-ssm"></span>
+    <div class="upload-zone" id="zone-consolidated">
+      <input type="file" id="file-consolidated" accept="image/*,.pdf" onchange="onIpFileSelected('consolidated', this)">
+      <span class="upload-zone-label" id="isi-pintar-upload-label">Dokumen Gabungan</span>
+      <span class="upload-zone-sub">JPG, PNG atau PDF sahaja — max 5MB</span>
+      <span class="file-name" id="fname-consolidated"></span>
     </div>
 
     <div class="consent-row">
