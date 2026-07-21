@@ -223,7 +223,7 @@ async function loadMembers() {
     
     if (error) throw error;
     
-    select.innerHTML = '<option value="">Select member...</option>';
+    select.innerHTML = '<option value="">Pilih ahli...</option>';
     data.forEach(member => {
       const option = document.createElement('option');
       option.value = member.id;
@@ -233,7 +233,7 @@ async function loadMembers() {
     });
   } catch (err) {
     console.error('Error loading members:', err);
-    select.innerHTML = '<option value="">Error loading members: ' + err.message + '</option>';
+    select.innerHTML = '<option value="">Ralat memuat ahli: ' + err.message + '</option>';
   }
 }
 
@@ -258,7 +258,7 @@ async function loadReceipts() {
       const td = document.createElement('td');
       td.colSpan = 7;
       td.className = 'text-center';
-      td.textContent = 'No receipts found';
+      td.textContent = 'Tiada resit dijumpai';
       tr.appendChild(td);
       tbody.appendChild(tr);
       return;
@@ -294,7 +294,7 @@ async function loadReceipts() {
       
       const tdAction = document.createElement('td');
       const btn = document.createElement('button');
-      btn.textContent = 'Download PDF';
+      btn.textContent = 'Muat Turun PDF';
       btn.className = 'btn btn-sm btn-outline';
       btn.onclick = () => downloadReceiptPDF(receipt.receipt_pdf_url);
       tdAction.appendChild(btn);
@@ -304,7 +304,7 @@ async function loadReceipts() {
     });
   } catch (err) {
     console.error('Error loading receipts:', err);
-    tbody.innerHTML = '<tr><td colspan="7" class="text-center">Error loading receipts: ' + err.message + '</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" class="text-center">Ralat memuat resit: ' + err.message + '</td></tr>';
   }
 }
 
@@ -329,7 +329,7 @@ async function loadVouchers() {
       const td = document.createElement('td');
       td.colSpan = 8;
       td.className = 'text-center';
-      td.textContent = 'No vouchers found';
+      td.textContent = 'Tiada voucher dijumpai';
       tr.appendChild(td);
       tbody.appendChild(tr);
       return;
@@ -373,7 +373,7 @@ async function loadVouchers() {
       
       const tdAction = document.createElement('td');
       const btn = document.createElement('button');
-      btn.textContent = 'Download PDF';
+      btn.textContent = 'Muat Turun PDF';
       btn.className = 'btn btn-sm btn-outline';
       btn.onclick = () => downloadVoucherPDF(voucher.voucher_pdf_url);
       tdAction.appendChild(btn);
@@ -383,7 +383,7 @@ async function loadVouchers() {
     });
   } catch (err) {
     console.error('Error loading vouchers:', err);
-    tbody.innerHTML = '<tr><td colspan="8" class="text-center">Error loading vouchers: ' + err.message + '</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" class="text-center">Ralat memuat voucher: ' + err.message + '</td></tr>';
   }
 }
 
@@ -445,7 +445,7 @@ async function loadPendingApprovals() {
       
       const tdAction = document.createElement('td');
       const btn = document.createElement('button');
-      btn.textContent = 'Review';
+      btn.textContent = 'Semak';
       btn.className = 'btn btn-sm btn-primary';
       btn.onclick = () => reviewVoucher(voucher.id);
       tdAction.appendChild(btn);
@@ -455,7 +455,7 @@ async function loadPendingApprovals() {
     });
   } catch (err) {
     console.error('Error loading approvals:', err);
-    tbody.innerHTML = '<tr><td colspan="7" class="text-center">Error loading approvals: ' + err.message + '</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" class="text-center">Ralat memuat kelulusan: ' + err.message + '</td></tr>';
   }
 }
 
@@ -470,12 +470,12 @@ async function handleGenerateReceipt() {
   const description = document.getElementById('receipt-description')?.value || null;
   
   if (!amount || !paymentDate) {
-    alert('Please fill in all required fields');
+    alert('Sila isi semua medan yang diperlukan');
     return;
   }
   
   if (!memberId && !manualPayeeName) {
-    alert('Please select a member or enter payee name');
+    alert('Sila pilih ahli atau masukkan nama penerima');
     return;
   }
   
@@ -485,12 +485,12 @@ async function handleGenerateReceipt() {
       const ocrStatus = document.getElementById('ocr-status');
       const ocrText = document.getElementById('ocr-status-text');
       ocrStatus.style.display = 'block';
-      ocrText.textContent = 'Processing payment slip with OCR...';
+      ocrText.textContent = 'Memproses slip pembayaran dengan OCR...';
       
       const slipUrl = await uploadPaymentSlip(slipFile, memberId || 0, amount, paymentMethod, paymentDate);
       const transactionId = await processOCR(slipUrl);
       
-      ocrText.textContent = `OCR Complete. Transaction ID: ${transactionId}`;
+      ocrText.textContent = `OCR Selesai. ID Transaksi: ${transactionId}`;
       document.getElementById('transaction-id-display').style.display = 'block';
       document.getElementById('transaction-id-text').textContent = transactionId;
     }
@@ -508,11 +508,11 @@ async function handleGenerateReceipt() {
       throw new Error(receiptData.error || 'Receipt generation failed');
     }
     
-    alert(`Receipt generated: ${receiptData.receiptNumber}`);
+    alert(`Resit dijana: ${receiptData.receiptNumber}`);
     loadReceipts();
   } catch (err) {
     console.error('Error generating receipt:', err);
-    alert('Error generating receipt: ' + err.message);
+    alert('Ralat menjana resit: ' + err.message);
   }
 }
 
@@ -525,17 +525,17 @@ async function createPaymentVoucher() {
   const preparedBy = 'Admin'; // Default prepared by
   
   if (!payableTo || !purpose || !amount || !paymentMethod) {
-    alert('Please fill in all required fields');
+    alert('Sila isi semua medan yang diperlukan');
     return;
   }
   
   try {
     const voucherData = await createPaymentVoucher(payableTo, purpose, amount, paymentMethod, preparedBy);
-    alert(`Payment voucher created: ${voucherData.voucherNumber}`);
+    alert(`Voucher pembayaran dijana: ${voucherData.voucherNumber}`);
     loadVouchers();
   } catch (err) {
     console.error('Error creating voucher:', err);
-    alert('Error creating voucher: ' + err.message);
+    alert('Ralat menjana voucher: ' + err.message);
   }
 }
 
@@ -563,11 +563,11 @@ async function reviewVoucher(voucherId) {
     modalContent.appendChild(modalHeader);
     
     const title = document.createElement('h3');
-    title.textContent = 'Review Payment Voucher';
+    title.textContent = 'Semak Voucher Pembayaran';
     modalHeader.appendChild(title);
     
     const closeBtn = document.createElement('button');
-    closeBtn.textContent = 'Close';
+    closeBtn.textContent = 'Tutup';
     closeBtn.className = 'btn btn-sm btn-outline';
     closeBtn.onclick = () => reviewModal.remove();
     modalHeader.appendChild(closeBtn);
@@ -578,7 +578,7 @@ async function reviewVoucher(voucherId) {
     
     const pVoucherNumber = document.createElement('p');
     const strongVoucher = document.createElement('strong');
-    strongVoucher.textContent = 'Voucher Number: ';
+    strongVoucher.textContent = 'Nombor Voucher: ';
     pVoucherNumber.appendChild(strongVoucher);
     const spanVoucher = document.createElement('span');
     spanVoucher.textContent = data.voucher_number;
@@ -587,7 +587,7 @@ async function reviewVoucher(voucherId) {
     
     const pPayableTo = document.createElement('p');
     const strongPayable = document.createElement('strong');
-    strongPayable.textContent = 'Payable To: ';
+    strongPayable.textContent = 'Dibayar Kepada: ';
     pPayableTo.appendChild(strongPayable);
     const spanPayable = document.createElement('span');
     spanPayable.textContent = data.payable_to;
@@ -596,7 +596,7 @@ async function reviewVoucher(voucherId) {
     
     const pPurpose = document.createElement('p');
     const strongPurpose = document.createElement('strong');
-    strongPurpose.textContent = 'Purpose: ';
+    strongPurpose.textContent = 'Tujuan: ';
     pPurpose.appendChild(strongPurpose);
     const spanPurpose = document.createElement('span');
     spanPurpose.textContent = data.payment_purpose;
@@ -605,7 +605,7 @@ async function reviewVoucher(voucherId) {
     
     const pAmount = document.createElement('p');
     const strongAmount = document.createElement('strong');
-    strongAmount.textContent = 'Amount: ';
+    strongAmount.textContent = 'Jumlah: ';
     pAmount.appendChild(strongAmount);
     const spanAmount = document.createElement('span');
     spanAmount.textContent = 'RM' + parseFloat(data.amount).toFixed(2);
@@ -614,7 +614,7 @@ async function reviewVoucher(voucherId) {
     
     const pMethod = document.createElement('p');
     const strongMethod = document.createElement('strong');
-    strongMethod.textContent = 'Payment Method: ';
+    strongMethod.textContent = 'Kaedah Pembayaran: ';
     pMethod.appendChild(strongMethod);
     const spanMethod = document.createElement('span');
     spanMethod.textContent = data.payment_method;
@@ -623,7 +623,7 @@ async function reviewVoucher(voucherId) {
     
     const pPrepared = document.createElement('p');
     const strongPrepared = document.createElement('strong');
-    strongPrepared.textContent = 'Prepared By: ';
+    strongPrepared.textContent = 'Disediakan Oleh: ';
     pPrepared.appendChild(strongPrepared);
     const spanPrepared = document.createElement('span');
     spanPrepared.textContent = data.prepared_by;
@@ -635,7 +635,7 @@ async function reviewVoucher(voucherId) {
     modalBody.appendChild(formGroup);
     
     const label = document.createElement('label');
-    label.textContent = 'Rejection Reason (if rejecting)';
+    label.textContent = 'Sebab Penolakan (jika menolak)';
     formGroup.appendChild(label);
     
     const textarea = document.createElement('textarea');
@@ -649,13 +649,13 @@ async function reviewVoucher(voucherId) {
     modalContent.appendChild(modalFooter);
     
     const approveBtn = document.createElement('button');
-    approveBtn.textContent = 'Approve';
+    approveBtn.textContent = 'Lulus';
     approveBtn.className = 'btn btn-success';
     approveBtn.onclick = () => approveVoucher(voucherId);
     modalFooter.appendChild(approveBtn);
     
     const rejectBtn = document.createElement('button');
-    rejectBtn.textContent = 'Reject';
+    rejectBtn.textContent = 'Tolak';
     rejectBtn.className = 'btn btn-danger';
     rejectBtn.onclick = () => rejectVoucher(voucherId);
     modalFooter.appendChild(rejectBtn);
@@ -663,14 +663,14 @@ async function reviewVoucher(voucherId) {
     document.body.appendChild(reviewModal);
   } catch (err) {
     console.error('Error loading voucher for review:', err);
-    alert('Error loading voucher: ' + err.message);
+    alert('Ralat memuat voucher: ' + err.message);
   }
 }
 
 // Download receipt PDF
 function downloadReceiptPDF(pdfUrl) {
   if (!pdfUrl) {
-    alert('PDF not available');
+    alert('PDF tidak tersedia');
     return;
   }
   // Generate signed URL for private storage
@@ -679,7 +679,7 @@ function downloadReceiptPDF(pdfUrl) {
     .createSignedUrl(pdfUrl, { expiresIn: 60 })
     .then(({ data, error }) => {
       if (error) {
-        alert('Error generating download link: ' + error.message);
+        alert('Ralat menjana pautan muat turun: ' + error.message);
         return;
       }
       window.open(data.signedUrl, '_blank');
@@ -689,7 +689,7 @@ function downloadReceiptPDF(pdfUrl) {
 // Download voucher PDF
 function downloadVoucherPDF(pdfUrl) {
   if (!pdfUrl) {
-    alert('PDF not available');
+    alert('PDF tidak tersedia');
     return;
   }
   // Generate signed URL for private storage
@@ -698,7 +698,7 @@ function downloadVoucherPDF(pdfUrl) {
     .createSignedUrl(pdfUrl, { expiresIn: 60 })
     .then(({ data, error }) => {
       if (error) {
-        alert('Error generating download link: ' + error.message);
+        alert('Ralat menjana pautan muat turun: ' + error.message);
         return;
       }
       window.open(data.signedUrl, '_blank');
