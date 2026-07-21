@@ -746,6 +746,18 @@ window.showPage = function(pageId) {
     if (n.getAttribute('onclick') && n.getAttribute('onclick').indexOf("'" + pageId + "'") !== -1) n.classList.add('active');
   });
   
+  // Update topbar header (original showPage does this; the new-page branch must too)
+  var NEW_PAGE_META = {
+    'page-receipts':  ['RESIT BAYARAN', 'Jana & urus resit pembayaran ahli'],
+    'page-vouchers':  ['BAUCAR BAYARAN', 'Cipta & urus baucar pembayaran'],
+    'page-approvals': ['KELULUSAN BAUCAR', 'Semak & luluskan baucar pembayaran']
+  };
+  var meta = NEW_PAGE_META[pageId] || [pageId, ''];
+  var pt = document.getElementById('page-title'); if (pt) pt.textContent = meta[0];
+  var ps = document.getElementById('page-sub'); if (ps) ps.textContent = meta[1];
+  var ta = document.getElementById('topbar-actions'); if (ta) ta.innerHTML = '';
+  var tla = document.getElementById('topbar-left-area'); if (tla) tla.innerHTML = '';
+  
   if (pageId === 'page-receipts') {
     showReceiptsPage();
   } else if (pageId === 'page-vouchers') {
