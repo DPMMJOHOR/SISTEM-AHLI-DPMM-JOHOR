@@ -251,7 +251,10 @@ async function loadReceipts() {
       .select('*')
       .order('receipt_date', { ascending: false });
     
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase error loading receipts:', error);
+      throw error;
+    }
     
     if (data.length === 0) {
       const tr = document.createElement('tr');
@@ -304,7 +307,7 @@ async function loadReceipts() {
     });
   } catch (err) {
     console.error('Error loading receipts:', err);
-    tbody.innerHTML = '<tr><td colspan="7" class="text-center">Error loading receipts</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" class="text-center">Error loading receipts: ' + err.message + '</td></tr>';
   }
 }
 
@@ -319,7 +322,10 @@ async function loadVouchers() {
       .select('*')
       .order('created_at', { ascending: false });
     
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase error loading vouchers:', error);
+      throw error;
+    }
     
     if (data.length === 0) {
       const tr = document.createElement('tr');
@@ -380,7 +386,7 @@ async function loadVouchers() {
     });
   } catch (err) {
     console.error('Error loading vouchers:', err);
-    tbody.innerHTML = '<tr><td colspan="8" class="text-center">Error loading vouchers</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" class="text-center">Error loading vouchers: ' + err.message + '</td></tr>';
   }
 }
 
@@ -396,7 +402,10 @@ async function loadPendingApprovals() {
       .eq('approval_status', 'pending')
       .order('created_at', { ascending: false });
     
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase error loading approvals:', error);
+      throw error;
+    }
     
     if (data.length === 0) {
       const tr = document.createElement('tr');
@@ -449,7 +458,7 @@ async function loadPendingApprovals() {
     });
   } catch (err) {
     console.error('Error loading approvals:', err);
-    tbody.innerHTML = '<tr><td colspan="7" class="text-center">Error loading approvals</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" class="text-center">Error loading approvals: ' + err.message + '</td></tr>';
   }
 }
 
@@ -498,6 +507,7 @@ async function createPaymentVoucher() {
   const purpose = document.getElementById('voucher-purpose').value;
   const amount = document.getElementById('voucher-amount').value;
   const paymentMethod = document.getElementById('voucher-payment-method').value;
+  const preparedBy = 'Admin'; // Default prepared by
   
   if (!payableTo || !purpose || !amount || !paymentMethod) {
     alert('Please fill in all required fields');
@@ -505,8 +515,8 @@ async function createPaymentVoucher() {
   }
   
   try {
-    const voucherData = await createPaymentVoucherAPI(payableTo, purpose, amount, paymentMethod);
-    alert(`Payment voucher created: ${voucherData.voucher_number}`);
+    const voucherData = await createPaymentVoucher(payableTo, purpose, amount, paymentMethod, preparedBy);
+    alert(`Payment voucher created: ${voucherData.voucherNumber}`);
     loadVouchers();
   } catch (err) {
     console.error('Error creating voucher:', err);
