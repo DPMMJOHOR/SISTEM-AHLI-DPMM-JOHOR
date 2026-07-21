@@ -6565,8 +6565,20 @@ window.addEventListener('DOMContentLoaded', () => {
 const _ip = { consolidatedFile: null, allSsmDocs: [], ssmDocKeys: [] };
 
 function openIsiPintar() {
-  // Update UI based on selected entity type
-  const entiti = getRadio('jenis_entiti');
+  // Update UI based on selected business type from intro screen
+  const selector = document.getElementById('business-type-selector');
+  const selectedType = selector ? selector.value : '';
+  
+  // Map business type to entity type for document selection
+  const businessTypeToEntity = {
+    'enterprise_sole': 'Pemunya Tunggal',
+    'enterprise_partnership': 'Perkongsian',
+    'sdn_bhd_sole': 'Sdn Bhd',
+    'professional': 'Pro. Tunggal',
+    'cooperative': 'Koperasi'
+  };
+  
+  const entiti = businessTypeToEntity[selectedType] || 'Pemunya Tunggal';
   const docInfo = entityDocMap[entiti] || { docName: 'Dokumen SSM', docDesc: 'Sila muat naik dokumen SSM anda.', accept: 'image/*,.pdf' };
   
   document.getElementById('isi-pintar-doc-name').textContent = docInfo.docName;
