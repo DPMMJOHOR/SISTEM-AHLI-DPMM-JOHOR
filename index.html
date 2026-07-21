@@ -3030,6 +3030,9 @@ var PAGE_META = {
   backup:    ['BACK UP',''],
   admin:       ['PANEL ADMIN',''],
   permohonan:  ['PERMOHONAN AHLI','Semak, luluskan atau tolak permohonan keahlian baru'],
+  receipts:    ['RESIT BAYARAN','Jana & urus resit pembayaran ahli'],
+  vouchers:    ['BAUCAR BAYARAN','Cipta & urus baucar pembayaran'],
+  approvals:   ['KELULUSAN BAUCAR','Semak & luluskan baucar pembayaran'],
 };
 
 function showPage(id) {
@@ -3070,9 +3073,9 @@ function showPage(id) {
   if (id === 'dokumen') renderDokumenPage();
   if (id === 'mesyuarat') loadMesyuarat();
   if (id === 'permohonan') renderPermohonanPage();
-  if (id === 'page-receipts' && typeof showReceiptsPage === 'function') showReceiptsPage();
-  if (id === 'page-vouchers' && typeof showVouchersPage === 'function') showVouchersPage();
-  if (id === 'page-approvals' && typeof showApprovalsPage === 'function') showApprovalsPage();
+  if (id === 'receipts' && typeof showReceiptsPage === 'function') showReceiptsPage();
+  if (id === 'vouchers' && typeof showVouchersPage === 'function') showVouchersPage();
+  if (id === 'approvals' && typeof showApprovalsPage === 'function') showApprovalsPage();
   closeSidebar();
 }
 
@@ -7843,7 +7846,7 @@ async function applyDigitalSignatureToPDF(pdfUrl, signatureUrl, documentType) {
   }
 }
 </script>
-<script src="receipt-pv-ui.js?v=4"></script>
+<script src="receipt-pv-ui.js?v=5"></script>
 </body>
 </html>
 

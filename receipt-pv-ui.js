@@ -680,14 +680,14 @@ function addReceiptPVNavigation() {
   // Create nav items once (guard against duplicates)
   if (!document.getElementById('receipt-nav-item')) {
     const navItems = `
-      <div class="nav-item" onclick="showPage('page-receipts')" id="receipt-nav-item" style="display:none;">
-        <div class="nav-text">Resit</div>
+      <div class="nav-item" onclick="showPage('receipts')" id="receipt-nav-item" style="display:none;">
+        <span class="nav-text">RESIT</span>
       </div>
-      <div class="nav-item" onclick="showPage('page-vouchers')" id="voucher-nav-item" style="display:none;">
-        <div class="nav-text">Baucar</div>
+      <div class="nav-item" onclick="showPage('vouchers')" id="voucher-nav-item" style="display:none;">
+        <span class="nav-text">BAUCAR</span>
       </div>
-      <div class="nav-item" onclick="showPage('page-approvals')" id="approval-nav-item" style="display:none;">
-        <div class="nav-text">Kelulusan</div>
+      <div class="nav-item" onclick="showPage('approvals')" id="approval-nav-item" style="display:none;">
+        <span class="nav-text">KELULUSAN</span>
       </div>
     `;
     
@@ -724,47 +724,8 @@ document.addEventListener('DOMContentLoaded', function() {
   addReceiptPVNavigation();
 });
 
-// Extend showPage function to handle new pages
-const originalShowPage = window.showPage;
-window.showPage = function(pageId) {
-  // Call original showPage for standard pages ONLY (exclude new pages)
-  if (originalShowPage && pageId !== 'page-receipts' && pageId !== 'page-vouchers' && pageId !== 'page-approvals') {
-    originalShowPage(pageId);
-    closeSidebar();
-    return;
-  }
-
-  // Handle new pages with custom logic
-  CURRENT_PAGE = pageId;
-  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
-  document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
-  
-  var pg = document.getElementById(pageId);
-  if (pg) pg.classList.add('active');
-  
-  document.querySelectorAll('.nav-item').forEach(function(n){
-    if (n.getAttribute('onclick') && n.getAttribute('onclick').indexOf("'" + pageId + "'") !== -1) n.classList.add('active');
-  });
-  
-  // Update topbar header (original showPage does this; the new-page branch must too)
-  var NEW_PAGE_META = {
-    'page-receipts':  ['RESIT BAYARAN', 'Jana & urus resit pembayaran ahli'],
-    'page-vouchers':  ['BAUCAR BAYARAN', 'Cipta & urus baucar pembayaran'],
-    'page-approvals': ['KELULUSAN BAUCAR', 'Semak & luluskan baucar pembayaran']
-  };
-  var meta = NEW_PAGE_META[pageId] || [pageId, ''];
-  var pt = document.getElementById('page-title'); if (pt) pt.textContent = meta[0];
-  var ps = document.getElementById('page-sub'); if (ps) ps.textContent = meta[1];
-  var ta = document.getElementById('topbar-actions'); if (ta) ta.innerHTML = '';
-  var tla = document.getElementById('topbar-left-area'); if (tla) tla.innerHTML = '';
-  
-  if (pageId === 'page-receipts') {
-    showReceiptsPage();
-  } else if (pageId === 'page-vouchers') {
-    showVouchersPage();
-  } else if (pageId === 'page-approvals') {
-    showApprovalsPage();
-  }
-  
-  closeSidebar();
-};
+// NOTE: Navigation for receipts/vouchers/approvals is handled by the native
+// showPage() in index.html (same path as every other tab). Nav items call
+// showPage('receipts'|'vouchers'|'approvals'); the page divs are #page-<id>;
+// index.html PAGE_META supplies the header, and its dispatch calls
+// showReceiptsPage()/showVouchersPage()/showApprovalsPage(). No override here.
