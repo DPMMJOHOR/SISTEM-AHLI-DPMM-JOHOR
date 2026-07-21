@@ -6815,7 +6815,9 @@ async function callGroqVision(images, prompt) {
   
   if (!response.ok) {
     var err = await response.json().catch(function() { return {}; });
-    throw new Error((err && err.error) || ('AI API error ' + response.status));
+    var errorMsg = (err && err.error) || ('AI API error ' + response.status);
+    console.error('Groq Vision API error:', errorMsg);
+    throw new Error(errorMsg);
   }
   
   var data = await response.json();
@@ -6828,19 +6830,37 @@ async function callGroqVision(images, prompt) {
 // Extract data page-by-page and merge results. Sending many high-res pages in a
 // single request exceeds Groq's per-request limit (413), so each page is processed
 // separately and non-null fields are merged. Stops early once required keys are found.
+// Added exponential backoff for 429 rate limit errors.
 async function extractAcrossPages(images, prompt, requiredKeys) {
   var list = Array.isArray(images) ? images : [images];
   var merged = {};
   var anySuccess = false;
   for (var i = 0; i < list.length; i++) {
     var pageRes = null;
-    try {
-      pageRes = await callGroqVision([list[i]], prompt);
-    } catch (e) {
-      // Skip pages that fail or are rate-limited; continue with the rest
-      if (i < list.length - 1) { await new Promise(function(r){ setTimeout(r, 500); }); }
-      continue;
+    var retryCount = 0;
+    var maxRetries = 3;
+    var baseDelay = 1000; // 1 second base delay
+    
+    while (retryCount <= maxRetries) {
+      try {
+        pageRes = await callGroqVision([list[i]], prompt);
+        break; // Success, exit retry loop
+      } catch (e) {
+        var isRateLimit = e.message && e.message.includes('429');
+        if (isRateLimit && retryCount < maxRetries) {
+          // Exponential backoff for rate limit: 1s, 2s, 4s
+          var delay = baseDelay * Math.pow(2, retryCount);
+          console.log('Rate limit hit, retrying in ' + delay + 'ms (attempt ' + (retryCount + 1) + '/' + (maxRetries + 1) + ')');
+          await new Promise(function(r){ setTimeout(r, delay); });
+          retryCount++;
+        } else {
+          // Not a rate limit or max retries exceeded, give up on this page
+          console.log('Page ' + i + ' failed: ' + (e.message || 'Unknown error'));
+          break;
+        }
+      }
     }
+    
     if (pageRes && typeof pageRes === 'object') {
       anySuccess = true;
       Object.keys(pageRes).forEach(function(k) {
@@ -6851,9 +6871,10 @@ async function extractAcrossPages(images, prompt, requiredKeys) {
     }
     var haveAll = requiredKeys.every(function(k) { return merged[k] != null && merged[k] !== ''; });
     if (haveAll) break;
-    if (i < list.length - 1) { await new Promise(function(r){ setTimeout(r, 400); }); }
+    // Add delay between pages to avoid rate limiting
+    if (i < list.length - 1) { await new Promise(function(r){ setTimeout(r, 1000); }); }
   }
-  if (!anySuccess) throw new Error('Tidak dapat membaca dokumen.');
+  if (!anySuccess) throw new Error('Tidak dapat membaca dokumen. Semua muka surat gagal diproses (mungkin disebabakan had kadar API). Sila cuba semula dalam beberapa minit.');
   return merged;
 }
 
