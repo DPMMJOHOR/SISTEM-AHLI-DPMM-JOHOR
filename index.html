@@ -7378,13 +7378,13 @@ async function generateReceipt(memberId, amount, paymentMethod, paymentDate, tra
     if (memberId) {
       const { data: memberData } = await supabaseClient
         .from('AHLI DPMM JOHOR')
-        .select('nama, nama, NO_AHLI, ALAMAT, JANTINA')
+        .select('NAMA_AHLI, NAMA, NO_AHLI, ALAMAT, JANTINA')
         .eq('id', memberId)
         .single();
       
       if (memberData) {
         memberDetails = {
-          memberName: memberData.nama,
+          memberName: memberData.NAMA_AHLI || memberData.NAMA,
           nomborAhli: memberData.NO_AHLI,
           alamat: memberData.ALAMAT,
           jantina: memberData.JANTINA

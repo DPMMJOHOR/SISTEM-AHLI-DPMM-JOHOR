@@ -220,10 +220,11 @@ async function loadMembers() {
   if (!select) return;
   
   try {
+    // NOTE: 'AHLI DPMM JOHOR' uses uppercase columns: NO_AHLI, NAMA_AHLI (company), NAMA (PIC)
     const { data, error } = await supabaseClient
       .from('AHLI DPMM JOHOR')
-      .select('id, nama, nombor_ahli')
-      .order('nama');
+      .select('id, NO_AHLI, NAMA_AHLI, NAMA')
+      .order('NAMA_AHLI');
     
     if (error) throw error;
     
@@ -231,12 +232,13 @@ async function loadMembers() {
     data.forEach(member => {
       const option = document.createElement('option');
       option.value = member.id;
-      option.textContent = `${member.nama} (${member.nombor_ahli || 'N/A'})`;
+      const name = member.NAMA_AHLI || member.NAMA || 'Tanpa Nama';
+      option.textContent = `${name} (${member.NO_AHLI || 'N/A'})`;
       select.appendChild(option);
     });
   } catch (err) {
     console.error('Error loading members:', err);
-    select.innerHTML = '<option value="">Error loading members</option>';
+    select.innerHTML = '<option value="">Error loading members: ' + err.message + '</option>';
   }
 }
 
