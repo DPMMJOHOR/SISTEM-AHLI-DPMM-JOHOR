@@ -7298,7 +7298,16 @@ async function uploadPaymentSlip(imageFile, memberId, amount, paymentMethod, pay
     
     // Generate slip number using get_next_number
     const yearMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
-    const slipNumber = await supabaseClient.rpc('get_next_number', { p_type: 'payment_slip', p_year_month: yearMonth });
+    const { data: slipNumber, error: rpcError } = await supabaseClient.rpc('get_next_number', { p_type: 'payment_slip', p_year_month: yearMonth });
+    
+    if (rpcError) {
+      console.error('RPC error:', rpcError);
+      throw new Error(`Failed to generate slip number: ${rpcError.message}`);
+    }
+    
+    if (!slipNumber) {
+      throw new Error('Slip number generation returned null');
+    }
     
     // Store in payment_slips table
     const { data: slipData, error: slipError } = await supabaseClient
@@ -7375,7 +7384,16 @@ async function generateReceipt(memberId, amount, paymentMethod, paymentDate, tra
   try {
     // Generate receipt number using get_next_number
     const yearMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
-    const receiptNumber = await supabaseClient.rpc('get_next_number', { p_type: 'receipt', p_year_month: yearMonth });
+    const { data: receiptNumber, error: rpcError } = await supabaseClient.rpc('get_next_number', { p_type: 'receipt', p_year_month: yearMonth });
+    
+    if (rpcError) {
+      console.error('RPC error:', rpcError);
+      throw new Error(`Failed to generate receipt number: ${rpcError.message}`);
+    }
+    
+    if (!receiptNumber) {
+      throw new Error('Receipt number generation returned null');
+    }
     
     // Look up member details if membership fee
     let memberDetails = {};
@@ -7436,7 +7454,16 @@ async function createPaymentVoucher(payableTo, purpose, amount, paymentMethod, p
   try {
     // Generate voucher number using get_next_number
     const yearMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
-    const voucherNumber = await supabaseClient.rpc('get_next_number', { p_type: 'payment_voucher', p_year_month: yearMonth });
+    const { data: voucherNumber, error: rpcError } = await supabaseClient.rpc('get_next_number', { p_type: 'payment_voucher', p_year_month: yearMonth });
+    
+    if (rpcError) {
+      console.error('RPC error:', rpcError);
+      throw new Error(`Failed to generate voucher number: ${rpcError.message}`);
+    }
+    
+    if (!voucherNumber) {
+      throw new Error('Voucher number generation returned null');
+    }
     
     // Validate required fields
     if (!payableTo || !purpose || !amount || !paymentMethod) {

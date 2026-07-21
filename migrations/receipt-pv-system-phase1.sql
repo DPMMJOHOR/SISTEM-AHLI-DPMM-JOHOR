@@ -113,7 +113,7 @@ CREATE TABLE IF NOT EXISTS running_numbers (
 
 -- Function to get next running number
 CREATE OR REPLACE FUNCTION get_next_number(p_type VARCHAR(50), p_year_month VARCHAR(7))
-RETURNS VARCHAR(50) AS $$
+RETURNS VARCHAR(50) SECURITY DEFINER AS $$
 DECLARE
   v_seq INT;
   v_prefix VARCHAR(10);
@@ -128,6 +128,9 @@ BEGIN
   RETURN v_prefix;
 END;
 $$ LANGUAGE plpgsql;
+
+-- Grant execute permission on get_next_number
+GRANT EXECUTE ON FUNCTION get_next_number(VARCHAR(50), VARCHAR(7)) TO anon, authenticated;
 
 -- ============================================================
 -- 6. RLS POLICIES FOR NEW TABLES
