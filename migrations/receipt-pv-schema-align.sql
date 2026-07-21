@@ -14,6 +14,15 @@
 -- ============================================================
 
 -- ------------------------------------------------------------
+-- 0. FIX DATA TYPE MISMATCH — member_id should be INTEGER not UUID
+-- ------------------------------------------------------------
+-- The live receipts table has member_id as UUID, but AHLI DPMM JOHOR.id is SERIAL (integer)
+-- This causes "invalid input syntax for type uuid" errors when inserting integer member IDs
+-- Since UUID cannot be cast to INTEGER, we drop and recreate the column
+ALTER TABLE receipts DROP COLUMN IF EXISTS member_id;
+ALTER TABLE receipts ADD COLUMN member_id INTEGER;
+
+-- ------------------------------------------------------------
 -- 1. RECEIPTS — add missing columns
 -- ------------------------------------------------------------
 ALTER TABLE receipts ADD COLUMN IF NOT EXISTS receipt_type          VARCHAR(50) DEFAULT 'membership_fee';
