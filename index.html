@@ -7380,7 +7380,7 @@ async function processOCR(imageUrl, slipId) {
 }
 
 // Receipt Generation
-async function generateReceipt(memberId, amount, paymentMethod, paymentDate, transactionId, slipId) {
+async function generateReceipt(memberId, amount, paymentMethod, paymentDate, transactionId, slipId, manualPayeeName) {
   try {
     // Generate receipt number using get_next_number
     const yearMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
@@ -7412,6 +7412,12 @@ async function generateReceipt(memberId, amount, paymentMethod, paymentDate, tra
           jantina: memberData.JANTINA
         };
       }
+    } else if (manualPayeeName) {
+      // Use manual payee name for non-member receipts
+      memberDetails = {
+        memberName: manualPayeeName,
+        nomborAhli: 'N/A'
+      };
     }
     
     // Generate PDF with jsPDF

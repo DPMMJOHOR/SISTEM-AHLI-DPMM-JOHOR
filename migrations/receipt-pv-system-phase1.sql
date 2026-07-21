@@ -117,6 +117,7 @@ RETURNS VARCHAR(20) SECURITY DEFINER AS $$
 DECLARE
   v_seq INT;
   v_prefix VARCHAR(20);
+  v_doc_code VARCHAR(10);
 BEGIN
   INSERT INTO running_numbers (document_type, year_month, sequence_number)
   VALUES (p_type, p_year_month, 1)
@@ -124,7 +125,16 @@ BEGIN
   DO UPDATE SET sequence_number = running_numbers.sequence_number + 1
   RETURNING sequence_number INTO v_seq;
   
-  v_prefix := UPPER(SUBSTRING(p_type, 1, 3)) || '-' || p_year_month || '-' || LPAD(v_seq::TEXT, 4, '0');
+  -- Determine document code based on type
+  IF p_type = 'receipt' OR p_type = 'receipts' THEN
+    v_doc_code := 'RR';
+  ELSIF p_type = 'voucher' OR p_type = 'vouchers' THEN
+    v_doc_code := 'PV';
+  ELSE
+    v_doc_code := UPPER(SUBSTRING(p_type, 1, 3));
+  END IF;
+  
+  v_prefix := 'DPMMJHR/' || v_doc_code || '/' || p_year_month || '-' || LPAD(v_seq::TEXT, 4, '0');
   RETURN v_prefix;
 END;
 $$ LANGUAGE plpgsql;

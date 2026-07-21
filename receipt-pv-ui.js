@@ -20,6 +20,11 @@ function showReceiptsPage() {
         </div>
         
         <div class="field-grp">
+          <label class="field-label">Nama Penerima (jika bukan ahli)</label>
+          <input type="text" id="manual-payee-name" class="field-input" placeholder="Masukkan nama penerima...">
+        </div>
+        
+        <div class="field-grp">
           <label class="field-label">Jumlah (RM)</label>
           <input type="number" id="receipt-amount" class="field-input" placeholder="0.00" step="0.01">
         </div>
@@ -456,9 +461,15 @@ async function handleGenerateReceipt() {
   const paymentMethod = document.getElementById('receipt-payment-method').value;
   const paymentDate = document.getElementById('receipt-payment-date').value;
   const slipFile = document.getElementById('receipt-payment-slip').files[0];
+  const manualPayeeName = document.getElementById('manual-payee-name')?.value || null;
   
-  if (!memberId || !amount || !paymentDate) {
+  if (!amount || !paymentDate) {
     alert('Please fill in all required fields');
+    return;
+  }
+  
+  if (!memberId && !manualPayeeName) {
+    alert('Please select a member or enter payee name');
     return;
   }
   
@@ -470,7 +481,7 @@ async function handleGenerateReceipt() {
       ocrStatus.style.display = 'block';
       ocrText.textContent = 'Processing payment slip with OCR...';
       
-      const slipUrl = await uploadPaymentSlip(slipFile, memberId, amount, paymentMethod, paymentDate);
+      const slipUrl = await uploadPaymentSlip(slipFile, memberId || 0, amount, paymentMethod, paymentDate);
       const transactionId = await processOCR(slipUrl);
       
       ocrText.textContent = `OCR Complete. Transaction ID: ${transactionId}`;
@@ -480,7 +491,7 @@ async function handleGenerateReceipt() {
     
     // Generate receipt (calls the implementation in index.html)
     console.log('Calling generateReceipt with:', memberId, amount, paymentMethod, paymentDate);
-    const receiptData = await generateReceipt(memberId, amount, paymentMethod, paymentDate, null, null);
+    const receiptData = await generateReceipt(memberId || null, amount, paymentMethod, paymentDate, null, null, manualPayeeName);
     console.log('generateReceipt returned:', receiptData);
     
     if (!receiptData) {
@@ -656,7 +667,17 @@ function downloadReceiptPDF(pdfUrl) {
     alert('PDF not available');
     return;
   }
-  window.open(pdfUrl, '_blank');
+  // Generate signed URL for private storage
+  supabaseClient.storage
+    .from('receipts')
+    .createSignedUrl(pdfUrl, { expiresIn: 60 })
+    .then(({ data, error }) => {
+      if (error) {
+        alert('Error generating download link: ' + error.message);
+        return;
+      }
+      window.open(data.signedUrl, '_blank');
+    });
 }
 
 // Download voucher PDF
@@ -665,7 +686,17 @@ function downloadVoucherPDF(pdfUrl) {
     alert('PDF not available');
     return;
   }
-  window.open(pdfUrl, '_blank');
+  // Generate signed URL for private storage
+  supabaseClient.storage
+    .from('vouchers')
+    .createSignedUrl(pdfUrl, { expiresIn: 60 })
+    .then(({ data, error }) => {
+      if (error) {
+        alert('Error generating download link: ' + error.message);
+        return;
+      }
+      window.open(data.signedUrl, '_blank');
+    });
 }
 
 // Add navigation items to sidebar
