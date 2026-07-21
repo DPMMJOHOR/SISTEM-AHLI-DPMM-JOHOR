@@ -7574,34 +7574,47 @@ async function generateReceiptPDF(receiptNumber, memberDetails, amount, paymentM
   }
   
   // Overlay text on template
-  // Adjust coordinates based on your template layout
-  const overlayX = 100;
-  const overlayY = 200;
+  // Coordinates converted from pixels (1000x550) to PDF points (595.28x841.89)
+  // X scale: 0.59528, Y scale: 1.5316
   
   pdf.setFontSize(10);
   pdf.setFont('helvetica', 'normal');
   pdf.setTextColor(0, 0, 0);
   
-  // Receipt number
-  pdf.text(receiptNumber, overlayX, overlayY);
+  // Voucher/Receipt Number (Right-aligned, Bold Red)
+  pdf.setFont('helvetica', 'bold');
+  pdf.setTextColor(200, 0, 0);
+  pdf.text(receiptNumber, 393, 276, { align: 'right' });
   
   // Date
-  pdf.text(paymentDate, overlayX, overlayY + 20);
+  pdf.setFont('helvetica', 'normal');
+  pdf.setTextColor(0, 0, 0);
+  pdf.text(paymentDate, 158, 529);
   
-  // Amount
-  pdf.text('RM ' + amount, overlayX, overlayY + 40);
-  
-  // Member details
+  // Received from (Member name)
   if (memberDetails.memberName) {
-    pdf.text(memberDetails.memberName, overlayX, overlayY + 60);
-  }
-  if (memberDetails.nomborAhli) {
-    pdf.text(memberDetails.nomborAhli, overlayX, overlayY + 80);
+    pdf.text(memberDetails.memberName, 158, 643);
   }
   
-  // Transaction ID
+  // Being payment of (Purpose/Description)
+  pdf.text('Yuran Keahlian', 158, 818);
+  
+  // The sum of (Amount in words - optional)
+  pdf.text('RM ' + amount, 158, 996);
+  
+  // Amount Box (Centered/Right-aligned)
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(12);
+  pdf.text('RM ' + amount, 506, 1026, { align: 'center' });
+  
+  // BANK/NO CEK (Payment method)
+  pdf.setFontSize(10);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text(paymentMethod, 167, 1333);
+  
+  // Transaction ID (optional)
   if (transactionId) {
-    pdf.text(transactionId, overlayX, overlayY + 100);
+    pdf.text(transactionId, 506, 1348, { align: 'center' });
   }
   
   const pdfBlob = pdf.output('dataurlblob');
@@ -7654,37 +7667,43 @@ async function generateVoucherPDF(voucherNumber, payableTo, purpose, amount, pay
   }
   
   // Overlay text on template
-  // Adjust coordinates based on your template layout
-  const overlayX = 100;
-  const overlayY = 200;
+  // Coordinates converted from pixels (1000x710) to PDF points (595.28x841.89)
+  // X scale: 0.59528, Y scale: 1.1852
   
   pdf.setFontSize(10);
   pdf.setFont('helvetica', 'normal');
   pdf.setTextColor(0, 0, 0);
   
-  // Voucher number
-  pdf.text(voucherNumber, overlayX, overlayY);
+  // Pay To
+  pdf.text(payableTo, 118, 154);
+  
+  // Voucher No
+  pdf.text(voucherNumber, 118, 231);
   
   // Date
-  pdf.text(new Date().toISOString().slice(0, 10), overlayX, overlayY + 20);
+  pdf.text(new Date().toISOString().slice(0, 10), 118, 302);
   
-  // Amount
-  pdf.text('RM ' + amount, overlayX, overlayY + 40);
+  // Itemized Table (Description & Amount)
+  // Row 1: Purpose
+  pdf.text(purpose, 51, 415);
+  pdf.text('RM ' + amount, 405, 415, { align: 'right' });
   
-  // Payable to
-  pdf.text(payableTo, overlayX, overlayY + 60);
+  // Total Row
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('RM ' + amount, 408, 741, { align: 'right' });
   
-  // Purpose
-  pdf.text(purpose, overlayX, overlayY + 80);
+  // The Sum of RM (In Words)
+  pdf.setFont('helvetica', 'normal');
+  pdf.text('Ringgit Malaysia: ' + amount, 118, 818);
   
-  // Payment method
-  pdf.text(paymentMethod, overlayX, overlayY + 100);
+  // Prepared By
+  pdf.text(preparedBy, 49, 1066);
   
-  // Prepared by
-  pdf.text(preparedBy, overlayX, overlayY + 120);
+  // Approved By (placeholder)
+  pdf.text('Pending Approval', 232, 1066);
   
-  // Status
-  pdf.text('PENDING', overlayX, overlayY + 140);
+  // Received By (placeholder)
+  pdf.text('-', 416, 1066);
   
   const pdfBlob = pdf.output('dataurlblob');
   const fileName = `voucher_${voucherNumber}.pdf`;
