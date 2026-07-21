@@ -3473,7 +3473,7 @@ async function _deleteTemplateFromSupabase(templateId) {
   if (res.error) console.warn('Template delete error:', res.error.message);
   else {
     // Log the deletion
-    await supabaseClient.from('DPMM_AUDIT_LOG').insert({
+    await supabaseClientClient.from('DPMM_AUDIT_LOG').insert({
       user_id: currentUser ? currentUser.email : 'anonymous',
       action: 'DELETE',
       table_name: 'DPMM_TEMPLATES',
@@ -4683,7 +4683,7 @@ async function _dokDeleteFromSupabase(dbId) {
   if (res.error) console.warn('Dokumen delete error:', res.error.message);
   else {
     // Log the deletion
-    await supabaseClient.from('DPMM_AUDIT_LOG').insert({
+    await supabaseClientClient.from('DPMM_AUDIT_LOG').insert({
       user_id: currentUser ? currentUser.email : 'anonymous',
       action: 'DELETE',
       table_name: 'DPMM_DOKUMEN',
@@ -6353,7 +6353,7 @@ async function confirmLulus() {
   
   // Log the insert to audit table
   if (insData && insData[0]) {
-    await supabaseClient.from('DPMM_AUDIT_LOG').insert({
+    await supabaseClientClient.from('DPMM_AUDIT_LOG').insert({
       user_id: currentUser ? currentUser.email : 'anonymous',
       action: 'INSERT',
       table_name: 'AHLI DPMM JOHOR',
@@ -6558,7 +6558,7 @@ async function retryEmail(id, type) {
     }
     updatePayload.email_error = null;
     
-    await supabaseClient.from('PERMOHONAN_AHLI').update(updatePayload).eq('id', id);
+    await supabaseClientClient.from('PERMOHONAN_AHLI').update(updatePayload).eq('id', id);
     
     // Update local data
     if (p) {
@@ -6570,7 +6570,7 @@ async function retryEmail(id, type) {
     showSnack && showSnack('E-mel berjaya dihantar semula');
   } catch (err) {
     // Log error to database
-    await supabaseClient.from('PERMOHONAN_AHLI')
+    await supabaseClientClient.from('PERMOHONAN_AHLI')
       .update({ email_error: 'Retry failed: ' + err.message })
       .eq('id', id);
     
@@ -7278,7 +7278,7 @@ async function uploadPaymentSlip(imageFile, memberId, amount, paymentMethod, pay
     // Upload to Supabase Storage
     const timestamp = Date.now();
     const fileName = `slip_${timestamp}.png`;
-    const { data, error } = await supabase.storage
+    const { data, error } = await supabaseClient.storage
       .from('payment_slips')
       .upload(fileName, imageFile, {
         cacheControl: 3600
@@ -7294,10 +7294,10 @@ async function uploadPaymentSlip(imageFile, memberId, amount, paymentMethod, pay
     
     // Generate slip number using get_next_number
     const yearMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
-    const slipNumber = await supabase.rpc('get_next_number', { p_type: 'payment_slip', p_year_month: yearMonth });
+    const slipNumber = await supabaseClient.rpc('get_next_number', { p_type: 'payment_slip', p_year_month: yearMonth });
     
     // Store in payment_slips table
-    const { data: slipData, error: slipError } = await supabase
+    const { data: slipData, error: slipError } = await supabaseClient
       .from('payment_slips')
       .insert({
         slip_number: slipNumber,
@@ -7346,7 +7346,7 @@ async function processOCR(imageUrl, slipId) {
     const ocrStatus = transactionId ? 'processed' : 'failed';
     const ocrConfidence = transactionId ? 0.8 : 0;
     
-    await supabase
+    await supabaseClient
       .from('payment_slips')
       .update({ 
         transaction_id: transactionId,
@@ -7371,12 +7371,12 @@ async function generateReceipt(memberId, amount, paymentMethod, paymentDate, tra
   try {
     // Generate receipt number using get_next_number
     const yearMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
-    const receiptNumber = await supabase.rpc('get_next_number', { p_type: 'receipt', p_year_month: yearMonth });
+    const receiptNumber = await supabaseClient.rpc('get_next_number', { p_type: 'receipt', p_year_month: yearMonth });
     
     // Look up member details if membership fee
     let memberDetails = {};
     if (memberId) {
-      const { data: memberData } = await supabase
+      const { data: memberData } = await supabaseClient
         .from('AHLI DPMM JOHOR')
         .select('nama, nama, NO_AHLI, ALAMAT, JANTINA')
         .eq('id', memberId)
@@ -7396,7 +7396,7 @@ async function generateReceipt(memberId, amount, paymentMethod, paymentDate, tra
     const pdfUrl = await generateReceiptPDF(receiptNumber, memberDetails, amount, paymentMethod, paymentDate, transactionId);
     
     // Store receipt in database
-    const { data: receiptData, error: receiptError } = await supabase 
+    const { data: receiptData, error: receiptError } = await supabaseClient 
       .from('receipts')
       .insert({
         receipt_number: receiptNumber,
@@ -7432,7 +7432,7 @@ async function createPaymentVoucher(payableTo, purpose, amount, paymentMethod, p
   try {
     // Generate voucher number using get_next_number
     const yearMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
-    const voucherNumber = await supabase.rpc('get_next_number', { p_type: 'payment_voucher', p_year_month: yearMonth });
+    const voucherNumber = await supabaseClient.rpc('get_next_number', { p_type: 'payment_voucher', p_year_month: yearMonth });
     
     // Validate required fields
     if (!payableTo || !purpose || !amount || !paymentMethod) {
@@ -7440,7 +7440,7 @@ async function createPaymentVoucher(payableTo, purpose, amount, paymentMethod, p
     }
     
     // Store as pending status
-    const { data: voucherData, error: voucherError } = await supabase
+    const { data: voucherData, error: voucherError } = await supabaseClient
       .from('vouchers')
       .insert({
         voucher_number: voucherNumber,
@@ -7488,7 +7488,7 @@ async function approveVoucher(voucherId, approvedBy, rejectionReason) {
     // Update approval status
     const approvalStatus = rejectionReason ? 'rejected' : 'approved';
     
-    const { data: voucherData, error: voucherError } = await supabase
+    const { data: voucherData, error: voucherError } = await supabaseClient
       .from('vouchers')
       .update({
         approval_status: approvalStatus,
@@ -7501,7 +7501,7 @@ async function approveVoucher(voucherId, approvedBy, rejectionReason) {
     if (voucherError) throw voucherError;
     
     // Record approval history
-    await supabase
+    await supabaseClient
       .from('approval_history')
       .insert({
         voucher_id: voucherId,
@@ -7513,7 +7513,7 @@ async function approveVoucher(voucherId, approvedBy, rejectionReason) {
     // Add digital signature if approved
     if (approvalStatus === 'approved') {
       const pdfUrl = await addDigitalSignature(voucherData.id);
-      await supabase
+      await supabaseClient
         .from('vouchers')
         .update({ digital_signature_url: pdfUrl })
         .eq('id', voucherData.id);
@@ -7735,7 +7735,7 @@ async function sendApprovalNotification(voucherId, approvalStatus) {
   
   try {
     // Get voucher details
-    const { data: voucher } = await supabase
+    const { data: voucher } = await supabaseClient
       .from('vouchers')
       .select('*')
       .eq('id', voucherId)
@@ -7776,7 +7776,7 @@ async function uploadSignatureImage(userId, role, imageFile) {
     const fileName = `signature_${role}_${userId}_${Date.now()}.png`;
     
     // Upload to Supabase Storage
-    const { data, error } = await supabase.storage
+    const { data, error } = await supabaseClient.storage
       .from('signatures')
       .upload(fileName, imageFile, {
         cacheControl: 3600
@@ -7785,7 +7785,7 @@ async function uploadSignatureImage(userId, role, imageFile) {
     if (error) throw error;
     
     // Store signature URL in user record or separate signatures table
-    const { error: updateError } = await supabase
+    const { error: updateError } = await supabaseClient
       .from('DPMM_USERS')
       .update({ signature_url: data.path })
       .eq('id', userId);
@@ -7803,7 +7803,7 @@ async function uploadSignatureImage(userId, role, imageFile) {
 async function applyDigitalSignatureToPDF(pdfUrl, signatureUrl, documentType) {
   try {
     // Load existing PDF
-    const { data: pdfData } = await supabase.storage
+    const { data: pdfData } = await supabaseClient.storage
       .from(documentType === 'receipt' ? 'receipts' : 'vouchers')
       .download(pdfUrl.split('/').pop());
     
@@ -7828,7 +7828,7 @@ async function applyDigitalSignatureToPDF(pdfUrl, signatureUrl, documentType) {
     const updatedPdfBlob = doc.output('dataurlblob');
     const updatedFileName = `signed_${pdfUrl.split('/').pop()}`;
     
-    const { data: uploadData, error: uploadError } = await supabase.storage
+    const { data: uploadData, error: uploadError } = await supabaseClient.storage
       .from(documentType === 'receipt' ? 'receipts' : 'vouchers')
       .upload(updatedFileName, updatedPdfBlob, {
         cacheControl: 3600
