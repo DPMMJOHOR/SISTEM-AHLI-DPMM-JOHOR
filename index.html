@@ -6000,7 +6000,7 @@ function viewAdminPDF(refId) {
   pdfError.style.display = 'none';
   
   // Generate signed URL for PDF
-  supabase.storage
+  supabaseClient.storage
     .from('permohonan-dokumen')
     .createSignedUrl(p.pdf_url, 3600)
     .then(function(response) {
@@ -7652,7 +7652,7 @@ async function generateReceiptPDF(receiptNumber, memberDetails, amount, paymentM
   const fileName = `receipt_${receiptNumber}.pdf`;
   
   // Upload to Supabase Storage
-  const { data, error } = await supabase.storage
+  const { data, error } = await supabaseClient.storage
     .from('receipts')
     .upload(fileName, pdfBlob, {
       cacheControl: 3600
@@ -7740,7 +7740,7 @@ async function generateVoucherPDF(voucherNumber, payableTo, purpose, amount, pay
   const fileName = `voucher_${voucherNumber}.pdf`;
   
   // Upload to Supabase Storage
-  const { data, error } = await supabase.storage
+  const { data, error } = await supabaseClient.storage
     .from('vouchers')
     .upload(fileName, pdfBlob, {
       cacheControl: 3600
@@ -7874,7 +7874,7 @@ async function applyDigitalSignatureToPDF(pdfUrl, signatureUrl, documentType) {
   }
 }
 </script>
-<script src="receipt-pv-ui.js?v=11"></script>
+<script src="receipt-pv-ui.js?v=12"></script>
 </body>
 </html>
 

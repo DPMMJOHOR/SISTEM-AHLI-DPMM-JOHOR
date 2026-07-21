@@ -113,15 +113,15 @@ CREATE TABLE IF NOT EXISTS running_numbers (
 
 -- Function to get next running number
 CREATE OR REPLACE FUNCTION get_next_number(p_type VARCHAR(50), p_year_month VARCHAR(7))
-RETURNS VARCHAR(50) SECURITY DEFINER AS $$
+RETURNS VARCHAR(20) SECURITY DEFINER AS $$
 DECLARE
   v_seq INT;
-  v_prefix VARCHAR(10);
+  v_prefix VARCHAR(20);
 BEGIN
   INSERT INTO running_numbers (document_type, year_month, sequence_number)
   VALUES (p_type, p_year_month, 1)
   ON CONFLICT (document_type, year_month)
-  DO UPDATE SET sequence_number = sequence_number + 1
+  DO UPDATE SET sequence_number = running_numbers.sequence_number + 1
   RETURNING sequence_number INTO v_seq;
   
   v_prefix := UPPER(SUBSTRING(p_type, 1, 3)) || '-' || p_year_month || '-' || LPAD(v_seq::TEXT, 4, '0');
