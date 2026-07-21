@@ -2359,9 +2359,9 @@ textarea:focus-visible {
         <div class="section-heading">Butiran Perniagaan / Perusahaan</div>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Nama Entiti Perniagaan <span class="req">*</span></label>
-            <input type="text" class="form-control" id="nama_entiti" placeholder="Nama penuh entiti">
-            <span class="field-error" id="err-nama_entiti">Sila isi nama entiti.</span>
+            <label class="form-label">Nama Perniagaan <span class="req">*</span></label>
+            <input type="text" class="form-control" id="nama_perniagaan" placeholder="Nama penuh perniagaan">
+            <span class="field-error" id="err-nama_perniagaan">Sila isi nama perniagaan.</span>
           </div>
         </div>
         <div class="form-row cols-2">
@@ -3456,7 +3456,7 @@ function validateStep(n) {
     if (!val('aktiviti_perniagaan'))     { showErr('err-aktiviti'); ok = false; }
   }
   if (n === 3) {
-    if (!val('nama_entiti'))             { showErr('err-nama_entiti'); ok = false; }
+    if (!val('nama_perniagaan'))             { showErr('err-nama_perniagaan'); ok = false; }
     if (!val('no_pendaftaran'))          { showErr('err-no_pend'); ok = false; }
     if (!val('tarikh_daftar'))           { showErr('err-tarikh_daftar'); ok = false; }
     if (!val('tarikh_luput'))            { showErr('err-tarikh_luput'); ok = false; }
@@ -4002,7 +4002,7 @@ function renderRingkasan() {
     ['Jenis Keahlian', `${JENIS_LABEL[jenis]} (${jenis})`],
     ['Fasal', fasalVal],
     ['Jenis Entiti', entiti],
-    ['Nama Entiti', val('nama_entiti')],
+    ['Nama Perniagaan', val('nama_perniagaan')],
     ['No. Pendaftaran', val('no_pendaftaran')],
     ['No. Telefon Bimbit', val('no_tel_bimbit')],
     ['E-mel Syarikat', val('emel_syarikat')],
@@ -4264,7 +4264,7 @@ async function _doSubmit() {
       persijilan_lain:      val('persijilan_lain') || null,
       jenama:               val('jenama') || null,
       aktiviti_perniagaan:  val('aktiviti_perniagaan') || null,
-      nama_entiti:          val('nama_entiti'),
+      nama_perniagaan:       val('nama_perniagaan'),
       no_pendaftaran:       val('no_pendaftaran'),
       tarikh_daftar:        val('tarikh_daftar') || null,
       tarikh_luput:         val('tarikh_luput') || null,
@@ -4350,7 +4350,7 @@ async function _doSubmit() {
     const rlsRequired = {
       'Jenis Keahlian': payload.jenis_keahlian,
       'Fasal': payload.fasal,
-      'Nama Entiti': payload.nama_entiti,
+      'Nama Perniagaan': payload.nama_perniagaan,
       'No. Pendaftaran (SSM)': payload.no_pendaftaran,
       'E-mel Syarikat': payload.emel_syarikat,
       'Jenis Entiti': payload.jenis_entiti,
@@ -4433,7 +4433,7 @@ async function _doSubmit() {
         <p><strong>No. Rujukan:</strong> ${finalRef}</p>
         <p><strong>Jenis:</strong> ${JENIS_LABEL[jenis]} (${jenis})</p>
         <p><strong>Fasal:</strong> ${fasalVal}</p>
-        <p><strong>Nama Entiti:</strong> ${escapeHtml(val('nama_entiti'))}</p>
+        <p><strong>Nama Perniagaan:</strong> ${escapeHtml(val('nama_perniagaan'))}</p>
         <p><strong>Proksi/Wakil:</strong> ${escapeHtml(val('proksi_nama')) || 'Pemunya Tunggal'}</p>
         <p><strong>E-mel Pemohon:</strong> ${escapeHtml(val('proksi_emel')) || escapeHtml(val('emel_syarikat'))}</p>
         <p><strong>Jumlah Bayaran:</strong> RM ${total.toLocaleString()}</p>
@@ -4451,8 +4451,8 @@ async function _doSubmit() {
           ref_id: finalRef,
           jenis: JENIS_LABEL[jenis] || jenis,
           fasal: fasalVal,
-          nama_entiti: val('nama_entiti'),
-          proksi_nama: val('proksi_nama') || val('nama_entiti'),
+          nama_perniagaan: val('nama_perniagaan'),
+          proksi_nama: val('proksi_nama') || val('nama_perniagaan'),
           proksi_hp: val('proksi_hp'),
           proksi_emel: val('proksi_emel') || val('emel_syarikat'),
           jumlah: `RM ${total.toLocaleString()}`,
@@ -4479,7 +4479,7 @@ async function _doSubmit() {
     // Prepare applicant data for email
     const applicantEmailData = {
       ref_id: finalRef,
-      nama_entiti: val('nama_entiti'),
+      nama_perniagaan: val('nama_perniagaan'),
       nama_lengkap_pemohon: val('nama_lengkap_pemohon'),
       no_kad_pengenal: val('no_kad_pengenal'),
       jenis_keahlian_label: JENIS_LABEL[jenis] || jenis,
@@ -4502,8 +4502,8 @@ async function _doSubmit() {
           ref_id: finalRef,
           jenis: JENIS_LABEL[jenis] || jenis,
           fasal: fasalVal,
-          nama_entiti: val('nama_entiti'),
-          proksi_nama: val('proksi_nama') || val('nama_entiti'),
+          nama_perniagaan: val('nama_perniagaan'),
+          proksi_nama: val('proksi_nama') || val('nama_perniagaan'),
           proksi_hp: val('proksi_hp'),
           proksi_emel: val('proksi_emel') || val('emel_syarikat'),
           jumlah: `RM ${total.toLocaleString()}`,
@@ -4536,8 +4536,8 @@ async function _doSubmit() {
             ref_id: finalRef,
             jenis: JENIS_LABEL[jenis] || jenis,
             fasal: fasalVal,
-            nama_entiti: val('nama_entiti'),
-            proksi_nama: val('proksi_nama') || val('nama_entiti'),
+            nama_perniagaan: val('nama_perniagaan'),
+            proksi_nama: val('proksi_nama') || val('nama_perniagaan'),
             proksi_hp: val('proksi_hp'),
             proksi_emel: pemohonEmail,
             jumlah: `RM ${total.toLocaleString()}`,
@@ -4654,7 +4654,7 @@ async function sendEmailsInBackground(refId, payload, uploadedUrls, jenis, fasal
         <p><strong>No. Rujukan:</strong> ${refId}</p>
         <p><strong>Jenis:</strong> ${JENIS_LABEL[jenis]} (${jenis})</p>
         <p><strong>Fasal:</strong> ${fasalVal}</p>
-        <p><strong>Nama Entiti:</strong> ${escapeHtml(payload.nama_entiti)}</p>
+        <p><strong>Nama Perniagaan:</strong> ${escapeHtml(payload.nama_perniagaan)}</p>
         <p><strong>Proksi/Wakil:</strong> ${escapeHtml(payload.nama_lengkap_pemohon) || 'Pemunya Tunggal'}</p>
         <p><strong>E-mel Pemohon:</strong> ${escapeHtml(payload.proksi_emel) || escapeHtml(payload.emel_syarikat)}</p>
         <p><strong>Jumlah Bayaran:</strong> RM ${total.toLocaleString()}</p>
@@ -4698,8 +4698,8 @@ async function sendEmailsInBackground(refId, payload, uploadedUrls, jenis, fasal
           <p><strong>No. Rujukan Permohonan:</strong> ${refId}</p>
           <p><strong>Jenis:</strong> ${JENIS_LABEL[jenis]} (${jenis})</p>
           <p><strong>Fasal:</strong> ${fasalVal}</p>
-          <p><strong>Nama Entiti:</strong> ${escapeHtml(payload.nama_entiti)}</p>
-          <p><strong>Proksi/Wakil:</strong> ${escapeHtml(payload.nama_lengkap_pemohon) || escapeHtml(payload.nama_entiti)}</p>
+          <p><strong>Nama Perniagaan:</strong> ${escapeHtml(payload.nama_perniagaan)}</p>
+          <p><strong>Proksi/Wakil:</strong> ${escapeHtml(payload.nama_lengkap_pemohon) || escapeHtml(payload.nama_perniagaan)}</p>
           <p><strong>No. HP Proksi:</strong> ${escapeHtml(payload.proksi_hp)}</p>
           <p><strong>Jumlah Bayaran:</strong> RM ${total.toLocaleString()}</p>
           <p><strong>Tarikh:</strong> ${new Date().toLocaleDateString('ms-MY')}</p>
@@ -4902,7 +4902,7 @@ function downloadPDFWithJsPDF() {
   // Match manual form: Nama Pemohon and Nama Syarikat fields at top
   y += 5;
   rowWithUnderline('Nama Pemohon', val('nama_lengkap_pemohon'));
-  rowWithUnderline('Nama Syarikat', val('nama_entiti'));
+  rowWithUnderline('Nama Syarikat', val('nama_perniagaan'));
   y += 8;
 
   // Document checklist - match manual form with checkboxes
@@ -5030,7 +5030,7 @@ function downloadPDFWithJsPDF() {
   y += 5;
   
   sectionTitle('C. BUTIRAN PERNIAGAAN');
-  rowWithUnderline('Nama Entiti', val('nama_entiti'));
+  rowWithUnderline('Nama Perniagaan', val('nama_perniagaan'));
   rowWithUnderline('No. Pendaftaran', val('no_pendaftaran'));
   rowWithUnderline('Tarikh Daftar', val('tarikh_daftar'));
   rowWithUnderline('Tarikh Luput', val('tarikh_luput'));
@@ -5233,7 +5233,7 @@ function downloadPDFWithJsPDF() {
     
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
-    const akuanText = 'Saya, ' + val('nama_lengkap_pemohon') + ', No. Kad Pengenalan ' + val('no_kad_pengenal') + ', pemilik perniagaan berdaftar ' + val('nama_entiti') + ', No. Pendaftaran SSM ' + val('no_pendaftaran') + ', dengan ini mengaku bahawa:';
+    const akuanText = 'Saya, ' + val('nama_lengkap_pemohon') + ', No. Kad Pengenalan ' + val('no_kad_pengenal') + ', pemilik perniagaan berdaftar ' + val('nama_perniagaan') + ', No. Pendaftaran SSM ' + val('no_pendaftaran') + ', dengan ini mengaku bahawa:';
     const lines = doc.splitTextToSize(akuanText, W - margin * 2);
     doc.text(lines, margin, y);
     y += lines.length * 4 + 8;
@@ -5305,7 +5305,7 @@ function downloadPDFWithJsPDF() {
     
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
-    doc.text('Kami, para pemilik/pengarah ' + val('nama_entiti') + ', dengan ini mengesahkan bahawa:', margin, y);
+    doc.text('Kami, para pemilik/pengarah ' + val('nama_perniagaan') + ', dengan ini mengesahkan bahawa:', margin, y);
     y += 8;
     
     const partnerPoints = [
@@ -5391,7 +5391,7 @@ async function testPDFGeneration() {
   // Set up test state
   state.refId = 'TEST-' + Date.now();
   state.nama_pemohon = 'Test User';
-  state.nama_entiti = 'Test Enterprise Sdn Bhd';
+  state.nama_perniagaan = 'Test Enterprise Sdn Bhd';
   state.no_ssm = 'SA0012345-A';
   state.tarikh_daftar = '2024-01-01';
   state.tarikh_luput = '2030-01-01';
@@ -5539,7 +5539,7 @@ function overlayPage1Data(pdf, width, height) {
   pdf.setFont('helvetica', 'bold');
   pdf.text('Nama Syarikat:', 50, y);
   pdf.setFont('helvetica', 'normal');
-  pdf.text(val('nama_entiti') || '', 160, y);
+  pdf.text(val('nama_perniagaan') || '', 160, y);
   y -= 40;
   
   // Document checklist with checkmarks - dynamic based on jenis_entiti
@@ -5643,9 +5643,9 @@ function overlayPage2Data(pdf, width, height) {
   
   pdf.setFontSize(10);
   pdf.setFont('helvetica', 'bold');
-  pdf.text('Nama Entiti Perniagaan:', 50, y);
+  pdf.text('Nama Perniagaan:', 50, y);
   pdf.setFont('helvetica', 'normal');
-  pdf.text(val('nama_entiti') || '', 220, y);
+  pdf.text(val('nama_perniagaan') || '', 220, y);
   y -= 20;
   
   pdf.setFont('helvetica', 'bold');
@@ -5810,7 +5810,7 @@ function overlayPage5Data(pdf, width, height, isPerkongsianOrSdnBhd) {
   pdf.setFont('helvetica', 'bold');
   pdf.text('Nama Syarikat:', 50, y);
   pdf.setFont('helvetica', 'normal');
-  pdf.text(val('nama_entiti') || '', 160, y);
+  pdf.text(val('nama_perniagaan') || '', 160, y);
   y -= 20;
   
   pdf.setFont('helvetica', 'bold');
@@ -6944,7 +6944,7 @@ function mapExtractedToForm(icData, ssmData) {
     applyIpField('proksi_ic', icFormatted);
   }
   if (ssmData) {
-    applyIpField('nama_entiti', ssmData.nama_perniagaan);
+    applyIpField('nama_perniagaan', ssmData.nama_perniagaan);
     applyIpField('no_pendaftaran', ssmData.no_pendaftaran);
     applyIpField('aktiviti_perniagaan', ssmData.aktiviti);
     applyIpField('tarikh_daftar', dmyToIso(ssmData.tarikh_daftar));
