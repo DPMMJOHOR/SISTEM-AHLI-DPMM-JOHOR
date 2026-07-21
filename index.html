@@ -7539,70 +7539,72 @@ async function loadImage(imagePath) {
   });
 }
 
-// PDF Generation - Receipt
+// PDF Generation - Receipt using JPEG template overlay
 async function generateReceiptPDF(receiptNumber, memberDetails, amount, paymentMethod, paymentDate, transactionId) {
   // Validate amount
   const amountCheck = validateAmount(amount);
   if (!amountCheck.valid) return { success: false, error: amountCheck.error };
   
-  const doc = new jsPDF();
+  const { jsPDF } = window.jspdf;
   
-  // DPMM Johor header with logo
+  // Create PDF document (A4 size)
+  const pdf = new jsPDF('p', 'pt', 'a4');
+  const pageWidth = 595.28;
+  const pageHeight = 841.89;
+  
+  // Load Receipt template image
+  const baseUrl = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
+  const templateUrl = `${baseUrl}/public/templates/Receipt_DPMMJHR-01.png`;
+  
   try {
-    const logoImg = await loadImage('dpmm-logo-color.png');
-    if (logoImg) {
-      doc.addImage(logoImg, 15, 15, 30, 30);
+    const templateImg = await loadImage(templateUrl);
+    if (templateImg) {
+      pdf.addImage(templateImg, 'PNG', 0, 0, pageWidth, pageHeight);
     }
   } catch (err) {
-    console.warn('Could not load logo, using text fallback:', err);
+    console.warn('Could not load receipt template, using fallback:', err);
+    // Fallback to text-based generation
+    pdf.setFontSize(12);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setTextColor(29, 60, 150);
+    pdf.setFontSize(16);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setTextColor(29, 60, 150);
+    pdf.text('DPMM JOHOR RESIT', 50, 20);
   }
   
-  doc.setFontSize(12);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(29, 60, 150);
-  doc.setFontSize(16);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(29, 60, 150);
-  doc.text('DPMM JOHOR RESIT', 50, 20);
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(29, 60, 150);
-  doc.text('Johor Darul Negeri Johor', 50, 25);
-  doc.setFontSize(10);
-  doc.setTextColor(29, 60, 150);
-  doc.text('No. Resit: ' + receiptNumber, 50, 30);
-  doc.setFontSize(10);
-  doc.setTextColor(29, 60, 150);
-  doc.text('Tarikh: ' + paymentDate, 50, 35);
-  doc.setFontSize(10);
-  doc.setTextColor(29, 60, 150);
-  doc.text('Amaun: RM ' + amount, 50, 40);
+  // Overlay text on template
+  // Adjust coordinates based on your template layout
+  const overlayX = 100;
+  const overlayY = 200;
+  
+  pdf.setFontSize(10);
+  pdf.setFont('helvetica', 'normal');
+  pdf.setTextColor(0, 0, 0);
+  
+  // Receipt number
+  pdf.text(receiptNumber, overlayX, overlayY);
+  
+  // Date
+  pdf.text(paymentDate, overlayX, overlayY + 20);
+  
+  // Amount
+  pdf.text('RM ' + amount, overlayX, overlayY + 40);
   
   // Member details
-  doc.setFontSize(10);
-  doc.setTextColor(29, 60, 150);
-  doc.text('Nama: ' + memberDetails.memberName, 15, 45);
-  doc.text('No Ahli: ' + memberDetails.nomborAhli, 15, 50);
-  doc.text('Jantina: ' + memberDetails.jantina, 15, 55);
-  doc.text('Alamat: ' + memberDetails.alamat, 15, 60);
+  if (memberDetails.memberName) {
+    pdf.text(memberDetails.memberName, overlayX, overlayY + 60);
+  }
+  if (memberDetails.nomborAhli) {
+    pdf.text(memberDetails.nomborAhli, overlayX, overlayY + 80);
+  }
   
   // Transaction ID
   if (transactionId) {
-    doc.text('Transaction ID: ' + transactionId, 15, 65);
+    pdf.text(transactionId, overlayX, overlayY + 100);
   }
   
-  // Footer
-  doc.setFontSize(8);
-  doc.setTextColor(29, 60, 150);
-  doc.text('DPMM JOHOR', 50, 75);
-  doc.text('Tel: +60-6555-1234', 50, 80);
-  
-  // Digital signature placeholder
-  doc.setFontSize(8);
-  doc.setTextColor(29, 60, 150);
-  doc.text('Digital Signature: [Tandatangan]', 50, 85);
-  
-  const pdfBlob = doc.output('dataurlblob');
+  const pdfBlob = pdf.output('dataurlblob');
   const fileName = `receipt_${receiptNumber}.pdf`;
   
   // Upload to Supabase Storage
@@ -7617,72 +7619,79 @@ async function generateReceiptPDF(receiptNumber, memberDetails, amount, paymentM
   return data.path;
 }
 
-// PDF Generation - Payment Voucher
+// PDF Generation - Payment Voucher using JPEG template overlay
 async function generateVoucherPDF(voucherNumber, payableTo, purpose, amount, paymentMethod, preparedBy) {
   // Validate amount
   const amountCheck = validateAmount(amount);
   if (!amountCheck.valid) return { success: false, error: amountCheck.error };
   
-  const doc = new jsPDF();
+  const { jsPDF } = window.jspdf;
   
-  // DPMM Johor header with logo
+  // Create PDF document (A4 size)
+  const pdf = new jsPDF('p', 'pt', 'a4');
+  const pageWidth = 595.28;
+  const pageHeight = 841.89;
+  
+  // Load Payment Voucher template image
+  const baseUrl = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
+  const templateUrl = `${baseUrl}/public/templates/PaymentVoucher_DPMMJHR-01.png`;
+  
   try {
-    const logoImg = await loadImage('dpmm-logo-color.png');
-    if (logoImg) {
-      doc.addImage(logoImg, 15, 15, 30, 30);
+    const templateImg = await loadImage(templateUrl);
+    if (templateImg) {
+      pdf.addImage(templateImg, 'PNG', 0, 0, pageWidth, pageHeight);
     }
   } catch (err) {
-    console.warn('Could not load logo, using text fallback:', err);
+    console.warn('Could not load voucher template, using fallback:', err);
+    // Fallback to text-based generation
+    pdf.setFontSize(12);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setTextColor(29, 60, 150);
+    pdf.setFontSize(16);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setTextColor(29, 60, 150);
+    pdf.text('DPMM JURUS BAYARAN', 50, 20);
   }
   
-  doc.setFontSize(12);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(29, 60, 150);
-  doc.setFontSize(16);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(29, 60, 150);
-  doc.text('DPMM JURUS BAYARAN', 50, 20);
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(29, 60, 150);
-  doc.text('Johor Darul Negeri Johor', 50, 25);
-  doc.setFontSize(10);
-  doc.setTextColor(29, 60, 150);
-  doc.text('No. Voucher: ' + voucherNumber, 50, 30);
-  doc.setFontSize(10);
-  doc.setTextColor(29, 60, 150);
-  doc.text('Tarikh: ' + new Date().toISOString().slice(0, 10), 50, 35);
-  doc.setFontSize(10);
-  doc.setTextColor(29, 60, 150);
-  doc.text('Amaun: RM ' + amount, 50, 40);
-  doc.setFontSize(10);
-  doc.setTextColor(29, 60, 150);
-  doc.text('Dibayar Kepada: ' + payableTo, 50, 45);
-  doc.setFontSize(10);
-  doc.setTextColor(29, 60, 150);
-  doc.text('Tujuan: ' + purpose, 50, 50);
-  doc.setFontSize(10);
-  doc.setTextColor(29, 60, 150);
-  doc.text('Kaedah Bayaran: ' + paymentMethod, 50, 55);
-  doc.setFontSize(10);
-  doc.setTextColor(29, 60, 150);
-  doc.text('Disedi oleh: ' + preparedBy, 50, 60);
-  doc.setFontSize(10);
-  doc.setTextColor(29, 60, 150);
-  doc.text('Status: PENDING', 15, 65);
+  // Overlay text on template
+  // Adjust coordinates based on your template layout
+  const overlayX = 100;
+  const overlayY = 200;
   
-  // Footer
-  doc.setFontSize(8);
-  doc.setTextColor(29, 60, 150);
-  doc.text('DPMM JOHOR', 15, 75);
-  doc.text('Tel: +60-6555-1234', 15, 80);
+  pdf.setFontSize(10);
+  pdf.setFont('helvetica', 'normal');
+  pdf.setTextColor(0, 0, 0);
   
-  const pdfBlob = doc.output('dataurlblob');
+  // Voucher number
+  pdf.text(voucherNumber, overlayX, overlayY);
+  
+  // Date
+  pdf.text(new Date().toISOString().slice(0, 10), overlayX, overlayY + 20);
+  
+  // Amount
+  pdf.text('RM ' + amount, overlayX, overlayY + 40);
+  
+  // Payable to
+  pdf.text(payableTo, overlayX, overlayY + 60);
+  
+  // Purpose
+  pdf.text(purpose, overlayX, overlayY + 80);
+  
+  // Payment method
+  pdf.text(paymentMethod, overlayX, overlayY + 100);
+  
+  // Prepared by
+  pdf.text(preparedBy, overlayX, overlayY + 120);
+  
+  // Status
+  pdf.text('PENDING', overlayX, overlayY + 140);
+  
+  const pdfBlob = pdf.output('dataurlblob');
   const fileName = `voucher_${voucherNumber}.pdf`;
   
   // Upload to Supabase Storage
   const { data, error } = await supabase.storage
-    .from('signatures')
+    .from('vouchers')
     .upload(fileName, pdfBlob, {
       cacheControl: 3600
     });
