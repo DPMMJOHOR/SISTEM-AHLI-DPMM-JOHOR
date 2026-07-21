@@ -25,6 +25,11 @@ function showReceiptsPage() {
         </div>
         
         <div class="field-grp">
+          <label class="field-label">Penerangan Pembayaran</label>
+          <input type="text" id="receipt-description" class="field-input" placeholder="Penerangan pembayaran...">
+        </div>
+        
+        <div class="field-grp">
           <label class="field-label">Jumlah (RM)</label>
           <input type="number" id="receipt-amount" class="field-input" placeholder="0.00" step="0.01">
         </div>
@@ -462,6 +467,7 @@ async function handleGenerateReceipt() {
   const paymentDate = document.getElementById('receipt-payment-date').value;
   const slipFile = document.getElementById('receipt-payment-slip').files[0];
   const manualPayeeName = document.getElementById('manual-payee-name')?.value || null;
+  const description = document.getElementById('receipt-description')?.value || null;
   
   if (!amount || !paymentDate) {
     alert('Please fill in all required fields');
@@ -491,7 +497,7 @@ async function handleGenerateReceipt() {
     
     // Generate receipt (calls the implementation in index.html)
     console.log('Calling generateReceipt with:', memberId, amount, paymentMethod, paymentDate);
-    const receiptData = await generateReceipt(memberId || null, amount, paymentMethod, paymentDate, null, null, manualPayeeName);
+    const receiptData = await generateReceipt(memberId || null, amount, paymentMethod, paymentDate, null, null, manualPayeeName, description);
     console.log('generateReceipt returned:', receiptData);
     
     if (!receiptData) {

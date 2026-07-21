@@ -34,6 +34,7 @@ ALTER TABLE receipts ADD COLUMN IF NOT EXISTS digital_signature_url TEXT;
 ALTER TABLE receipts ADD COLUMN IF NOT EXISTS transaction_id        VARCHAR(100);
 ALTER TABLE receipts ADD COLUMN IF NOT EXISTS payment_slip_id       INTEGER;
 ALTER TABLE receipts ADD COLUMN IF NOT EXISTS created_by            TEXT;
+ALTER TABLE receipts ADD COLUMN IF NOT EXISTS description           TEXT;
 
 -- Backfill receipt_date from created_at for any existing rows
 UPDATE receipts SET receipt_date = created_at WHERE receipt_date IS NULL;

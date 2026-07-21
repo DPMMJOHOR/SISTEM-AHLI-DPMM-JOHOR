@@ -7380,7 +7380,7 @@ async function processOCR(imageUrl, slipId) {
 }
 
 // Receipt Generation
-async function generateReceipt(memberId, amount, paymentMethod, paymentDate, transactionId, slipId, manualPayeeName) {
+async function generateReceipt(memberId, amount, paymentMethod, paymentDate, transactionId, slipId, manualPayeeName, description) {
   try {
     // Generate receipt number using get_next_number
     const yearMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
@@ -7421,7 +7421,7 @@ async function generateReceipt(memberId, amount, paymentMethod, paymentDate, tra
     }
     
     // Generate PDF with jsPDF
-    const pdfUrl = await generateReceiptPDF(receiptNumber, memberDetails, amount, paymentMethod, paymentDate, transactionId);
+    const pdfUrl = await generateReceiptPDF(receiptNumber, memberDetails, amount, paymentMethod, paymentDate, transactionId, description);
     
     // Store receipt in database
     const { data: receiptData, error: receiptError } = await supabaseClient 
@@ -7438,7 +7438,8 @@ async function generateReceipt(memberId, amount, paymentMethod, paymentDate, tra
         receipt_pdf_url: pdfUrl,
         transaction_id: transactionId,
         payment_slip_id: slipId,
-        created_by: supabaseClient.auth.getUser()?.data?.user?.id || 'system'
+        created_by: supabaseClient.auth.getUser()?.data?.user?.id || 'system',
+        description: description || 'Yuran Keahlian'
       })
       .select()
       .single();
@@ -7579,7 +7580,7 @@ async function loadImage(imagePath) {
 }
 
 // PDF Generation - Receipt using JPEG template overlay
-async function generateReceiptPDF(receiptNumber, memberDetails, amount, paymentMethod, paymentDate, transactionId) {
+async function generateReceiptPDF(receiptNumber, memberDetails, amount, paymentMethod, paymentDate, transactionId, description) {
   // Validate amount
   const amountCheck = validateAmount(amount);
   if (!amountCheck.valid) return { success: false, error: amountCheck.error };
@@ -7636,7 +7637,7 @@ async function generateReceiptPDF(receiptNumber, memberDetails, amount, paymentM
   }
   
   // Being payment of (Purpose/Description)
-  pdf.text('Yuran Keahlian', 158, 818);
+  pdf.text(description || 'Yuran Keahlian', 158, 818);
   
   // The sum of (Amount in words - optional)
   pdf.text('RM ' + amount, 158, 996);
