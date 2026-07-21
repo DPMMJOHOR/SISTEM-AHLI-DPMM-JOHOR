@@ -389,8 +389,12 @@ If borang.html regression occurs:
 
 ### Recent Fixes (July 2026)
 
-- **Commit 10010db**: Added `akuan_kemaskini_maklumat` to payload for RLS compliance
-- **Migration**: Added `akuan_kemaskini_maklumat` column to `PERMOHONAN_AHLI`
-- **RLS Policy**: Updated to require all 6 checkboxes (akuan1-6)
+- **Commit 39b670c**: Fixed Edge Function CORS (preflight handling + CORS headers on all responses)
+- **Commit c4a365e**: Multi-page PDF handling with per-page merge for vision OCR
+- **Commit 01d7e72**: Fixed ReferenceError in `drawTextOnPage` (function initialization order)
+- **Migration**: Added `pdf_url`, `pdf_uploaded_at`, `pdf_file_size` columns to PERMOHONAN_AHLI
+- **RLS Policy**: Updated to require all 6 checkboxes (akuan1-6) and both IC formats
 - **JavaScript**: Fixed ReferenceError in `overlayPage1Data` (variable scope)
 - **JavaScript**: Fixed SyntaxError in `overlayPage6Data` (orphaned catch block)
+- **Edge Function**: Deployed email-with-pdf with CORS fix (version 7)
+- **Success Page**: Redesigned with corporate styling, removed PDF display

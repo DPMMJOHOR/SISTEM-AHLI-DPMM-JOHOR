@@ -1,5 +1,8 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
+const GROQ_API_KEY = Deno.env.get('GROQ_API_KEY');
+const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
+
 Deno.serve(async (req: Request) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -14,19 +17,7 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const body = await req.json();
-    console.log('Request body:', JSON.stringify(body));
-    
-    const { provider, type, model, messages, image, prompt, options } = body;
-    
-    // Move environment variable access inside handler
-    const GROQ_API_KEY = Deno.env.get('GROQ_API_KEY');
-    const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
-    
-    console.log('Provider:', provider);
-    console.log('Model:', model);
-    console.log('Messages count:', messages?.length);
-    console.log('GROQ_API_KEY exists:', !!GROQ_API_KEY);
+    const { provider, type, model, messages, image, prompt, options } = await req.json();
 
     if (!provider) {
       return new Response(JSON.stringify({ error: 'Provider is required' }), {
@@ -38,8 +29,8 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    let apiKey;
     let response;
+    let apiKey;
 
     if (provider === 'groq') {
       apiKey = GROQ_API_KEY;
@@ -53,24 +44,43 @@ Deno.serve(async (req: Request) => {
         });
       }
 
-      // Use vision model for vision requests, chat model for regular chat
-      const groqModel = type === 'vision' 
-        ? (model || 'llama-3.2-90b-vision-preview')
-        : (model || 'llama-3.3-70b-versatile');
-
-      response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          model: groqModel,
-          messages,
-          max_tokens: 800,
-          ...options
-        })
-      });
+      if (type === 'vision') {
+        // Groq Vision API for Isi Pintar
+        response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            model: model || 'meta-llama/llama-4-scout-17b-16e-instruct',
+            messages: [{
+              role: 'user',
+              content: [
+                { type: 'text', text: prompt },
+                { type: 'image_url', image_url: { url: image } }
+              ]
+            }],
+            temperature: 0.1,
+            max_tokens: 512
+          })
+        });
+      } else {
+        // Groq Chat API for Aiman
+        response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            model: model || 'llama-3.3-70b-versatile',
+            messages,
+            max_tokens: 800,
+            ...options
+          })
+        });
+      }
     } else if (provider === 'gemini') {
       apiKey = GEMINI_API_KEY;
       if (!apiKey) {

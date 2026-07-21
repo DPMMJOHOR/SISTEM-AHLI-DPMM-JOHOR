@@ -165,7 +165,7 @@ CREATE POLICY "bk_insert_receipts"
   WITH CHECK (
     EXISTS (
       SELECT 1 FROM "DPMM_USERS" 
-      WHERE user_id = current_user_id 
+      WHERE user_id = auth.uid()::TEXT 
       AND peranan IN ('admin', 'bendahari_kehormat')
     )
   );
@@ -175,7 +175,7 @@ CREATE POLICY "bk_update_receipts"
   WITH CHECK (
     EXISTS (
       SELECT 1 FROM "DPMM_USERS" 
-      WHERE user_id = current_user_id 
+      WHERE user_id = auth.uid()::TEXT 
       AND peranan IN ('admin', 'bendahari_kehormat')
     )
   );
@@ -190,7 +190,7 @@ CREATE POLICY "bk_insert_slips"
   WITH CHECK (
     EXISTS (
       SELECT 1 FROM "DPMM_USERS" 
-      WHERE user_id = current_user_id 
+      WHERE user_id = auth.uid()::TEXT 
       AND peranan IN ('admin', 'bendahari_kehormat')
     )
   );
@@ -200,7 +200,7 @@ CREATE POLICY "bk_update_slips"
   WITH CHECK (
     EXISTS (
       SELECT 1 FROM "DPMM_USERS" 
-      WHERE user_id = current_user_id 
+      WHERE user_id = auth.uid()::TEXT 
       AND peranan IN ('admin', 'bendahari_kehormat')
     )
   );
@@ -215,7 +215,7 @@ CREATE POLICY "bk_insert_vouchers"
   WITH CHECK (
     EXISTS (
       SELECT 1 FROM "DPMM_USERS" 
-      WHERE user_id = current_user_id 
+      WHERE user_id = auth.uid()::TEXT 
       AND peranan IN ('admin', 'bendahari_kehormat')
     )
   );
@@ -225,7 +225,7 @@ CREATE POLICY "approval_update_vouchers"
   WITH CHECK (
     EXISTS (
       SELECT 1 FROM "DPMM_USERS" 
-      WHERE user_id = current_user_id 
+      WHERE user_id = auth.uid()::TEXT 
       AND peranan IN ('admin', 'bendahari_kehormat', 'ydp', 'tydp', 'nydp')
     )
   );

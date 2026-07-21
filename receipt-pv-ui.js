@@ -7,31 +7,26 @@ function showReceiptsPage() {
   const container = document.getElementById('receipts-list');
   if (!container) return;
   container.innerHTML = `
-    <div class="page-header" style="margin-bottom: 24px; padding: 0;">
-      <h2 style="font-size: 1.5rem; margin-bottom: 8px;">Pengurusan Resit</h2>
-      <p style="font-size: 1rem; color: var(--text-muted);">Jana dan urus resit yuran keahlian</p>
-    </div>
-    
-    <div class="card" style="margin-bottom: 24px;">
-      <div class="card-header">
-        <h3 style="font-size: 1.25rem;">Jana Resit Baru</h3>
+    <div class="sec-card">
+      <div class="sec-head">
+        <h3>JANA RESIT BARU</h3>
       </div>
-      <div class="card-body">
-        <div class="form-group">
-          <label>Ahli (untuk yuran keahlian)</label>
-          <select id="receipt-member-select" class="form-control">
+      <div class="sec-body">
+        <div class="field-grp">
+          <label class="field-label">Ahli (untuk yuran keahlian)</label>
+          <select id="receipt-member-select" class="field-input">
             <option value="">Pilih ahli...</option>
           </select>
         </div>
         
-        <div class="form-group">
-          <label>Jumlah (RM)</label>
-          <input type="number" id="receipt-amount" class="form-control" placeholder="0.00" step="0.01">
+        <div class="field-grp">
+          <label class="field-label">Jumlah (RM)</label>
+          <input type="number" id="receipt-amount" class="field-input" placeholder="0.00" step="0.01">
         </div>
         
-        <div class="form-group">
-          <label>Kaedah Pembayaran</label>
-          <select id="receipt-payment-method" class="form-control">
+        <div class="field-grp">
+          <label class="field-label">Kaedah Pembayaran</label>
+          <select id="receipt-payment-method" class="field-input">
             <option value="cash">Tunai</option>
             <option value="online">Pindahan Dalam Talian</option>
             <option value="cheque">Cek</option>
@@ -39,35 +34,35 @@ function showReceiptsPage() {
           </select>
         </div>
         
-        <div class="form-group">
-          <label>Tarikh Pembayaran</label>
-          <input type="date" id="receipt-payment-date" class="form-control">
+        <div class="field-grp">
+          <label class="field-label">Tarikh Pembayaran</label>
+          <input type="date" id="receipt-payment-date" class="field-input">
         </div>
         
-        <div class="form-group">
-          <label>Slip Pembayaran (pilihan)</label>
-          <input type="file" id="receipt-payment-slip" class="form-control" accept="image/*">
-          <small class="text-muted">Muat naik slip pembayaran untuk pemprosesan OCR</small>
+        <div class="field-grp">
+          <label class="field-label">Slip Pembayaran (pilihan)</label>
+          <input type="file" id="receipt-payment-slip" class="field-input" accept="image/*">
+          <small style="color: var(--muted); font-size: 12px;">Muat naik slip pembayaran untuk pemprosesan OCR</small>
         </div>
         
         <div id="ocr-status" class="alert" style="display:none;">
           <span id="ocr-status-text"></span>
         </div>
         
-        <div id="transaction-id-display" class="alert alert-success" style="display:none;">
+        <div id="transaction-id-display" class="alert alert-ok" style="display:none;">
           <strong>ID Transaksi:</strong> <span id="transaction-id-text"></span>
         </div>
         
-        <button onclick="generateReceipt()" class="btn btn-primary">Jana Resit</button>
+        <button onclick="handleGenerateReceipt()" class="btn btn-primary">Jana Resit</button>
       </div>
     </div>
     
-    <div class="card" style="margin-bottom: 24px;">
-      <div class="card-header">
-        <h3 style="font-size: 1.25rem;">Sejarah Resit</h3>
+    <div class="sec-card">
+      <div class="sec-head">
+        <h3>SEJARAH RESIT</h3>
       </div>
-      <div class="card-body">
-        <div class="table-responsive">
+      <div class="sec-body">
+        <div class="table-wrap">
           <table class="table">
             <thead>
               <tr>
@@ -82,7 +77,7 @@ function showReceiptsPage() {
             </thead>
             <tbody id="receipts-table-body">
               <tr>
-                <td colspan="7" class="text-center">Memuatkan resit...</td>
+                <td colspan="7" style="text-align: center; color: var(--muted);">Memuatkan resit...</td>
               </tr>
             </tbody>
           </table>
@@ -100,34 +95,29 @@ function showVouchersPage() {
   const container = document.getElementById('vouchers-list');
   if (!container) return;
   container.innerHTML = `
-    <div class="page-header" style="margin-bottom: 24px; padding: 0;">
-      <h2 style="font-size: 1.5rem; margin-bottom: 8px;">Baucar Pembayaran</h2>
-      <p style="font-size: 1rem; color: var(--text-muted);">Urus baucar pembayaran pihak ketiga</p>
-    </div>
-    
-    <div class="card" style="margin-bottom: 24px;">
-      <div class="card-header">
-        <h3 style="font-size: 1.25rem;">Cipta Baucar Pembayaran</h3>
+    <div class="sec-card">
+      <div class="sec-head">
+        <h3>CIPTA BAUCAR PEMBAYARAN</h3>
       </div>
-      <div class="card-body">
-        <div class="form-group">
-          <label>Dibayar Kepada</label>
-          <input type="text" id="voucher-payable-to" class="form-control" placeholder="Nama syarikat atau individu">
+      <div class="sec-body">
+        <div class="field-grp">
+          <label class="field-label">Dibayar Kepada</label>
+          <input type="text" id="voucher-payable-to" class="field-input" placeholder="Nama syarikat atau individu">
         </div>
         
-        <div class="form-group">
-          <label>Tujuan Pembayaran</label>
-          <textarea id="voucher-purpose" class="form-control" rows="3" placeholder="Penerangan pembayaran"></textarea>
+        <div class="field-grp">
+          <label class="field-label">Tujuan Pembayaran</label>
+          <textarea id="voucher-purpose" class="field-input" rows="3" placeholder="Penerangan pembayaran"></textarea>
         </div>
         
-        <div class="form-group">
-          <label>Jumlah (RM)</label>
-          <input type="number" id="voucher-amount" class="form-control" placeholder="0.00" step="0.01">
+        <div class="field-grp">
+          <label class="field-label">Jumlah (RM)</label>
+          <input type="number" id="voucher-amount" class="field-input" placeholder="0.00" step="0.01">
         </div>
         
-        <div class="form-group">
-          <label>Kaedah Pembayaran</label>
-          <select id="voucher-payment-method" class="form-control">
+        <div class="field-grp">
+          <label class="field-label">Kaedah Pembayaran</label>
+          <select id="voucher-payment-method" class="field-input">
             <option value="cash">Tunai</option>
             <option value="cheque">Cek</option>
             <option value="online">Pindahan Dalam Talian</option>
@@ -139,12 +129,12 @@ function showVouchersPage() {
       </div>
     </div>
     
-    <div class="card" style="margin-bottom: 24px;">
-      <div class="card-header">
-        <h3 style="font-size: 1.25rem;">Senarai Baucar Pembayaran</h3>
+    <div class="sec-card">
+      <div class="sec-head">
+        <h3>SENARAI BAUCAR PEMBAYARAN</h3>
       </div>
-      <div class="card-body">
-        <div class="table-responsive">
+      <div class="sec-body">
+        <div class="table-wrap">
           <table class="table">
             <thead>
               <tr>
@@ -160,7 +150,7 @@ function showVouchersPage() {
             </thead>
             <tbody id="vouchers-table-body">
               <tr>
-                <td colspan="8" class="text-center">Memuatkan baucar...</td>
+                <td colspan="8" style="text-align: center; color: var(--muted);">Memuatkan baucar...</td>
               </tr>
             </tbody>
           </table>
@@ -177,17 +167,12 @@ function showApprovalsPage() {
   const container = document.getElementById('approvals-list');
   if (!container) return;
   container.innerHTML = `
-    <div class="page-header" style="margin-bottom: 24px; padding: 0;">
-      <h2 style="font-size: 1.5rem; margin-bottom: 8px;">Papan Pemuka Kelulusan</h2>
-      <p style="font-size: 1rem; color: var(--text-muted);">Semak dan lulus baucar pembayaran</p>
-    </div>
-    
-    <div class="card" style="margin-bottom: 24px;">
-      <div class="card-header">
-        <h3 style="font-size: 1.25rem;">Kelulusan Tertunda</h3>
+    <div class="sec-card">
+      <div class="sec-head">
+        <h3>KELULUSAN TERTUNDA</h3>
       </div>
-      <div class="card-body">
-        <div class="table-responsive">
+      <div class="sec-body">
+        <div class="table-wrap">
           <table class="table">
             <thead>
               <tr>
@@ -202,7 +187,7 @@ function showApprovalsPage() {
             </thead>
             <tbody id="approvals-table-body">
               <tr>
-                <td colspan="7" class="text-center">Memuatkan kelulusan...</td>
+                <td colspan="7" style="text-align: center; color: var(--muted);">Memuatkan kelulusan...</td>
               </tr>
             </tbody>
           </table>
@@ -465,7 +450,7 @@ async function loadPendingApprovals() {
 }
 
 // Generate receipt
-async function generateReceipt() {
+async function handleGenerateReceipt() {
   const memberId = document.getElementById('receipt-member-select').value;
   const amount = document.getElementById('receipt-amount').value;
   const paymentMethod = document.getElementById('receipt-payment-method').value;
@@ -493,9 +478,20 @@ async function generateReceipt() {
       document.getElementById('transaction-id-text').textContent = transactionId;
     }
     
-    // Generate receipt
-    const receiptData = await generateReceipt(memberId, amount, paymentMethod, paymentDate, null);
-    alert(`Receipt generated: ${receiptData.receipt_number}`);
+    // Generate receipt (calls the implementation in index.html)
+    console.log('Calling generateReceipt with:', memberId, amount, paymentMethod, paymentDate);
+    const receiptData = await generateReceipt(memberId, amount, paymentMethod, paymentDate, null, null);
+    console.log('generateReceipt returned:', receiptData);
+    
+    if (!receiptData) {
+      throw new Error('generateReceipt returned undefined');
+    }
+    
+    if (!receiptData.success) {
+      throw new Error(receiptData.error || 'Receipt generation failed');
+    }
+    
+    alert(`Receipt generated: ${receiptData.receiptNumber}`);
     loadReceipts();
   } catch (err) {
     console.error('Error generating receipt:', err);

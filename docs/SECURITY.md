@@ -275,10 +275,22 @@ CREATE POLICY "Meeting system read" ON "AHLI DPMM JOHOR"
 - Error message sanitization
 
 ### Rate Limiting
-- Per-user limits
+- Per-user limits (10 emails per minute for email-with-pdf)
 - Per-endpoint limits
 - Burst protection
 - Throttling
+
+### CORS Configuration (July 20, 2026)
+- **email-with-pdf Edge Function**: CORS preflight handling implemented
+  - OPTIONS requests return 200 with CORS headers
+  - All responses include `Access-Control-Allow-Origin: '*'`
+  - Headers: `Access-Control-Allow-Methods: POST, OPTIONS`
+  - Headers: `Access-Control-Allow-Headers: Content-Type, Authorization`
+- **ai-proxy-fixed Edge Function**: CORS preflight handling implemented
+  - OPTIONS requests return 200 with CORS headers
+  - All responses include `Access-Control-Allow-Origin: '*'`
+  - Headers: `Access-Control-Allow-Methods: POST, OPTIONS`
+  - Headers: `Access-Control-Allow-Headers: Content-Type, Authorization`
 
 ## 7. Infrastructure Security
 

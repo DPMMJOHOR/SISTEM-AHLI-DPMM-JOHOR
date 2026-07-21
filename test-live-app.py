@@ -44,8 +44,50 @@ def test_live_application():
             else:
                 print("✗ CTA buttons not found")
             
-            print("\nBasic UI tests completed")
-            print("Note: API functionality tests skipped due to placeholder keys")
+            # Test AI Proxy Chat functionality
+            print("\n--- Testing AI Proxy Chat ---")
+            
+            # Click on chat button to open chat interface
+            chat_btn = page.locator('#btn-isi-pintar')
+            if chat_btn.count() > 0:
+                chat_btn.click()
+                page.wait_for_timeout(2000)
+                print("✓ Chat button clicked")
+                
+                # Check if chat interface opened
+                chat_input = page.locator('#chat-input')
+                if chat_input.count() > 0:
+                    print("✓ Chat interface opened")
+                    
+                    # Test sending a message
+                    chat_input.fill("Hello, this is a test message")
+                    chat_input.press('Enter')
+                    page.wait_for_timeout(5000)
+                    
+                    # Check if response appeared
+                    chat_messages = page.locator('.chat-message')
+                    if chat_messages.count() > 1:
+                        print("✓ Chat response received")
+                        print(f"✓ Total messages: {chat_messages.count()}")
+                    else:
+                        print("✗ No chat response received")
+                else:
+                    print("✗ Chat interface did not open")
+            else:
+                print("✗ Chat button not found")
+            
+            # Check console for errors
+            console_errors = []
+            page.on('console', lambda msg: console_errors.append(msg))
+            
+            print("\n--- Test Summary ---")
+            print("Basic UI tests completed")
+            print("AI Proxy chat test completed")
+            print(f"Console errors found: {len(console_errors)}")
+            
+            if console_errors:
+                for error in console_errors:
+                    print(f"  - {error.type}: {error.text}")
             
         except Exception as e:
             print(f"Error during testing: {e}")

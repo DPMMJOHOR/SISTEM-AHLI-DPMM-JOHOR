@@ -1,0 +1,175 @@
+================================================================================
+          DEWAN PERNIAGAAN MELAYU MALAYSIA (NEGERI JOHOR)
+                     BORANG KEAHLIAN BARU
+================================================================================
+Borang Kod: BRG/AHLI/01 v1.2
+Halaman: 1 / 6 - 4 / 6
+Pendaftaran Entiti: Enterprise Perkongsian (6.2.1) / Sdn Bhd (6.2.4) / Koperasi (6.2.6) / Professional (6.2.3)
+
+--------------------------------------------------------------------------------
+[SENARAI DOKUMEN WAJIB UNTUK PENDAFTARAN AHLI]
+--------------------------------------------------------------------------------
+Nama Pemohon: [                    ]
+Nama Syarikat: [                    ]
+
+Sila tanda (/) jika dokumen lengkap:
+1) SALINAN SSM:
+   [ ] Sendirian Berhad (6.2.4) -> Borang 9/13, M&AA, Borang 24, Borang 49
+   [ ] Enterprise Perkongsian (6.2.1) -> Sijil Pendaftaran Perniagaan, Maklumat Pemilik / Perkongsian, Maklumat Perniagaan
+   * Tarikh Luput SSM mestilah lebih dari 30/9/2028
+2) [ ] Salinan Kad Pengenalan Pemohon (Depan & Belakang)
+3) [ ] 2 Keping Gambar Passport
+4) [ ] Borang Keahlian Lengkap Diisi
+5) [ ] Borang Proksi (Dicetak dalam Letterhead Pemohon)
+6) [ ] Borang Akuan Berkanun telah dicop Pesuruhjaya Sumpah
+7) [ ] Bukti Bayaran Yuran Pendaftaran + Keahlian
+
+STRUKTUR YURAN:
+- Pendaftaran (6.2.1): RM50
+- Pendaftaran (6.2.3/4/6): RM200
+- Keahlian (6.2.1) RM50 x 3 tahun: RM150
+- Keahlian (6.2.3/4/6) RM150 x 3 tahun: RM450
+* JUMLAH (6.2.1): RM200
+* JUMLAH (6.2.3/4/6): RM650
+
+PENGESAHAN DOKUMEN:
+Dengan ini saya mengesahkan bahawa borang ini adalah lengkap.
+Telah disemak oleh (Ketua Cawangan): [                    ]
+Nama Pemohon: [                    ]  Tarikh: [          ]  Cop Rasmi: [          ]
+
+--------------------------------------------------------------------------------
+[UNTUK KEGUNAAN PEJABAT SAHAJA]
+--------------------------------------------------------------------------------
+No. Ahli: B/S/G/H - [                    ]  No. MM / Bil: [          ]
+Kuatkuasa Keahlian: [          ]
+Fi Daftar: RM10 / RM50 / RM200 / RM500 / RM1000
+Yuran Tahunan (Digalakkan bayar 3 tahun sekali gus): RM [          ]
+Jumlah Bayaran TERIMA: RM [          ]  No. Resit: [          ]  Tarikh Luput Daftar: [          ]
+Jika Persatuan (MAT): [          ]
+Kepilkan 2 keping Gambar: [ ] Ya  [ ] Tidak
+
+--------------------------------------------------------------------------------
+[A. MAKLUMAT PEMOHON - ENTITI PERNIAGAAN]
+--------------------------------------------------------------------------------
+URUSAN NEGERI: [ ] PLS [ ] KDH [ ] PNG [ ] PRK [ ] SGR [ ] KUL [ ] PTJ [ ] NSK [ ] MLK [ ] JHR [ ] PHG [ ] TRG [ ] KLN [ ] SBH [ ] LBN [ ] SWK
+KEAHLIAN: [ ] BIASA (A)  [ ] BERSEKUTU (S)  [ ] BERGABUNG (G)  [ ] KEHORMAT (H)
+
+1. JENIS ENTITI:
+   [ ] Pemunya Tunggal  [ ] PLT  [ ] Perkongsian  [ ] Sdn Bhd  [ ] Bhd  [ ] Pro. Tunggal  [ ] Pro.-Firma
+   [ ] Koperasi  [ ] Perbadanan  [ ] Yayasan  [ ] Persatuan  [ ] Trade Perniagaan  [ ] Lain-lain: [          ]
+
+2. SEKTOR:
+   [ ] Perkhidmatan  [ ] Pembuatan  [ ] Industri Asas Tani  [ ] Perlombongan
+
+3. INDUSTRI (Tanda berkenaan):
+   [ ] Acara  [ ] Automotif  [ ] Baik-Pulih  [ ] Busana & Tekstil  [ ] Hartanah  [ ] Hobi & Kraf  [ ] ICT  [ ] Kesihatan  [ ] Kesejahteraan  [ ] Kosmetik  [ ] Khidmat Profesional  [ ] Komoditi Tani  [ ] Kewangan  [ ] Kumbahan  [ ] Logistik  [ ] Makanan  [ ] Minuman  [ ] Pelancongan  [ ] Perunding  [ ] Percetakan & Penerbitan  [ ] Penyelenggaraan  [ ] Perhutanan  [ ] Pembinaan  [ ] Perabot  [ ] Pertukangan  [ ] Perkayuan  [ ] Pertanian  [ ] Pendidikan & Latihan  [ ] Pengangkutan  [ ] Petroliam & Gas  [ ] Rencah  [ ] Sisa & Kitar Semula  [ ] Sukan  [ ] Telekomunikasi  [ ] Tenaga  [ ] Lain-lain Nyatakan: [                    ]
+
+4. RANTAIAN BEKALAN:
+   [ ] Pengeluar  [ ] Pengilang  [ ] Pengedar  [ ] Pemborong  [ ] Peruncit
+
+5. PERKHIDMATAN:
+   [ ] Penyedia  [ ] Pengurusan  [ ] Pengendali  [ ] Agen  [ ] Peruncit
+
+6. SAIZ ENTITI:
+   [ ] ATOM (< RM100K)  [ ] MIKRO (< RM300K)  [ ] KECIL (RM301K - < RM3J)  [ ] SEDERHANA (RM3J - < RM25J)  [ ] BESAR (> RM25J)
+
+7. PERSIJILAN:
+   [ ] HALAL  [ ] GMP  [ ] GAP  [ ] HACCP  [ ] ISO
+
+8. JENAMA: [                              ]
+9. AKTIVITI PERNIAGAAN: [                                                                                ]
+
+--------------------------------------------------------------------------------
+[BUTIRAN PERNIAGAAN / PERUSAHAAN]
+--------------------------------------------------------------------------------
+Nama Entiti Perniagaan : [                                                            ]
+No. Pendaftaran        : [                                    ]
+Alamat Pejabat/Premis  : [                                                            ]
+Poskod                 : [          ]  Bandar: [                    ]  Negeri: [              ]
+Tarikh Daftar          : [          ]  *Tarikh Luput SSM: [          ]
+No. Tel                : [                  ]  Faks: [                  ]
+E-mail                 : [                                    ]  URL/Web: [            ]
+Modal Berbayar         : RM [                ]  Modal Pusingan: RM [                  ]
+Jualan Tahunan         : 2019: RM [          ]  2020: RM [          ]  2021: RM [          ]  2022: RM [          ]
+
+Pegawai Yang Diberi Kuasa / Proksi:
+[ ] Wakil / Proksi Nama Penjawat KPE (6.2.3b): [                                           ]
+Jawatan: [ ] Pengarah  [ ] Pekongsi  [ ] Lain-lain: [               ]
+MyKAD: [                  ]  No. H/P: [                  ]  No. Tel: [                  ]
+E-mail Proksi: [                                    ]
+
+--------------------------------------------------------------------------------
+[9. MAKLUMAT PEGANGAN SAHAM (SELAIN PEMUNYA TUNGGAL)]
+--------------------------------------------------------------------------------
+* Salinan Cetakan SSM (MyData/e-Info) / SKM
+No. | Nama Pemegang Saham                    | % Saham | Bangsa
+-------------------------------------------------------------------
+1   |                                        |         | 
+2   |                                        |         | 
+3   |                                        |         | 
+4   |                                        |         | 
+5   |                                        |         | 
+
+--------------------------------------------------------------------------------
+[10. MAKLUMAT AHLI LEMBAGA / PENGURUSAN (JIKA PERKONGSIAN) / JKK]
+--------------------------------------------------------------------------------
+No. | Nama Ahli Lembaga / Pengurusan         | %       | Bangsa
+-------------------------------------------------------------------
+1   |                                        |         | 
+2   |                                        |         | 
+3   |                                        |         | 
+4   |                                        |         | 
+5   |                                        |         | 
+
+--------------------------------------------------------------------------------
+[PENGISYTIHARAN PEMOHON]
+--------------------------------------------------------------------------------
+Kami mengesahkan segala butiran dalam maklumat yang diberikan dalam permohonan ini adalah benar dan betul. Kami bersetuju untuk mematuhi serta akur kepada peruntukan-peruntukan dalam Undang-Undang Tubuh dan Peraturan yang ditetapkan oleh DPMM pada bila-bila masa...
+
+Bagi Pihak Pemohon (Fasal 6.2.1, 6.2.2 & 6.2.3):
+Nama Penandatangan: [                              ]
+No. MyKad: [                  ]
+Cop Syarikat: [               ]
+
+Bagi Pihak Pemohon (Fasal 6.2.3(b), 6.2.4, 6.2.5, 6.2.6, 6.3, 6.4):
+Tandatangan Pengarah Syarikat/Koperasi: [               ]
+Nama: [                              ]  No. MyKad: [                  ]  Jawatan: [          ]
+Cop Syarikat/Koperasi atau Meterai Biasa: [               ]
+
+================================================================================
+          BORANG AKUAN BERKANUN (AKTA AKUAN BERKANUN 1960)
+================================================================================
+Saya, [                                        ] No. MyKad: [                  ]
+seorang warganegara Malaysia yang beralamat di: [                                                            ]
+Sesungguhnya dan sebenarnya mengaku bahawa telah mengemukakan permohonan keahlian bagi entiti perniagaan berikut (*Pilih B untuk Enterprise Perkongsian / Sdn Bhd):
+[ ] *A. Ahli Biasa DPMM (Pemunya Tunggal, Profesional Perseorangan).
+    Nama Enterprise/Amalan Profesional: [                                        ]
+[ ] *B. Proksi (penama) yang dilantik oleh Syarikat / Koperasi / PLT / Perkongsian (Enterprise).
+    [ ] Saya wakil/proksi sah bagi: [ ] Syarikat [ ] Koperasi [ ] PLT [ ] Firma Perkongsian [ ] Persatuan
+    Nama Entiti Perniagaan: [                                        ]
+
+Dan saya tidak muflis ataupun belum dilepaskan kemuflisan, dan merupakan seorang ahli/wakil/proksi yang dibenarkan...
+
+Diperbuat oleh: [                         ]  No. MyKad: [                  ]
+Di: [                    ]  Pada Tarikh: [          ]
+Di hadapan saya, (Tandatangan Pesuruhjaya Sumpah): [                         ]
+
+================================================================================
+          TEMPLATE BORANG PROKSI / PELANTIKAN WAKIL (LETTERHEAD SYARIKAT)
+================================================================================
+No Ruj. Kami: [               ]  Tarikh: [          ]
+DEWAN PERNIAGAAN MELAYU MALAYSIA CAWANGAN JOHOR
+U.P.: YANG DIPERTUA
+
+PERMOHONAN KEAHLIAN DEWAN PERNIAGAAN MELAYU MALAYSIA: PENAMAAN WAKIL/PENAMA/PROKSI
+Kami bersetuju dan mengesahkan untuk melantik sebagai Wakil / Proksi kepada syarikat/perkongsian/persatuan kami seperti berikut:
+a. Wakil / Proksi : [                                        ]
+b. No MyKAD       : [                  ]
+c. Jawatan        : [                                        ] 
+   *(Pekongsi / Ahli Lembaga Pengarah / Anggota Lembaga Koperasi / Ahli Jawatankuasa Induk)
+d. Tempoh         : Sehingga tempoh jawatan tamat atau surat penukaran oleh kami.
+
+Yang benar,
+[                                   ]
+Nama & Jawatan (Selain Penama Proksi)
+Cop Rasmi Syarikat
