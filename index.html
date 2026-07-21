@@ -7432,7 +7432,7 @@ async function generateReceipt(memberId, amount, paymentMethod, paymentDate, tra
         receipt_pdf_url: pdfUrl,
         transaction_id: transactionId,
         payment_slip_id: slipId,
-        created_by: supabaseClient.auth.user()?.id || 'system'
+        created_by: supabaseClient.auth.getUser()?.data?.user?.id || 'system'
       });
     
     if (receiptError) throw receiptError;
@@ -7874,7 +7874,7 @@ async function applyDigitalSignatureToPDF(pdfUrl, signatureUrl, documentType) {
   }
 }
 </script>
-<script src="receipt-pv-ui.js?v=12"></script>
+<script src="receipt-pv-ui.js?v=13"></script>
 </body>
 </html>
 
