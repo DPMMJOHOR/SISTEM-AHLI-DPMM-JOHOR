@@ -26,7 +26,7 @@ ALTER TABLE receipts ADD COLUMN member_id INTEGER;
 -- 1. RECEIPTS — add missing columns
 -- ------------------------------------------------------------
 ALTER TABLE receipts ADD COLUMN IF NOT EXISTS receipt_type          VARCHAR(50) DEFAULT 'membership_fee';
-ALTER TABLE receipts ADD COLUMN IF NOT EXISTS nombor_ahli           VARCHAR(50);
+ALTER TABLE receipts ADD COLUMN IF NOT EXISTS NO_AHLI               VARCHAR(50); -- Matches live schema (UPPERCASE)
 ALTER TABLE receipts ADD COLUMN IF NOT EXISTS payment_method        VARCHAR(50);
 ALTER TABLE receipts ADD COLUMN IF NOT EXISTS receipt_date          TIMESTAMP DEFAULT NOW();
 ALTER TABLE receipts ADD COLUMN IF NOT EXISTS receipt_pdf_url       TEXT;

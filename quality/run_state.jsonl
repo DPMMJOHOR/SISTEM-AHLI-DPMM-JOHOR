@@ -1,0 +1,1 @@
+{"event":"_index","ts":"2026-07-22T06:00:00Z","schema_version":"1.5.6","event_types":["_index","run_start","phase_start","pattern_walked","pass_started","pass_ended","finding_logged","artifact_written","gate_check","phase_end","error","run_end"],"benchmark":"SISTEM-AHLI-DPMM-JOHOR","lever_state":"baseline","started_at":"2026-07-22T06:00:00Z"}

@@ -2,8 +2,15 @@
 // Tests: 1) Email to applicants, 2) Email to Admin, 3) Dashboard display, 4) Counter update
 // Run this in browser console on borang.html page
 
-const SUPABASE_URL = 'https://lzoloupwtqmjyupvofhh.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx6b2xvdXB3dHFtanl1cHZvZmhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5NTMxMTEsImV4cCI6MjA4ODUyOTExMX0.tBcGc6KfPyjUmJngbLTBHv-GZkSoSoyWGXwlXFZ0ShE';
+// Load credentials from window.CONFIG
+const SUPABASE_URL = window.CONFIG?.SUPABASE_URL || 'https://lzoloupwtqmjyupvofhh.supabase.co';
+const SUPABASE_ANON_KEY = window.CONFIG?.SUPABASE_ANON_KEY;
+
+if (!SUPABASE_ANON_KEY) {
+  console.error('ERROR: SUPABASE_ANON_KEY not found in window.CONFIG');
+  console.error('Ensure config-loader.js is loaded before running this test');
+  throw new Error('Credentials not loaded');
+}
 
 const testResults = {
   databaseInsert: false,
