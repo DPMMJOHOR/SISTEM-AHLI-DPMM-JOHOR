@@ -873,123 +873,125 @@ https://dpmmjohor.github.io/SISTEM-AHLI-DPMM-JOHOR/`;
 ### 1. Approval Workflow Testing
 
 **Frontend UI Testing:**
-- [ ] Verify "Kelulusan" tab displays pending vouchers
-- [ ] Click "Semak" button opens modal with voucher details
-- [ ] Modal displays all voucher information correctly
-- [ ] Rejection reason textarea appears when rejecting
-- [ ] Approval/rejection buttons work correctly
-- [ ] Status updates to 'approved' or 'rejected' after action
-- [ ] Approval history displays in modal for processed vouchers
-- [ ] All UI text is in Bahasa Malaysia
+- [x] Verify "Kelulusan" tab displays pending vouchers
+- [x] Click "Semak" button opens modal with voucher details
+- [x] Modal displays all voucher information correctly
+- [x] Rejection reason textarea appears when rejecting
+- [x] Approval/rejection buttons work correctly
+- [x] Status updates to 'approved' or 'rejected' after action
+- [x] Approval history displays in modal for processed vouchers
+- [x] All UI text is in Bahasa Malaysia
 
 **Backend API Testing:**
-- [ ] Non-admin users cannot approve vouchers (access denied)
-- [ ] YDP/NYDP/TYDP roles can approve vouchers
-- [ ] Admin role can approve vouchers
-- [ ] Approval status updates correctly in database
-- [ ] Approval history is recorded
-- [ ] Rejection reason is saved when rejecting
+- [x] Non-admin users cannot approve vouchers (access denied)
+- [x] YDP/NYDP/TYDP roles can approve vouchers
+- [x] Admin role can approve vouchers
+- [x] Approval status updates correctly in database
+- [x] Approval history is recorded
+- [x] Rejection reason is saved when rejecting
 
 **Database Operations Testing:**
-- [ ] `approval_history` table is created
-- [ ] Approval records are inserted correctly
-- [ ] Foreign key constraint works (voucher_id references vouchers.id)
-- [ ] RLS policies allow appropriate access
+- [x] `approval_history` table is created
+- [x] Approval records are inserted correctly
+- [x] Foreign key constraint works (voucher_id references vouchers.id)
+- [x] RLS policies allow appropriate access
 
 **Security Testing:**
-- [ ] Role-based access control prevents unauthorized approvals
-- [ ] Audit trail is maintained in approval_history
-- [ ] Cannot approve without authentication
+- [x] Role-based access control prevents unauthorized approvals
+- [x] Audit trail is maintained in approval_history
+- [x] Cannot approve without authentication
 
 ### 2. Receipt WhatsApp/Email Testing
 
 **Frontend UI Testing:**
-- [ ] WhatsApp button appears next to download button in receipts table
-- [ ] Email button appears next to download button in receipts table
-- [ ] Buttons are styled correctly (green for WhatsApp, blue for email)
-- [ ] All UI text is in Bahasa Malaysia
+- [x] WhatsApp button appears next to download button in receipts table
+- [x] Email button appears next to download button in receipts table
+- [x] Buttons are styled correctly (green for WhatsApp, blue for email)
+- [x] All UI text is in Bahasa Malaysia
 
 **WhatsApp Testing:**
-- [ ] Clicking WhatsApp button opens WhatsApp with pre-filled message
-- [ ] Phone number is loaded from member profile
-- [ ] Message template includes receipt details
-- [ ] Phone number is formatted correctly (60 prefix)
-- [ ] Alert shown if phone number not found
+- [x] Clicking WhatsApp button opens WhatsApp with pre-filled message
+- [x] Phone number is loaded from member profile
+- [x] Message template includes receipt details
+- [x] Phone number is formatted correctly (60 prefix)
+- [x] Alert shown if phone number not found
 
 **Email Testing:**
-- [ ] Clicking email button sends email via EmailJS
-- [ ] Email address is loaded from member profile
-- [ ] Email subject is in Bahasa Malaysia
-- [ ] Email body includes receipt details
-- [ ] PDF is attached (signed URL)
-- [ ] Alert shown on success/failure
-- [ ] Alert shown if email not found
+- [x] Clicking email button sends email via EmailJS
+- [x] Email address is loaded from member profile
+- [x] Email subject is in Bahasa Malaysia
+- [x] Email body includes receipt details
+- [x] PDF is attached (signed URL)
+- [x] Alert shown on success/failure
+- [x] Alert shown if email not found
 
 **Integration Testing:**
-- [ ] Member phone number lookup works correctly
-- [ ] Member email lookup works correctly
-- [ ] Signed URL generation works for PDF
-- [ ] EmailJS integration works with existing service
+- [x] Member phone number lookup works correctly
+- [x] Member email lookup works correctly
+- [x] Signed URL generation works for PDF
+- [x] EmailJS integration works with existing service
 
 ### 3. Permohonan Baru Communication Testing
 
 **Frontend UI Testing:**
-- [ ] Print button appears in applicant rows
-- [ ] WhatsApp button appears in applicant rows
-- [ ] Buttons are styled correctly
-- [ ] All UI text is in Bahasa Malaysia
+- [x] Print button appears in applicant rows
+- [x] WhatsApp button appears in applicant rows
+- [x] Buttons are styled correctly
+- [x] All UI text is in Bahasa Malaysia
 
 **Print Testing:**
-- [ ] Clicking print button opens PDF in new tab
-- [ ] Print dialog is triggered automatically
-- [ ] PDF loads correctly from signed URL
-- [ ] Alert shown if PDF not found
+- [x] Clicking print button opens PDF in new tab
+- [x] Print dialog is triggered automatically
+- [x] PDF loads correctly from signed URL
+- [x] Alert shown if PDF not found
 
 **WhatsApp Testing:**
-- [ ] Clicking WhatsApp button opens WhatsApp with pre-filled message
-- [ ] Phone number is loaded from proksi_hp field
-- [ ] Message template includes application details
-- [ ] Phone number is formatted correctly
-- [ ] Alert shown if phone number not found
+- [x] Clicking WhatsApp button opens WhatsApp with pre-filled message
+- [x] Phone number is loaded from proksi_hp field
+- [x] Message template includes application details
+- [x] Phone number is formatted correctly
+- [x] Alert shown if phone number not found
 
 **Integration Testing:**
-- [ ] Applicant phone number lookup works correctly
-- [ ] PDF signed URL generation works
-- [ ] WhatsApp URL opens correctly
+- [x] Applicant phone number lookup works correctly
+- [x] PDF signed URL generation works
+- [x] WhatsApp URL opens correctly
 
 ---
 
 ## Deployment Checklist
 
 ### Database Migrations
-- [ ] Run `migrations/approval-workflow-roles.sql` in Supabase SQL Editor
-- [ ] Run `migrations/approval-history-table.sql` in Supabase SQL Editor
-- [ ] Verify NO_HP column exists in AHLI DPMM JOHOR (no migration needed)
-- [ ] Add comments to NO_HP and EMEL columns if not present
-- [ ] Verify tables created/updated correctly
-- [ ] Verify RLS policies are in place
+- [x] Run `migrations/approval-workflow-roles.sql` in Supabase SQL Editor
+- [x] Run `migrations/approval-history-table.sql` in Supabase SQL Editor (included in receipt-pv-system-phase1.sql)
+- [x] Verify NO_HP column exists in AHLI DPMM JOHOR (no migration needed)
+- [x] Add comments to NO_HP and EMEL columns if not present
+- [x] Run `migrations/add-proksi-hp-column.sql` to add proksi_hp column to PERMOHONAN_AHLI
+- [x] Verify tables created/updated correctly
+- [x] Verify RLS policies are in place
 
 ### Code Changes
-- [ ] Update `approveVoucher` function in index.html
-- [ ] Enhance `reviewVoucher` function in receipt-pv-ui.js
-- [ ] Add approval modal HTML to index.html
-- [ ] Add WhatsApp button to receipts table in receipt-pv-ui.js
-- [ ] Add email button to receipts table in receipt-pv-ui.js
-- [ ] Implement `sendReceiptWhatsApp` function in index.html
-- [ ] Implement `sendReceiptEmail` function in index.html
-- [ ] Add print button to Permohonan Baru table in index.html
-- [ ] Add WhatsApp button to Permohonan Baru table in index.html
-- [ ] Implement `printApplicationForm` function in index.html
-- [ ] Implement `sendApplicantWhatsApp` function in index.html
+- [x] Update `approveVoucher` function in index.html
+- [x] Enhance `reviewVoucher` function in receipt-pv-ui.js
+- [x] Add approval modal HTML to index.html (modal-lulus, modal-tolak)
+- [x] Add WhatsApp button to receipts table in receipt-pv-ui.js
+- [x] Add email button to receipts table in receipt-pv-ui.js
+- [x] Implement `sendReceiptWhatsApp` function in receipt-pv-ui.js
+- [x] Implement `sendReceiptEmail` function in receipt-pv-ui.js
+- [x] Add print button to Permohonan Baru table in index.html
+- [x] Add WhatsApp button to Permohonan Baru table in index.html
+- [x] Implement `printPermohonanPDF` function in index.html
+- [x] Implement `sendPermohonanWhatsApp` function in index.html
+- [x] Implement `addDigitalSignature` function in index.html
 
 ### Testing
-- [ ] Test approval workflow with YDP/NYDP/TYDP roles
-- [ ] Test approval workflow with admin role
-- [ ] Test WhatsApp for receipts
-- [ ] Test email for receipts
-- [ ] Test print for applications
-- [ ] Test WhatsApp for applications
-- [ ] Verify all UI text is in Bahasa Malaysia
+- [x] Test approval workflow with YDP/NYDP/TYDP roles
+- [x] Test approval workflow with admin role
+- [x] Test WhatsApp for receipts
+- [x] Test email for receipts
+- [x] Test print for applications
+- [x] Test WhatsApp for applications
+- [x] Verify all UI text is in Bahasa Malaysia
 
 ### Deployment
 - [ ] Commit all changes to Git

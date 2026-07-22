@@ -6628,7 +6628,7 @@ async function sendPermohonanWhatsApp(id) {
   var p = permohonanData.find(function(x){ return x.id === id; });
   if (!p) return;
   
-  var phoneNumber = p.proksi_no_hp || p.no_hp_syarikat;
+  var phoneNumber = p.proksi_hp || p.no_hp_syarikat;
   if (!phoneNumber) {
     alert('Nombor telefon pemohon tidak dijumpai.');
     return;
@@ -7839,9 +7839,37 @@ async function generateVoucherPDF(voucherNumber, payableTo, purpose, amount, pay
 
 // Digital Signature Application
 async function addDigitalSignature(voucherId) {
-  // Placeholder for signature image upload
-  // In production, this would overlay a signature image on the PDF
-  return 'signature_placeholder_url';
+  try {
+    // Fetch voucher details
+    const { data: voucher } = await supabaseClient
+      .from('vouchers')
+      .select('*')
+      .eq('id', voucherId)
+      .single();
+    
+    if (!voucher || !voucher.voucher_pdf_url) {
+      console.error('Voucher or PDF URL not found');
+      return null;
+    }
+    
+    // Generate signed URL for the voucher PDF
+    const { data: signedData, error: signedError } = await supabaseClient
+      .storage
+      .from('vouchers')
+      .createSignedUrl(voucher.voucher_pdf_url.replace('vouchers/', ''), 3600);
+    
+    if (signedError) {
+      console.error('Error creating signed URL:', signedError);
+      return null;
+    }
+    
+    // For now, return the signed URL as the digital signature
+    // In production, this would overlay a signature image on the PDF
+    return signedData.signedUrl;
+  } catch (error) {
+    console.error('Error adding digital signature:', error);
+    return null;
+  }
 }
 
 // WhatsApp Integration
