@@ -136,12 +136,31 @@ initEmailJSWhenReady();
 
 body {
   font-family: 'Inter', 'Montserrat', sans-serif;
-  background: var(--bg-light);
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   color: var(--text);
   min-height: 100vh;
   font-size: 16px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 15% 20%, rgba(29, 60, 150, 0.03) 0%, transparent 50%),
+              radial-gradient(circle at 85% 80%, rgba(29, 60, 150, 0.02) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+body > * {
+  position: relative;
+  z-index: 1;
 }
 
 /* ---- HEADER ---- */
@@ -1973,6 +1992,163 @@ textarea:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
+
+/* ── BUTTON SHINE ── */
+.btn-shine {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  border-radius: 6px;
+  color: var(--white);
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  padding: 12px 24px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-shine:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.btn-shine::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.btn-shine:hover::before {
+  left: 100%;
+}
+
+.btn-shine:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(29, 60, 150, 0.25);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-shine::before {
+    display: none;
+  }
+  .btn-shine:hover {
+    transform: none;
+  }
+}
+
+/* ── MODERN KPI CARD ── */
+.modern-kpi-card {
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.modern-kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--primary);
+  opacity: 0.5;
+}
+
+.modern-kpi-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.modern-kpi-card.modern-kpi-danger::before {
+  background: var(--red);
+}
+
+.modern-kpi-card.modern-kpi-gold::before {
+  background: var(--warning);
+}
+
+.modern-kpi-card.modern-kpi-green::before {
+  background: var(--success);
+}
+
+.modern-kpi-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--grey-600);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.modern-kpi-val {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.2;
+  margin-bottom: 4px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.modern-kpi-sub {
+  font-size: 12px;
+  color: var(--grey-500);
+}
+
+.modern-kpi-card.modern-kpi-danger .modern-kpi-val {
+  color: var(--red);
+}
+
+.modern-kpi-card.modern-kpi-gold .modern-kpi-val {
+  color: var(--warning);
+}
+
+.modern-kpi-card.modern-kpi-green .modern-kpi-val {
+  color: var(--success);
+}
+
+@media (max-width: 768px) {
+  .modern-kpi-card {
+    padding: 16px;
+  }
+  .modern-kpi-val {
+    font-size: 24px;
+  }
+}
+
+/* ── TABLE ROW HIGHLIGHT ── */
+.table-row-highlight {
+  background: rgba(29, 60, 150, 0.04);
+  transition: background 0.2s ease;
+}
+
+.table-row-highlight:hover {
+  background: rgba(29, 60, 150, 0.08);
+}
+
+.table-row-highlight td {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── STATUS BADGE ── */
+.badge-navy { background: rgba(29, 60, 150, 0.08); color: #1D3C96; border: 1px solid rgba(29, 60, 150, 0.2); padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; font-family: 'Montserrat', sans-serif; }
+.badge-red { background: rgba(204, 22, 40, 0.08); color: #CC1628; border: 1px solid rgba(204, 22, 40, 0.2); padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; font-family: 'Montserrat', sans-serif; }
+.badge-gray { background: rgba(107, 114, 128, 0.08); color: #6B7280; border: 1px solid rgba(107, 114, 128, 0.2); padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; font-family: 'Montserrat', sans-serif; }
+.badge-gold { background: rgba(217, 119, 6, 0.08); color: #D97706; border: 1px solid rgba(217, 119, 6, 0.2); padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; font-family: 'Montserrat', sans-serif; }
+.badge-paid { background: rgba(21, 128, 61, 0.08); color: #15803D; border: 1px solid rgba(21, 128, 61, 0.2); padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; font-family: 'Montserrat', sans-serif; }
+.badge-unpaid { background: rgba(204, 22, 40, 0.08); color: #CC1628; border: 1px solid rgba(204, 22, 40, 0.2); padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; font-family: 'Montserrat', sans-serif; }
+.badge-ok { background: rgba(21, 128, 61, 0.08); color: #15803D; border: 1px solid rgba(21, 128, 61, 0.2); padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; font-family: 'Montserrat', sans-serif; }
 </style>
 </head>
 <body>
@@ -2172,7 +2348,7 @@ textarea:focus-visible {
 
       <div class="btn-row">
         <span></span>
-        <button class="btn btn-primary" onclick="goStep(2)">Seterusnya &rarr;</button>
+        <button class="btn btn-primary btn-shine" onclick="goStep(2)">Seterusnya &rarr;</button>
       </div>
     </div>
   </div>
@@ -2328,7 +2504,7 @@ textarea:focus-visible {
 
       <div class="btn-row">
         <button class="btn btn-secondary" onclick="goStep(1)">&larr; Kembali</button>
-        <button class="btn btn-primary" onclick="goStep(3)">Seterusnya &rarr;</button>
+        <button class="btn btn-primary btn-shine" onclick="goStep(3)">Seterusnya &rarr;</button>
       </div>
     </div>
   </div>
@@ -2500,7 +2676,7 @@ textarea:focus-visible {
 
       <div class="btn-row">
         <button class="btn btn-secondary" onclick="goStep(2)">&larr; Kembali</button>
-        <button class="btn btn-primary" onclick="goStep(4)">Seterusnya &rarr;</button>
+        <button class="btn btn-primary btn-shine" onclick="goStep(4)">Seterusnya &rarr;</button>
       </div>
     </div>
   </div>
@@ -2556,7 +2732,7 @@ textarea:focus-visible {
 
       <div class="btn-row">
         <button class="btn btn-secondary" onclick="goStep(3)">&larr; Kembali</button>
-        <button class="btn btn-primary" onclick="goStep(5)">Seterusnya &rarr;</button>
+        <button class="btn btn-primary btn-shine" onclick="goStep(5)">Seterusnya &rarr;</button>
       </div>
     </div>
   </div>
@@ -2612,7 +2788,7 @@ textarea:focus-visible {
 
       <div class="btn-row">
         <button class="btn btn-secondary" onclick="goStep(4)">&larr; Kembali</button>
-        <button class="btn btn-primary" onclick="goStep(6)">Seterusnya &rarr;</button>
+        <button class="btn btn-primary btn-shine" onclick="goStep(6)">Seterusnya &rarr;</button>
       </div>
     </div>
   </div>
@@ -2711,7 +2887,7 @@ textarea:focus-visible {
 
       <div class="btn-row">
         <button class="btn btn-secondary" onclick="goStep(5)">&larr; Kembali</button>
-        <button class="btn btn-primary" onclick="goStep(7)">Seterusnya &rarr;</button>
+        <button class="btn btn-primary btn-shine" onclick="goStep(7)">Seterusnya &rarr;</button>
       </div>
     </div>
   </div>
@@ -2783,7 +2959,7 @@ textarea:focus-visible {
 
       <div class="btn-row">
         <button class="btn btn-secondary" onclick="goStep(6)">&larr; Kembali</button>
-        <button class="btn btn-gold btn-lg" id="btn-submit" onclick="submitPermohonan()">
+        <button class="btn btn-gold btn-lg btn-shine" id="btn-submit" onclick="submitPermohonan()">
           Hantar Permohonan
         </button>
       </div>
@@ -2827,15 +3003,15 @@ textarea:focus-visible {
         Yuran Pendaftaran tidak akan dipulangkan sekiranya permohonan ditolak.
       </div>
 
-      <button class="btn btn-gold btn-lg" onclick="downloadPDF()">
+      <button class="btn btn-gold btn-lg btn-shine" onclick="downloadPDF()">
         Download Borang PDF
       </button>
       <br><br>
-      <button class="btn btn-primary" onclick="openPDFModal()">
+      <button class="btn btn-primary btn-shine" onclick="openPDFModal()">
         Lihat Borang
       </button>
       <br><br>
-      <button class="btn btn-wa" onclick="hubungiAdmin()">
+      <button class="btn btn-wa btn-shine" onclick="hubungiAdmin()">
         Hubungi Urusetia via WhatsApp
       </button>
       <br><br>
@@ -2858,11 +3034,11 @@ textarea:focus-visible {
         <iframe id="pdf-viewer" style="width:100%;height:70vh;border:none;display:none;"></iframe>
         <div id="pdf-error" style="display:none;padding:40px;text-align:center;">
           <p style="color:var(--error);">Gagal memuatkan borang PDF.</p>
-          <button class="btn btn-primary" onclick="closePDFModal()">Tutup</button>
+          <button class="btn btn-primary btn-shine" onclick="closePDFModal()">Tutup</button>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-primary" onclick="printPDF()">Cetak</button>
+        <button class="btn btn-primary btn-shine" onclick="printPDF()">Cetak</button>
         <button class="btn btn-secondary" onclick="downloadPDF()">Muat Turun</button>
         <button class="btn btn-secondary" onclick="closePDFModal()">Tutup</button>
       </div>
@@ -6102,7 +6278,7 @@ function showResumePrompt(draft) {
       <p>Adakah anda ingin meneruskan pengisian borang ini?</p>
       <div class="resume-actions">
         <button class="btn btn-secondary" onclick="clearDraft(); document.querySelector('.resume-modal').remove();">Mula Baru</button>
-        <button class="btn btn-primary" onclick="restoreDraft(loadDraft()); document.querySelector('.resume-modal').remove();">Teruskan</button>
+        <button class="btn btn-primary btn-shine" onclick="restoreDraft(loadDraft()); document.querySelector('.resume-modal').remove();">Teruskan</button>
       </div>
     </div>
   `;

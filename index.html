@@ -82,7 +82,45 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { font-size: 15px; -webkit-font-smoothing: antialiased; }
-body { font-family: var(--sans); background: var(--body-bg); color: var(--text); min-height: 100vh; }
+body { 
+  font-family: var(--sans); 
+  background: linear-gradient(135deg, #F8FAFC 0%, #F1F4F9 50%, #E8EDF5 100%); 
+  color: var(--text); 
+  min-height: 100vh; 
+  padding: 40px 20px;
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 15% 50%, rgba(29, 60, 150, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 85% 30%, rgba(91, 115, 192, 0.03) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+#app-container {
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 768px) {
+  body {
+    padding: 20px 16px;
+  }
+  
+  body::before {
+    background-image: 
+      radial-gradient(circle at 20% 60%, rgba(29, 60, 150, 0.02) 0%, transparent 40%),
+      radial-gradient(circle at 80% 40%, rgba(91, 115, 192, 0.02) 0%, transparent 40%);
+  }
+}
 a { text-decoration: none; color: inherit; }
 input, select, textarea, button { font-family: var(--sans); }
 
@@ -200,6 +238,9 @@ small {
   box-shadow: 0 6px 20px rgba(var(--primary-rgb),.5);
   transform: translateY(-1px);
 }
+.login-btn.btn-shine {
+  border-radius: 6px;
+}
 .login-err {
   background: var(--danger-lt); border: 1.5px solid var(--danger);
   color: var(--danger); padding: 9px 12px; border-radius: 8px;
@@ -210,6 +251,267 @@ small {
   text-align: center; padding: 14px; background: var(--body-bg);
   border-top: 1px solid var(--gray1);
   font-size: 11.5px; color: var(--gray3);
+}
+
+/* ══════════════════════════════════════════
+   VENGENCE UI-INSPIRED COMPONENTS
+══════════════════════════════════════════ */
+
+/* Button Shine Effect */
+.btn-shine {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dk));
+  border-radius: 6px;
+  color: var(--white);
+  font-family: var(--head);
+  font-weight: 600;
+  padding: 12px 24px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-shine:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.btn-shine::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(255,255,255,0.15) 50%,
+    transparent 100%
+  );
+  transform: rotate(45deg) translateX(-100%);
+  transition: transform 0.6s;
+}
+
+.btn-shine:hover::after {
+  transform: rotate(45deg) translateX(100%);
+}
+
+.btn-shine:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(29, 60, 150, 0.25);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-shine::after {
+    display: none;
+  }
+  
+  .btn-shine:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+/* Modern KPI Card */
+.card {
+  position: relative;
+  border-radius: 8px;
+  padding: 20px;
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  transition: all 0.2s ease;
+  margin-bottom: 20px;
+}
+
+.card:hover {
+  border-color: #1D3C96;
+  box-shadow: 0 4px 12px rgba(29, 60, 150, 0.08);
+}
+
+.card:focus-within {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.card-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: #6B7280;
+  font-family: var(--sans);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.card-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: #F7F9FC;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.card-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 8px;
+  font-family: var(--head);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.card-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-trend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: var(--sans);
+}
+
+.card-trend.up { color: #15803D; }
+.card-trend.down { color: #CC1628; }
+.card-trend.neutral { color: #6B7280; }
+
+.card-label {
+  font-size: 12px;
+  color: #9CA3AF;
+  font-weight: 400;
+  font-family: var(--sans);
+}
+
+.card-divider {
+  height: 1px;
+  background: #F3F4F6;
+  margin: 16px 0;
+}
+
+.card-metric {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: #6B7280;
+  font-family: var(--sans);
+}
+
+.card-metric-value {
+  font-weight: 600;
+  color: #111827;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .card {
+    padding: 16px;
+  }
+  
+  .card-value {
+    font-size: 24px;
+  }
+}
+
+/* Table Row Highlight */
+.table-row-highlight {
+  position: relative;
+  transition: background 0.2s ease;
+}
+
+.table-row-highlight:focus-within {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+}
+
+.table-row-highlight::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, var(--primary), var(--primary-dk));
+  opacity: 0;
+  z-index: 0;
+  transition: opacity 0.2s ease;
+}
+
+.table-row-highlight:hover::after {
+  opacity: 0.04;
+}
+
+.table-row-highlight td {
+  position: relative;
+  z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .table-row-highlight::after {
+    display: none;
+  }
+}
+
+/* Status Badge */
+.badge-flip {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--head);
+}
+
+.badge-flip.status-changed {
+  animation: flipIn 0.5s ease;
+}
+
+.badge-success {
+  background: rgba(21, 128, 61, 0.08);
+  color: #15803D;
+  border: 1px solid rgba(21, 128, 61, 0.2);
+}
+
+.badge-warning {
+  background: rgba(217, 119, 6, 0.08);
+  color: #D97706;
+  border: 1px solid rgba(217, 119, 6, 0.2);
+}
+
+.badge-danger {
+  background: rgba(204, 22, 40, 0.08);
+  color: #CC1628;
+  border: 1px solid rgba(204, 22, 40, 0.2);
+}
+
+@keyframes flipIn {
+  0% { transform: rotateX(90deg); opacity: 0; }
+  100% { transform: rotateX(0); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .badge-flip.status-changed {
+    animation: none;
+  }
 }
 
 /* ══════════════════════════════════════════
@@ -674,6 +976,21 @@ tbody tr { border-bottom: 1px solid var(--gray1); transition: background .1s; }
 tbody tr:last-child { border-bottom: none; }
 tbody tr:hover { background: #f5f3ff; }
 tbody tr.clickable-row { cursor: pointer; }
+
+/* Table Row Highlight */
+.table-row-highlight {
+  background: rgba(29, 60, 150, 0.04);
+  transition: background 0.2s ease;
+}
+
+.table-row-highlight:hover {
+  background: rgba(29, 60, 150, 0.08);
+}
+
+.table-row-highlight td {
+  position: relative;
+  z-index: 1;
+}
 tbody td { padding: 11px 12px; vertical-align: middle; font-size: 13px; }
 .row-num { color: var(--gray3); font-family: var(--mono); font-size: 11px; width: 32px; }
 .group-hdr td {
@@ -700,13 +1017,13 @@ tbody td { padding: 11px 12px; vertical-align: middle; font-size: 13px; }
   border-radius: 20px; font-size: 10.5px; font-weight: 700;
   text-transform: uppercase; white-space: nowrap; letter-spacing: 0.3px;
 }
-.badge-navy { background: var(--primary-lt); color: var(--primary); }
-.badge-red { background: var(--danger-lt); color: var(--danger); }
-.badge-gray { background: var(--gray1); color: var(--secondary); }
-.badge-gold { background: var(--warning-lt); color: #c47d25; }
-.badge-paid { background: var(--success-lt); color: var(--success); }
-.badge-unpaid { background: var(--danger-lt); color: var(--danger); }
-.badge-ok { background: var(--success-lt); color: var(--success); }
+.badge-navy { background: rgba(29, 60, 150, 0.08); color: #1D3C96; border: 1px solid rgba(29, 60, 150, 0.2); padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; font-family: var(--head); }
+.badge-red { background: rgba(204, 22, 40, 0.08); color: #CC1628; border: 1px solid rgba(204, 22, 40, 0.2); padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; font-family: var(--head); }
+.badge-gray { background: rgba(107, 114, 128, 0.08); color: #6B7280; border: 1px solid rgba(107, 114, 128, 0.2); padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; font-family: var(--head); }
+.badge-gold { background: rgba(217, 119, 6, 0.08); color: #D97706; border: 1px solid rgba(217, 119, 6, 0.2); padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; font-family: var(--head); }
+.badge-paid { background: rgba(21, 128, 61, 0.08); color: #15803D; border: 1px solid rgba(21, 128, 61, 0.2); padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; font-family: var(--head); }
+.badge-unpaid { background: rgba(204, 22, 40, 0.08); color: #CC1628; border: 1px solid rgba(204, 22, 40, 0.2); padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; font-family: var(--head); }
+.badge-ok { background: rgba(21, 128, 61, 0.08); color: #15803D; border: 1px solid rgba(21, 128, 61, 0.2); padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; font-family: var(--head); }
 
 /* ── SEARCH BAR ── */
 .search-bar { display: flex; gap: 10px; align-items: center; margin-bottom: 18px; flex-wrap: wrap; }
@@ -1203,25 +1520,25 @@ tr.row-unpaid { background: #fff0f0 !important; }
       <span id="dash-last-updated" style="font-size:10px;font-weight:700;color:var(--primary);font-family:var(--mono);">—</span>
     </div>
     <div class="kpi-grid kpi-4">
-      <div class="kpi-card">
-        <div class="kpi-label">Jumlah Ahli Berdaftar</div>
-        <div class="kpi-val" id="kpi-total">—</div>
-        <div class="kpi-sub" id="kpi-total-sub">Setakat 31 Disember 2025</div>
+      <div class="modern-kpi-card">
+        <div class="modern-kpi-label">Jumlah Ahli Berdaftar</div>
+        <div class="modern-kpi-val" id="kpi-total">—</div>
+        <div class="modern-kpi-sub" id="kpi-total-sub">Setakat 31 Disember 2025</div>
       </div>
-      <div class="kpi-card danger">
-        <div class="kpi-label" id="kpi-unpaid-label">Belum Bayar Yuran '+YURAN_YEAR+'</div>
-        <div class="kpi-val" id="kpi-unpaid">—</div>
-        <div class="kpi-sub" id="kpi-unpaid-pct">—</div>
+      <div class="modern-kpi-card modern-kpi-danger">
+        <div class="modern-kpi-label" id="kpi-unpaid-label">Belum Bayar Yuran '+YURAN_YEAR+'</div>
+        <div class="modern-kpi-val" id="kpi-unpaid">—</div>
+        <div class="modern-kpi-sub" id="kpi-unpaid-pct">—</div>
       </div>
-      <div class="kpi-card gold">
-        <div class="kpi-label" id="kpi-paid-label">Telah Bayar Yuran '+YURAN_YEAR+'</div>
-        <div class="kpi-val" id="kpi-paid">—</div>
-        <div class="kpi-sub" id="kpi-paid-pct">—</div>
+      <div class="modern-kpi-card modern-kpi-gold">
+        <div class="modern-kpi-label" id="kpi-paid-label">Telah Bayar Yuran '+YURAN_YEAR+'</div>
+        <div class="modern-kpi-val" id="kpi-paid">—</div>
+        <div class="modern-kpi-sub" id="kpi-paid-pct">—</div>
       </div>
-      <div class="kpi-card danger">
-        <div class="kpi-label">SSM Perlu Diperbaharui</div>
-        <div class="kpi-val" id="kpi-ssm">0</div>
-        <div class="kpi-sub">Luput atau hampir luput (180 hari)</div>
+      <div class="modern-kpi-card modern-kpi-danger">
+        <div class="modern-kpi-label">SSM Perlu Diperbaharui</div>
+        <div class="modern-kpi-val" id="kpi-ssm">0</div>
+        <div class="modern-kpi-sub">Luput atau hampir luput (180 hari)</div>
       </div>
     </div>
 
@@ -1242,7 +1559,7 @@ tr.row-unpaid { background: #fff0f0 !important; }
     </div>
 
     <div style="text-align:center;padding:8px 0 16px;">
-      <button class="btn btn-primary" onclick="generateReport()" style="font-size:14px;padding:12px 32px;letter-spacing:0.5px;box-shadow:0 4px 20px rgba(108,92,231,.4);">
+      <button class="btn btn-primary btn-shine" onclick="generateReport()" style="font-size:14px;padding:12px 32px;letter-spacing:0.5px;box-shadow:0 4px 20px rgba(108,92,231,.4);">
         &#x1F4CB;&nbsp; GENERATE REPORT
       </button>
     </div>
@@ -1307,25 +1624,25 @@ tr.row-unpaid { background: #fff0f0 !important; }
   <!-- ══ YURAN TRACKER ══ -->
   <div id="page-yuran" class="page">
     <div class="kpi-grid kpi-4" style="margin-bottom:8px;">
-      <div class="kpi-card danger">
-        <div class="kpi-label">BELUM BAYAR <span class="yuran-year-label">2025</span></div>
-        <div class="kpi-val" id="yuran-kpi-unpaid">—</div>
-        <div class="kpi-sub" style="font-size:11px;">Ahli belum jelaskan Yuran Tahunan</div>
+      <div class="modern-kpi-card modern-kpi-danger">
+        <div class="modern-kpi-label">BELUM BAYAR <span class="yuran-year-label">2025</span></div>
+        <div class="modern-kpi-val" id="yuran-kpi-unpaid">—</div>
+        <div class="modern-kpi-sub" style="font-size:11px;">Ahli belum jelaskan Yuran Tahunan</div>
       </div>
-      <div class="kpi-card gold">
-        <div class="kpi-label">TELAH BAYAR <span class="yuran-year-label">2025</span></div>
-        <div class="kpi-val" id="yuran-kpi-paid">—</div>
-        <div class="kpi-sub" style="font-size:11px;">Ahli sudah jelaskan Yuran Tahunan</div>
+      <div class="modern-kpi-card modern-kpi-gold">
+        <div class="modern-kpi-label">TELAH BAYAR <span class="yuran-year-label">2025</span></div>
+        <div class="modern-kpi-val" id="yuran-kpi-paid">—</div>
+        <div class="modern-kpi-sub" style="font-size:11px;">Ahli sudah jelaskan Yuran Tahunan</div>
       </div>
-      <div class="kpi-card">
-        <div class="kpi-label">KUTIPAN YURAN TAHUNAN <span class="yuran-year-label">2025</span></div>
-        <div class="kpi-val" id="yuran-kpi-total" style="font-size:22px;">—</div>
-        <div class="kpi-sub" style="font-size:11px;">Jumlah Yuran Tahunan terkumpul</div>
+      <div class="modern-kpi-card">
+        <div class="modern-kpi-label">KUTIPAN YURAN TAHUNAN <span class="yuran-year-label">2025</span></div>
+        <div class="modern-kpi-val" id="yuran-kpi-total" style="font-size:22px;">—</div>
+        <div class="modern-kpi-sub" style="font-size:11px;">Jumlah Yuran Tahunan terkumpul</div>
       </div>
-      <div class="kpi-card" style="border-left:4px solid #1a3f7a;">
-        <div class="kpi-label">KUTIPAN YURAN PENDAFTARAN</div>
-        <div class="kpi-val" id="yuran-kpi-daftar" style="font-size:22px;color:#1a3f7a;">—</div>
-        <div class="kpi-sub" style="font-size:11px;">Yuran pendaftaran (sekali sahaja)</div>
+      <div class="modern-kpi-card" style="border-left:4px solid #1a3f7a;">
+        <div class="modern-kpi-label">KUTIPAN YURAN PENDAFTARAN</div>
+        <div class="modern-kpi-val" id="yuran-kpi-daftar" style="font-size:22px;color:#1a3f7a;">—</div>
+        <div class="modern-kpi-sub" style="font-size:11px;">Yuran pendaftaran (sekali sahaja)</div>
       </div>
     </div>
     <div class="yuran-3col" style="display:grid;grid-template-columns:1fr auto 1fr;gap:14px;margin-bottom:18px;align-items:stretch;">
@@ -1381,20 +1698,20 @@ tr.row-unpaid { background: #fff0f0 !important; }
     <div class="no-print" style="display:flex;justify-content:flex-end;margin-bottom:12px;"><div class="page-export-wrap" style="position:relative;"><button class="page-export-btn" onclick="togglePageExport(this,event)">📤 Eksport ▾</button><div class="page-export-dd"><div class="page-export-item" onclick="pageExport('ssm','csv')">📊 &nbsp;CSV / Excel</div><div class="page-export-item" onclick="pageExport('ssm','pdf')">📄 &nbsp;PDF (A4)</div><div class="page-export-item" onclick="pageExport('ssm','image')">🖼 &nbsp;Imej (A4)</div></div></div></div>
 
     <div class="kpi-grid kpi-3">
-      <div class="kpi-card danger">
-        <div class="kpi-label">SSM Telah Luput</div>
-        <div class="kpi-val" id="ssm-kpi-expired">0</div>
-        <div class="kpi-sub">Memerlukan tindakan segera</div>
+      <div class="modern-kpi-card modern-kpi-danger">
+        <div class="modern-kpi-label">SSM Telah Luput</div>
+        <div class="modern-kpi-val" id="ssm-kpi-expired">0</div>
+        <div class="modern-kpi-sub">Memerlukan tindakan segera</div>
       </div>
-      <div class="kpi-card gold">
-        <div class="kpi-label">Hampir Luput (6 Bln)</div>
-        <div class="kpi-val" id="ssm-kpi-expiring">0</div>
-        <div class="kpi-sub">Perlu diperbaharui tidak lama lagi</div>
+      <div class="modern-kpi-card modern-kpi-gold">
+        <div class="modern-kpi-label">Hampir Luput (6 Bln)</div>
+        <div class="modern-kpi-val" id="ssm-kpi-expiring">0</div>
+        <div class="modern-kpi-sub">Perlu diperbaharui tidak lama lagi</div>
       </div>
-      <div class="kpi-card">
-        <div class="kpi-label">SSM Masih Sah</div>
-        <div class="kpi-val" id="ssm-kpi-ok">0</div>
-        <div class="kpi-sub">SSM dalam tempoh sah</div>
+      <div class="modern-kpi-card">
+        <div class="modern-kpi-label">SSM Masih Sah</div>
+        <div class="modern-kpi-val" id="ssm-kpi-ok">0</div>
+        <div class="modern-kpi-sub">SSM dalam tempoh sah</div>
       </div>
     </div>
     <div class="sec-card">
@@ -1452,7 +1769,7 @@ tr.row-unpaid { background: #fff0f0 !important; }
       <div>
         <div style="font-size:13px;color:var(--muted);margin-top:2px;">Template digunakan di WhatsApp modal dan Follow Up. Placeholder: <strong>[NAMA PIC]</strong>, <strong>[NO. AHLI]</strong>, <strong>[NAMA SYARIKAT]</strong>, <strong>[TARIKH LUPUT SSM]</strong></div>
       </div>
-      <button class="btn btn-primary btn-sm" onclick="openAddTemplateModal()" style="white-space:nowrap;">+ Tambah Template</button>
+      <button class="btn btn-primary btn-sm btn-shine" onclick="openAddTemplateModal()" style="white-space:nowrap;">+ Tambah Template</button>
     </div>
     <div id="templates-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:18px;"></div>
   </div>
@@ -1511,20 +1828,20 @@ tr.row-unpaid { background: #fff0f0 !important; }
   <!-- ══ BACKUP ══ -->
   <div id="page-backup" class="page">
     <div class="kpi-grid kpi-3">
-      <div class="kpi-card" id="backup-days-card">
-        <div class="kpi-label">Hari Sejak Backup Terakhir</div>
-        <div class="kpi-val" id="backup-kpi-days">—</div>
-        <div class="kpi-sub" id="backup-kpi-date">—</div>
+      <div class="modern-kpi-card" id="backup-days-card">
+        <div class="modern-kpi-label">Hari Sejak Backup Terakhir</div>
+        <div class="modern-kpi-val" id="backup-kpi-days">—</div>
+        <div class="modern-kpi-sub" id="backup-kpi-date">—</div>
       </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Backup Seterusnya (Hari)</div>
-        <div class="kpi-val" id="backup-kpi-next">—</div>
-        <div class="kpi-sub">Disyorkan setiap 30 hari</div>
+      <div class="modern-kpi-card">
+        <div class="modern-kpi-label">Backup Seterusnya (Hari)</div>
+        <div class="modern-kpi-val" id="backup-kpi-next">—</div>
+        <div class="modern-kpi-sub">Disyorkan setiap 30 hari</div>
       </div>
-      <div class="kpi-card gold">
-        <div class="kpi-label">Jumlah Rekod</div>
-        <div class="kpi-val" id="backup-kpi-count">—</div>
-        <div class="kpi-sub">Ahli dalam sistem</div>
+      <div class="modern-kpi-card modern-kpi-gold">
+        <div class="modern-kpi-label">Jumlah Rekod</div>
+        <div class="modern-kpi-val" id="backup-kpi-count">—</div>
+        <div class="modern-kpi-sub">Ahli dalam sistem</div>
       </div>
     </div>
     <div id="backup-status-alert"></div>
@@ -1533,7 +1850,7 @@ tr.row-unpaid { background: #fff0f0 !important; }
       <div class="sec-body">
         <p style="font-size:14px;color:var(--muted);margin-bottom:16px;line-height:1.6;">Muat turun semua data ahli dalam format CSV atau JSON. Simpan fail ini di lokasi yang selamat sebagai sandaran data penting.</p>
         <div style="display:flex;gap:12px;flex-wrap:wrap;">
-          <button class="btn btn-primary" onclick="doBackupCSV()">&#x1F4CA;&nbsp; Muat Turun CSV</button>
+          <button class="btn btn-primary btn-shine" onclick="doBackupCSV()">&#x1F4CA;&nbsp; Muat Turun CSV</button>
           <button class="btn btn-outline" onclick="doBackupJSON()">&#x1B2F5;&nbsp; Muat Turun JSON</button>
         </div>
       </div>
@@ -1591,7 +1908,7 @@ tr.row-unpaid { background: #fff0f0 !important; }
     <!-- TOP TOOLBAR -->
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="btn btn-primary btn-sm" onclick="dokOpenCompose(null)">&#x270F; Cipta Dokumen Baru</button>
+        <button class="btn btn-primary btn-sm btn-shine" onclick="dokOpenCompose(null)">&#x270F; Cipta Dokumen Baru</button>
         <div style="position:relative;display:inline-block;">
           <select id="dok-filter-kat" class="filter-sel" onchange="renderDokumenPage()" style="min-width:180px;">
             <option value="">Semua Kategori</option>
@@ -1635,7 +1952,7 @@ tr.row-unpaid { background: #fff0f0 !important; }
         </div>
         <div style="display:flex;gap:6px;flex-shrink:0;">
           <button class="btn btn-outline btn-sm no-print" id="dok-btn-edit" onclick="dokToggleEdit()" style="display:none;">&#x270F; Edit</button>
-          <button class="btn btn-success btn-sm no-print" id="dok-btn-save" onclick="dokSave()" style="display:none;">&#x1F4BE; Simpan</button>
+          <button class="btn btn-success btn-sm btn-shine no-print" id="dok-btn-save" onclick="dokSave()" style="display:none;">&#x1F4BE; Simpan</button>
           <button class="btn btn-outline btn-sm no-print" onclick="dokPrint()">&#x1F5A8; Cetak PDF</button>
           <button class="btn btn-outline btn-sm no-print" onclick="dokEmail()">&#x2709; E-mel</button>
           <button class="modal-close no-print" onclick="closeModal('dok-modal')">&#x2715;</button>
@@ -1706,7 +2023,7 @@ tr.row-unpaid { background: #fff0f0 !important; }
         <h3>&#x1F5D3;&#xFE0F; Senarai Mesyuarat DPMM</h3>
         <div style="display:flex;gap:8px;align-items:center;">
           <button class="btn btn-outline btn-sm" onclick="loadMesyuarat()">&#x1F504; Muat Semula</button>
-          <a href="https://dpmmjohor.github.io/SISTEM-MESYUARAT-DPMM-JOHOR/" target="_blank" class="btn btn-primary btn-sm">Buka Sistem Mesyuarat &#x2192;</a>
+          <a href="https://dpmmjohor.github.io/SISTEM-MESYUARAT-DPMM-JOHOR/" target="_blank" class="btn btn-primary btn-sm btn-shine">Buka Sistem Mesyuarat &#x2192;</a>
         </div>
       </div>
       <div class="sec-body" style="padding:0;">
@@ -1945,7 +2262,7 @@ tr.row-unpaid { background: #fff0f0 !important; }
         <div class="wa-time" id="wa-preview-time">— ✓✓</div>
       </div>
       <div style="display:flex;gap:9px;flex-wrap:wrap;">
-        <button class="btn btn-primary" id="wa-proceed-btn" onclick="waOpenWhatsApp()">&#x1F4F1; Buka WhatsApp Web</button>
+        <button class="btn btn-primary btn-shine" id="wa-proceed-btn" onclick="waOpenWhatsApp()">&#x1F4F1; Buka WhatsApp Web</button>
         <button class="btn btn-outline" id="wa-copy-btn" onclick="waCopyMsg()">&#x1F4CB; Salin Mesej</button>
         <button class="btn btn-outline-red" onclick="closeModal('wa-modal')">Batal</button>
       </div>
@@ -1975,7 +2292,7 @@ tr.row-unpaid { background: #fff0f0 !important; }
       </div>
       <div style="display:flex;gap:10px;justify-content:space-between;align-items:center;">
         <div style="display:flex;gap:10px;">
-          <button class="btn btn-primary" onclick="saveTemplate()">💾 Simpan Template</button>
+          <button class="btn btn-primary btn-shine" onclick="saveTemplate()">💾 Simpan Template</button>
           <button class="btn btn-outline" onclick="closeModal('edit-template-modal')">Batal</button>
         </div>
         <button class="btn btn-outline-red btn-sm" id="delete-template-btn" onclick="deleteTemplate()" style="display:none;">🗑 Padam Template</button>
@@ -2047,7 +2364,7 @@ tr.row-unpaid { background: #fff0f0 !important; }
         </div>
       </div>
       <div style="margin-top:16px;display:flex;gap:10px;">
-        <button class="btn btn-primary" onclick="saveMember()">Simpan Ahli</button>
+        <button class="btn btn-primary btn-shine" onclick="saveMember()">Simpan Ahli</button>
         <button class="btn btn-outline" onclick="closeModal('add-member-modal')">Batal</button>
       </div>
     </div>
@@ -2074,7 +2391,7 @@ tr.row-unpaid { background: #fff0f0 !important; }
         </div>
       </div>
       <div style="margin-top:16px;display:flex;gap:10px;">
-        <button class="btn btn-primary" onclick="saveNewUser()">Simpan Pengguna</button>
+        <button class="btn btn-primary btn-shine" onclick="saveNewUser()">Simpan Pengguna</button>
         <button class="btn btn-outline" onclick="closeModal('add-user-modal')">Batal</button>
       </div>
     </div>
@@ -2935,7 +3252,7 @@ function renderBackupPage() {
   var daysNext = Math.max(0, 30 - daysSince);
   var card = document.getElementById('backup-days-card');
   if (card) {
-    card.className = daysSince >= 30 ? 'kpi-card danger' : 'kpi-card';
+    card.className = daysSince >= 30 ? 'modern-kpi-card modern-kpi-danger' : 'modern-kpi-card';
     var kd = document.getElementById('backup-kpi-days'); if(kd) kd.textContent = daysSince >= 999 ? '—' : daysSince;
     var kdate = document.getElementById('backup-kpi-date'); if(kdate) kdate.textContent = 'Terakhir: ' + (lastBackupDate ? lastBackupDate.toLocaleDateString('ms-MY') : '—');
     var kn = document.getElementById('backup-kpi-next'); if(kn) kn.textContent = daysNext;
@@ -3237,9 +3554,9 @@ function openModal(id) {
   fieldsHtml += '</div>';
   document.getElementById('modal-fields').innerHTML = fieldsHtml;
   var actionsHtml = '<button class="btn btn-success" onclick="openEditMemberModal(\'' + m.id + '\')">&#x270E; Edit Ahli</button>';
-  actionsHtml += '<button class="btn btn-primary" onclick="exportContact(\'' + m.id + '\')">Eksport Kenalan</button>';
+  actionsHtml += '<button class="btn btn-primary btn-shine" onclick="exportContact(\'' + m.id + '\')">Eksport Kenalan</button>';
   actionsHtml += '<button class="btn btn-outline" onclick="printContact(\'' + m.id + '\')">Cetak Butiran</button>';
-  if (m.hp) actionsHtml += '<button class="btn btn-gold" onclick="openWAModal(\'' + m.id + '\')">&#x1F4AC; WhatsApp</button>';
+  if (m.hp) actionsHtml += '<button class="btn btn-gold btn-shine" onclick="openWAModal(\'' + m.id + '\')">&#x1F4AC; WhatsApp</button>';
   if (currentUser && currentUser.role === 'admin') actionsHtml += '<button class="btn btn-outline-red" onclick="deleteMember(\'' + m.id + '\')">Padam Ahli</button>';
   document.getElementById('modal-actions').innerHTML = actionsHtml;
   document.getElementById('member-modal').classList.add('show');
@@ -3743,7 +4060,7 @@ function renderYuranPage() {
   /* ── UNPAID TABLE ── */
   var unpaidTbody = document.getElementById('unpaid-tbody');
   if (unpaidTbody) unpaidTbody.innerHTML = ump.map(function(m,i){
-    var waBtn = m.hp ? '<button class="btn btn-gold btn-sm" onclick="event.stopPropagation();openWAModal(\''+m.id+'\')">WA</button>' : badge('Tiada No.','badge-red');
+    var waBtn = m.hp ? '<button class="btn btn-gold btn-sm btn-shine" onclick="event.stopPropagation();openWAModal(\''+m.id+'\')">WA</button>' : badge('Tiada No.','badge-red');
     var rate = getYuranTahunan(m.fasal);
     return '<tr class="clickable-row row-unpaid" onclick="openModal(\''+m.id+'\')">'+
       '<td class="row-num">'+(i+1)+'</td>'+
@@ -3851,7 +4168,7 @@ function renderFollowUpPage() {
   el = document.getElementById('followup-badge'); if(el) el.textContent = Object.keys(allIds).length;
   var fuYuran = document.getElementById('followup-yuran-tbody');
   if (fuYuran) fuYuran.innerHTML = yuranList.map(function(m,i){
-    var waBtn = m.hp ? '<button class="btn btn-gold btn-sm" onclick="openWAModal(\'' + m.id + '\')">WA</button>' : badge('Tiada No.','badge-red');
+    var waBtn = m.hp ? '<button class="btn btn-gold btn-sm btn-shine" onclick="openWAModal(\'' + m.id + '\')">WA</button>' : badge('Tiada No.','badge-red');
     return '<tr>'
       + '<td class="row-num">' + (i+1) + '</td>'
       + '<td><strong style="font-family:var(--mono);font-size:12px;">' + m.id + '</strong></td>'
@@ -5315,9 +5632,12 @@ function pageExport(pageId, fmt) {
       '  tr:nth-child(even) td { background: #f9f9f9; }',
       // Badges
       '  .badge { padding: 1px 4px; border-radius: 3px; font-size: 7px; font-weight: 700; }',
-      '  .badge-ok { background:#d4edda !important; color:#155724 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }',
-      '  .badge-unpaid { background:#f8d7da !important; color:#721c24 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }',
-      '  .badge-gold { background:#fff3cd !important; color:#856404 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }',
+      '  .badge-ok { background:rgba(21, 128, 61, 0.08) !important; color:#15803D !important; border:1px solid rgba(21, 128, 61, 0.2) !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }',
+      '  .badge-unpaid { background:rgba(204, 22, 40, 0.08) !important; color:#CC1628 !important; border:1px solid rgba(204, 22, 40, 0.2) !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }',
+      '  .badge-gold { background:rgba(217, 119, 6, 0.08) !important; color:#D97706 !important; border:1px solid rgba(217, 119, 6, 0.2) !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }',
+      '  .badge-navy { background:rgba(29, 60, 150, 0.08) !important; color:#1D3C96 !important; border:1px solid rgba(29, 60, 150, 0.2) !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }',
+      '  .badge-red { background:rgba(204, 22, 40, 0.08) !important; color:#CC1628 !important; border:1px solid rgba(204, 22, 40, 0.2) !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }',
+      '  .badge-gray { background:rgba(107, 114, 128, 0.08) !important; color:#6B7280 !important; border:1px solid rgba(107, 114, 128, 0.2) !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }',
       // Row colors
       '  .ssm-expired td { background: #fce8e8 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }',
       '  .ssm-expiring td { background: #fffbe6 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }',
@@ -5336,14 +5656,14 @@ function pageExport(pageId, fmt) {
       '  .row-num { width: 16px !important; font-size: 7px !important; text-align: center !important; }',
       // KPI grid — show compact inline row instead of large cards
       '  .kpi-grid { display: flex !important; gap: 6px !important; margin: 0 0 5px 0 !important; padding: 0 !important; flex-wrap: nowrap !important; }',
-      '  .kpi-card { flex: 1; border: 1px solid #ccc !important; border-radius: 4px !important; padding: 4px 8px !important; box-shadow: none !important; min-height: 0 !important; page-break-inside: avoid; -webkit-print-color-adjust: exact; print-color-adjust: exact; }',
-      '  .kpi-card::before, .kpi-card::after { display: none !important; }',
-      '  .kpi-label { font-size: 7px !important; text-transform: uppercase; color: #666 !important; margin: 0 !important; }',
-      '  .kpi-val { font-size: 18px !important; font-weight: 900 !important; line-height: 1.1 !important; margin: 0 !important; }',
-      '  .kpi-sub { font-size: 6.5px !important; color: #888 !important; margin: 0 !important; }',
-      '  .kpi-card.danger .kpi-val { color: #c0392b !important; }',
-      '  .kpi-card.gold .kpi-val { color: #e67e22 !important; }',
-      '  .kpi-card.green .kpi-val { color: #27ae60 !important; }',
+      '  .modern-kpi-card { flex: 1; border: 1px solid #ccc !important; border-radius: 4px !important; padding: 4px 8px !important; box-shadow: none !important; min-height: 0 !important; page-break-inside: avoid; -webkit-print-color-adjust: exact; print-color-adjust: exact; }',
+      '  .modern-kpi-card::before, .modern-kpi-card::after { display: none !important; }',
+      '  .modern-kpi-label { font-size: 7px !important; text-transform: uppercase; color: #666 !important; margin: 0 !important; }',
+      '  .modern-kpi-val { font-size: 18px !important; font-weight: 900 !important; line-height: 1.1 !important; margin: 0 !important; }',
+      '  .modern-kpi-sub { font-size: 6.5px !important; color: #888 !important; margin: 0 !important; }',
+      '  .modern-kpi-card.modern-kpi-danger .modern-kpi-val { color: #c0392b !important; }',
+      '  .modern-kpi-card.modern-kpi-gold .modern-kpi-val { color: #e67e22 !important; }',
+      '  .modern-kpi-card.modern-kpi-green .modern-kpi-val { color: #27ae60 !important; }',
       // Follow Up counters
       '  .fu-counters { display: flex !important; gap: 6px !important; margin: 0 0 5px 0 !important; padding: 0 !important; flex-wrap: nowrap !important; }',
       '  .fu-counter { flex: 1; border: 1px solid #bbb !important; border-radius: 4px !important; padding: 4px 8px !important; text-align: center; }',
@@ -5545,11 +5865,11 @@ function exportPDF() {
     + '#app{margin-left:0!important;padding:0!important;}'
     + '.page{display:block!important;padding:0!important;}'
     + '.kpi-grid{display:flex!important;gap:6px!important;margin-bottom:6px!important;}'
-    + '.kpi-card{flex:1;padding:6px 10px!important;box-shadow:none!important;border:1px solid #ccc!important;}'
-    + '.kpi-card::before,.kpi-card::after{display:none!important;}'
-    + '.kpi-val{font-size:20px!important;line-height:1.1!important;margin:0!important;}'
-    + '.kpi-label{font-size:7px!important;margin:0!important;}'
-    + '.kpi-sub{font-size:6.5px!important;margin:0!important;}'
+    + '.modern-kpi-card{flex:1;padding:6px 10px!important;box-shadow:none!important;border:1px solid #ccc!important;}'
+    + '.modern-kpi-card::before,.modern-kpi-card::after{display:none!important;}'
+    + '.modern-kpi-val{font-size:20px!important;line-height:1.1!important;margin:0!important;}'
+    + '.modern-kpi-label{font-size:7px!important;margin:0!important;}'
+    + '.modern-kpi-sub{font-size:6.5px!important;margin:0!important;}'
     + '.sec-card{box-shadow:none!important;border:none!important;margin-bottom:6px!important;}'
     + '.sec-head{padding:3px 0!important;border-bottom:1.5px solid #1a3f7a!important;background:transparent!important;}'
     + '.sec-body{padding:0!important;}'
