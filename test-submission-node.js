@@ -3,8 +3,15 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-const SUPABASE_URL = 'https://lzoloupwtqmjyupvofhh.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx6b2xvdXB3dHFtanl1cHZvZmhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5NTMxMTEsImV4cCI6MjA4ODUyOTExMX0.tBcGc6KfPyjUmJngbLTBHv-GZkSoSoyWGXwlXFZ0ShE';
+// Load credentials from environment variables
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://lzoloupwtqmjyupvofhh.supabase.co';
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
+
+if (!SUPABASE_ANON_KEY) {
+  console.error('ERROR: SUPABASE_ANON_KEY environment variable not set');
+  console.error('Set it with: export SUPABASE_ANON_KEY=your-key');
+  process.exit(1);
+}
 
 const testResults = {
   databaseInsert: false,

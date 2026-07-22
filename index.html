@@ -5834,6 +5834,12 @@ function buildPermohonanActionBtns(p) {
   var isAdm = currentUser && currentUser.role === 'admin';
   var html = '<button data-action="open-permohonan" data-id="' + id + '" style="padding:5px 12px;border-radius:6px;border:1.5px solid var(--gray2);background:var(--white);font-size:11px;font-weight:600;cursor:pointer;margin-right:4px;">👁 Semak</button>';
 
+  // Print and WhatsApp buttons for BARU status
+  if (st === 'BARU' && p.pdf_url) {
+    html += '<button onclick="printPermohonanPDF(' + id + ')" style="padding:5px 12px;border-radius:6px;border:1.5px solid var(--gray2);background:var(--white);font-size:11px;font-weight:600;cursor:pointer;margin-right:4px;" title="Cetak PDF">🖨 Cetak</button>';
+    html += '<button onclick="sendPermohonanWhatsApp(' + id + ')" style="padding:5px 12px;border-radius:6px;border:1.5px solid var(--gray2);background:#25D366;color:#fff;font-size:11px;font-weight:600;cursor:pointer;margin-right:4px;" title="WhatsApp">💬 WhatsApp</button>';
+  }
+
   if (isAdm) {
     // Email retry buttons for admin
     if (p.email_error || !p.email_admin_sent) {
@@ -6583,6 +6589,76 @@ async function retryEmail(id, type) {
     
     showSnack && showSnack('Gagal menghantar e-mel: ' + err.message, 'error');
   }
+}
+
+/* ── PRINT PERMOHONAN PDF ─────────────────────────────────── */
+async function printPermohonanPDF(id) {
+  var p = permohonanData.find(function(x){ return x.id === id; });
+  if (!p || !p.pdf_url) {
+    alert('PDF tidak tersedia');
+    return;
+  }
+  
+  try {
+    // Generate signed URL for PDF
+    var { data: signedData, error: signedError } = await supabaseClient
+      .storage
+      .from('permohonan-dokumen')
+      .createSignedUrl(p.pdf_url.replace('permohonan-dokumen/', ''), 3600);
+    
+    if (signedError) throw signedError;
+    
+    // Open PDF in new tab for printing
+    var pdfWindow = window.open(signedData.signedUrl, '_blank');
+    if (pdfWindow) {
+      pdfWindow.onload = function() {
+        pdfWindow.print();
+      };
+    } else {
+      alert('Pop-up blocker menghalang pembukaan PDF. Sila benarkan pop-up untuk ciri ini.');
+    }
+  } catch (err) {
+    console.error('Ralat mencetak PDF:', err);
+    alert('Ralat mencetak PDF: ' + err.message);
+  }
+}
+
+/* ── SEND PERMOHONAN WHATSAPP ────────────────────────────── */
+async function sendPermohonanWhatsApp(id) {
+  var p = permohonanData.find(function(x){ return x.id === id; });
+  if (!p) return;
+  
+  var phoneNumber = p.proksi_no_hp || p.no_hp_syarikat;
+  if (!phoneNumber) {
+    alert('Nombor telefon pemohon tidak dijumpai.');
+    return;
+  }
+  
+  // Format phone number
+  var formattedPhone = phoneNumber.replace(/[^0-9]/g, '');
+  if (formattedPhone.startsWith('0')) {
+    formattedPhone = '60' + formattedPhone.substring(1);
+  }
+  
+  // Build WhatsApp message
+  var message = `*PERMOHONAN KEAHLIAN - DPMM NEGERI JOHOR*
+
+No. Rujukan: ${p.ref_id}
+Tarikh: ${new Date(p.submitted_at).toLocaleDateString('ms-MY')}
+Jenis: ${p.jenis_keahlian_label || p.jenis_keahlian}
+Fasal: ${p.fasal}
+Nama Entiti: ${p.nama_entiti}
+Jumlah Bayaran: RM ${(p.jumlah_bayar || 0).toLocaleString()}
+
+Status: Permohonan Baru
+
+Terima kasih kerana memohon keahlian DPMM Negeri Johor.
+
+Sistem Keahlian DPMM Negeri Johor
+https://dpmmjohor.github.io/SISTEM-AHLI-DPMM-JOHOR/`;
+  
+  var whatsappUrl = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`;
+  window.open(whatsappUrl, '_blank');
 }
 
 /* ── SAVE BAYARAN SAHKAN ─────────────────────────────────── */
@@ -7515,13 +7591,14 @@ async function approveVoucher(voucherId, approvedBy, rejectionReason) {
   // Authorization check using Supabase auth session
   const { data: { user } } = await supabaseClient.auth.getUser();
   if (!user) {
-    return { success: false, error: 'Unauthorized: Authentication required' };
+    return { success: false, error: 'Tidak diiktiraf: Log masuk diperlukan' };
   }
   
-  // Check if user has admin role (assuming role stored in user_metadata)
+  // Check if user has approval role (YDP, NYDP, TYDP, or admin)
   const userRole = user.user_metadata?.role || 'user';
-  if (userRole !== 'admin') {
-    return { success: false, error: 'Unauthorized: Admin role required' };
+  const validRoles = ['admin', 'ydp', 'nydp', 'tydp'];
+  if (!validRoles.includes(userRole)) {
+    return { success: false, error: 'Tidak diiktiraf: Peranan kelulusan diperlukan' };
   }
   
   try {
@@ -7546,8 +7623,8 @@ async function approveVoucher(voucherId, approvedBy, rejectionReason) {
       .insert({
         voucher_id: voucherId,
         action: approvalStatus,
-        performed_by: approvedBy,
-        comments: rejectionReason
+        performed_by: user.email,
+        comments: rejectionReason || 'Diluluskan'
       });
     
     // Add digital signature if approved

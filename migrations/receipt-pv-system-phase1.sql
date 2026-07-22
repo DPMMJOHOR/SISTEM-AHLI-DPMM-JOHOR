@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS receipts (
   receipt_type VARCHAR(50) DEFAULT 'membership_fee',
   member_id INTEGER, -- References "AHLI DPMM JOHOR".id (SERIAL, not UUID)
   member_name VARCHAR(255),
-  nombor_ahli VARCHAR(50),
+  NO_AHLI VARCHAR(50), -- Matches live schema (UPPERCASE)
   amount DECIMAL(10,2) NOT NULL,
   payment_method VARCHAR(50),
   payment_date DATE,
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS payment_slips (
   transaction_id VARCHAR(100) UNIQUE NOT NULL,
   member_id INTEGER, -- References "AHLI DPMM JOHOR".id (SERIAL, not UUID)
   member_name VARCHAR(255),
-  nombor_ahli VARCHAR(50),
+  NO_AHLI VARCHAR(50), -- Matches live schema (UPPERCASE)
   amount DECIMAL(10,2) NOT NULL,
   payment_method VARCHAR(50),
   payment_date DATE,
@@ -262,17 +262,20 @@ CREATE POLICY "authenticated_insert_running"
   WITH CHECK (true);
 
 -- ============================================================
--- 7. MEMBER TABLE UPDATE - Check if nombor_ahli exists
+-- 7. MEMBER TABLE UPDATE - Check if NO_AHLI exists
 -- ============================================================
--- Check if column exists before adding
+-- Note: NO_AHLI already exists in live schema (UPPERCASE)
+-- This section is kept for reference but should not be executed
+-- as the column already exists in the member table
 DO $$
 BEGIN
   IF NOT EXISTS (
     SELECT 1 FROM information_schema.columns 
     WHERE table_name = 'AHLI DPMM JOHOR' 
-    AND column_name = 'nombor_ahli'
+    AND column_name = 'NO_AHLI'
   ) THEN
+    -- This should not execute as NO_AHLI already exists
     ALTER TABLE "AHLI DPMM JOHOR"
-    ADD COLUMN nombor_ahli TEXT;
+    ADD COLUMN NO_AHLI TEXT;
   END IF;
 END $$;

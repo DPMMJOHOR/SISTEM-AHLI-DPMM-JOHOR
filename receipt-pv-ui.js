@@ -2,6 +2,31 @@
 // Integrated with Sistem Ahli
 // Cache-bust: 2026-07-14-16-45
 
+// Error and Success UI Helpers
+function showError(message) {
+  const errorDiv = document.createElement('div');
+  errorDiv.className = 'error-message';
+  errorDiv.style.cssText = 'background: #fee; color: #c33; padding: 12px; border-radius: 6px; border: 1px solid #fcc; margin: 10px 0; font-size: 14px;';
+  errorDiv.textContent = message;
+  
+  const container = document.querySelector('.sec-body') || document.body;
+  container.insertBefore(errorDiv, container.firstChild);
+  
+  setTimeout(() => errorDiv.remove(), 5000);
+}
+
+function showSuccess(message) {
+  const successDiv = document.createElement('div');
+  successDiv.className = 'success-message';
+  successDiv.style.cssText = 'background: #efe; color: #3c3; padding: 12px; border-radius: 6px; border: 1px solid #cfc; margin: 10px 0; font-size: 14px;';
+  successDiv.textContent = message;
+  
+  const container = document.querySelector('.sec-body') || document.body;
+  container.insertBefore(successDiv, container.firstChild);
+  
+  setTimeout(() => successDiv.remove(), 5000);
+}
+
 // Receipt Management Section
 function showReceiptsPage() {
   const container = document.getElementById('receipts-list');
@@ -293,11 +318,37 @@ async function loadReceipts() {
       tr.appendChild(tdTransId);
       
       const tdAction = document.createElement('td');
-      const btn = document.createElement('button');
-      btn.textContent = 'Muat Turun PDF';
-      btn.className = 'btn btn-sm btn-outline';
-      btn.onclick = () => downloadReceiptPDF(receipt.receipt_pdf_url);
-      tdAction.appendChild(btn);
+      tdAction.style.textAlign = 'center';
+      
+      // Download PDF button
+      const btnDownload = document.createElement('button');
+      btnDownload.textContent = 'Muat Turun';
+      btnDownload.className = 'btn btn-sm btn-outline';
+      btnDownload.style.marginRight = '4px';
+      btnDownload.onclick = () => downloadReceiptPDF(receipt.receipt_pdf_url);
+      tdAction.appendChild(btnDownload);
+      
+      // WhatsApp button
+      const btnWhatsApp = document.createElement('button');
+      btnWhatsApp.textContent = 'WhatsApp';
+      btnWhatsApp.className = 'btn btn-sm';
+      btnWhatsApp.style.background = '#25D366';
+      btnWhatsApp.style.color = '#fff';
+      btnWhatsApp.style.border = 'none';
+      btnWhatsApp.style.marginRight = '4px';
+      btnWhatsApp.onclick = () => sendReceiptWhatsApp(receipt);
+      tdAction.appendChild(btnWhatsApp);
+      
+      // Email button
+      const btnEmail = document.createElement('button');
+      btnEmail.textContent = 'E-mel';
+      btnEmail.className = 'btn btn-sm';
+      btnEmail.style.background = '#007bff';
+      btnEmail.style.color = '#fff';
+      btnEmail.style.border = 'none';
+      btnEmail.onclick = () => sendReceiptEmail(receipt);
+      tdAction.appendChild(btnEmail);
+      
       tr.appendChild(tdAction);
       
       tbody.appendChild(tr);
@@ -470,12 +521,12 @@ async function handleGenerateReceipt() {
   const description = document.getElementById('receipt-description')?.value || null;
   
   if (!amount || !paymentDate) {
-    alert('Sila isi semua medan yang diperlukan');
+    showError('Sila isi semua medan yang diperlukan');
     return;
   }
   
   if (!memberId && !manualPayeeName) {
-    alert('Sila pilih ahli atau masukkan nama penerima');
+    showError('Sila pilih ahli atau masukkan nama penerima');
     return;
   }
   
@@ -508,11 +559,11 @@ async function handleGenerateReceipt() {
       throw new Error(receiptData.error || 'Receipt generation failed');
     }
     
-    alert(`Resit dijana: ${receiptData.receiptNumber}`);
+    showSuccess(`Resit dijana: ${receiptData.receiptNumber}`);
     loadReceipts();
   } catch (err) {
     console.error('Error generating receipt:', err);
-    alert('Ralat menjana resit: ' + err.message);
+    showError('Ralat menjana resit: ' + err.message);
   }
 }
 
@@ -525,30 +576,37 @@ async function createPaymentVoucher() {
   const preparedBy = 'Admin'; // Default prepared by
   
   if (!payableTo || !purpose || !amount || !paymentMethod) {
-    alert('Sila isi semua medan yang diperlukan');
+    showError('Sila isi semua medan yang diperlukan');
     return;
   }
   
   try {
     const voucherData = await createPaymentVoucher(payableTo, purpose, amount, paymentMethod, preparedBy);
-    alert(`Voucher pembayaran dijana: ${voucherData.voucherNumber}`);
+    showSuccess(`Voucher pembayaran dijana: ${voucherData.voucherNumber}`);
     loadVouchers();
   } catch (err) {
     console.error('Error creating voucher:', err);
-    alert('Ralat menjana voucher: ' + err.message);
+    showError('Ralat menjana voucher: ' + err.message);
   }
 }
 
 // Review voucher
 async function reviewVoucher(voucherId) {
   try {
-    const { data, error } = await supabaseClient
+    const { data: voucher, error } = await supabaseClient
       .from('vouchers')
       .select('*')
       .eq('id', voucherId)
       .single();
     
     if (error) throw error;
+    
+    // Fetch approval history
+    const { data: history } = await supabaseClient
+      .from('approval_history')
+      .select('*')
+      .eq('voucher_id', voucherId)
+      .order('created_at', { ascending: false });
     
     const reviewModal = document.createElement('div');
     reviewModal.className = 'modal';
@@ -563,7 +621,7 @@ async function reviewVoucher(voucherId) {
     modalContent.appendChild(modalHeader);
     
     const title = document.createElement('h3');
-    title.textContent = 'Semak Voucher Pembayaran';
+    title.textContent = 'Semak Baucar Pembayaran';
     modalHeader.appendChild(title);
     
     const closeBtn = document.createElement('button');
@@ -576,101 +634,330 @@ async function reviewVoucher(voucherId) {
     modalBody.className = 'modal-body';
     modalContent.appendChild(modalBody);
     
-    const pVoucherNumber = document.createElement('p');
-    const strongVoucher = document.createElement('strong');
-    strongVoucher.textContent = 'Nombor Voucher: ';
-    pVoucherNumber.appendChild(strongVoucher);
-    const spanVoucher = document.createElement('span');
-    spanVoucher.textContent = data.voucher_number;
-    pVoucherNumber.appendChild(spanVoucher);
-    modalBody.appendChild(pVoucherNumber);
+    // Voucher details
+    const detailsDiv = document.createElement('div');
+    detailsDiv.style.cssText = 'display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;';
     
-    const pPayableTo = document.createElement('p');
-    const strongPayable = document.createElement('strong');
-    strongPayable.textContent = 'Dibayar Kepada: ';
-    pPayableTo.appendChild(strongPayable);
-    const spanPayable = document.createElement('span');
-    spanPayable.textContent = data.payable_to;
-    pPayableTo.appendChild(spanPayable);
-    modalBody.appendChild(pPayableTo);
+    const createDetail = (label, value, isBold = false) => {
+      const div = document.createElement('div');
+      const labelEl = document.createElement('label');
+      labelEl.style.cssText = 'font-weight: 600; font-size: 12px; color: var(--muted);';
+      labelEl.textContent = label;
+      div.appendChild(labelEl);
+      const valueEl = document.createElement('div');
+      valueEl.style.cssText = `font-size: 14px; ${isBold ? 'font-weight: 700;' : ''}`;
+      valueEl.textContent = value;
+      div.appendChild(valueEl);
+      return div;
+    };
     
-    const pPurpose = document.createElement('p');
-    const strongPurpose = document.createElement('strong');
-    strongPurpose.textContent = 'Tujuan: ';
-    pPurpose.appendChild(strongPurpose);
-    const spanPurpose = document.createElement('span');
-    spanPurpose.textContent = data.payment_purpose;
-    pPurpose.appendChild(spanPurpose);
-    modalBody.appendChild(pPurpose);
+    detailsDiv.appendChild(createDetail('No. Baucar', voucher.voucher_number, true));
+    detailsDiv.appendChild(createDetail('Tarikh Cipta', new Date(voucher.created_at).toLocaleDateString('ms-MY')));
+    detailsDiv.appendChild(createDetail('Dibayar Kepada', voucher.payable_to, true));
+    detailsDiv.appendChild(createDetail('Jumlah', 'RM ' + parseFloat(voucher.amount).toFixed(2), true));
     
-    const pAmount = document.createElement('p');
-    const strongAmount = document.createElement('strong');
-    strongAmount.textContent = 'Jumlah: ';
-    pAmount.appendChild(strongAmount);
-    const spanAmount = document.createElement('span');
-    spanAmount.textContent = 'RM' + parseFloat(data.amount).toFixed(2);
-    pAmount.appendChild(spanAmount);
-    modalBody.appendChild(pAmount);
+    const purposeDiv = document.createElement('div');
+    purposeDiv.style.gridColumn = 'span 2';
+    purposeDiv.appendChild(createDetail('Tujuan Pembayaran', voucher.payment_purpose));
+    detailsDiv.appendChild(purposeDiv);
     
-    const pMethod = document.createElement('p');
-    const strongMethod = document.createElement('strong');
-    strongMethod.textContent = 'Kaedah Pembayaran: ';
-    pMethod.appendChild(strongMethod);
-    const spanMethod = document.createElement('span');
-    spanMethod.textContent = data.payment_method;
-    pMethod.appendChild(spanMethod);
-    modalBody.appendChild(pMethod);
+    detailsDiv.appendChild(createDetail('Kaedah Pembayaran', voucher.payment_method));
+    detailsDiv.appendChild(createDetail('Disediakan Oleh', voucher.prepared_by));
     
-    const pPrepared = document.createElement('p');
-    const strongPrepared = document.createElement('strong');
-    strongPrepared.textContent = 'Disediakan Oleh: ';
-    pPrepared.appendChild(strongPrepared);
-    const spanPrepared = document.createElement('span');
-    spanPrepared.textContent = data.prepared_by;
-    pPrepared.appendChild(spanPrepared);
-    modalBody.appendChild(pPrepared);
+    modalBody.appendChild(detailsDiv);
     
-    const formGroup = document.createElement('div');
-    formGroup.className = 'form-group';
-    modalBody.appendChild(formGroup);
+    // Status display if not pending
+    if (voucher.approval_status !== 'pending') {
+      const statusDiv = document.createElement('div');
+      const bgColor = voucher.approval_status === 'approved' ? '#d4edda' : '#f8d7da';
+      const borderColor = voucher.approval_status === 'approved' ? '#c3e6cb' : '#f5c6cb';
+      statusDiv.style.cssText = `background: ${bgColor}; border: 1px solid ${borderColor}; border-radius: 8px; padding: 16px; margin-bottom: 20px;`;
+      
+      const statusTitle = document.createElement('div');
+      statusTitle.style.cssText = 'font-weight: 700; font-size: 13px; margin-bottom: 8px;';
+      statusTitle.textContent = 'Status: ' + (voucher.approval_status === 'approved' ? 'DILULUSKAN' : 'DITOLAK');
+      statusDiv.appendChild(statusTitle);
+      
+      const statusDetails = document.createElement('div');
+      statusDetails.style.cssText = 'font-size: 12px;';
+      statusDetails.innerHTML = `Diluluskan oleh: ${voucher.approved_by}<br>Tarikh: ${new Date(voucher.approval_date).toLocaleString('ms-MY')}`;
+      statusDiv.appendChild(statusDetails);
+      
+      if (voucher.rejection_reason) {
+        const reasonDiv = document.createElement('div');
+        reasonDiv.style.cssText = 'margin-top: 8px; font-size: 12px;';
+        reasonDiv.innerHTML = '<strong>Sebab Penolakan:</strong> ' + voucher.rejection_reason;
+        statusDiv.appendChild(reasonDiv);
+      }
+      
+      modalBody.appendChild(statusDiv);
+    }
     
-    const label = document.createElement('label');
-    label.textContent = 'Sebab Penolakan (jika menolak)';
-    formGroup.appendChild(label);
+    // Approval history
+    if (history && history.length > 0) {
+      const historyDiv = document.createElement('div');
+      historyDiv.style.cssText = 'margin-bottom: 20px;';
+      
+      const historyTitle = document.createElement('h4');
+      historyTitle.style.cssText = 'font-size: 13px; font-weight: 700; margin-bottom: 12px;';
+      historyTitle.textContent = 'Sejarah Kelulusan';
+      historyDiv.appendChild(historyTitle);
+      
+      history.forEach(h => {
+        const historyItem = document.createElement('div');
+        historyItem.style.cssText = 'padding: 10px; border-bottom: 1px solid var(--gray1); font-size: 12px;';
+        historyItem.innerHTML = `
+          <div style="font-weight: 600;">${h.action === 'approved' ? 'Diluluskan' : 'Ditolak'}</div>
+          <div style="color: var(--muted);">Oleh: ${h.performed_by} | ${new Date(h.created_at).toLocaleString('ms-MY')}</div>
+          ${h.comments ? `<div style="margin-top: 4px;">${h.comments}</div>` : ''}
+        `;
+        historyDiv.appendChild(historyItem);
+      });
+      
+      modalBody.appendChild(historyDiv);
+    }
     
-    const textarea = document.createElement('textarea');
-    textarea.id = 'rejection-reason';
-    textarea.className = 'form-control';
-    textarea.rows = 2;
-    formGroup.appendChild(textarea);
-    
-    const modalFooter = document.createElement('div');
-    modalFooter.className = 'modal-footer';
-    modalContent.appendChild(modalFooter);
-    
-    const approveBtn = document.createElement('button');
-    approveBtn.textContent = 'Lulus';
-    approveBtn.className = 'btn btn-success';
-    approveBtn.onclick = () => approveVoucher(voucherId);
-    modalFooter.appendChild(approveBtn);
-    
-    const rejectBtn = document.createElement('button');
-    rejectBtn.textContent = 'Tolak';
-    rejectBtn.className = 'btn btn-danger';
-    rejectBtn.onclick = () => rejectVoucher(voucherId);
-    modalFooter.appendChild(rejectBtn);
+    // Rejection reason textarea and buttons for pending vouchers
+    if (voucher.approval_status === 'pending') {
+      const formGroup = document.createElement('div');
+      formGroup.style.cssText = 'margin-top: 20px;';
+      
+      const label = document.createElement('label');
+      label.style.cssText = 'font-weight: 600; font-size: 12px; color: var(--muted); display: block; margin-bottom: 8px;';
+      label.textContent = 'Sebab Penolakan (jika menolak)';
+      formGroup.appendChild(label);
+      
+      const textarea = document.createElement('textarea');
+      textarea.id = 'rejection-reason';
+      textarea.style.cssText = 'width: 100%; padding: 10px; border: 1.5px solid var(--gray2); border-radius: 7px; font-family: var(--sans); font-size: 13px; resize: vertical; min-height: 80px;';
+      textarea.placeholder = 'Masukkan sebab penolakan...';
+      formGroup.appendChild(textarea);
+      
+      modalBody.appendChild(formGroup);
+      
+      const modalFooter = document.createElement('div');
+      modalFooter.style.cssText = 'display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end;';
+      modalContent.appendChild(modalFooter);
+      
+      const cancelBtn = document.createElement('button');
+      cancelBtn.textContent = 'Batal';
+      cancelBtn.style.cssText = 'padding: 10px 20px; border: 1.5px solid var(--gray2); border-radius: 7px; background: var(--white); font-size: 13px; font-weight: 600; cursor: pointer;';
+      cancelBtn.onclick = () => reviewModal.remove();
+      modalFooter.appendChild(cancelBtn);
+      
+      const rejectBtn = document.createElement('button');
+      rejectBtn.textContent = 'Tolak';
+      rejectBtn.style.cssText = 'padding: 10px 20px; border: none; border-radius: 7px; background: #dc3545; color: #fff; font-size: 13px; font-weight: 600; cursor: pointer;';
+      rejectBtn.onclick = () => handleVoucherApproval(voucherId, 'rejected');
+      modalFooter.appendChild(rejectBtn);
+      
+      const approveBtn = document.createElement('button');
+      approveBtn.textContent = 'Luluskan';
+      approveBtn.style.cssText = 'padding: 10px 20px; border: none; border-radius: 7px; background: var(--primary); color: #fff; font-size: 13px; font-weight: 600; cursor: pointer;';
+      approveBtn.onclick = () => handleVoucherApproval(voucherId, 'approved');
+      modalFooter.appendChild(approveBtn);
+    } else {
+      // Close button for processed vouchers
+      const modalFooter = document.createElement('div');
+      modalFooter.style.cssText = 'display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end;';
+      modalContent.appendChild(modalFooter);
+      
+      const closeBtn = document.createElement('button');
+      closeBtn.textContent = 'Tutup';
+      closeBtn.style.cssText = 'padding: 10px 20px; border: 1.5px solid var(--gray2); border-radius: 7px; background: var(--white); font-size: 13px; font-weight: 600; cursor: pointer;';
+      closeBtn.onclick = () => reviewModal.remove();
+      modalFooter.appendChild(closeBtn);
+    }
     
     document.body.appendChild(reviewModal);
   } catch (err) {
     console.error('Error loading voucher for review:', err);
-    alert('Ralat memuat voucher: ' + err.message);
+    showError('Ralat memuat voucher: ' + err.message);
+  }
+}
+
+async function handleVoucherApproval(voucherId, action) {
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  const rejectionReason = action === 'rejected' 
+    ? document.getElementById('rejection-reason').value 
+    : null;
+  
+  if (action === 'rejected' && !rejectionReason) {
+    showError('Sila masukkan sebab penolakan');
+    return;
+  }
+  
+  const result = await approveVoucher(voucherId, user.email, rejectionReason);
+  
+  if (result.success) {
+    showSuccess(action === 'approved' ? 'Baucar berjaya diluluskan' : 'Baucar berjaya ditolak');
+    document.querySelector('.modal').remove();
+    loadPendingApprovals();
+  } else {
+    showError('Ralat: ' + result.error);
+  }
+}
+
+// Send receipt via WhatsApp
+async function sendReceiptWhatsApp(receipt) {
+  // Fetch member details to get phone number
+  let phoneNumber = '';
+  
+  if (receipt.member_id) {
+    const { data: member } = await supabaseClient
+      .from('AHLI DPMM JOHOR')
+      .select('NO_HP, NAMA_AHLI')
+      .eq('id', receipt.member_id)
+      .single();
+    
+    if (member && member.NO_HP) {
+      phoneNumber = member.NO_HP;
+    }
+  }
+  
+  if (!phoneNumber) {
+    showError('Nombor telefon ahli tidak dijumpai. Sila kemaskini profil ahli.');
+    return;
+  }
+  
+  // Format phone number (remove dashes, add 60 prefix if needed)
+  let formattedPhone = phoneNumber.replace(/[^0-9]/g, '');
+  if (formattedPhone.startsWith('0')) {
+    formattedPhone = '60' + formattedPhone.substring(1);
+  }
+  
+  // Build WhatsApp message template
+  const message = `*RESIT BAYARAN - DPMM NEGERI JOHOR*
+
+No. Resit: ${receipt.receipt_number}
+Tarikh: ${new Date(receipt.receipt_date).toLocaleDateString('ms-MY')}
+Jumlah: RM ${parseFloat(receipt.amount).toFixed(2)}
+Kaedah: ${receipt.payment_method}
+${receipt.description ? 'Keterangan: ' + receipt.description : ''}
+
+Terima kasih kerana pembayaran anda.
+
+Sistem Keahlian DPMM Negeri Johor
+https://dpmmjohor.github.io/SISTEM-AHLI-DPMM-JOHOR/`;
+  
+  // Open WhatsApp with pre-filled message
+  const whatsappUrl = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`;
+  window.open(whatsappUrl, '_blank');
+}
+
+// Send receipt via Email
+async function sendReceiptEmail(receipt) {
+  // Fetch member details to get email
+  let memberEmail = '';
+  let memberName = '';
+  
+  if (receipt.member_id) {
+    const { data: member } = await supabaseClient
+      .from('AHLI DPMM JOHOR')
+      .select('EMEL, NAMA_AHLI')
+      .eq('id', receipt.member_id)
+      .single();
+    
+    if (member) {
+      memberEmail = member.EMEL;
+      memberName = member.NAMA_AHLI;
+    }
+  }
+  
+  if (!memberEmail) {
+    showError('E-mel ahli tidak dijumpai. Sila kemaskini profil ahli.');
+    return;
+  }
+  
+  // Generate signed URL for receipt PDF
+  let pdfUrl = receipt.receipt_pdf_url;
+  if (pdfUrl && pdfUrl.startsWith('receipts/')) {
+    const { data: signedData, error: signedError } = await supabaseClient
+      .storage
+      .from('receipts')
+      .createSignedUrl(pdfUrl.replace('receipts/', ''), 3600); // 1 hour expiry
+    
+    if (!signedError && signedData.signedUrl) {
+      pdfUrl = signedData.signedUrl;
+    }
+  }
+  
+  // Build email content
+  const emailSubject = `Resit Pembayaran - ${receipt.receipt_number}`;
+  const emailBody = `
+    <h2>Resit Pembayaran - DPMM Negeri Johor</h2>
+    <p>Salam Sejahtera ${memberName},</p>
+    <p>Berikut adalah butiran resit pembayaran anda:</p>
+    
+    <table style="border-collapse: collapse; width: 100%; margin: 20px 0;">
+      <tr>
+        <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">No. Resit</td>
+        <td style="padding: 10px; border: 1px solid #ddd;">${receipt.receipt_number}</td>
+      </tr>
+      <tr>
+        <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Tarikh</td>
+        <td style="padding: 10px; border: 1px solid #ddd;">${new Date(receipt.receipt_date).toLocaleDateString('ms-MY')}</td>
+      </tr>
+      <tr>
+        <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Jumlah</td>
+        <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; color: #007bff;">RM ${parseFloat(receipt.amount).toFixed(2)}</td>
+      </tr>
+      <tr>
+        <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Kaedah Pembayaran</td>
+        <td style="padding: 10px; border: 1px solid #ddd;">${receipt.payment_method}</td>
+      </tr>
+      ${receipt.description ? `
+      <tr>
+        <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold;">Keterangan</td>
+        <td style="padding: 10px; border: 1px solid #ddd;">${receipt.description}</td>
+      </tr>
+      ` : ''}
+    </table>
+    
+    ${pdfUrl ? `
+    <p style="margin: 20px 0;">
+      <a href="${pdfUrl}" style="display: inline-block; padding: 12px 24px; background: #007bff; color: #fff; text-decoration: none; border-radius: 7px; font-weight: 600;">
+        Muat Turun PDF Resit
+      </a>
+    </p>
+    ` : ''}
+    
+    <p>Terima kasih kerana pembayaran anda.</p>
+    
+    <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
+    
+    <p style="font-size: 12px; color: #666;">
+      Sistem Keahlian DPMM Negeri Johor<br>
+      https://dpmmjohor.github.io/SISTEM-AHLI-DPMM-JOHOR/
+    </p>
+  `;
+  
+  // Send email using EmailJS
+  try {
+    await emailjs.send(
+      'service_a3kt2zm',
+      'template_vud79xb',
+      {
+        to_email: memberEmail,
+        subject: emailSubject,
+        message: emailBody,
+        receipt_number: receipt.receipt_number,
+        amount: receipt.amount,
+        payment_date: receipt.receipt_date
+      }
+    );
+    
+    showSuccess('E-mel berjaya dihantar');
+  } catch (error) {
+    console.error('Ralat menghantar e-mel:', error);
+    showError('Ralat menghantar e-mel: ' + error.message);
   }
 }
 
 // Download receipt PDF
 function downloadReceiptPDF(pdfUrl) {
   if (!pdfUrl) {
-    alert('PDF tidak tersedia');
+    showError('PDF tidak tersedia');
     return;
   }
   // Generate signed URL for private storage
@@ -679,7 +966,7 @@ function downloadReceiptPDF(pdfUrl) {
     .createSignedUrl(pdfUrl, { expiresIn: 60 })
     .then(({ data, error }) => {
       if (error) {
-        alert('Ralat menjana pautan muat turun: ' + error.message);
+        showError('Ralat menjana pautan muat turun: ' + error.message);
         return;
       }
       window.open(data.signedUrl, '_blank');
@@ -689,7 +976,7 @@ function downloadReceiptPDF(pdfUrl) {
 // Download voucher PDF
 function downloadVoucherPDF(pdfUrl) {
   if (!pdfUrl) {
-    alert('PDF tidak tersedia');
+    showError('PDF tidak tersedia');
     return;
   }
   // Generate signed URL for private storage
@@ -698,7 +985,7 @@ function downloadVoucherPDF(pdfUrl) {
     .createSignedUrl(pdfUrl, { expiresIn: 60 })
     .then(({ data, error }) => {
       if (error) {
-        alert('Ralat menjana pautan muat turun: ' + error.message);
+        showError('Ralat menjana pautan muat turun: ' + error.message);
         return;
       }
       window.open(data.signedUrl, '_blank');

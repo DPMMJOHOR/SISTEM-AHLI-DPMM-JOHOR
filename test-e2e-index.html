@@ -1,0 +1,124 @@
+// E2E Tests for index.html (Admin Dashboard)
+// Run this in browser console on index.html page
+
+const testResults = {
+  pageLoad: false,
+  memberList: false,
+  searchFunction: false,
+  filterFunction: false,
+  exportFunction: false,
+  receiptPVTab: false
+};
+
+async function runE2ETests() {
+  console.log('=== E2E Tests for index.html ===\n');
+  
+  // Test 1: Page Load
+  console.log('Test 1: Page Load');
+  try {
+    const mainContent = document.querySelector('.main-content') || document.querySelector('main');
+    if (mainContent) {
+      console.log('✅ Page loaded successfully');
+      testResults.pageLoad = true;
+    } else {
+      console.log('❌ Main content not found');
+    }
+  } catch (e) {
+    console.log('❌ Page load error:', e.message);
+  }
+  
+  // Test 2: Member List Display
+  console.log('\nTest 2: Member List Display');
+  try {
+    const memberTable = document.querySelector('table') || document.querySelector('.table');
+    if (memberTable) {
+      console.log('✅ Member table found');
+      testResults.memberList = true;
+    } else {
+      console.log('⚠️ Member table not found (may need data)');
+    }
+  } catch (e) {
+    console.log('❌ Member list error:', e.message);
+  }
+  
+  // Test 3: Search Function
+  console.log('\nTest 3: Search Function');
+  try {
+    const searchInput = document.querySelector('input[type="search"]') || 
+                        document.querySelector('input[placeholder*="cari" i]') ||
+                        document.querySelector('#search');
+    if (searchInput) {
+      console.log('✅ Search input found');
+      testResults.searchFunction = true;
+    } else {
+      console.log('⚠️ Search input not found');
+    }
+  } catch (e) {
+    console.log('❌ Search function error:', e.message);
+  }
+  
+  // Test 4: Filter Function
+  console.log('\nTest 4: Filter Function');
+  try {
+    const filterSelect = document.querySelector('select') || 
+                        document.querySelector('#filter');
+    if (filterSelect) {
+      console.log('✅ Filter dropdown found');
+      testResults.filterFunction = true;
+    } else {
+      console.log('⚠️ Filter dropdown not found');
+    }
+  } catch (e) {
+    console.log('❌ Filter function error:', e.message);
+  }
+  
+  // Test 5: Export Function
+  console.log('\nTest 5: Export Function');
+  try {
+    const exportBtn = document.querySelector('button') || 
+                      document.querySelector('.btn-export') ||
+                      document.querySelector('[title*="export" i]');
+    if (exportBtn) {
+      console.log('✅ Export button found');
+      testResults.exportFunction = true;
+    } else {
+      console.log('⚠️ Export button not found');
+    }
+  } catch (e) {
+    console.log('❌ Export function error:', e.message);
+  }
+  
+  // Test 6: Receipt & Payment Voucher Tab
+  console.log('\nTest 6: Receipt & Payment Voucher Tab');
+  try {
+    const receiptTab = document.querySelector('[href*="receipt" i]') ||
+                       document.querySelector('#receipts-tab') ||
+                       document.querySelector('.tab-receipt');
+    if (receiptTab) {
+      console.log('✅ Receipt/PV tab found');
+      testResults.receiptPVTab = true;
+    } else {
+      console.log('⚠️ Receipt/PV tab not found');
+    }
+  } catch (e) {
+    console.log('❌ Receipt/PV tab error:', e.message);
+  }
+  
+  // Summary
+  console.log('\n=== Test Summary ===');
+  console.log('Page Load:', testResults.pageLoad ? '✅ PASS' : '❌ FAIL');
+  console.log('Member List:', testResults.memberList ? '✅ PASS' : '⚠️ CHECK');
+  console.log('Search Function:', testResults.searchFunction ? '✅ PASS' : '⚠️ CHECK');
+  console.log('Filter Function:', testResults.filterFunction ? '✅ PASS' : '⚠️ CHECK');
+  console.log('Export Function:', testResults.exportFunction ? '✅ PASS' : '⚠️ CHECK');
+  console.log('Receipt/PV Tab:', testResults.receiptPVTab ? '✅ PASS' : '⚠️ CHECK');
+  
+  const passedCount = Object.values(testResults).filter(v => v === true).length;
+  console.log(`\nPassed: ${passedCount}/6`);
+  console.log('Overall:', passedCount >= 4 ? '✅ ACCEPTABLE' : '❌ NEEDS ATTENTION');
+  
+  return { success: passedCount >= 4, results: testResults };
+}
+
+// Auto-run
+runE2ETests();

@@ -48,6 +48,8 @@ function initSupabaseWhenReady() {
         autoRefreshToken: false
       }
     });
+    // Alias for consistency with index.html
+    window.supabaseClient = window.sb;
     console.log('Supabase client initialized successfully');
   } catch (e) {
     console.error('Failed to create Supabase client:', e);
