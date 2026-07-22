@@ -5832,21 +5832,21 @@ function buildPermohonanActionBtns(p) {
   var id  = p.id;
   var st  = p.status;
   var isAdm = currentUser && currentUser.role === 'admin';
-  var html = '<button data-action="open-permohonan" data-id="' + id + '" style="padding:5px 12px;border-radius:6px;border:1.5px solid var(--gray2);background:var(--white);font-size:11px;font-weight:600;cursor:pointer;margin-right:4px;">👁 Semak</button>';
+  var html = '<button data-action="open-permohonan" data-id="' + id + '" style="padding:8px 16px;border-radius:6px;border:1.5px solid var(--gray2);background:var(--white);font-size:13px;font-weight:600;cursor:pointer;margin-right:8px;transition:all 0.2s ease;">👁 Semak</button>';
 
   // Print and WhatsApp buttons for BARU status
   if (st === 'BARU' && p.pdf_url) {
-    html += '<button onclick="printPermohonanPDF(' + id + ')" style="padding:5px 12px;border-radius:6px;border:1.5px solid var(--gray2);background:var(--white);font-size:11px;font-weight:600;cursor:pointer;margin-right:4px;" title="Cetak PDF">🖨 Cetak</button>';
-    html += '<button onclick="sendPermohonanWhatsApp(' + id + ')" style="padding:5px 12px;border-radius:6px;border:1.5px solid var(--gray2);background:#25D366;color:#fff;font-size:11px;font-weight:600;cursor:pointer;margin-right:4px;" title="WhatsApp">💬 WhatsApp</button>';
+    html += '<button onclick="printPermohonanPDF(' + id + ')" style="padding:8px 16px;border-radius:6px;border:1.5px solid var(--gray2);background:var(--white);font-size:13px;font-weight:600;cursor:pointer;margin-right:8px;transition:all 0.2s ease;" title="Cetak PDF">📥 Cetak</button>';
+    html += '<button onclick="sendPermohonanWhatsApp(' + id + ')" style="padding:8px 16px;border-radius:6px;border:none;background:#25D366;color:#fff;font-size:13px;font-weight:600;cursor:pointer;margin-right:8px;transition:all 0.2s ease;" title="WhatsApp">💬 WhatsApp</button>';
   }
 
   if (isAdm) {
     // Email retry buttons for admin
     if (p.email_error || !p.email_admin_sent) {
-      html += '<button onclick="retryEmail(' + id + ', \'admin\')" style="padding:5px 12px;border-radius:6px;border:1.5px solid var(--gray2);background:var(--white);font-size:11px;font-weight:600;cursor:pointer;margin-right:4px;" title="Hantar semula e-mel admin">📧 Admin</button>';
+      html += '<button onclick="retryEmail(' + id + ', \'admin\')" style="padding:8px 16px;border-radius:6px;border:1.5px solid var(--gray2);background:var(--white);font-size:13px;font-weight:600;cursor:pointer;margin-right:8px;transition:all 0.2s ease;" title="Hantar semula e-mel admin">📧 Admin</button>';
     }
     if (p.email_error || !p.email_applicant_sent) {
-      html += '<button onclick="retryEmail(' + id + ', \'applicant\')" style="padding:5px 12px;border-radius:6px;border:1.5px solid var(--gray2);background:var(--white);font-size:11px;font-weight:600;cursor:pointer;margin-right:4px;" title="Hantar semula e-mel pemohon">📧 Pemohon</button>';
+      html += '<button onclick="retryEmail(' + id + ', \'applicant\')" style="padding:8px 16px;border-radius:6px;border:1.5px solid var(--gray2);background:var(--white);font-size:13px;font-weight:600;cursor:pointer;margin-right:8px;transition:all 0.2s ease;" title="Hantar semula e-mel pemohon">📧 Pemohon</button>';
     }
     
     // Status dropdown for admin

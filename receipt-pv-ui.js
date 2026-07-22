@@ -319,35 +319,62 @@ async function loadReceipts() {
       
       const tdAction = document.createElement('td');
       tdAction.style.textAlign = 'center';
+      tdAction.style.padding = '12px';
+      tdAction.style.minWidth = '280px';
+      
+      // Button container for better spacing
+      const buttonContainer = document.createElement('div');
+      buttonContainer.style.display = 'flex';
+      buttonContainer.style.gap = '8px';
+      buttonContainer.style.justifyContent = 'center';
+      buttonContainer.style.flexWrap = 'wrap';
       
       // Download PDF button
       const btnDownload = document.createElement('button');
-      btnDownload.textContent = 'Muat Turun';
+      btnDownload.textContent = '📥 Muat Turun';
       btnDownload.className = 'btn btn-sm btn-outline';
-      btnDownload.style.marginRight = '4px';
+      btnDownload.style.padding = '8px 16px';
+      btnDownload.style.borderRadius = '6px';
+      btnDownload.style.fontSize = '13px';
+      btnDownload.style.fontWeight = '600';
+      btnDownload.style.cursor = 'pointer';
+      btnDownload.style.transition = 'all 0.2s ease';
       btnDownload.onclick = () => downloadReceiptPDF(receipt.receipt_pdf_url);
-      tdAction.appendChild(btnDownload);
+      buttonContainer.appendChild(btnDownload);
       
       // WhatsApp button
       const btnWhatsApp = document.createElement('button');
-      btnWhatsApp.textContent = 'WhatsApp';
+      btnWhatsApp.textContent = '💬 WhatsApp';
       btnWhatsApp.className = 'btn btn-sm';
       btnWhatsApp.style.background = '#25D366';
       btnWhatsApp.style.color = '#fff';
       btnWhatsApp.style.border = 'none';
-      btnWhatsApp.style.marginRight = '4px';
+      btnWhatsApp.style.padding = '8px 16px';
+      btnWhatsApp.style.borderRadius = '6px';
+      btnWhatsApp.style.fontSize = '13px';
+      btnWhatsApp.style.fontWeight = '600';
+      btnWhatsApp.style.cursor = 'pointer';
+      btnWhatsApp.style.transition = 'all 0.2s ease';
       btnWhatsApp.onclick = () => sendReceiptWhatsApp(receipt);
-      tdAction.appendChild(btnWhatsApp);
+      buttonContainer.appendChild(btnWhatsApp);
       
       // Email button
       const btnEmail = document.createElement('button');
-      btnEmail.textContent = 'E-mel';
+      btnEmail.textContent = '✉️ E-mel';
       btnEmail.className = 'btn btn-sm';
       btnEmail.style.background = '#007bff';
       btnEmail.style.color = '#fff';
       btnEmail.style.border = 'none';
+      btnEmail.style.padding = '8px 16px';
+      btnEmail.style.borderRadius = '6px';
+      btnEmail.style.fontSize = '13px';
+      btnEmail.style.fontWeight = '600';
+      btnEmail.style.cursor = 'pointer';
+      btnEmail.style.transition = 'all 0.2s ease';
       btnEmail.onclick = () => sendReceiptEmail(receipt);
-      tdAction.appendChild(btnEmail);
+      buttonContainer.appendChild(btnEmail);
+      
+      tdAction.appendChild(buttonContainer);
       
       tr.appendChild(tdAction);
       
@@ -423,9 +450,21 @@ async function loadVouchers() {
       tr.appendChild(tdStatus);
       
       const tdAction = document.createElement('td');
+      tdAction.style.textAlign = 'center';
+      tdAction.style.padding = '12px';
+      tdAction.style.minWidth = '200px';
+      
       const btn = document.createElement('button');
-      btn.textContent = 'Muat Turun PDF';
+      btn.textContent = '📥 Muat Turun PDF';
       btn.className = 'btn btn-sm btn-outline';
+      btn.style.padding = '8px 16px';
+      btn.style.borderRadius = '6px';
+      btn.style.fontSize = '13px';
+      btn.style.fontWeight = '600';
+      btn.style.cursor = 'pointer';
+      btn.style.transition = 'all 0.2s ease';
+      btn.style.width = '100%';
+      btn.style.maxWidth = '180px';
       btn.onclick = () => downloadVoucherPDF(voucher.voucher_pdf_url);
       tdAction.appendChild(btn);
       tr.appendChild(tdAction);
@@ -495,9 +534,21 @@ async function loadPendingApprovals() {
       tr.appendChild(tdPrepared);
       
       const tdAction = document.createElement('td');
+      tdAction.style.textAlign = 'center';
+      tdAction.style.padding = '12px';
+      tdAction.style.minWidth = '150px';
+      
       const btn = document.createElement('button');
-      btn.textContent = 'Semak';
+      btn.textContent = '🔍 Semak';
       btn.className = 'btn btn-sm btn-primary';
+      btn.style.padding = '8px 16px';
+      btn.style.borderRadius = '6px';
+      btn.style.fontSize = '13px';
+      btn.style.fontWeight = '600';
+      btn.style.cursor = 'pointer';
+      btn.style.transition = 'all 0.2s ease';
+      btn.style.width = '100%';
+      btn.style.maxWidth = '120px';
       btn.onclick = () => reviewVoucher(voucher.id);
       tdAction.appendChild(btn);
       tr.appendChild(tdAction);
