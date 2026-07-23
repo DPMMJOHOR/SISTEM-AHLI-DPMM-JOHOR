@@ -84,15 +84,27 @@ README.md              ← Dokumentasi ini
 
 ## 📝 Perubahan Terkini (Julai 2026)
 
-### Vengence UI Design System (23 Julai 2026) - Live Deployment ✅
+### Vengence UI Design System (23 Julai 2026) - Complete Rollout ✅
 - **Live URL:** https://dpmmjohor.github.io/SISTEM-AHLI-DPMM-JOHOR/
-- **Commit:** 7683055 - Documentation update to trigger deployment
+- **Final Commit:** f078a50 - Update login logo to new DPMM white background version
 - **Button Shine Effect:**
   - Applied `.btn-shine` class to all interactive buttons across index.html and borang.html
   - Modern button shine effect with gradient background and hover animation
   - Consistent styling for login, logout, modal action, and all CTA buttons
   - Maintained corporate DPMM blue color scheme and accessibility standards
-- **Status:** Committed and pushed to main branch
+- **Login Banner Improvements:**
+  - Updated gradient from hardcoded purple (#6C5CE7, #9B8EF5) to DPMM blue variables (var(--primary), var(--primary-dk))
+  - Added text-shadow to login banner text for better readability against blue gradient
+  - Increased text opacity for improved contrast
+- **Logo Update:**
+  - Replaced dpmm-logo-color.png with LOGO Bulat_ DPMMNJ_WHITEBGRD-01.png
+  - New white background logo for better visibility on DPMM blue gradient
+- **Status:** Fully deployed and live on GitHub Pages
+- **Commits:**
+  - 4cd5b79: docs: add commit reference to trigger GitHub Pages deployment
+  - 39ec1ff: fix: update login banner gradient to use DPMM blue colors
+  - 41cac8c: fix: add text shadow to login banner text for better readability
+  - f078a50: feat: update login logo to new DPMM white background version
 
 ### PDF Workflow Enhancement (19 Julai 2026)
 - **PDF Header Addition:**
