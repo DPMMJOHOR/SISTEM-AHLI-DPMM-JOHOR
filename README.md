@@ -84,6 +84,15 @@ README.md              ← Dokumentasi ini
 
 ## 📝 Perubahan Terkini (Julai 2026)
 
+### Vengence UI Design System (23 Julai 2026) - Live Deployment ✅
+- **Live URL:** https://dpmmjohor.github.io/SISTEM-AHLI-DPMM-JOHOR/
+- **Button Shine Effect:**
+  - Applied `.btn-shine` class to all interactive buttons across index.html and borang.html
+  - Modern button shine effect with gradient background and hover animation
+  - Consistent styling for login, logout, modal action, and all CTA buttons
+  - Maintained corporate DPMM blue color scheme and accessibility standards
+- **Status:** Committed and pushed to main branch
+
 ### PDF Workflow Enhancement (19 Julai 2026)
 - **PDF Header Addition:**
   - Header pengesahan dalam talian ditambah ke semua 6 halaman PDF (top right)
