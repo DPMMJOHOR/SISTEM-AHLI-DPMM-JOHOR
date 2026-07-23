@@ -86,6 +86,7 @@ README.md              ← Dokumentasi ini
 
 ### Vengence UI Design System (23 Julai 2026) - Live Deployment ✅
 - **Live URL:** https://dpmmjohor.github.io/SISTEM-AHLI-DPMM-JOHOR/
+- **Commit:** 7683055 - Documentation update to trigger deployment
 - **Button Shine Effect:**
   - Applied `.btn-shine` class to all interactive buttons across index.html and borang.html
   - Modern button shine effect with gradient background and hover animation
