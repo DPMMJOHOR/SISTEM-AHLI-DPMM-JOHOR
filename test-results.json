@@ -1,0 +1,112 @@
+{
+  "total": 21,
+  "passed": 18,
+  "failed": 3,
+  "tests": [
+    {
+      "name": "CSS Variable: breakpointMobile",
+      "passed": true,
+      "details": "Expected: 375px, Got: 375px"
+    },
+    {
+      "name": "CSS Variable: breakpointTablet",
+      "passed": true,
+      "details": "Expected: 768px, Got: 768px"
+    },
+    {
+      "name": "CSS Variable: breakpointDesktop",
+      "passed": true,
+      "details": "Expected: 1280px, Got: 1280px"
+    },
+    {
+      "name": "CSS Variable: counterPrimary",
+      "passed": true,
+      "details": "Expected: #1d3c96, Got: #1D3C96"
+    },
+    {
+      "name": "No layout overflow (mobile)",
+      "passed": true,
+      "details": "Issues: None"
+    },
+    {
+      "name": "Grid layout defined (mobile)",
+      "passed": true,
+      "details": "Found 8 grid containers"
+    },
+    {
+      "name": "No layout overflow (tablet)",
+      "passed": true,
+      "details": "Issues: None"
+    },
+    {
+      "name": "Grid layout defined (tablet)",
+      "passed": true,
+      "details": "Found 8 grid containers"
+    },
+    {
+      "name": "No layout overflow (desktop)",
+      "passed": true,
+      "details": "Issues: None"
+    },
+    {
+      "name": "Grid layout defined (desktop)",
+      "passed": true,
+      "details": "Found 8 grid containers"
+    },
+    {
+      "name": "Dark mode CSS defined",
+      "passed": true,
+      "details": "prefers-color-scheme: dark media query found"
+    },
+    {
+      "name": "Dark mode variables defined",
+      "passed": true,
+      "details": "Dark BG: #1a1a2e, Dark Text: #e0e0e0"
+    },
+    {
+      "name": "Reduced motion CSS defined",
+      "passed": true,
+      "details": "prefers-reduced-motion media query found"
+    },
+    {
+      "name": "Brand color (#1D3C96) usage",
+      "passed": true,
+      "details": "Found 0 elements with brand color"
+    },
+    {
+      "name": "Logo integration",
+      "passed": true,
+      "details": "Found 3 logo images"
+    },
+    {
+      "name": "Focus states defined",
+      "passed": true,
+      "details": ":focus and :focus-visible styles found"
+    },
+    {
+      "name": "Touch target sizes (\u226544px)",
+      "passed": false,
+      "details": "All 91 buttons meet minimum size requirement"
+    },
+    {
+      "name": "Semantic HTML structure",
+      "passed": true,
+      "details": "Found 27 headings, 89 buttons, 2 links"
+    },
+    {
+      "name": "Counter design classes",
+      "passed": false,
+      "details": "Found 0 cards with variants: {'lg': 0, 'md': 0, 'sm': 0, 'primary': 0, 'success': 0, 'warning': 0, 'alert': 0}"
+    },
+    {
+      "name": "Glassmorphism effect",
+      "passed": false,
+      "details": "0/0 cards have backdrop-filter"
+    },
+    {
+      "name": "Performance optimizations",
+      "passed": true,
+      "details": "will-change: True, text-rendering: True"
+    }
+  ]
+}
