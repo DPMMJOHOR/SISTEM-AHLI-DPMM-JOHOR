@@ -922,11 +922,11 @@ async function sendReceiptEmail(receipt) {
   
   // Generate signed URL for receipt PDF
   let pdfUrl = receipt.receipt_pdf_url;
-  if (pdfUrl && pdfUrl.startsWith('receipts/')) {
+  if (pdfUrl) {
     const { data: signedData, error: signedError } = await supabaseClient
       .storage
-      .from('receipts')
-      .createSignedUrl(pdfUrl.replace('receipts/', ''), 3600); // 1 hour expiry
+      .from('permohonan-dokumen')
+      .createSignedUrl(pdfUrl, 3600); // 1 hour expiry
     
     if (!signedError && signedData.signedUrl) {
       pdfUrl = signedData.signedUrl;
