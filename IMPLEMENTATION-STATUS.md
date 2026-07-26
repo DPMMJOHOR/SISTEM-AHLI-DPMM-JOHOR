@@ -6,12 +6,12 @@
 
 ## Quick Summary
 
-All 22 implementation units completed successfully on **26 Julai 2026**. Merged to main with regression fixes on **27 Julai 2026**.
+All 22 implementation units completed successfully on **26 Julai 2026**. Merged to main with regression fixes on **27 Julai 2026**. Receipt generation bugs fixed on **27 Julai 2026**.
 
 **Branch:** `main` (merged from `feat/index-html-redesign-counters`)  
 **Target File:** `index.html`  
 **Total Changes:** 600+ lines of CSS  
-**Commits:** 7 (3 implementation + 1 documentation + 3 regression fixes)
+**Commits:** 10 (3 implementation + 1 documentation + 3 regression fixes + 3 receipt generation fixes)
 
 ---
 
@@ -108,6 +108,22 @@ All 22 implementation units completed successfully on **26 Julai 2026**. Merged 
 
 **Commit:** `54d87e1` - fix(ui): remove body padding causing empty space at top of pages
 
+### Issue 4: Receipt Generation Number Length Error
+**Problem:** `get_next_number` function returns VARCHAR(20) but generates 23-character receipt numbers (e.g., `DPMMJHR/RR/2026-07-0001`).
+
+**Fix:** Created migration to change function return type from VARCHAR(20) to VARCHAR(30).
+
+**Commit:** `1adccbd` - fix(receipt): add migration to fix get_next_number return type VARCHAR(20)->VARCHAR(30)
+
+### Issue 5: Storage Bucket Not Found
+**Problem:** Code references non-existent `receipts` and `vouchers` storage buckets, causing 400 errors on signed URLs.
+
+**Fix:** Changed all storage references to use existing `permohonan-dokumen` bucket with proper RLS policies.
+
+**Commits:** 
+- `f9f5f3c` - fix(storage): add migration to create receipts storage bucket with RLS policies
+- `21b1ce6` - fix(storage): use existing permohonan-dokumen bucket for receipt/voucher PDFs
+
 ---
 
 ## Git Commits
@@ -127,6 +143,13 @@ b18e773 fix(ui): reduce header height and sidebar nav font size
 54d87e1 fix(ui): remove body padding causing empty space at top of pages
 ```
 
+### Receipt Generation Fix Commits (27 Julai 2026)
+```
+1adccbd fix(receipt): add migration to fix get_next_number return type VARCHAR(20)->VARCHAR(30)
+f9f5f3c fix(storage): add migration to create receipts storage bucket with RLS policies
+21b1ce6 fix(storage): use existing permohonan-dokumen bucket for receipt/voucher PDFs
+```
+
 ---
 
 ## Files Modified
@@ -141,6 +164,8 @@ b18e773 fix(ui): reduce header height and sidebar nav font size
 ### Documentation
 - `docs/IMPLEMENTATION-COMPLETE-2026-07-26.md` - Detailed implementation report
 - `docs/PLAN-UPDATE-SUMMARY-BRAND-COMPLIANCE.md` - Brand compliance update summary
+- `migrations/fix_get_next_number_return_type.sql` - Receipt number function fix
+- `migrations/create_receipts_storage_bucket.sql` - Storage bucket setup (reference)
 
 ---
 
@@ -162,6 +187,8 @@ b18e773 fix(ui): reduce header height and sidebar nav font size
 - [x] Git commits clean and organized
 - [x] Documentation complete
 - [x] **Regression fixes applied (27 Julai 2026)**
+- [x] **Receipt generation bugs fixed (27 Julai 2026)**
+- [x] **Storage bucket issues resolved (27 Julai 2026)**
 - [x] **Merged to main branch**
 - [x] **Deployed to GitHub Pages**
 

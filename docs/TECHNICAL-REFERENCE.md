@@ -1,6 +1,6 @@
 # Technical Reference — SISTEM-AHLI-DPMM-JOHOR
 
-**Last Updated:** 27 Julai 2026  
+**Last Updated:** 27 Julai 2026 (Receipt Generation Fixes)  
 **Audience:** Developers, DevOps engineers, technical architects  
 **Purpose:** Complete technical specifications and API reference
 
