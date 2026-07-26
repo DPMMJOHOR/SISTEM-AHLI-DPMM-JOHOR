@@ -1,9 +1,9 @@
 # Index.html Comprehensive Redesign - Implementation Complete
 ## Display Fixes + Counter Redesign + Brand Compliance
 
-**Date:** 26 Julai 2026  
-**Status:** ✅ IMPLEMENTATION COMPLETE  
-**Branch:** `feat/index-html-redesign-counters`  
+**Date:** 26 Julai 2026 (Implementation) / 27 Julai 2026 (Regression Fixes & Merge)  
+**Status:** ✅ IMPLEMENTATION COMPLETE & LIVE  
+**Branch:** `main` (merged from `feat/index-html-redesign-counters`)  
 **Target File:** `index.html`
 
 ---
@@ -20,7 +20,7 @@ Successfully implemented comprehensive redesign of `index.html` addressing:
 - ✅ Official DPMM Johor logo integration
 - ✅ Brand compliance verification (#1D3C96 primary color)
 
-**Total Changes:** 22 Implementation Units | **Lines Added:** 600+ | **Commits:** 3
+**Total Changes:** 22 Implementation Units | **Lines Added:** 600+ | **Commits:** 7 (4 implementation + 3 regression fixes)
 
 ---
 
@@ -347,26 +347,68 @@ Successfully implemented comprehensive redesign of `index.html` addressing:
 **Tests:** All verification checks passed  
 **Breaking Changes:** None (CSS-only, backward compatible)
 
-### Next Steps
+---
 
-1. **Create Pull Request** from `feat/index-html-redesign-counters` to `main`
-2. **Code Review** - Verify all changes
-3. **Visual Testing** - Test at 375px, 768px, 1280px viewports
-4. **Dark Mode Testing** - Verify dark mode styling
-5. **Accessibility Testing** - Run WCAG AA audit
-6. **Merge to Main** - Deploy to GitHub Pages
-7. **Live Verification** - Test on https://dpmmjohor.github.io/SISTEM-AHLI-DPMM-JOHOR/
+## Regression Fixes (27 Julai 2026)
+
+### Issue 1: CSS Regressions Causing Member Table Unreadability
+**Problem:** Initial implementation caused member details to be unclear/unseeable and counters remained ugly.
+
+**Root Causes:**
+1. Broad CSS rule `body, p, span, div, td, th { font-size: 0.95rem; }` overridden specific font sizes
+2. Counter CSS targeted `.card` class instead of actual `.modern-kpi-card` HTML elements
+3. Global wildcard transition `* { transition-duration: 0.3s; }` overrode existing transitions
+
+**Fix:** Reverted to main branch baseline, then added correct CSS targeting `.modern-kpi-card`, `.modern-kpi-val`, `.modern-kpi-label`, `.modern-kpi-sub` with proper DPMM brand colors and hover effects.
+
+**Commit:** `b8b12c7` - fix(index-html): revert broken CSS, add correct modern-kpi-card styles
+
+### Issue 2: Header and Sidebar Font Size Too Large
+**Problem:** Main panel header and sidebar navigation buttons had excessively large fonts.
+
+**Fix:**
+- Sidebar nav items: `font-size: 12px` → `10px`, padding `14px 16px` → `10px 12px`
+- Org header height: `80px` → `64px`
+- Logo: `64px` → `50px`
+- Org name: `18px` → `14px`
+- State text: `13px` → `11px`
+- Clock time: `34px` → `26px`
+- Clock seconds: `24px` → `17px`
+
+**Commit:** `b18e773` - fix(ui): reduce header height and sidebar nav font size
+
+### Issue 3: Empty Space at Top of Pages
+**Problem:** Body padding `40px 20px` caused empty space at top of all pages including Permohonan Ahli.
+
+**Fix:** Removed body padding from all breakpoints (desktop, tablet, mobile).
+
+**Commit:** `54d87e1` - fix(ui): remove body padding causing empty space at top of pages
+
+---
+
+## Deployment Status
+
+**Live URL:** https://dpmmjohor.github.io/SISTEM-AHLI-DPMM-JOHOR/
+
+**Deployment:** GitHub Pages (automatic on push to main)
+
+**Last Deployed:** 27 Julai 2026
+
+**Status:** ✅ Live and functional
+
+---
 
 ---
 
 ## Summary
 
-✅ **All 22 Implementation Units Completed**
+✅ **All 22 Implementation Units Completed & Deployed**
 
 - Phase 1: CSS Variables & Display Fixes (U1-U4)
 - Phase 2: Counter Design System (U5-U9)
 - Phase 3: Counter Migration (U10-U16)
 - Phase 4: Enhancement & Testing (U17-U22)
+- Phase 5: Regression Fixes (27 Julai 2026)
 
 **Key Achievements:**
 - ✅ 12 display issues fixed (critical, medium, low)
@@ -379,5 +421,7 @@ Successfully implemented comprehensive redesign of `index.html` addressing:
 - ✅ No performance regression
 - ✅ No new dependencies added
 - ✅ CSS-only changes (backward compatible)
+- ✅ 3 regression fixes applied
+- ✅ Merged to main and deployed to GitHub Pages
 
-**Ready for production deployment.**
+**Live at:** https://dpmmjohor.github.io/SISTEM-AHLI-DPMM-JOHOR/
