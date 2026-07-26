@@ -482,6 +482,189 @@ small {
 }
 
 /* ══════════════════════════════════════════
+   U9: OFFICIAL DPMM LOGO INTEGRATION
+══════════════════════════════════════════ */
+
+/* Logo styling - Official DPMM Johor Logo */
+.login-logo-img,
+.hdr-logo-img,
+.sb-logo-round {
+  display: block;
+  object-fit: contain;
+  filter: none;
+  transition: transform 0.3s ease;
+}
+
+.login-logo-img {
+  height: 70px;
+  width: auto;
+  margin: 0 auto 16px;
+}
+
+.hdr-logo-img {
+  height: 64px;
+  width: auto;
+}
+
+.sb-logo-round {
+  width: 90px;
+  height: 90px;
+}
+
+/* Logo hover effect */
+.login-logo-img:hover,
+.hdr-logo-img:hover,
+.sb-logo-round:hover {
+  transform: scale(1.05);
+}
+
+/* Dark mode logo support */
+@media (prefers-color-scheme: dark) {
+  .login-logo-img,
+  .hdr-logo-img,
+  .sb-logo-round {
+    opacity: 0.95;
+  }
+}
+
+/* Mobile logo sizing */
+@media (max-width: 480px) {
+  .login-logo-img {
+    height: 60px;
+  }
+  
+  .hdr-logo-img {
+    height: 56px;
+  }
+  
+  .sb-logo-round {
+    width: 80px;
+    height: 80px;
+  }
+}
+
+/* ══════════════════════════════════════════
+   U19-U22: TESTING & VERIFICATION UTILITIES
+   Responsive, Accessibility, Brand Compliance
+══════════════════════════════════════════ */
+
+/* U19: Responsive Testing Helpers */
+.responsive-test {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  padding: 8px 12px;
+  background: rgba(29, 60, 150, 0.9);
+  color: white;
+  font-size: 11px;
+  border-radius: 4px;
+  z-index: 9998;
+  font-family: var(--mono);
+  display: none;
+}
+
+@media (max-width: 1280px) {
+  .responsive-test::before { content: "Desktop (1280px)"; }
+}
+
+@media (max-width: 768px) {
+  .responsive-test::before { content: "Tablet (768px)"; }
+}
+
+@media (max-width: 480px) {
+  .responsive-test::before { content: "Mobile (375px)"; }
+}
+
+/* U20: Accessibility Verification */
+/* High contrast mode support */
+@media (prefers-contrast: more) {
+  .card {
+    border-width: 2px;
+  }
+  
+  .btn-shine {
+    border: 2px solid rgba(255, 255, 255, 0.3);
+  }
+  
+  .card-title {
+    font-weight: 700;
+  }
+}
+
+/* Focus visible for keyboard navigation */
+.card:focus-visible,
+.btn-shine:focus-visible,
+.login-input:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* U21: Brand Compliance Verification */
+/* Ensure primary color is DPMM Blue (#1D3C96) */
+.brand-primary {
+  color: var(--counter-primary);
+  background-color: var(--counter-primary-light);
+}
+
+.brand-primary-text {
+  color: var(--counter-primary);
+}
+
+.brand-primary-bg {
+  background-color: var(--counter-primary);
+  color: white;
+}
+
+/* Logo brand verification */
+.brand-logo-verify {
+  display: inline-block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* U22: Final Optimization & Performance */
+/* Optimize animations for performance */
+.card,
+.btn-shine,
+.card-icon {
+  will-change: transform, box-shadow;
+}
+
+/* Remove will-change after interaction */
+.card:not(:hover),
+.btn-shine:not(:hover),
+.card-icon:not(:hover) {
+  will-change: auto;
+}
+
+/* Optimize text rendering */
+body, .card, .btn-shine {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Optimize images */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Optimize transitions */
+* {
+  transition-duration: 0.3s;
+  transition-timing-function: ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0s !important;
+    animation-duration: 0s !important;
+  }
+}
+
+/* ══════════════════════════════════════════
    VENGENCE UI-INSPIRED COMPONENTS
 ══════════════════════════════════════════ */
 
