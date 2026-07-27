@@ -7908,10 +7908,28 @@ async function generateReceipt(memberId, amount, paymentMethod, paymentDate, tra
       };
     }
     
-    // Generate PDF with jsPDF
-    const pdfUrl = await generateReceiptPDF(receiptNumber, memberDetails, amount, paymentMethod, paymentDate, transactionId, description);
+    // Generate PDF with jsPDF (returns blob for local download)
+    const pdfData = await generateReceiptPDF(receiptNumber, memberDetails, amount, paymentMethod, paymentDate, transactionId, description);
     
-    // Store receipt in database
+    // Try to upload to Supabase (optional - can fail gracefully)
+    let pdfUrl = null;
+    try {
+      const { data, error } = await supabaseClient.storage
+        .from('permohonan-dokumen')
+        .upload(pdfData.fileName, pdfData.pdfBlob, {
+          cacheControl: 3600,
+          contentType: 'application/pdf'
+        });
+      
+      if (!error) {
+        pdfUrl = data.path;
+      }
+    } catch (uploadError) {
+      console.warn('Supabase upload failed (non-critical):', uploadError);
+      // Continue without Supabase storage - PDF still available locally
+    }
+    
+    // Store receipt in database (pdfUrl may be null if upload failed)
     const { data: receiptData, error: receiptError } = await supabaseClient 
       .from('receipts')
       .insert({
@@ -7938,7 +7956,9 @@ async function generateReceipt(memberId, amount, paymentMethod, paymentDate, tra
       success: true,
       receiptId: receiptData.id,
       receiptNumber: receiptNumber,
-      pdfUrl: pdfUrl
+      pdfUrl: pdfUrl,
+      pdfBlob: pdfData.pdfBlob,
+      fileName: pdfData.fileName
     };
   } catch (error) {
     console.error('Receipt generation error:', error);
@@ -8149,17 +8169,8 @@ async function generateReceiptPDF(receiptNumber, memberDetails, amount, paymentM
   const pdfBlob = pdf.output('dataurlblob');
   const fileName = `receipt_${receiptNumber.replace(/\//g, '_')}.pdf`;
   
-  // Upload to Supabase Storage (use existing permohonan-dokumen bucket)
-  const { data, error } = await supabaseClient.storage
-    .from('permohonan-dokumen')
-    .upload(fileName, pdfBlob, {
-      cacheControl: 3600,
-      contentType: 'application/pdf'
-    });
-  
-  if (error) throw error;
-  
-  return data.path;
+  // Return PDF blob for local download/WhatsApp (Supabase upload now optional)
+  return { pdfBlob, fileName, receiptNumber };
 }
 
 // PDF Generation - Payment Voucher using JPEG template overlay

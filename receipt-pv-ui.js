@@ -27,6 +27,59 @@ function showSuccess(message) {
   setTimeout(() => successDiv.remove(), 5000);
 }
 
+// Show download and WhatsApp actions for generated receipt
+function showReceiptActions(receiptData) {
+  const actionsDiv = document.createElement('div');
+  actionsDiv.className = 'receipt-actions';
+  actionsDiv.style.cssText = 'background: #f0f8ff; padding: 16px; border-radius: 8px; margin: 16px 0; border: 1px solid #d0e0ff;';
+  
+  actionsDiv.innerHTML = `
+    <h4 style="margin: 0 0 12px 0; color: #1a365d;">Tindakan Resit</h4>
+    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+      <button id="download-receipt-btn" class="btn btn-primary" style="flex: 1; min-width: 150px;">
+        📥 Muat Turun PDF
+      </button>
+      <button id="whatsapp-receipt-btn" class="btn btn-success" style="flex: 1; min-width: 150px; background: #25D366;">
+        📱 Hantar WhatsApp
+      </button>
+    </div>
+  `;
+  
+  const container = document.querySelector('.sec-body') || document.body;
+  container.insertBefore(actionsDiv, container.firstChild);
+  
+  // Download button handler
+  document.getElementById('download-receipt-btn').addEventListener('click', () => {
+    if (receiptData.pdfBlob && receiptData.fileName) {
+      const url = URL.createObjectURL(receiptData.pdfBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = receiptData.fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  });
+  
+  // WhatsApp button handler
+  document.getElementById('whatsapp-receipt-btn').addEventListener('click', () => {
+    if (receiptData.pdfBlob && receiptData.fileName) {
+      // Convert blob to base64 for WhatsApp
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64 = reader.result.split(',')[1];
+        const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(`Resit Pembayaran - ${receiptData.receiptNumber}\n\nSila muat turun resit dari lampiran.`)}`;
+        window.open(whatsappUrl, '_blank');
+      };
+      reader.readAsDataURL(receiptData.pdfBlob);
+    }
+  });
+  
+  // Remove actions div after 5 minutes
+  setTimeout(() => actionsDiv.remove(), 300000);
+}
+
 // Receipt Management Section
 function showReceiptsPage() {
   const container = document.getElementById('receipts-list');
@@ -609,6 +662,9 @@ async function handleGenerateReceipt() {
     if (!receiptData.success) {
       throw new Error(receiptData.error || 'Receipt generation failed');
     }
+    
+    // Show download and WhatsApp buttons
+    showReceiptActions(receiptData);
     
     showSuccess(`Resit dijana: ${receiptData.receiptNumber}`);
     loadReceipts();
