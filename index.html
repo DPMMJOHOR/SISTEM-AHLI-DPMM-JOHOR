@@ -7911,8 +7911,6 @@ async function generateReceipt(memberId, amount, paymentMethod, paymentDate, tra
     // Generate PDF with jsPDF (returns blob for local download)
     const pdfData = await generateReceiptPDF(receiptNumber, memberDetails, amount, paymentMethod, paymentDate, transactionId, description);
     
-    console.log('generateReceiptPDF returned:', JSON.stringify(pdfData, null, 2));
-    
     // Try to upload to Supabase (optional - can fail gracefully)
     let pdfUrl = null;
     try {
@@ -7953,15 +7951,6 @@ async function generateReceipt(memberId, amount, paymentMethod, paymentDate, tra
       .single();
     
     if (receiptError) throw receiptError;
-    
-    console.log('generateReceipt returning:', JSON.stringify({
-      success: true,
-      receiptId: receiptData.id,
-      receiptNumber: receiptNumber,
-      pdfUrl: pdfUrl,
-      pdfBlob: pdfData.pdfBlob,
-      fileName: pdfData.fileName
-    }, null, 2));
     
     return {
       success: true,
@@ -8177,7 +8166,7 @@ async function generateReceiptPDF(receiptNumber, memberDetails, amount, paymentM
     pdf.text(transactionId, 506, 1348, { align: 'center' });
   }
   
-  const pdfBlob = pdf.output('dataurlblob');
+  const pdfBlob = pdf.output('blob');
   const fileName = `receipt_${receiptNumber.replace(/\//g, '_')}.pdf`;
   
   // Return PDF blob for local download/WhatsApp (Supabase upload now optional)
@@ -8424,7 +8413,7 @@ async function applyDigitalSignatureToPDF(pdfUrl, signatureUrl, documentType) {
   }
 }
 </script>
-<script src="receipt-pv-ui.js?v=40"></script>
+<script src="receipt-pv-ui.js?v=45"></script>
 </body>
 </html>
 
