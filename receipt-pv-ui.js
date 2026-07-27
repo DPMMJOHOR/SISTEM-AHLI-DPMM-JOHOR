@@ -1013,7 +1013,7 @@ function downloadReceiptPDF(pdfUrl) {
   }
   // Generate signed URL for private storage
   supabaseClient.storage
-    .from('receipts')
+    .from('permohonan-dokumen')
     .createSignedUrl(pdfUrl, { expiresIn: 60 })
     .then(({ data, error }) => {
       if (error) {
@@ -1032,7 +1032,7 @@ function downloadVoucherPDF(pdfUrl) {
   }
   // Generate signed URL for private storage
   supabaseClient.storage
-    .from('vouchers')
+    .from('permohonan-dokumen')
     .createSignedUrl(pdfUrl, { expiresIn: 60 })
     .then(({ data, error }) => {
       if (error) {
