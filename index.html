@@ -8153,7 +8153,8 @@ async function generateReceiptPDF(receiptNumber, memberDetails, amount, paymentM
   const { data, error } = await supabaseClient.storage
     .from('permohonan-dokumen')
     .upload(fileName, pdfBlob, {
-      cacheControl: 3600
+      cacheControl: 3600,
+      contentType: 'application/pdf'
     });
   
   if (error) throw error;
@@ -8241,7 +8242,8 @@ async function generateVoucherPDF(voucherNumber, payableTo, purpose, amount, pay
   const { data, error } = await supabaseClient.storage
     .from('permohonan-dokumen')
     .upload(fileName, pdfBlob, {
-      cacheControl: 3600
+      cacheControl: 3600,
+      contentType: 'application/pdf'
     });
   
   if (error) throw error;
