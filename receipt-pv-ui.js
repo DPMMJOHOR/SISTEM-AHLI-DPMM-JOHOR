@@ -411,22 +411,6 @@ async function loadReceipts() {
       btnWhatsApp.onclick = () => sendReceiptWhatsApp(receipt);
       buttonContainer.appendChild(btnWhatsApp);
       
-      // Email button
-      const btnEmail = document.createElement('button');
-      btnEmail.textContent = '✉️ E-mel';
-      btnEmail.className = 'btn btn-sm';
-      btnEmail.style.background = '#007bff';
-      btnEmail.style.color = '#fff';
-      btnEmail.style.border = 'none';
-      btnEmail.style.padding = '8px 16px';
-      btnEmail.style.borderRadius = '6px';
-      btnEmail.style.fontSize = '13px';
-      btnEmail.style.fontWeight = '600';
-      btnEmail.style.cursor = 'pointer';
-      btnEmail.style.transition = 'all 0.2s ease';
-      btnEmail.onclick = () => sendReceiptEmail(receipt);
-      buttonContainer.appendChild(btnEmail);
-      
       tdAction.appendChild(buttonContainer);
       
       tr.appendChild(tdAction);
