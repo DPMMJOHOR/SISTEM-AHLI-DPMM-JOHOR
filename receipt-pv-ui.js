@@ -1,6 +1,6 @@
 // Receipt and Payment Voucher System - Frontend UI Components
 // Integrated with Sistem Ahli
-// Cache-bust: 2026-07-27-22-53
+// Cache-bust: 2026-07-27-23-40
 
 // Error and Success UI Helpers
 function showError(message) {
