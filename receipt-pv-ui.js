@@ -403,13 +403,34 @@ async function loadReceipts() {
       buttonContainer.style.justifyContent = 'center';
       buttonContainer.style.flexWrap = 'wrap';
       
-      // Download PDF button
-      const btnDownload = document.createElement('button');
-      btnDownload.textContent = '📥 Muat Turun';
-      btnDownload.className = 'btn btn-sm btn-outline';
-      btnDownload.style.padding = '8px 16px';
-      // Download button removed - PDF now available for immediate download after generation
-      // WhatsApp button removed - PDF now available for immediate WhatsApp sharing after generation
+      // View/Print button - regenerates PDF from database data
+      const btnView = document.createElement('button');
+      btnView.textContent = '�️ Lihat/Cetak';
+      btnView.className = 'btn btn-sm btn-outline';
+      btnView.style.padding = '8px 16px';
+      btnView.style.borderRadius = '6px';
+      btnView.style.fontSize = '13px';
+      btnView.style.fontWeight = '600';
+      btnView.style.cursor = 'pointer';
+      btnView.style.transition = 'all 0.2s ease';
+      btnView.onclick = () => viewAndPrintReceipt(receipt);
+      buttonContainer.appendChild(btnView);
+      
+      // Delete button
+      const btnDelete = document.createElement('button');
+      btnDelete.textContent = '🗑️ Padam';
+      btnDelete.className = 'btn btn-sm';
+      btnDelete.style.background = '#dc3545';
+      btnDelete.style.color = '#fff';
+      btnDelete.style.border = 'none';
+      btnDelete.style.padding = '8px 16px';
+      btnDelete.style.borderRadius = '6px';
+      btnDelete.style.fontSize = '13px';
+      btnDelete.style.fontWeight = '600';
+      btnDelete.style.cursor = 'pointer';
+      btnDelete.style.transition = 'all 0.2s ease';
+      btnDelete.onclick = () => deleteReceipt(receipt.id, receipt.receipt_number);
+      buttonContainer.appendChild(btnDelete);
       
       tdAction.appendChild(buttonContainer);
       
@@ -1047,6 +1068,62 @@ async function sendReceiptEmail(receipt) {
 
 // Download receipt PDF - removed (PDF now available for immediate download after generation)
 // Download voucher PDF - removed (PDF now available for immediate download after generation)
+
+// View and print receipt by regenerating PDF from database data
+async function viewAndPrintReceipt(receipt) {
+  try {
+    // Call the PDF generation function with database data
+    const pdfData = await generateReceiptPDF(
+      receipt.receipt_number,
+      { memberName: receipt.member_name, nomborAhli: receipt.nombor_ahli },
+      receipt.amount,
+      receipt.payment_method,
+      receipt.payment_date,
+      receipt.transaction_id,
+      receipt.description
+    );
+    
+    // Create blob URL and open in new window
+    const url = URL.createObjectURL(pdfData.pdfBlob);
+    const printWindow = window.open(url, '_blank');
+    
+    if (printWindow) {
+      printWindow.onload = function() {
+        printWindow.print();
+      };
+    } else {
+      showError('Pop-up blocker menghalang pembukaan PDF. Sila benarkan pop-up untuk ciri ini.');
+    }
+    
+    // Clean up blob URL after 1 minute
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+  } catch (error) {
+    console.error('Error viewing receipt:', error);
+    showError('Ralat memaparkan resit: ' + error.message);
+  }
+}
+
+// Delete receipt from database
+async function deleteReceipt(receiptId, receiptNumber) {
+  if (!confirm(`Adakah anda pasti mahu memadam resit ${receiptNumber}?`)) {
+    return;
+  }
+  
+  try {
+    const { error } = await supabaseClient
+      .from('receipts')
+      .delete()
+      .eq('id', receiptId);
+    
+    if (error) throw error;
+    
+    showSuccess(`Resit ${receiptNumber} berjaya dipadam`);
+    loadReceipts();
+  } catch (error) {
+    console.error('Error deleting receipt:', error);
+    showError('Ralat memadam resit: ' + error.message);
+  }
+}
 
 // Add navigation items to sidebar
 function addReceiptPVNavigation() {
