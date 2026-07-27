@@ -1,6 +1,6 @@
 // Receipt and Payment Voucher System - Frontend UI Components
 // Integrated with Sistem Ahli
-// Cache-bust: 2026-07-27-20-15
+// Cache-bust: 2026-07-27-20-20
 
 // Error and Success UI Helpers
 function showError(message) {
@@ -387,29 +387,8 @@ async function loadReceipts() {
       btnDownload.textContent = '📥 Muat Turun';
       btnDownload.className = 'btn btn-sm btn-outline';
       btnDownload.style.padding = '8px 16px';
-      btnDownload.style.borderRadius = '6px';
-      btnDownload.style.fontSize = '13px';
-      btnDownload.style.fontWeight = '600';
-      btnDownload.style.cursor = 'pointer';
-      btnDownload.style.transition = 'all 0.2s ease';
-      btnDownload.onclick = () => downloadReceiptPDF(receipt.receipt_pdf_url);
-      buttonContainer.appendChild(btnDownload);
-      
-      // WhatsApp button
-      const btnWhatsApp = document.createElement('button');
-      btnWhatsApp.textContent = '💬 WhatsApp';
-      btnWhatsApp.className = 'btn btn-sm';
-      btnWhatsApp.style.background = '#25D366';
-      btnWhatsApp.style.color = '#fff';
-      btnWhatsApp.style.border = 'none';
-      btnWhatsApp.style.padding = '8px 16px';
-      btnWhatsApp.style.borderRadius = '6px';
-      btnWhatsApp.style.fontSize = '13px';
-      btnWhatsApp.style.fontWeight = '600';
-      btnWhatsApp.style.cursor = 'pointer';
-      btnWhatsApp.style.transition = 'all 0.2s ease';
-      btnWhatsApp.onclick = () => sendReceiptWhatsApp(receipt);
-      buttonContainer.appendChild(btnWhatsApp);
+      // Download button removed - PDF now available for immediate download after generation
+      // WhatsApp button removed - PDF now available for immediate WhatsApp sharing after generation
       
       tdAction.appendChild(buttonContainer);
       
@@ -1045,43 +1024,8 @@ async function sendReceiptEmail(receipt) {
   }
 }
 
-// Download receipt PDF
-function downloadReceiptPDF(pdfUrl) {
-  if (!pdfUrl) {
-    showError('PDF tidak tersedia');
-    return;
-  }
-  // Generate signed URL for private storage
-  supabaseClient.storage
-    .from('permohonan-dokumen')
-    .createSignedUrl(pdfUrl, { expiresIn: 60 })
-    .then(({ data, error }) => {
-      if (error) {
-        showError('Ralat menjana pautan muat turun: ' + error.message);
-        return;
-      }
-      window.open(data.signedUrl, '_blank');
-    });
-}
-
-// Download voucher PDF
-function downloadVoucherPDF(pdfUrl) {
-  if (!pdfUrl) {
-    showError('PDF tidak tersedia');
-    return;
-  }
-  // Generate signed URL for private storage
-  supabaseClient.storage
-    .from('permohonan-dokumen')
-    .createSignedUrl(pdfUrl, { expiresIn: 60 })
-    .then(({ data, error }) => {
-      if (error) {
-        showError('Ralat menjana pautan muat turun: ' + error.message);
-        return;
-      }
-      window.open(data.signedUrl, '_blank');
-    });
-}
+// Download receipt PDF - removed (PDF now available for immediate download after generation)
+// Download voucher PDF - removed (PDF now available for immediate download after generation)
 
 // Add navigation items to sidebar
 function addReceiptPVNavigation() {
