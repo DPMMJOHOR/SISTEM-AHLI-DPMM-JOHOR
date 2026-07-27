@@ -7911,6 +7911,8 @@ async function generateReceipt(memberId, amount, paymentMethod, paymentDate, tra
     // Generate PDF with jsPDF (returns blob for local download)
     const pdfData = await generateReceiptPDF(receiptNumber, memberDetails, amount, paymentMethod, paymentDate, transactionId, description);
     
+    console.log('generateReceiptPDF returned:', pdfData);
+    
     // Try to upload to Supabase (optional - can fail gracefully)
     let pdfUrl = null;
     try {
@@ -7951,6 +7953,15 @@ async function generateReceipt(memberId, amount, paymentMethod, paymentDate, tra
       .single();
     
     if (receiptError) throw receiptError;
+    
+    console.log('generateReceipt returning:', {
+      success: true,
+      receiptId: receiptData.id,
+      receiptNumber: receiptNumber,
+      pdfUrl: pdfUrl,
+      pdfBlob: pdfData.pdfBlob,
+      fileName: pdfData.fileName
+    });
     
     return {
       success: true,
