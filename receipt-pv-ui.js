@@ -1,6 +1,6 @@
 // Receipt and Payment Voucher System - Frontend UI Components
 // Integrated with Sistem Ahli
-// Cache-bust: 2026-07-27-20-20
+// Cache-bust: 2026-07-27-22-53
 
 // Error and Success UI Helpers
 function showError(message) {
@@ -29,9 +29,11 @@ function showSuccess(message) {
 
 // Show download and WhatsApp actions for generated receipt
 function showReceiptActions(receiptData) {
+  console.log('showReceiptActions called with:', receiptData);
+  
   const actionsDiv = document.createElement('div');
   actionsDiv.className = 'receipt-actions';
-  actionsDiv.style.cssText = 'background: #f0f8ff; padding: 16px; border-radius: 8px; margin: 16px 0; border: 1px solid #d0e0ff;';
+  actionsDiv.style.cssText = 'background: #f0f8ff; padding: 16px; border-radius: 8px; margin: 16px 0; border: 1px solid #d0e0ff; display: block !important;';
   
   actionsDiv.innerHTML = `
     <h4 style="margin: 0 0 12px 0; color: #1a365d;">Tindakan Resit</h4>
@@ -45,11 +47,25 @@ function showReceiptActions(receiptData) {
     </div>
   `;
   
-  const container = document.querySelector('.sec-body') || document.body;
-  container.insertBefore(actionsDiv, container.firstChild);
+  // Find the receipt form's sec-body specifically
+  const receiptsListContainer = document.getElementById('receipts-list');
+  if (receiptsListContainer) {
+    const formSection = receiptsListContainer.querySelector('.sec-card .sec-body');
+    if (formSection) {
+      formSection.appendChild(actionsDiv);
+      console.log('Actions div appended to form section');
+    } else {
+      console.error('Form section not found');
+      receiptsListContainer.appendChild(actionsDiv);
+    }
+  } else {
+    console.error('receipts-list container not found');
+    document.body.appendChild(actionsDiv);
+  }
   
   // Download button handler
   document.getElementById('download-receipt-btn').addEventListener('click', () => {
+    console.log('Download button clicked');
     if (receiptData.pdfBlob && receiptData.fileName) {
       const url = URL.createObjectURL(receiptData.pdfBlob);
       const a = document.createElement('a');
@@ -59,11 +75,14 @@ function showReceiptActions(receiptData) {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
+    } else {
+      console.error('PDF blob or fileName missing:', receiptData);
     }
   });
   
   // WhatsApp button handler
   document.getElementById('whatsapp-receipt-btn').addEventListener('click', () => {
+    console.log('WhatsApp button clicked');
     if (receiptData.pdfBlob && receiptData.fileName) {
       // Convert blob to base64 for WhatsApp
       const reader = new FileReader();
@@ -73,6 +92,8 @@ function showReceiptActions(receiptData) {
         window.open(whatsappUrl, '_blank');
       };
       reader.readAsDataURL(receiptData.pdfBlob);
+    } else {
+      console.error('PDF blob or fileName missing:', receiptData);
     }
   });
   
