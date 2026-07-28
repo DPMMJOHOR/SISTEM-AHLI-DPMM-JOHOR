@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<title>Resit Rasmi</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html, body {
+    width: 576px;
+    height: 288px;
+  }
+
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 9px;
+    color: #000;
+    background: #fff;
+  }
+
+  .receipt {
+    width: 576px;
+    height: 288px;
+    border: 1.5px solid #0B2545;
+    padding: 6px 10px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+  }
+
+  .header img.logo {
+    display: block;
+    margin: 0 auto 2px auto;
+    height: 34px;
+    width: auto;
+  }
+
+  .org-name {
+    font-weight: bold;
+    font-size: 10px;
+    letter-spacing: 0.3px;
+    line-height: 1.2;
+    color: #0B2545;
+  }
+
+  .org-reg {
+    font-size: 7.5px;
+    line-height: 1.2;
+  }
+
+  .receipt-title {
+    font-weight: bold;
+    font-size: 12px;
+    text-decoration: underline;
+    margin-top: 2px;
+    color: #0B2545;
+  }
+
+  /* Top-right meta block */
+  .top-meta {
+    position: absolute;
+    top: 6px;
+    right: 10px;
+    text-align: right;
+    font-size: 9px;
+    line-height: 1.4;
+  }
+
+  .top-meta .receipt-no {
+    font-weight: bold;
+    color: #C41230;
+  }
+
+  /* Body */
+  .body-fields {
+    margin-top: 10px;
+    flex: 1;
+  }
+
+  .field-row {
+    display: flex;
+    align-items: flex-end;
+    margin-bottom: 8px;
+  }
+
+  .field-label {
+    white-space: nowrap;
+    font-weight: bold;
+    margin-right: 4px;
+  }
+
+  .field-value {
+    flex: 1;
+    border-bottom: 1px solid #000;
+    padding-bottom: 1px;
+    min-height: 11px;
+    font-size: 9px;
+  }
+
+  .field-row.amount .field-value,
+  .field-row.words .field-value {
+    font-weight: bold;
+  }
+
+  /* Footer */
+  .footer {
+    margin-top: auto;
+  }
+
+  .payment-method-title {
+    font-weight: bold;
+    margin-bottom: 4px;
+  }
+
+  .payment-options-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+
+  .payment-options {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .checkbox {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border: 1px solid #000;
+    text-align: center;
+    line-height: 10px;
+    font-size: 8px;
+    margin-right: 3px;
+    vertical-align: middle;
+  }
+
+  .cheque-info {
+    white-space: nowrap;
+    font-size: 9px;
+  }
+
+  .cheque-info .underline-fill {
+    display: inline-block;
+    min-width: 90px;
+    border-bottom: 1px solid #000;
+    text-align: center;
+  }
+
+  /* Signature box */
+  .signature-section {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .signature-box {
+    text-align: center;
+    width: 180px;
+  }
+
+  .signature-line {
+    border-bottom: 1px solid #000;
+    height: 26px;
+  }
+
+  .signature-label {
+    font-weight: bold;
+    font-size: 8.5px;
+    margin-top: 2px;
+  }
+
+  .signature-name {
+    font-size: 9px;
+    margin-top: 1px;
+  }
+</style>
+</head>
+<body>
+
+  <div class="receipt">
+
+    <!-- Top-right meta -->
+    <div class="top-meta">
+      <div class="receipt-no">NO. RESIT : {{ receipt_number }}</div>
+      <div>TARIKH : {{ date }}</div>
+    </div>
+
+    <!-- Header -->
+    <div class="header">
+      <img class="logo" src="dpmm-logo-color.png" alt="Logo DPMM Negeri Johor">
+      <div class="org-name">DEWAN PERNIAGAAN MELAYU MALAYSIA NEGERI JOHOR</div>
+      <div class="org-reg">(PPM-002-14-11011957-000012)</div>
+      <div class="receipt-title">RESIT RASMI</div>
+    </div>
+
+    <!-- Body fields -->
+    <div class="body-fields">
+      <div class="field-row">
+        <span class="field-label">DI TERIMA DARIPADA :</span>
+        <span class="field-value">{{ received_from }}</span>
+      </div>
+
+      <div class="field-row">
+        <span class="field-label">BAYARAN UNTUK :</span>
+        <span class="field-value">{{ payment_for }}</span>
+      </div>
+
+      <div class="field-row amount">
+        <span class="field-label">JUMLAH (RM) :</span>
+        <span class="field-value">{{ amount }}</span>
+      </div>
+
+      <div class="field-row words">
+        <span class="field-label">RINGGIT MALAYSIA :</span>
+        <span class="field-value">{{ amount_words }}</span>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <div class="payment-method-title">PEMBAYARAN TELAH DIBUAT DENGAN CARA :-</div>
+
+      <div class="payment-options-row">
+        <div class="payment-options">
+          <span><span class="checkbox">{{ tunai_check }}</span>TUNAI</span>
+          <span><span class="checkbox">{{ online_check }}</span>ONLINE TRANSFER</span>
+          <span class="cheque-info">BANK/NO. CEK : <span class="underline-fill">{{ cheque_no }}</span></span>
+        </div>
+      </div>
+
+      <div class="signature-section">
+        <div class="signature-box">
+          <div class="signature-line"></div>
+          <div class="signature-label">DIKELUARKAN OLEH :</div>
+          <div class="signature-name">{{ issued_by }}</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>
