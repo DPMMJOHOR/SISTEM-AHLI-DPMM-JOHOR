@@ -335,15 +335,22 @@ function showReceiptsPage() {
       </div>
       <div class="sec-body">
         <div class="field-grp">
-          <label class="field-label">Ahli (untuk yuran keahlian)</label>
-          <select id="receipt-member-select" class="field-input">
-            <option value="">Pilih ahli...</option>
-          </select>
+          <label class="field-label">Slip Pembayaran / Bukti Pembayaran (pilihan)</label>
+          <input type="file" id="receipt-payment-slip" class="field-input" accept="image/*,application/pdf">
+          <small style="color: var(--muted); font-size: 12px;">Muat naik imej atau PDF slip pembayaran. Fail ini akan disimpan sebagai bukti pembayaran dan diproses dengan OCR.</small>
         </div>
         
-        <div class="field-grp">
-          <label class="field-label">Nama Penerima (jika bukan ahli)</label>
-          <input type="text" id="manual-payee-name" class="field-input" placeholder="Masukkan nama penerima...">
+        <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+          <div class="field-grp" style="flex: 1;">
+            <label class="field-label">Ahli (untuk yuran keahlian)</label>
+            <select id="receipt-member-select" class="field-input">
+              <option value="">Pilih ahli...</option>
+            </select>
+          </div>
+          <div class="field-grp" style="flex: 1;">
+            <label class="field-label">Nama Penerima (jika bukan ahli)</label>
+            <input type="text" id="manual-payee-name" class="field-input" placeholder="Masukkan nama penerima...">
+          </div>
         </div>
         
         <div class="field-grp">
@@ -351,43 +358,39 @@ function showReceiptsPage() {
           <input type="text" id="receipt-description" class="field-input" placeholder="Penerangan pembayaran...">
         </div>
         
-        <div class="field-grp">
-          <label class="field-label">Jumlah (RM)</label>
-          <input type="number" id="receipt-amount" class="field-input" placeholder="0.00" step="0.01">
-        </div>
-        
-        <div class="field-grp">
-          <label class="field-label">Kaedah Pembayaran</label>
-          <div class="payment-method-checkboxes" style="display:flex; gap:20px; flex-wrap:wrap; margin-top:6px;">
-            <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-weight:normal;">
-              <input type="checkbox" id="receipt-pm-cash" class="receipt-pm-checkbox" data-method="cash">
-              Tunai
-            </label>
-            <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-weight:normal;">
-              <input type="checkbox" id="receipt-pm-online" class="receipt-pm-checkbox" data-method="online">
-              Pindahan Dalam Talian
-            </label>
-            <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-weight:normal;">
-              <input type="checkbox" id="receipt-pm-cheque" class="receipt-pm-checkbox" data-method="cheque">
-              Cek
-            </label>
+        <div style="display: flex; gap: 12px; align-items: flex-end; margin-bottom: 16px;">
+          <div class="field-grp" style="flex: 0 0 140px;">
+            <label class="field-label">Jumlah (RM)</label>
+            <input type="number" id="receipt-amount" class="field-input" placeholder="0.00" step="0.01">
+          </div>
+          <div class="field-grp" style="flex: 1;">
+            <label class="field-label">Kaedah Pembayaran</label>
+            <div class="payment-method-checkboxes" style="display:flex; gap:16px; flex-wrap:wrap; margin-top:6px;">
+              <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-weight:normal;">
+                <input type="checkbox" id="receipt-pm-cash" class="receipt-pm-checkbox" data-method="cash">
+                Tunai
+              </label>
+              <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-weight:normal;">
+                <input type="checkbox" id="receipt-pm-online" class="receipt-pm-checkbox" data-method="online">
+                Online
+              </label>
+              <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-weight:normal;">
+                <input type="checkbox" id="receipt-pm-cheque" class="receipt-pm-checkbox" data-method="cheque">
+                Cek
+              </label>
+            </div>
+          </div>
+          <div class="field-grp" id="receipt-cheque-info-grp" style="flex: 1; display:none;">
+            <label class="field-label">No. Cek / Bank</label>
+            <input type="text" id="receipt-cheque-info" class="field-input" placeholder="123456 - MAYBANK">
           </div>
         </div>
         
-        <div class="field-grp" id="receipt-cheque-info-grp" style="display:none;">
-          <label class="field-label">No. Cek / Bank</label>
-          <input type="text" id="receipt-cheque-info" class="field-input" placeholder="Contoh: 123456 - MAYBANK">
-        </div>
-        
-        <div class="field-grp">
-          <label class="field-label">Tarikh Pembayaran</label>
-          <input type="date" id="receipt-payment-date" class="field-input">
-        </div>
-        
-        <div class="field-grp">
-          <label class="field-label">Slip Pembayaran / Bukti Pembayaran (pilihan)</label>
-          <input type="file" id="receipt-payment-slip" class="field-input" accept="image/*,application/pdf">
-          <small style="color: var(--muted); font-size: 12px;">Muat naik imej atau PDF slip pembayaran. Fail ini akan disimpan sebagai bukti pembayaran dan diproses dengan OCR.</small>
+        <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+          <div class="field-grp" style="flex: 0 0 auto;">
+            <label class="field-label">Tarikh Pembayaran</label>
+            <input type="date" id="receipt-payment-date" class="field-input">
+          </div>
         </div>
         
         <div id="ocr-status" class="alert" style="display:none;">
