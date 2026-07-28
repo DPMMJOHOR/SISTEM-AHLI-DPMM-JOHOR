@@ -1,6 +1,6 @@
 // Receipt and Payment Voucher System - Frontend UI Components
 // Integrated with Sistem Ahli
-// Cache-bust: 2026-07-28-00-45
+// Cache-bust: 2026-07-28-01-30
 
 // Error and Success UI Helpers
 function showError(message) {
@@ -41,6 +41,9 @@ function showReceiptActions(receiptData) {
       <button id="download-receipt-btn" class="btn btn-primary" style="flex: 1; min-width: 150px;">
         📥 Muat Turun PDF
       </button>
+      <button id="print-receipt-template-btn" class="btn btn-outline" style="flex: 1; min-width: 150px;">
+        🖨️ Cetak Resit
+      </button>
       <button id="whatsapp-receipt-btn" class="btn btn-success" style="flex: 1; min-width: 150px; background: #25D366;">
         📱 Hantar WhatsApp
       </button>
@@ -80,6 +83,12 @@ function showReceiptActions(receiptData) {
     }
   });
   
+  // Print (receipt_template.html) button handler
+  document.getElementById('print-receipt-template-btn').addEventListener('click', () => {
+    console.log('Print receipt template button clicked');
+    printReceiptTemplate(receiptData);
+  });
+  
   // WhatsApp button handler
   document.getElementById('whatsapp-receipt-btn').addEventListener('click', () => {
     console.log('WhatsApp button clicked');
@@ -99,6 +108,144 @@ function showReceiptActions(receiptData) {
   
   // Remove actions div after 5 minutes
   setTimeout(() => actionsDiv.remove(), 300000);
+}
+
+// ── receipt_template.html rendering helpers ──────────────────────────
+
+let _receiptTemplateHtmlCache = null;
+
+// Fetch and cache receipt_template.html (lives alongside index.html)
+async function loadReceiptTemplateHtml() {
+  if (_receiptTemplateHtmlCache) return _receiptTemplateHtmlCache;
+  const response = await fetch('receipt_template.html');
+  if (!response.ok) {
+    throw new Error(`Gagal memuat receipt_template.html (status ${response.status})`);
+  }
+  _receiptTemplateHtmlCache = await response.text();
+  return _receiptTemplateHtmlCache;
+}
+
+// Format a 'YYYY-MM-DD' (or any Date-parseable) date string as 'DD/MM/YYYY'
+function formatReceiptDateDMY(dateStr) {
+  if (!dateStr) return '';
+  // Parse 'YYYY-MM-DD' manually to avoid UTC/local timezone off-by-one issues
+  const isoMatch = /^(\d{4})-(\d{2})-(\d{2})/.exec(dateStr);
+  if (isoMatch) {
+    const [, y, m, d] = isoMatch;
+    return `${d}/${m}/${y}`;
+  }
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr;
+  return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+}
+
+// Format a numeric amount as '1,500.00'
+function formatReceiptAmount(amount) {
+  const num = parseFloat(amount) || 0;
+  return num.toLocaleString('en-MY', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+// Convert a ringgit amount (whole number part) to Malay words, e.g. 1500 -> "SATU RIBU LIMA RATUS"
+function amountToWordsMY(amount) {
+  const num = Math.floor(parseFloat(amount) || 0);
+  if (num === 0) return 'KOSONG';
+  
+  const ones = ['', 'SATU', 'DUA', 'TIGA', 'EMPAT', 'LIMA', 'ENAM', 'TUJUH', 'LAPAN', 'SEMBILAN'];
+  const teens = ['SEPULUH', 'SEBELAS', 'DUA BELAS', 'TIGA BELAS', 'EMPAT BELAS', 'LIMA BELAS', 'ENAM BELAS', 'TUJUH BELAS', 'LAPAN BELAS', 'SEMBILAN BELAS'];
+  const tens = ['', '', 'DUA PULUH', 'TIGA PULUH', 'EMPAT PULUH', 'LIMA PULUH', 'ENAM PULUH', 'TUJUH PULUH', 'LAPAN PULUH', 'SEMBILAN PULUH'];
+  const scales = ['', ' RIBU', ' JUTA', ' BILION'];
+  
+  function threeDigitsToWords(n) {
+    let str = '';
+    const h = Math.floor(n / 100);
+    const rem = n % 100;
+    if (h > 0) {
+      str += (h === 1 ? 'SERATUS' : ones[h] + ' RATUS');
+      if (rem > 0) str += ' ';
+    }
+    if (rem >= 10 && rem < 20) {
+      str += teens[rem - 10];
+    } else {
+      const t = Math.floor(rem / 10);
+      const o = rem % 10;
+      if (t > 0) str += tens[t];
+      if (t > 0 && o > 0) str += ' ';
+      if (o > 0) str += ones[o];
+    }
+    return str;
+  }
+  
+  const groups = [];
+  let n = num;
+  while (n > 0) {
+    groups.push(n % 1000);
+    n = Math.floor(n / 1000);
+  }
+  
+  const parts = [];
+  for (let i = groups.length - 1; i >= 0; i--) {
+    if (groups[i] > 0) {
+      parts.push(threeDigitsToWords(groups[i]) + scales[i]);
+    }
+  }
+  return parts.join(' ').trim();
+}
+
+// Map a payment_method value ('cash'/'online'/'cheque'/'other') to checkbox marks + cheque/reference no.
+function getReceiptPaymentMarks(paymentMethod, referenceNo) {
+  return {
+    tunaiCheck: paymentMethod === 'cash' ? 'X' : '',
+    onlineCheck: paymentMethod === 'online' ? 'X' : '',
+    chequeNo: referenceNo || (paymentMethod === 'cheque' ? '' : 'N/A')
+  };
+}
+
+// Fill receipt_template.html placeholders with real data and return the final HTML string
+async function renderReceiptTemplateHtml(data) {
+  const html = await loadReceiptTemplateHtml();
+  const marks = getReceiptPaymentMarks(data.paymentMethod, data.transactionId);
+  const amountWords = data.amountWords || (amountToWordsMY(data.amount) + ' SAHAJA');
+  
+  const values = {
+    receipt_number: data.receiptNumber || '',
+    date: formatReceiptDateDMY(data.paymentDate || data.date),
+    received_from: data.receivedFrom || '',
+    payment_for: data.paymentFor || '',
+    amount: formatReceiptAmount(data.amount),
+    amount_words: amountWords,
+    tunai_check: marks.tunaiCheck,
+    online_check: marks.onlineCheck,
+    cheque_no: marks.chequeNo,
+    issued_by: data.issuedBy || (typeof currentUser !== 'undefined' && currentUser ? currentUser.name : 'Setiausaha Kehormat')
+  };
+  
+  const filled = html.replace(/\{\{\s*(\w+)\s*\}\}/g, (match, key) => {
+    return Object.prototype.hasOwnProperty.call(values, key) ? values[key] : '';
+  });
+  
+  // Inject a <base> tag so relative asset paths (e.g. the logo image) resolve
+  // correctly when this HTML is written into a blank popup window.
+  const baseHref = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
+  return filled.replace('<head>', `<head>\n<base href="${baseHref}">`);
+}
+
+// Open a print-ready window using receipt_template.html filled with receipt data
+async function printReceiptTemplate(data) {
+  try {
+    const html = await renderReceiptTemplateHtml(data);
+    const printWindow = window.open('', '_blank', 'width=650,height=400');
+    if (!printWindow) {
+      showError('Pop-up blocker menghalang pembukaan resit. Sila benarkan pop-up untuk ciri ini.');
+      return;
+    }
+    printWindow.document.open();
+    printWindow.document.write(html);
+    printWindow.document.close();
+    printWindow.onload = () => printWindow.print();
+  } catch (error) {
+    console.error('Error printing receipt template:', error);
+    showError('Ralat mencetak resit: ' + error.message);
+  }
 }
 
 // Receipt Management Section
@@ -621,7 +768,8 @@ async function loadPendingApprovals() {
 
 // Generate receipt
 async function handleGenerateReceipt() {
-  const memberId = document.getElementById('receipt-member-select').value;
+  const memberSelect = document.getElementById('receipt-member-select');
+  const memberId = memberSelect.value;
   const amount = document.getElementById('receipt-amount').value;
   const paymentMethod = document.getElementById('receipt-payment-method').value;
   const paymentDate = document.getElementById('receipt-payment-date').value;
@@ -639,6 +787,11 @@ async function handleGenerateReceipt() {
     return;
   }
   
+  // Bug fix: transactionId was previously scoped inside the `if (slipFile)` block
+  // and never reached generateReceipt(), so OCR-derived transaction IDs were silently
+  // discarded and never saved to the receipt record.
+  let transactionId = null;
+  
   try {
     // If payment slip uploaded, process OCR first
     if (slipFile) {
@@ -648,7 +801,7 @@ async function handleGenerateReceipt() {
       ocrText.textContent = 'Memproses slip pembayaran dengan OCR...';
       
       const slipUrl = await uploadPaymentSlip(slipFile, memberId || 0, amount, paymentMethod, paymentDate);
-      const transactionId = await processOCR(slipUrl);
+      transactionId = await processOCR(slipUrl);
       
       ocrText.textContent = `OCR Selesai. ID Transaksi: ${transactionId}`;
       document.getElementById('transaction-id-display').style.display = 'block';
@@ -656,8 +809,8 @@ async function handleGenerateReceipt() {
     }
     
     // Generate receipt (calls the implementation in index.html)
-    console.log('Calling generateReceipt with:', memberId, amount, paymentMethod, paymentDate);
-    const receiptData = await generateReceipt(memberId || null, amount, paymentMethod, paymentDate, null, null, manualPayeeName, description);
+    console.log('Calling generateReceipt with:', memberId, amount, paymentMethod, paymentDate, transactionId);
+    const receiptData = await generateReceipt(memberId || null, amount, paymentMethod, paymentDate, transactionId, null, manualPayeeName, description);
     console.log('generateReceipt returned:', receiptData);
     
     if (!receiptData) {
@@ -668,7 +821,18 @@ async function handleGenerateReceipt() {
       throw new Error(receiptData.error || 'Receipt generation failed');
     }
     
-    // Show download and WhatsApp buttons
+    // Enrich receiptData with the raw form inputs so the receipt_template.html
+    // print/preview has everything it needs without a round-trip to the database.
+    const receivedFromLabel = manualPayeeName
+      || (memberSelect.selectedOptions[0] ? memberSelect.selectedOptions[0].textContent.replace(/\s*\([^)]*\)\s*$/, '').trim() : '');
+    receiptData.receivedFrom = receivedFromLabel;
+    receiptData.paymentFor = description || 'Yuran Keahlian';
+    receiptData.amount = amount;
+    receiptData.paymentMethod = paymentMethod;
+    receiptData.paymentDate = paymentDate;
+    receiptData.transactionId = transactionId;
+    
+    // Show download, WhatsApp, and print-template buttons
     showReceiptActions(receiptData);
     
     showSuccess(`Resit dijana: ${receiptData.receiptNumber}`);
@@ -1069,34 +1233,18 @@ async function sendReceiptEmail(receipt) {
 // Download receipt PDF - removed (PDF now available for immediate download after generation)
 // Download voucher PDF - removed (PDF now available for immediate download after generation)
 
-// View and print receipt by regenerating PDF from database data
+// View and print receipt using receipt_template.html, filled with database data
 async function viewAndPrintReceipt(receipt) {
   try {
-    // Call the PDF generation function with database data
-    const pdfData = await generateReceiptPDF(
-      receipt.receipt_number,
-      { memberName: receipt.member_name, nomborAhli: receipt.nombor_ahli },
-      receipt.amount,
-      receipt.payment_method,
-      receipt.payment_date,
-      receipt.transaction_id,
-      receipt.description
-    );
-    
-    // Create blob URL and open in new window
-    const url = URL.createObjectURL(pdfData.pdfBlob);
-    const printWindow = window.open(url, '_blank');
-    
-    if (printWindow) {
-      printWindow.onload = function() {
-        printWindow.print();
-      };
-    } else {
-      showError('Pop-up blocker menghalang pembukaan PDF. Sila benarkan pop-up untuk ciri ini.');
-    }
-    
-    // Clean up blob URL after 1 minute
-    setTimeout(() => URL.revokeObjectURL(url), 60000);
+    await printReceiptTemplate({
+      receiptNumber: receipt.receipt_number,
+      receivedFrom: receipt.member_name,
+      paymentFor: receipt.description,
+      amount: receipt.amount,
+      paymentMethod: receipt.payment_method,
+      paymentDate: receipt.payment_date || receipt.receipt_date,
+      transactionId: receipt.transaction_id
+    });
   } catch (error) {
     console.error('Error viewing receipt:', error);
     showError('Ralat memaparkan resit: ' + error.message);
