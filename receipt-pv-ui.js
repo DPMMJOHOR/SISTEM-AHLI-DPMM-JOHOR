@@ -297,6 +297,7 @@ async function showReceiptDetailModal(receipt, slip) {
     <div class="field-grp"><label class="field-label">Kaedah Pembayaran</label><div>${receipt.payment_method || '-'}</div></div>
     <div class="field-grp"><label class="field-label">Tarikh Pembayaran</label><div>${receipt.payment_date ? new Date(receipt.payment_date).toLocaleDateString() : '-'}</div></div>
     <div class="field-grp"><label class="field-label">ID Transaksi / No. Cek</label><div>${receipt.transaction_id || 'N/A'}</div></div>
+    <div class="field-grp"><label class="field-label">Dijana Oleh</label><div>${receipt.DPMM_USERS?.nama || receipt.created_by || '-'}</div></div>
     <div class="field-grp full"><label class="field-label">Penerangan Pembayaran</label><div>${receipt.description || '-'}</div></div>
     <div class="field-grp full">
       <label class="field-label">Bukti Pembayaran</label>
@@ -606,7 +607,7 @@ async function loadReceipts() {
   try {
     const { data, error } = await supabaseClient
       .from('receipts')
-      .select('*')
+      .select('*, DPMM_USERS(nama)')
       .order('receipt_date', { ascending: false });
     
     if (error) {
