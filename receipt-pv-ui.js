@@ -218,7 +218,7 @@ async function renderReceiptTemplateHtml(data) {
     online_check: marks.onlineCheck,
     cek_check: marks.cekCheck,
     cheque_no: marks.chequeNo,
-    issued_by: data.issuedBy || (typeof currentUser !== 'undefined' && currentUser ? currentUser.name : 'Setiausaha Kehormat')
+    issued_by: data.issuedBy || 'Resit dijana secara atas talian dari sistem rasmi DPMM Johor. Tiada tandatangan di perlukan'
   };
   
   const filled = html.replace(/\{\{\s*(\w+)\s*\}\}/g, (match, key) => {
