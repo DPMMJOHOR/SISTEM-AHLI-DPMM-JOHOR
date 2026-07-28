@@ -250,6 +250,79 @@ async function printReceiptTemplate(data) {
   }
 }
 
+// Open the stored proof-of-payment (image or PDF) in a new tab via a fresh signed URL
+async function viewPaymentProof(slipImagePath) {
+  try {
+    const signedUrl = await getSignedPaymentSlipUrl(slipImagePath, 3600);
+    if (!signedUrl) {
+      showError('Gagal mendapatkan bukti pembayaran. Fail mungkin telah dipadam.');
+      return;
+    }
+    window.open(signedUrl, '_blank');
+  } catch (error) {
+    console.error('Error viewing payment proof:', error);
+    showError('Ralat memaparkan bukti pembayaran: ' + error.message);
+  }
+}
+
+// Show a full detail popup for a receipt (same interaction pattern as clicking
+// an "Ahli" in Senarai Ahli) - all receipt fields plus its Bukti Pembayaran.
+async function showReceiptDetailModal(receipt, slip) {
+  let modal = document.getElementById('receipt-detail-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.id = 'receipt-detail-modal';
+    modal.innerHTML = `
+      <div class="modal">
+        <div class="modal-head">
+          <h3>Butiran Resit</h3>
+          <button class="modal-close" onclick="closeModal('receipt-detail-modal')">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="field-grid" id="receipt-detail-fields"></div>
+          <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap;" id="receipt-detail-actions"></div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+  }
+  
+  const fieldsHtml = `
+    <div class="field-grp"><label class="field-label">Nombor Resit</label><div>${receipt.receipt_number || '-'}</div></div>
+    <div class="field-grp"><label class="field-label">Tarikh</label><div>${new Date(receipt.receipt_date).toLocaleDateString()}</div></div>
+    <div class="field-grp"><label class="field-label">Diterima Daripada</label><div>${receipt.member_name || '-'}</div></div>
+    <div class="field-grp"><label class="field-label">No. Ahli</label><div>${receipt.nombor_ahli || 'N/A'}</div></div>
+    <div class="field-grp"><label class="field-label">Jumlah</label><div>RM ${parseFloat(receipt.amount || 0).toFixed(2)}</div></div>
+    <div class="field-grp"><label class="field-label">Kaedah Pembayaran</label><div>${receipt.payment_method || '-'}</div></div>
+    <div class="field-grp"><label class="field-label">Tarikh Pembayaran</label><div>${receipt.payment_date ? new Date(receipt.payment_date).toLocaleDateString() : '-'}</div></div>
+    <div class="field-grp"><label class="field-label">ID Transaksi / No. Cek</label><div>${receipt.transaction_id || 'N/A'}</div></div>
+    <div class="field-grp full"><label class="field-label">Penerangan Pembayaran</label><div>${receipt.description || '-'}</div></div>
+    <div class="field-grp full">
+      <label class="field-label">Bukti Pembayaran</label>
+      <div>${slip && slip.slip_image_url
+        ? `<span style="color: var(--success);">✓ Slip pembayaran tersedia (No. Slip: ${slip.slip_number || '-'})</span>`
+        : `<span style="color: var(--muted); font-style: italic;">Tiada bukti pembayaran</span>`}</div>
+    </div>
+  `;
+  document.getElementById('receipt-detail-fields').innerHTML = fieldsHtml;
+  
+  let actionsHtml = `<button class="btn btn-outline" id="receipt-detail-print-btn">🖨️ Lihat/Cetak Resit</button>`;
+  if (slip && slip.slip_image_url) {
+    actionsHtml += `<button class="btn btn-primary" id="receipt-detail-view-proof-btn">📎 Lihat Bukti Pembayaran</button>`;
+  }
+  document.getElementById('receipt-detail-actions').innerHTML = actionsHtml;
+  
+  document.getElementById('receipt-detail-print-btn').onclick = () => viewAndPrintReceipt(receipt);
+  
+  const proofBtn = document.getElementById('receipt-detail-view-proof-btn');
+  if (proofBtn) {
+    proofBtn.onclick = () => viewPaymentProof(slip.slip_image_url);
+  }
+  
+  modal.classList.add('show');
+}
+
 // Receipt Management Section
 function showReceiptsPage() {
   const container = document.getElementById('receipts-list');
@@ -311,9 +384,9 @@ function showReceiptsPage() {
         </div>
         
         <div class="field-grp">
-          <label class="field-label">Slip Pembayaran (pilihan)</label>
-          <input type="file" id="receipt-payment-slip" class="field-input" accept="image/*">
-          <small style="color: var(--muted); font-size: 12px;">Muat naik slip pembayaran untuk pemprosesan OCR</small>
+          <label class="field-label">Slip Pembayaran / Bukti Pembayaran (pilihan)</label>
+          <input type="file" id="receipt-payment-slip" class="field-input" accept="image/*,application/pdf">
+          <small style="color: var(--muted); font-size: 12px;">Muat naik imej atau PDF slip pembayaran. Fail ini akan disimpan sebagai bukti pembayaran dan diproses dengan OCR.</small>
         </div>
         
         <div id="ocr-status" class="alert" style="display:none;">
@@ -343,12 +416,13 @@ function showReceiptsPage() {
                 <th>Jumlah</th>
                 <th>Kaedah</th>
                 <th>ID Transaksi</th>
+                <th>Bukti Pembayaran</th>
                 <th>Tindakan</th>
               </tr>
             </thead>
             <tbody id="receipts-table-body">
               <tr>
-                <td colspan="7" style="text-align: center; color: var(--muted);">Memuatkan resit...</td>
+                <td colspan="8" style="text-align: center; color: var(--muted);">Memuatkan resit...</td>
               </tr>
             </tbody>
           </table>
@@ -543,7 +617,7 @@ async function loadReceipts() {
     if (data.length === 0) {
       const tr = document.createElement('tr');
       const td = document.createElement('td');
-      td.colSpan = 7;
+      td.colSpan = 8;
       td.className = 'text-center';
       td.textContent = 'Tiada resit dijumpai';
       tr.appendChild(td);
@@ -551,9 +625,16 @@ async function loadReceipts() {
       return;
     }
     
+    // Batch-fetch the payment_slips linked to these receipts, so we can show
+    // "Bukti Pembayaran" (proof of payment) for each row.
+    const slipIds = data.map(r => r.payment_slip_id).filter(Boolean);
+    const slipsById = await getPaymentSlipsByIds(slipIds);
+    
     tbody.innerHTML = '';
     data.forEach(receipt => {
       const tr = document.createElement('tr');
+      tr.style.cursor = 'pointer';
+      const slip = receipt.payment_slip_id ? slipsById[receipt.payment_slip_id] : null;
       
       const tdNumber = document.createElement('td');
       tdNumber.textContent = receipt.receipt_number;
@@ -579,6 +660,32 @@ async function loadReceipts() {
       tdTransId.textContent = receipt.transaction_id || 'N/A';
       tr.appendChild(tdTransId);
       
+      // Bukti Pembayaran column
+      const tdProof = document.createElement('td');
+      if (slip && slip.slip_image_url) {
+        const proofBtn = document.createElement('button');
+        proofBtn.textContent = '📎 Lihat Bukti';
+        proofBtn.className = 'btn btn-sm btn-outline';
+        proofBtn.style.padding = '6px 12px';
+        proofBtn.style.borderRadius = '6px';
+        proofBtn.style.fontSize = '12px';
+        proofBtn.style.fontWeight = '600';
+        proofBtn.style.cursor = 'pointer';
+        proofBtn.onclick = (e) => {
+          e.stopPropagation();
+          viewPaymentProof(slip.slip_image_url);
+        };
+        tdProof.appendChild(proofBtn);
+      } else {
+        const span = document.createElement('span');
+        span.textContent = 'Tiada bukti pembayaran';
+        span.style.color = 'var(--muted)';
+        span.style.fontStyle = 'italic';
+        span.style.fontSize = '12px';
+        tdProof.appendChild(span);
+      }
+      tr.appendChild(tdProof);
+      
       const tdAction = document.createElement('td');
       tdAction.style.textAlign = 'center';
       tdAction.style.padding = '12px';
@@ -593,7 +700,7 @@ async function loadReceipts() {
       
       // View/Print button - regenerates PDF from database data
       const btnView = document.createElement('button');
-      btnView.textContent = '�️ Lihat/Cetak';
+      btnView.textContent = '🖨️ Lihat/Cetak';
       btnView.className = 'btn btn-sm btn-outline';
       btnView.style.padding = '8px 16px';
       btnView.style.borderRadius = '6px';
@@ -601,7 +708,7 @@ async function loadReceipts() {
       btnView.style.fontWeight = '600';
       btnView.style.cursor = 'pointer';
       btnView.style.transition = 'all 0.2s ease';
-      btnView.onclick = () => viewAndPrintReceipt(receipt);
+      btnView.onclick = (e) => { e.stopPropagation(); viewAndPrintReceipt(receipt); };
       buttonContainer.appendChild(btnView);
       
       // Delete button
@@ -617,18 +724,22 @@ async function loadReceipts() {
       btnDelete.style.fontWeight = '600';
       btnDelete.style.cursor = 'pointer';
       btnDelete.style.transition = 'all 0.2s ease';
-      btnDelete.onclick = () => deleteReceipt(receipt.id, receipt.receipt_number);
+      btnDelete.onclick = (e) => { e.stopPropagation(); deleteReceipt(receipt.id, receipt.receipt_number); };
       buttonContainer.appendChild(btnDelete);
       
       tdAction.appendChild(buttonContainer);
       
       tr.appendChild(tdAction);
       
+      // Clicking anywhere else on the row opens the full receipt detail popup
+      // (same interaction pattern as clicking an "Ahli" in Senarai Ahli).
+      tr.addEventListener('click', () => showReceiptDetailModal(receipt, slip));
+      
       tbody.appendChild(tr);
     });
   } catch (err) {
     console.error('Error loading receipts:', err);
-    tbody.innerHTML = '<tr><td colspan="7" class="text-center">Ralat memuat resit: ' + err.message + '</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" class="text-center">Ralat memuat resit: ' + err.message + '</td></tr>';
   }
 }
 
@@ -839,6 +950,10 @@ async function handleGenerateReceipt() {
   // and never reached generateReceipt(), so OCR-derived transaction IDs were silently
   // discarded and never saved to the receipt record.
   let transactionId = null;
+  // Bug fix: the uploaded slip's ID was never passed to generateReceipt(), so the
+  // receipt's `payment_slip_id` column was always null and the uploaded proof of
+  // payment could never be linked back to (or shown for) its receipt.
+  let slipId = null;
   
   try {
     // If payment slip uploaded, process OCR first
@@ -846,7 +961,7 @@ async function handleGenerateReceipt() {
       const ocrStatus = document.getElementById('ocr-status');
       const ocrText = document.getElementById('ocr-status-text');
       ocrStatus.style.display = 'block';
-      ocrText.textContent = 'Memproses slip pembayaran dengan OCR...';
+      ocrText.textContent = 'Memuat naik dan memproses slip pembayaran dengan OCR...';
       
       // Bug fix: uploadPaymentSlip() already runs OCR internally (with the correct
       // storage path + slip ID) and returns the result as `ocrResult`. The previous
@@ -856,10 +971,11 @@ async function handleGenerateReceipt() {
       if (!uploadResult.success) {
         throw new Error(uploadResult.error || 'Gagal memuat naik slip pembayaran');
       }
+      slipId = uploadResult.slipId;
       const ocrResult = uploadResult.ocrResult || {};
       transactionId = ocrResult.transactionId || '';
       
-      ocrText.textContent = `OCR Selesai. ID Transaksi: ${transactionId || '-'}`;
+      ocrText.textContent = `Slip disimpan sebagai bukti pembayaran. OCR Selesai. ID Transaksi: ${transactionId || '-'}`;
       document.getElementById('transaction-id-display').style.display = 'block';
       document.getElementById('transaction-id-text').textContent = transactionId || '-';
       
@@ -878,8 +994,8 @@ async function handleGenerateReceipt() {
     }
     
     // Generate receipt (calls the implementation in index.html)
-    console.log('Calling generateReceipt with:', memberId, amount, paymentMethod, paymentDate, transactionId);
-    const receiptData = await generateReceipt(memberId || null, amount, paymentMethod, paymentDate, transactionId, null, manualPayeeName, description);
+    console.log('Calling generateReceipt with:', memberId, amount, paymentMethod, paymentDate, transactionId, slipId);
+    const receiptData = await generateReceipt(memberId || null, amount, paymentMethod, paymentDate, transactionId, slipId, manualPayeeName, description);
     console.log('generateReceipt returned:', receiptData);
     
     if (!receiptData) {

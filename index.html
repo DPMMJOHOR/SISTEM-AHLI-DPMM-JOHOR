@@ -11,6 +11,12 @@
 <script src="https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/dist/bcrypt.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+<script>
+  if (typeof pdfjsLib !== 'undefined') {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+  }
+</script>
 <script src="src/config-loader.js"></script>
 <script src="src/sentry-config.js" defer></script>
 <style>
@@ -7734,14 +7740,14 @@ function validateAmount(amount) {
 }
 
 function validateFile(file) {
-  const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+  const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'application/pdf'];
   const maxSize = 5 * 1024 * 1024; // 5MB
   
   if (!allowedTypes.includes(file.type)) {
-    return { valid: false, error: 'Invalid file type. Only PNG and JPG allowed.' };
+    return { valid: false, error: 'Jenis fail tidak sah. Hanya PNG, JPG, atau PDF dibenarkan.' };
   }
   if (file.size > maxSize) {
-    return { valid: false, error: 'File size exceeds 5MB limit' };
+    return { valid: false, error: 'Saiz fail melebihi had 5MB' };
   }
   return { valid: true };
 }
@@ -7755,6 +7761,9 @@ function validateDate(dateString) {
 }
 
 // Payment Slip Upload
+// Serves 2 purposes: (1) record keeping - the original file (image or PDF) is
+// permanently kept in Supabase Storage and linked to the receipt via payment_slip_id;
+// (2) OCR data extraction to help fill in the receipt generation form.
 async function uploadPaymentSlip(imageFile, memberId, amount, paymentMethod, paymentDate) {
   try {
     // Validate inputs
@@ -7767,18 +7776,36 @@ async function uploadPaymentSlip(imageFile, memberId, amount, paymentMethod, pay
     const dateCheck = validateDate(paymentDate);
     if (!dateCheck.valid) return { success: false, error: dateCheck.error };
     
-    // Upload to Supabase Storage
+    const isPdf = imageFile.type === 'application/pdf';
+    
+    // Bug fix: filename was previously always suffixed ".png" even for PDF uploads,
+    // corrupting the stored record. Preserve the real file extension.
     const timestamp = Date.now();
-    const fileName = `slip_${timestamp}.png`;
+    const ext = isPdf ? 'pdf' : (imageFile.type === 'image/jpeg' || imageFile.type === 'image/jpg' ? 'jpg' : 'png');
+    const fileName = `slip_${timestamp}.${ext}`;
+    
+    // Upload to Supabase Storage (this is the permanent record-keeping copy)
     const { data, error } = await supabaseClient.storage
       .from('payment_slips')
       .upload(fileName, imageFile, {
-        cacheControl: 3600
+        cacheControl: 3600,
+        contentType: imageFile.type
       });
     
     if (error) throw error;
     
-    const imageUrl = data.path;
+    const storagePath = data.path;
+    
+    // Bug fix: `storagePath` (e.g. "slip_123.png") is only a path within the bucket,
+    // not a fetchable URL. The previous code passed this bare path straight into
+    // fetch() inside processOCR(), which always resolved against the page's own
+    // origin and 404'd — OCR silently failed on every single upload. Create a
+    // short-lived signed URL so OCR can actually read the file back.
+    const { data: signedUrlData, error: signedUrlError } = await supabaseClient.storage
+      .from('payment_slips')
+      .createSignedUrl(storagePath, 300);
+    
+    if (signedUrlError) throw signedUrlError;
     
     // Get authenticated user ID from Supabase auth
     const { data: { user } } = await supabaseClient.auth.getUser();
@@ -7798,6 +7825,9 @@ async function uploadPaymentSlip(imageFile, memberId, amount, paymentMethod, pay
     }
     
     // Store in payment_slips table
+    // Bug fix: `.insert()` without `.select()` returns `data: null` in supabase-js v2
+    // (rows are not returned by default), so `slipData.id` below was always throwing
+    // a TypeError and the whole upload was silently failing. Added `.select().single()`.
     const { data: slipData, error: slipError } = await supabaseClient
       .from('payment_slips')
       .insert({
@@ -7809,20 +7839,23 @@ async function uploadPaymentSlip(imageFile, memberId, amount, paymentMethod, pay
         amount: amount,
         payment_method: paymentMethod,
         payment_date: paymentDate,
-        slip_image_url: imageUrl,
+        slip_image_url: storagePath, // store the bucket path; sign it fresh whenever it needs to be viewed
         ocr_status: 'pending',
         uploaded_by: userId
-      });
+      })
+      .select()
+      .single();
     
     if (slipError) throw slipError;
     
-    // Trigger OCR processing
-    const ocrResult = await processOCR(imageUrl, slipData.id);
+    // Trigger OCR processing using the signed URL (handles images and PDFs)
+    const ocrResult = await processOCR(signedUrlData.signedUrl, slipData.id, isPdf);
     
     return {
       success: true,
       slipId: slipData.id,
       slipNumber: slipNumber,
+      slipImagePath: storagePath,
       ocrResult: ocrResult
     };
   } catch (error) {
@@ -7871,11 +7904,36 @@ function parseOCRText(rawText) {
   return { transactionId, chequeNo, bankName };
 }
 
-// OCR Processing using Tesseract.js
-async function processOCR(imageUrl, slipId) {
+// Render the first page of a PDF blob to a PNG image blob using pdf.js,
+// since Tesseract.js can only OCR raster images, not PDF documents directly.
+async function renderPdfFirstPageToImageBlob(pdfBlob) {
+  const arrayBuffer = await pdfBlob.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  const page = await pdf.getPage(1);
+  const viewport = page.getViewport({ scale: 2 }); // higher scale = better OCR accuracy
+  
+  const canvas = document.createElement('canvas');
+  canvas.width = viewport.width;
+  canvas.height = viewport.height;
+  const context = canvas.getContext('2d');
+  
+  await page.render({ canvasContext: context, viewport: viewport }).promise;
+  
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Gagal menukar PDF ke imej')), 'image/png');
+  });
+}
+
+// OCR Processing using Tesseract.js. Handles both images and PDF payment slips
+// (PDFs are rasterized to an image first via pdf.js, since Tesseract can't read PDFs directly).
+async function processOCR(imageUrl, slipId, isPdf) {
   try {
     const response = await fetch(imageUrl);
-    const blob = await response.blob();
+    let blob = await response.blob();
+    
+    if (isPdf || blob.type === 'application/pdf') {
+      blob = await renderPdfFirstPageToImageBlob(blob);
+    }
     
     const result = await Tesseract.recognize(blob, {
       logger: m => console.log(m)
@@ -7908,6 +7966,47 @@ async function processOCR(imageUrl, slipId) {
   } catch (error) {
     console.error('OCR processing error:', error);
     return { transactionId: '', chequeNo: '', bankName: '', rawText: '', status: 'failed', confidence: 0 };
+  }
+}
+
+// Get a fresh signed URL to view/download a stored payment slip (image or PDF)
+// from the private 'payment_slips' storage bucket. Used for the "Bukti Pembayaran" feature.
+async function getSignedPaymentSlipUrl(slipImagePath, expirySeconds) {
+  if (!slipImagePath) return null;
+  try {
+    const { data, error } = await supabaseClient.storage
+      .from('payment_slips')
+      .createSignedUrl(slipImagePath, expirySeconds || 3600);
+    if (error) {
+      console.error('getSignedPaymentSlipUrl error:', error);
+      return null;
+    }
+    return data.signedUrl;
+  } catch (error) {
+    console.error('getSignedPaymentSlipUrl error:', error);
+    return null;
+  }
+}
+
+// Fetch payment_slips rows for a list of slip IDs, keyed by id, for batch lookups
+async function getPaymentSlipsByIds(slipIds) {
+  const uniqueIds = [...new Set((slipIds || []).filter(Boolean))];
+  if (uniqueIds.length === 0) return {};
+  try {
+    const { data, error } = await supabaseClient
+      .from('payment_slips')
+      .select('id, slip_number, slip_image_url, uploaded_by')
+      .in('id', uniqueIds);
+    if (error) {
+      console.error('getPaymentSlipsByIds error:', error);
+      return {};
+    }
+    const map = {};
+    (data || []).forEach(row => { map[row.id] = row; });
+    return map;
+  } catch (error) {
+    console.error('getPaymentSlipsByIds error:', error);
+    return {};
   }
 }
 
