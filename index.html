@@ -7831,6 +7831,46 @@ async function uploadPaymentSlip(imageFile, memberId, amount, paymentMethod, pay
   }
 }
 
+// Known Malaysian bank names to detect in OCR text (cheque / bank transfer slips)
+const MALAYSIAN_BANK_NAMES = [
+  'MAYBANK', 'CIMB BANK', 'CIMB', 'PUBLIC BANK', 'RHB BANK', 'RHB', 'HONG LEONG BANK', 'HONG LEONG',
+  'AMBANK', 'BANK ISLAM', 'BANK RAKYAT', 'BSN', 'BANK SIMPANAN NASIONAL', 'OCBC BANK', 'OCBC',
+  'HSBC BANK', 'HSBC', 'UOB BANK', 'UOB', 'ALLIANCE BANK', 'AFFIN BANK', 'AFFIN',
+  'STANDARD CHARTERED', 'AL RAJHI BANK', 'MUAMALAT', 'AGROBANK'
+];
+
+// Parse raw OCR text for a transaction/reference ID and, for cheque payments,
+// a cheque number and bank name.
+function parseOCRText(rawText) {
+  const text = (rawText || '').trim();
+  const upperText = text.toUpperCase();
+  
+  // Transaction / reference number: look for common labels first, else fall back to raw text
+  let transactionId = text;
+  const refMatch = /(?:REF(?:ERENCE)?|TRANSACTION|TXN|RRN)\s*(?:NO\.?|NUMBER|ID)?[:\s#]*([A-Z0-9\-]{4,})/i.exec(text);
+  if (refMatch) {
+    transactionId = refMatch[1];
+  }
+  
+  // Cheque number: look for "CHEQUE NO", "CEK NO", "NO. CEK" style labels
+  let chequeNo = '';
+  const chequeMatch = /(?:CHEQUE|CEK)\s*(?:NO\.?|NUMBER)?[:\s#]*([0-9]{4,})/i.exec(text);
+  if (chequeMatch) {
+    chequeNo = chequeMatch[1];
+  }
+  
+  // Bank name: match against known Malaysian bank names
+  let bankName = '';
+  for (const bank of MALAYSIAN_BANK_NAMES) {
+    if (upperText.includes(bank)) {
+      bankName = bank;
+      break;
+    }
+  }
+  
+  return { transactionId, chequeNo, bankName };
+}
+
 // OCR Processing using Tesseract.js
 async function processOCR(imageUrl, slipId) {
   try {
@@ -7841,29 +7881,33 @@ async function processOCR(imageUrl, slipId) {
       logger: m => console.log(m)
     });
     
-    const transactionId = result.data.text.trim();
+    const rawText = result.data.text.trim();
+    const parsed = parseOCRText(rawText);
     
     // Update payment_slips table with OCR result
-    const ocrStatus = transactionId ? 'processed' : 'failed';
-    const ocrConfidence = transactionId ? 0.8 : 0;
+    const ocrStatus = parsed.transactionId ? 'processed' : 'failed';
+    const ocrConfidence = parsed.transactionId ? 0.8 : 0;
     
     await supabaseClient
       .from('payment_slips')
       .update({ 
-        transaction_id: transactionId,
+        transaction_id: parsed.transactionId,
         ocr_status: ocrStatus,
         ocr_confidence: ocrConfidence
       })
       .eq('id', slipId);
     
     return {
-      transactionId: transactionId,
+      transactionId: parsed.transactionId,
+      chequeNo: parsed.chequeNo,
+      bankName: parsed.bankName,
+      rawText: rawText,
       status: ocrStatus,
       confidence: ocrConfidence
     };
   } catch (error) {
     console.error('OCR processing error:', error);
-    return { transactionId: '', status: 'failed', confidence: 0 };
+    return { transactionId: '', chequeNo: '', bankName: '', rawText: '', status: 'failed', confidence: 0 };
   }
 }
 
@@ -8413,7 +8457,7 @@ async function applyDigitalSignatureToPDF(pdfUrl, signatureUrl, documentType) {
   }
 }
 </script>
-<script src="receipt-pv-ui.js?v=60"></script>
+<script src="receipt-pv-ui.js?v=70"></script>
 </body>
 </html>
 

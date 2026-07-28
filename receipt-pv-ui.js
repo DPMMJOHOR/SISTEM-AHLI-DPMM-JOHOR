@@ -1,6 +1,6 @@
 // Receipt and Payment Voucher System - Frontend UI Components
 // Integrated with Sistem Ahli
-// Cache-bust: 2026-07-28-01-30
+// Cache-bust: 2026-07-28-02-45
 
 // Error and Success UI Helpers
 function showError(message) {
@@ -196,6 +196,7 @@ function getReceiptPaymentMarks(paymentMethod, referenceNo) {
   return {
     tunaiCheck: paymentMethod === 'cash' ? 'X' : '',
     onlineCheck: paymentMethod === 'online' ? 'X' : '',
+    cekCheck: paymentMethod === 'cheque' ? 'X' : '',
     chequeNo: referenceNo || (paymentMethod === 'cheque' ? '' : 'N/A')
   };
 }
@@ -215,6 +216,7 @@ async function renderReceiptTemplateHtml(data) {
     amount_words: amountWords,
     tunai_check: marks.tunaiCheck,
     online_check: marks.onlineCheck,
+    cek_check: marks.cekCheck,
     cheque_no: marks.chequeNo,
     issued_by: data.issuedBy || (typeof currentUser !== 'undefined' && currentUser ? currentUser.name : 'Setiausaha Kehormat')
   };
@@ -282,12 +284,25 @@ function showReceiptsPage() {
         
         <div class="field-grp">
           <label class="field-label">Kaedah Pembayaran</label>
-          <select id="receipt-payment-method" class="field-input">
-            <option value="cash">Tunai</option>
-            <option value="online">Pindahan Dalam Talian</option>
-            <option value="cheque">Cek</option>
-            <option value="other">Lain-lain</option>
-          </select>
+          <div class="payment-method-checkboxes" style="display:flex; gap:20px; flex-wrap:wrap; margin-top:6px;">
+            <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-weight:normal;">
+              <input type="checkbox" id="receipt-pm-cash" class="receipt-pm-checkbox" data-method="cash">
+              Tunai
+            </label>
+            <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-weight:normal;">
+              <input type="checkbox" id="receipt-pm-online" class="receipt-pm-checkbox" data-method="online">
+              Pindahan Dalam Talian
+            </label>
+            <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-weight:normal;">
+              <input type="checkbox" id="receipt-pm-cheque" class="receipt-pm-checkbox" data-method="cheque">
+              Cek
+            </label>
+          </div>
+        </div>
+        
+        <div class="field-grp" id="receipt-cheque-info-grp" style="display:none;">
+          <label class="field-label">No. Cek / Bank</label>
+          <input type="text" id="receipt-cheque-info" class="field-input" placeholder="Contoh: 123456 - MAYBANK">
         </div>
         
         <div class="field-grp">
@@ -344,6 +359,32 @@ function showReceiptsPage() {
   
   loadMembers();
   loadReceipts();
+  setupReceiptPaymentMethodCheckboxes();
+}
+
+// Make the Tunai / Online Transfer / Cek checkboxes mutually exclusive,
+// and show/hide the "No. Cek / Bank" field depending on selection.
+function setupReceiptPaymentMethodCheckboxes() {
+  const checkboxes = document.querySelectorAll('.receipt-pm-checkbox');
+  const chequeInfoGrp = document.getElementById('receipt-cheque-info-grp');
+  
+  checkboxes.forEach(cb => {
+    cb.addEventListener('change', () => {
+      if (cb.checked) {
+        checkboxes.forEach(other => {
+          if (other !== cb) other.checked = false;
+        });
+      }
+      const chequeChecked = document.getElementById('receipt-pm-cheque')?.checked;
+      if (chequeInfoGrp) chequeInfoGrp.style.display = chequeChecked ? 'block' : 'none';
+    });
+  });
+}
+
+// Return the selected payment method ('cash'/'online'/'cheque') from the checkboxes, or null if none selected
+function getSelectedReceiptPaymentMethod() {
+  const checked = document.querySelector('.receipt-pm-checkbox:checked');
+  return checked ? checked.dataset.method : null;
 }
 
 // Payment Voucher Section
@@ -771,14 +812,21 @@ async function handleGenerateReceipt() {
   const memberSelect = document.getElementById('receipt-member-select');
   const memberId = memberSelect.value;
   const amount = document.getElementById('receipt-amount').value;
-  const paymentMethod = document.getElementById('receipt-payment-method').value;
+  const paymentMethod = getSelectedReceiptPaymentMethod();
   const paymentDate = document.getElementById('receipt-payment-date').value;
   const slipFile = document.getElementById('receipt-payment-slip').files[0];
   const manualPayeeName = document.getElementById('manual-payee-name')?.value || null;
   const description = document.getElementById('receipt-description')?.value || null;
+  const chequeInfoInput = document.getElementById('receipt-cheque-info');
+  let chequeInfo = chequeInfoInput?.value || null;
   
   if (!amount || !paymentDate) {
     showError('Sila isi semua medan yang diperlukan');
+    return;
+  }
+  
+  if (!paymentMethod) {
+    showError('Sila pilih kaedah pembayaran (Tunai / Pindahan Dalam Talian / Cek)');
     return;
   }
   
@@ -800,12 +848,33 @@ async function handleGenerateReceipt() {
       ocrStatus.style.display = 'block';
       ocrText.textContent = 'Memproses slip pembayaran dengan OCR...';
       
-      const slipUrl = await uploadPaymentSlip(slipFile, memberId || 0, amount, paymentMethod, paymentDate);
-      transactionId = await processOCR(slipUrl);
+      // Bug fix: uploadPaymentSlip() already runs OCR internally (with the correct
+      // storage path + slip ID) and returns the result as `ocrResult`. The previous
+      // code re-called processOCR() with the upload's return object (not a URL),
+      // which always failed silently and produced an empty transaction ID.
+      const uploadResult = await uploadPaymentSlip(slipFile, memberId || 0, amount, paymentMethod, paymentDate);
+      if (!uploadResult.success) {
+        throw new Error(uploadResult.error || 'Gagal memuat naik slip pembayaran');
+      }
+      const ocrResult = uploadResult.ocrResult || {};
+      transactionId = ocrResult.transactionId || '';
       
-      ocrText.textContent = `OCR Selesai. ID Transaksi: ${transactionId}`;
+      ocrText.textContent = `OCR Selesai. ID Transaksi: ${transactionId || '-'}`;
       document.getElementById('transaction-id-display').style.display = 'block';
-      document.getElementById('transaction-id-text').textContent = transactionId;
+      document.getElementById('transaction-id-text').textContent = transactionId || '-';
+      
+      // For cheque payments, auto-fill the "No. Cek / Bank" field from OCR
+      // (cheque number + detected bank name) if the user hasn't typed anything.
+      if (paymentMethod === 'cheque' && !chequeInfo && (ocrResult.chequeNo || ocrResult.bankName)) {
+        chequeInfo = [ocrResult.chequeNo, ocrResult.bankName].filter(Boolean).join(' - ');
+        if (chequeInfoInput) chequeInfoInput.value = chequeInfo;
+      }
+    }
+    
+    // For cheque payments, store the cheque number/bank as the transaction reference
+    // (this is what feeds the "BANK/NO. CEK" field on the printed receipt).
+    if (paymentMethod === 'cheque' && chequeInfo) {
+      transactionId = chequeInfo;
     }
     
     // Generate receipt (calls the implementation in index.html)
