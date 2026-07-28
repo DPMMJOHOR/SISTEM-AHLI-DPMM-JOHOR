@@ -407,6 +407,33 @@ function showReceiptsPage() {
         <h3>SEJARAH RESIT</h3>
       </div>
       <div class="sec-body">
+        <div style="display: flex; gap: 10px; align-items: flex-end; margin-bottom: 15px; flex-wrap: wrap;">
+          <div class="field-grp" style="flex: 0 0 auto;">
+            <label class="field-label">Bulan</label>
+            <select id="report-month" class="field-input" style="min-width: 120px;">
+              <option value="">Semua Bulan</option>
+              <option value="1">Januari</option>
+              <option value="2">Februari</option>
+              <option value="3">Mac</option>
+              <option value="4">April</option>
+              <option value="5">Mei</option>
+              <option value="6">Jun</option>
+              <option value="7">Julai</option>
+              <option value="8">Ogos</option>
+              <option value="9">September</option>
+              <option value="10">Oktober</option>
+              <option value="11">November</option>
+              <option value="12">Disember</option>
+            </select>
+          </div>
+          <div class="field-grp" style="flex: 0 0 auto;">
+            <label class="field-label">Tahun</label>
+            <select id="report-year" class="field-input" style="min-width: 100px;">
+              <option value="">Semua Tahun</option>
+            </select>
+          </div>
+          <button onclick="generateReceiptReport()" class="btn btn-primary" style="flex: 0 0 auto;">📊 Jana Laporan</button>
+        </div>
         <div class="table-wrap">
           <table class="table">
             <thead>
@@ -435,6 +462,7 @@ function showReceiptsPage() {
   loadMembers();
   loadReceipts();
   setupReceiptPaymentMethodCheckboxes();
+  populateReportYears();
 }
 
 // Make the Tunai / Online Transfer / Cek checkboxes mutually exclusive,
@@ -1499,11 +1527,157 @@ function updateReceiptPVNavVisibility() {
   if (!receiptNav || !voucherNav || !approvalNav) return;
   
   const userRole = (typeof currentUser !== 'undefined' && currentUser) ? currentUser.role : null;
+  
   const display = userRole === 'admin' ? 'flex' : 'none';
   
   receiptNav.style.display = display;
   voucherNav.style.display = display;
   approvalNav.style.display = display;
+}
+
+// Populate report year dropdown with available years from receipts
+async function populateReportYears() {
+  const yearSelect = document.getElementById('report-year');
+  if (!yearSelect) return;
+  
+  try {
+    const { data, error } = await supabaseClient
+      .from('receipts')
+      .select('receipt_date');
+    
+    if (error) {
+      console.error('Error fetching receipt years:', error);
+      return;
+    }
+    
+    if (!data || data.length === 0) return;
+    
+    const years = new Set();
+    data.forEach(r => {
+      if (r.receipt_date) {
+        const year = new Date(r.receipt_date).getFullYear();
+        years.add(year);
+      }
+    });
+    
+    const currentYear = new Date().getFullYear();
+    years.add(currentYear);
+    
+    const sortedYears = Array.from(years).sort((a, b) => b - a);
+    
+    yearSelect.innerHTML = '<option value="">Semua Tahun</option>';
+    sortedYears.forEach(year => {
+      const option = document.createElement('option');
+      option.value = year;
+      option.textContent = year;
+      if (year === currentYear) option.selected = true;
+      yearSelect.appendChild(option);
+    });
+  } catch (err) {
+    console.error('Error populating report years:', err);
+  }
+}
+
+// Generate receipt report for selected month/year
+async function generateReceiptReport() {
+  const month = document.getElementById('report-month').value;
+  const year = document.getElementById('report-year').value;
+  
+  if (!month && !year) {
+    showError('Sila pilih sekurang-kurangnya bulan atau tahun untuk menjana laporan');
+    return;
+  }
+  
+  try {
+    let query = supabaseClient
+      .from('receipts')
+      .select('*, DPMM_USERS(nama)')
+      .order('receipt_date', { ascending: true });
+    
+    if (year) {
+      const startDate = `${year}-01-01`;
+      const endDate = `${year}-12-31`;
+      query = query.gte('receipt_date', startDate).lte('receipt_date', endDate);
+    }
+    
+    if (month) {
+      const selectedYear = year || new Date().getFullYear();
+      const startDate = `${selectedYear}-${month.padStart(2, '0')}-01`;
+      const lastDay = new Date(selectedYear, month, 0).getDate();
+      const endDate = `${selectedYear}-${month.padStart(2, '0')}-${lastDay}`;
+      query = query.gte('receipt_date', startDate).lte('receipt_date', endDate);
+    }
+    
+    const { data, error } = await query;
+    
+    if (error) {
+      console.error('Error fetching receipts for report:', error);
+      showError('Gagal memuatkan data resit untuk laporan');
+      return;
+    }
+    
+    if (!data || data.length === 0) {
+      showError('Tiada resit dijumpai untuk tempoh yang dipilih');
+      return;
+    }
+    
+    // Generate CSV report
+    const csv = generateReceiptCSV(data, month, year);
+    downloadCSV(csv, `laporan-resit-${year || 'semua'}-${month ? month : 'semua'}.csv`);
+    
+    showSuccess('Laporan berjaya dijana dan dimuat turun');
+  } catch (err) {
+    console.error('Error generating report:', err);
+    showError('Gagal menjana laporan');
+  }
+}
+
+// Generate CSV from receipt data
+function generateReceiptCSV(receipts, month, year) {
+  const headers = ['No. Resit', 'Tarikh', 'Nama Ahli', 'No. Ahli', 'Jumlah (RM)', 'Kaedah Pembayaran', 'Tarikh Pembayaran', 'ID Transaksi', 'Dijana Oleh', 'Penerangan'];
+  
+  let csv = headers.join(',') + '\n';
+  
+  receipts.forEach(r => {
+    const row = [
+      r.receipt_number || '',
+      r.receipt_date ? new Date(r.receipt_date).toLocaleDateString() : '',
+      r.member_name || '',
+      r.nombor_ahli || 'N/A',
+      r.amount ? parseFloat(r.amount).toFixed(2) : '0.00',
+      r.payment_method || '',
+      r.payment_date ? new Date(r.payment_date).toLocaleDateString() : '',
+      r.transaction_id || 'N/A',
+      r.DPMM_USERS?.nama || r.created_by || '-',
+      r.description || '-'
+    ];
+    csv += row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',') + '\n';
+  });
+  
+  // Add summary
+  const totalAmount = receipts.reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0);
+  csv += '\n';
+  csv += `Jumlah Resit,${receipts.length}\n`;
+  csv += `Jumlah Keseluruhan (RM),${totalAmount.toFixed(2)}\n`;
+  
+  return csv;
+}
+
+// Download CSV file
+function downloadCSV(csv, filename) {
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  
+  link.setAttribute('href', url);
+  link.setAttribute('download', filename);
+  link.style.visibility = 'hidden';
+  
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  
+  URL.revokeObjectURL(url);
 }
 
 // Initialize navigation on page load (creates hidden items; visibility set after login)
