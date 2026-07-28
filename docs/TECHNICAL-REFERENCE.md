@@ -1,6 +1,6 @@
 # Technical Reference — SISTEM-AHLI-DPMM-JOHOR
 
-**Last Updated:** 27 Julai 2026 (Receipt Generation Fixes)  
+**Last Updated:** 28 Julai 2026 (Payment Slip PDF Support & Report Generation)  
 **Audience:** Developers, DevOps engineers, technical architects  
 **Purpose:** Complete technical specifications and API reference
 

@@ -18,7 +18,9 @@ Sistem pengurusan ahli berasaskan web untuk Dewan Perniagaan Melayu Malaysia (DP
   - Jana resit yuran keahlian
   - Cipta baucar pembayaran pihak ketiga
   - Papan pemuka kelulusan
-  - Sokongan OCR untuk slip pembayaran
+  - Sokongan OCR untuk slip pembayaran (imej dan PDF)
+  - Bukti pembayaran disimpan secara kekal untuk audit
+  - Laporan resit dengan penapis bulan/tahun dan eksport CSV
   - Antaramuka dalam Bahasa Malaysia sepenuhnya
 - **Sistem Permohonan Keahlian** (borang.html)
   - Borang permohonan keahlian dalam talian
@@ -36,6 +38,7 @@ Sistem pengurusan ahli berasaskan web untuk Dewan Perniagaan Melayu Malaysia (DP
 - Supabase Edge Functions (hantar emel dengan lampiran PDF)
 - EmailJS (hantar emel - fallback)
 - Tesseract.js (OCR untuk slip pembayaran)
+- pdf.js (rasterisasi PDF untuk OCR)
 - bcryptjs (hash kata laluan)
 - pdf-lib (penjanaan PDF borang)
 - nodemailer (SMTP untuk emel dalam Edge Functions)
@@ -83,6 +86,34 @@ README.md              ← Dokumentasi ini
 - Hash kata laluan menggunakan bcryptjs
 
 ## 📝 Perubahan Terkini (Julai 2026)
+
+### Payment Slip & Receipt Enhancements (28 Julai 2026)
+- **PDF Support for Payment Slips:**
+  - Upload PDF files for payment slips (previously images only)
+  - pdf.js integration to rasterize PDF first page for OCR processing
+  - Supports PNG, JPG, JPEG, and PDF formats (max 5MB)
+- **Bukti Pembayaran Column:**
+  - Added "Bukti Pembayaran" column in receipts list
+  - Shows view button for available proof-of-payment or "tiada bukti pembayaran" message
+- **Receipt Detail Modal:**
+  - Click receipt row to view detailed modal with all receipt fields
+  - Displays linked proof-of-payment with view button
+  - Shows "Dijana Oleh" field indicating user who created the receipt
+  - Mimics member detail modal design for consistency
+- **Report Generation:**
+  - Month/year selector for filtering receipts
+  - CSV export with all receipt details
+  - Summary section with total receipt count and amount
+  - Audit-ready reports for any time period
+- **Redesigned Receipt Input Panel:**
+  - Compact layout to reduce vertical space
+  - Upload field moved to top of form
+  - Ahli and Nama Penerima on same row
+  - Jumlah, Kaedah Pembayaran, and No. Cek/Bank on same row
+  - Professional and functional design
+- **Default Issued By Text:**
+  - Updated to: "Resit dijana secara atas talian dari sistem rasmi DPMM Johor. Tiada tandatangan di perlukan"
+  - Signature box width increased to accommodate text
 
 ### Vengence UI Design System (23 Julai 2026) - Complete Rollout ✅
 - **Live URL:** https://dpmmjohor.github.io/SISTEM-AHLI-DPMM-JOHOR/
