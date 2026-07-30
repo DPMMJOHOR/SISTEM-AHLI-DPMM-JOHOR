@@ -22,11 +22,13 @@ Deno.serve(async (req: Request) => {
     // Move environment variable access inside handler
     const GROQ_API_KEY = Deno.env.get('GROQ_API_KEY');
     const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
+    const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY');
     
     console.log('Provider:', provider);
     console.log('Model:', model);
     console.log('Messages count:', messages?.length);
     console.log('GROQ_API_KEY exists:', !!GROQ_API_KEY);
+    console.log('OPENROUTER_API_KEY exists:', !!OPENROUTER_API_KEY);
 
     if (!provider) {
       return new Response(JSON.stringify({ error: 'Provider is required' }), {
@@ -68,6 +70,34 @@ Deno.serve(async (req: Request) => {
           model: groqModel,
           messages,
           max_tokens: 800,
+          ...options
+        })
+      });
+    } else if (provider === 'openrouter') {
+      apiKey = OPENROUTER_API_KEY;
+      if (!apiKey) {
+        return new Response(JSON.stringify({ error: 'OPENROUTER_API_KEY not configured' }), {
+          status: 500,
+          headers: { 
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+          }
+        });
+      }
+
+      // OpenRouter API
+      response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+          'HTTP-Referer': Deno.env.get('HTTP_REFERER') || 'https://dpmmjohor.github.io',
+          'X-Title': Deno.env.get('X_TITLE') || 'DPMM Johor Membership System'
+        },
+        body: JSON.stringify({
+          model: model || 'qwen/qwen3-vl-235b-a22b-instruct',
+          messages,
+          max_tokens: 512,
           ...options
         })
       });

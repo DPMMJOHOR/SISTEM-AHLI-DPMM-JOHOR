@@ -3488,6 +3488,7 @@ function showPage(id) {
   if (id === 'senarai') renderMainTable();
   if (id === 'daerah') renderDistrictPage();
   if (id === 'yuran') renderYuranPage();
+  if (id === 'permohonan') renderPermohonanPage();
   if (id === 'backup') { renderBackupPage(); loadSupabaseBackups(); }
   if (id === 'admin') renderAdminPage();
   if (id === 'ssm') renderSSMPage();
@@ -3496,7 +3497,6 @@ function showPage(id) {
   if (id === 'faq') { /* static page, no render needed */ }
   if (id === 'dokumen') renderDokumenPage();
   if (id === 'mesyuarat') loadMesyuarat();
-  if (id === 'permohonan') renderPermohonanPage();
   if (id === 'receipts' && typeof showReceiptsPage === 'function') showReceiptsPage();
   if (id === 'vouchers' && typeof showVouchersPage === 'function') showVouchersPage();
   if (id === 'approvals' && typeof showApprovalsPage === 'function') showApprovalsPage();
@@ -6284,10 +6284,13 @@ function buildPermohonanActionBtns(p) {
       { value: 'LULUS',                 label: 'Lulus' },
       { value: 'TIDAK_LULUS',           label: 'Tidak Lulus' },
     ];
-    html += '<select data-action="change-status" data-id="' + id + '" style="padding:5px 8px;border-radius:6px;border:1.5px solid var(--gray2);background:var(--white);font-size:11px;font-weight:600;cursor:pointer;font-family:var(--sans);color:var(--text);" onchange="if(this.value){updatePermohonanStatus(' + id + ',this.value);this.value=\'\';}">'
+    html += '<select data-action="change-status" data-id="' + id + '" style="padding:5px 8px;border-radius:6px;border:1.5px solid var(--gray2);background:var(--white);font-size:11px;font-weight:600;cursor:pointer;font-family:var(--sans);color:var(--text);">'
       + '<option value="">Ubah Status ▾</option>'
       + opts.map(function(o){ return '<option value="' + o.value + '"' + (o.value === st ? ' selected disabled' : '') + '>' + o.label + '</option>'; }).join('')
       + '</select>';
+    
+    // Delete button for admin
+    html += '<button data-action="delete-permohonan" data-id="' + id + '" style="padding:8px 16px;border-radius:6px;border:1.5px solid #E03131;background:#fff;color:#E03131;font-size:13px;font-weight:600;cursor:pointer;margin-left:8px;transition:all 0.2s ease;" title="Padam permohonan">🗑 Padam</button>';
   }
   return html;
 }
@@ -6731,6 +6734,32 @@ async function updatePermohonanStatus(id, newStatus) {
   showSnack && showSnack('Status dikemaskini: ' + (P_STATUS[newStatus] || {}).label);
 }
 
+/* ── DELETE PERMOHONAN ─────────────────────────────────────── */
+async function deletePermohonan(id) {
+  if (!confirm('Adakah anda pasti mahu memadam permohonan ini? Tindakan ini tidak boleh diundur.')) return;
+  
+  // Fetch old values for audit log
+  var { data: oldData } = await supabaseClient.from('PERMOHONAN_AHLI').select('*').eq('id', id).single();
+  
+  var { error } = await supabaseClient.from('PERMOHONAN_AHLI').delete().eq('id', id);
+  if (error) { showToast && showToast('Ralat memadam permohonan: ' + error.message, 'error'); return; }
+  
+  // Log the deletion to audit table
+  await supabaseClient.from('DPMM_AUDIT_LOG').insert({
+    user_id: currentUser ? currentUser.email : 'anonymous',
+    action: 'DELETE',
+    table_name: 'PERMOHONAN_AHLI',
+    record_id: String(id),
+    old_values: oldData,
+    new_values: null,
+    ip_address: null,
+    user_agent: navigator.userAgent
+  });
+  
+  await renderPermohonanPage();
+  showSnack && showSnack('Permohonan telah dipadam.');
+}
+
 /* ── LULUS MODAL ─────────────────────────────────────────── */
 function openLulusModal(id) {
   var p = permohonanData.find(function(x){ return x.id === id; });
@@ -6994,7 +7023,7 @@ async function retryEmail(id, type) {
     }
     updatePayload.email_error = null;
     
-    await supabaseClientClient.from('PERMOHONAN_AHLI').update(updatePayload).eq('id', id);
+    await supabaseClient.from('PERMOHONAN_AHLI').update(updatePayload).eq('id', id);
     
     // Update local data
     if (p) {
@@ -7006,7 +7035,7 @@ async function retryEmail(id, type) {
     showSnack && showSnack('E-mel berjaya dihantar semula');
   } catch (err) {
     // Log error to database
-    await supabaseClientClient.from('PERMOHONAN_AHLI')
+    await supabaseClient.from('PERMOHONAN_AHLI')
       .update({ email_error: 'Retry failed: ' + err.message })
       .eq('id', id);
     
@@ -7146,11 +7175,19 @@ document.addEventListener('DOMContentLoaded', function(){
     
     if (action === 'open-permohonan') {
       openPermohonanModal(id);
+    } else if (action === 'change-status') {
+      var select = e.target;
+      if (select.value) {
+        updatePermohonanStatus(id, select.value);
+        select.value = '';
+      }
     } else if (action === 'update-status') {
       updatePermohonanStatus(id, status);
     } else if (action === 'update-status-close') {
       updatePermohonanStatus(id, status);
       closePermohonanModal();
+    } else if (action === 'delete-permohonan') {
+      deletePermohonan(id);
     } else if (action === 'open-tolak') {
       openTolakModal(id);
     } else if (action === 'open-lulus') {
@@ -7712,9 +7749,9 @@ async function sendAdminMessage() {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
-        provider: 'groq',
+        provider: 'openrouter',
         type: 'chat',
-        model: 'llama-3.3-70b-versatile',
+        model: 'openai/gpt-4o-mini',
         messages: [{role:'system',content:buildAdminSystemPrompt()},..._clerk.history],
         max_tokens: 900
       })

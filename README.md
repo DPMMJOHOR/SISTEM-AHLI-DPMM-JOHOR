@@ -87,6 +87,29 @@ README.md              ← Dokumentasi ini
 
 ## 📝 Perubahan Terkini (Julai 2026)
 
+### OpenRouter AI Migration (30 Julai 2026)
+- **AIMAN Chatbot Migration:**
+  - Migrated from Groq llama-3.3-70b-versatile to OpenRouter openai/gpt-4o-mini
+  - Improved multilingual support (Bahasa Melayu + English)
+  - Better reasoning capabilities for business guidance
+  - Cost-effective with strong performance
+- **Isi Pintar OCR Migration:**
+  - Migrated from Groq qwen/qwen3.6-27b to OpenRouter qwen/qwen3-vl-235b-a22b-instruct
+  - Enhanced vision capabilities for OCR
+  - Better performance on Malaysian document formats
+  - Instruction-tuned for structured JSON output
+- **Edge Functions Updated:**
+  - ai-proxy: Added OpenRouter provider support with HTTP-Referer and X-Title headers
+  - ai-proxy-fixed: Added OpenRouter provider support for vision models
+  - Both functions now support: groq, openrouter, gemini providers
+  - Logging added for OPENROUTER_API_KEY presence
+- **Security:**
+  - API keys remain in Supabase Edge Function environment variables
+  - No API keys exposed in frontend code
+  - CORS handling maintained
+  - All existing guardrails preserved
+- **Status:** Code changes deployed, awaiting manual testing with valid credentials
+
 ### Payment Slip & Receipt Enhancements (28 Julai 2026)
 - **PDF Support for Payment Slips:**
   - Upload PDF files for payment slips (previously images only)
