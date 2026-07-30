@@ -4461,7 +4461,6 @@ async function _doSubmit() {
       negeri:               val('negeri') || null,
       no_tel_syarikat:      val('no_tel_syarikat') || null,
       url_syarikat:         val('url_syarikat') || null,
-      faks:                 val('faks') || null,
       emel_syarikat:        val('emel_syarikat') || null,
       modal_berbayar:       parseFloat(val('modal_berbayar')) || null,
       modal_pusingan:       parseFloat(val('modal_pusingan')) || null,
@@ -5871,10 +5870,7 @@ function overlayPage2Data(pdf, width, height) {
   pdf.setFont('helvetica', 'bold');
   pdf.text('No. Tel:', 50, y);
   pdf.setFont('helvetica', 'normal');
-  pdf.text(val('no_tel_bimbit') || '', 150, y);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('Faks:', 300, y);
-  pdf.text(val('no_faks') || '', 360, y);
+  pdf.text(val('no_tel_syarikat') || '', 150, y);
   y -= 20;
   
   pdf.setFont('helvetica', 'bold');
@@ -5883,7 +5879,7 @@ function overlayPage2Data(pdf, width, height) {
   pdf.text(val('emel_syarikat') || '', 150, y);
   pdf.setFont('helvetica', 'bold');
   pdf.text('URL/Web:', 300, y);
-  pdf.text(val('url_web') || '', 360, y);
+  pdf.text(val('url_syarikat') || '', 360, y);
   y -= 20;
   
   pdf.setFont('helvetica', 'bold');
