@@ -21,9 +21,9 @@ WITH CHECK (
   nama_perniagaan IS NOT NULL AND
   LENGTH(TRIM(nama_perniagaan)) >= 3 AND
   -- IC validation for Malaysian IC format
-  no_kad_pengenalan ~ '^\d{6}-\d{2}-\d{4}$' OR
-  no_kad_pengenalan ~ '^\d{12}$' OR
-  no_kad_pengenalan IS NULL
+  no_kad_pengenal ~ '^\d{6}-\d{2}-\d{4}$' OR
+  no_kad_pengenal ~ '^\d{12}$' OR
+  no_kad_pengenal IS NULL
 );
 
 COMMENT ON POLICY "anon_insert_permohonan" ON "PERMOHONAN_AHLI" IS 'Allow anonymous users to submit new membership applications with validation (updated to use nama_perniagaan)';
