@@ -3584,6 +3584,12 @@ function startBorang() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+// FIX APPLIED: Email validation helper function
+function isValidEmail(email) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
 /* ============================================================
    NAVIGATION
    ============================================================ */
@@ -3652,8 +3658,21 @@ function validateStep(n) {
     if (!val('alamat'))                  { showErr('err-alamat'); ok = false; }
     if (!val('poskod'))                  { showErr('err-poskod'); ok = false; }
     if (!val('bandar'))                  { showErr('err-bandar'); ok = false; }
-    if (!val('emel_syarikat'))           { showErr('err-emel_syarikat'); ok = false; }
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val('emel_syarikat'))) { showErr('err-emel_format'); ok = false; }
+    // FIX APPLIED: Validate at least one email field (emel_syarikat or proksi_emel)
+    const hasEmelSyarikat = val('emel_syarikat');
+    const hasProksiEmel = val('proksi_emel');
+    if (!hasEmelSyarikat && !hasProksiEmel) {
+      showToast('Sila masukkan sekurang-kurangnya satu e-mel (e-mel syarikat atau e-mel proksi)', 'error');
+      ok = false;
+    }
+    // Validate email format if provided
+    if (hasEmelSyarikat && !isValidEmail(hasEmelSyarikat)) {
+      showErr('err-emel_format'); ok = false;
+    }
+    if (hasProksiEmel && !isValidEmail(hasProksiEmel)) {
+      showToast('Format e-mel proksi tidak sah', 'error');
+      ok = false;
+    }
     if (!val('no_tel_bimbit'))           { showErr('err-no_tel_bimbit'); ok = false; }
     if (!val('nama_lengkap_pemohon'))    { showErr('err-nama_lengkap_pemohon'); ok = false; }
     if (!val('no_kad_pengenal'))         { showErr('err-no_kad_pengenal'); ok = false; }
@@ -4193,7 +4212,8 @@ function renderRingkasan() {
     ['No. Pendaftaran', val('no_pendaftaran')],
     ['No. Telefon Bimbit', val('no_tel_bimbit')],
     ['E-mel Syarikat', val('emel_syarikat')],
-    ['Proksi / Wakil', val('proksi_nama') || '(Pemunya Tunggal)'],
+    // FIX APPLIED: Check all name fields in priority order for display
+    ['Proksi / Wakil', val('proksi_nama') || val('nama_lengkap_pemohon') || val('nama_perniagaan') || 'Pemilik Tunggal'],
     ['Nombor Kad Pengenalan', val('no_kad_pengenal') || val('proksi_ic') || '—'],
     ['Alamat', val('alamat') + ', ' + val('poskod') + ' ' + val('bandar')],
     ['Yuran Pendaftaran (Once in a lifetime)', fi === 0 ? 'Percuma' : 'RM ' + fi.toLocaleString()],
@@ -4662,6 +4682,13 @@ async function _doSubmit() {
     // 6b. Send emails via Edge Function with PDF attachment
     const pemohonEmail = val('proksi_emel') || val('emel_syarikat');
     
+    // DIAGNOSTIC: Log email and PDF state
+    console.log('[DIAGNOSTIC] Email flow started for ref_id:', finalRef);
+    console.log('[DIAGNOSTIC] PDF upload result:', pdfUploadResult);
+    console.log('[DIAGNOSTIC] PDF signed URL:', pdfUploadResult?.signedUrl);
+    console.log('[DIAGNOSTIC] Applicant email source:', pemohonEmail ? 'proksi_emel' : 'emel_syarikat');
+    console.log('[DIAGNOSTIC] Applicant email value:', pemohonEmail);
+    
     // Prepare applicant data for email
     const applicantEmailData = {
       ref_id: finalRef,
@@ -4676,11 +4703,14 @@ async function _doSubmit() {
     };
 
     // Send admin email with PDF
+    console.log('[DIAGNOSTIC] Attempting admin email via Edge Function');
     try {
       await sendEmailViaEdgeFunction('admin', pdfUploadResult?.signedUrl, applicantEmailData);
-      console.log('Admin email sent via Edge Function');
+      console.log('[DIAGNOSTIC] Admin email sent via Edge Function - SUCCESS');
+      showToast('E-mel admin berjaya dihantar', 'success');
     } catch (adminEmailErr) {
-      console.warn('Edge Function admin email error, falling back to EmailJS:', adminEmailErr);
+      console.warn('[DIAGNOSTIC] Edge Function admin email FAILED, falling back to EmailJS:', adminEmailErr);
+      showToast('Gagal menghantar e-mel admin melalui Edge Function, mencuba kaedah alternatif...', 'warning');
       // Fallback to EmailJS for admin
       try {
         const params = {
@@ -4698,23 +4728,31 @@ async function _doSubmit() {
           pesan: '[ADMIN ALERT] Permohonan baharu diterima. Sila log masuk ke sistem untuk semakan.',
         };
         
+        console.log('[DIAGNOSTIC] Attempting admin email via EmailJS fallback (NO PDF)');
         await emailjs.send(
           window.CONFIG.EMAILJS_SERVICE_ID,
           window.CONFIG.EMAILJS_ADMIN_TEMPLATE_ID,
           params
         );
+        console.log('[DIAGNOSTIC] Admin email sent via EmailJS fallback - SUCCESS');
+        showToast('E-mel admin berjaya dihantar (kaedah alternatif)', 'success');
       } catch (emailjsErr) {
-        console.warn('EmailJS admin error (non-critical):', emailjsErr);
+        console.warn('[DIAGNOSTIC] EmailJS admin email FAILED:', emailjsErr);
+        showToast('Gagal menghantar e-mel admin. Sila hubungi pentadbir sistem.', 'error');
       }
     }
 
     // Send applicant email with PDF
+    console.log('[DIAGNOSTIC] Applicant email check - pemohonEmail exists:', !!pemohonEmail);
     if (pemohonEmail) {
+      console.log('[DIAGNOSTIC] Attempting applicant email via Edge Function');
       try {
         await sendEmailViaEdgeFunction('applicant', pdfUploadResult?.signedUrl, applicantEmailData);
-        console.log('Applicant email sent via Edge Function');
+        console.log('[DIAGNOSTIC] Applicant email sent via Edge Function - SUCCESS');
+        showToast('E-mel pemohon berjaya dihantar', 'success');
       } catch (applicantEmailErr) {
-        console.warn('Edge Function applicant email error, falling back to EmailJS:', applicantEmailErr);
+        console.warn('[DIAGNOSTIC] Edge Function applicant email FAILED, falling back to EmailJS:', applicantEmailErr);
+        showToast('Gagal menghantar e-mel pemohon melalui Edge Function, mencuba kaedah alternatif...', 'warning');
         // Fallback to EmailJS for applicant
         try {
           const params = {
@@ -4732,15 +4770,22 @@ async function _doSubmit() {
             pesan: 'Terima kasih kerana menghantar permohonan keahlian DPMM Negeri Johor. E-mel ini adalah pengesahan penerimaan sahaja dan BUKAN kelulusan automatik.',
           };
           
+          console.log('[DIAGNOSTIC] Attempting applicant email via EmailJS fallback (NO PDF)');
           await emailjs.send(
             window.CONFIG.EMAILJS_SERVICE_ID,
             window.CONFIG.EMAILJS_APPLICANT_TEMPLATE_ID,
             params
           );
+          console.log('[DIAGNOSTIC] Applicant email sent via EmailJS fallback - SUCCESS');
+          showToast('E-mel pemohon berjaya dihantar (kaedah alternatif)', 'success');
         } catch (emailjsErr) {
-          console.warn('EmailJS pemohon error (non-critical):', emailjsErr);
+          console.warn('[DIAGNOSTIC] EmailJS applicant email FAILED:', emailjsErr);
+          showToast('Gagal menghantar e-mel pemohon. Sila semak e-mel anda atau hubungi pentadbir.', 'error');
         }
       }
+    } else {
+      console.warn('[DIAGNOSTIC] Applicant email SKIPPED - no email address provided');
+      showToast('Amaran: Tiada e-mel pemohon disediakan. E-mel pengesahan tidak akan dihantar.', 'warning');
     }
 
     // Update audit fields
@@ -4755,8 +4800,10 @@ async function _doSubmit() {
     hideLoading();
     showSuccess(finalRef);
 
-    // Send emails in background (non-blocking)
-    sendEmailsInBackground(finalRef, payload, uploadedUrls, jenis, fasalVal, total);
+    // REMOVED: sendEmailsInBackground(finalRef, payload, uploadedUrls, jenis, fasalVal, total);
+    // Reason: Duplicate admin emails - Edge Function already sends with PDF attachment
+    // This function uses /api/send-email which does NOT support PDF attachments
+    console.log('[FIX APPLIED] sendEmailsInBackground REMOVED to prevent duplicate admin emails');
 
   } catch (err) {
     throw err;
@@ -4798,6 +4845,10 @@ function showSuccess(refId) {
    BACKGROUND EMAIL SENDING (Non-blocking)
    ============================================================ */
 async function sendEmailsInBackground(refId, payload, uploadedUrls, jenis, fasalVal, total) {
+  console.log('[DIAGNOSTIC] sendEmailsInBackground called - THIS CAUSES DUPLICATE EMAILS');
+  console.log('[DIAGNOSTIC] refId:', refId);
+  console.log('[DIAGNOSTIC] This function uses /api/send-email which does NOT support PDF attachments');
+  
   try {
     // Update admin email status
     await window.sb.from('PERMOHONAN_AHLI')
