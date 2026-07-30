@@ -3367,6 +3367,18 @@ var JENIS_LABEL = {TRAD:'Perdagangan','F&B':'F&B',CONST:'Pembinaan','P&S':'Produ
 var JAWATAN_ORDER = {YDP:1,TYDP:2,NYDP:3,SU:4,BK:5,AJK:6,AHLI:99};
 var JAWATAN_LABEL = {YDP:'Yang Dipertua',TYDP:'Timbalan YDP',NYDP:'Naib YDP',SU:'Setiausaha Kehormat',BK:'Bendahari Kehormat',AJK:'Ahli Jawatankuasa',AHLI:'Ahli'};
 function val(v, fb) { if (fb === undefined) fb = '—'; return (v===null||v===undefined||v==='') ? fb : v; }
+
+// Security: Escape HTML metacharacters to prevent XSS
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function badge(text, cls) { return '<span class="badge ' + cls + '">' + text + '</span>'; }
 function yuranBadge(m) { return isPaid(m) ? badge('BAYAR','badge-paid') : badge('BELUM','badge-unpaid'); }
 
@@ -3888,7 +3900,7 @@ async function _deleteTemplateFromSupabase(templateId) {
   if (res.error) console.warn('Template delete error:', res.error.message);
   else {
     // Log the deletion
-    await supabaseClientClient.from('DPMM_AUDIT_LOG').insert({
+    await supabaseClient.from('DPMM_AUDIT_LOG').insert({
       user_id: currentUser ? currentUser.email : 'anonymous',
       action: 'DELETE',
       table_name: 'DPMM_TEMPLATES',
@@ -5098,7 +5110,7 @@ async function _dokDeleteFromSupabase(dbId) {
   if (res.error) console.warn('Dokumen delete error:', res.error.message);
   else {
     // Log the deletion
-    await supabaseClientClient.from('DPMM_AUDIT_LOG').insert({
+    await supabaseClient.from('DPMM_AUDIT_LOG').insert({
       user_id: currentUser ? currentUser.email : 'anonymous',
       action: 'DELETE',
       table_name: 'DPMM_DOKUMEN',
@@ -6176,7 +6188,7 @@ function renderPermohonanTable() {
     if (!search) return true;
     return (p.ref_id || '').toLowerCase().includes(search)
         || (p.proksi_nama || '').toLowerCase().includes(search)
-        || (p.nama_entiti || '').toLowerCase().includes(search)
+        || (p.nama_perniagaan || '').toLowerCase().includes(search)
         || (p.fasal || '').toLowerCase().includes(search);
   });
 
@@ -6225,7 +6237,7 @@ function renderPermohonanTable() {
     return '<tr style="border-bottom:1px solid var(--gray1);' + (idx % 2 === 0 ? '' : 'background:var(--body-bg);') + '">'
       + '<td style="padding:10px 14px;font-family:var(--mono);font-size:11.5px;font-weight:600;color:var(--primary)">' + (p.ref_id || '—') + emailStatus + '</td>'
       + '<td style="padding:10px 14px;font-weight:600;">' + (p.proksi_nama || '(Pemunya Tunggal)') + '</td>'
-      + '<td style="padding:10px 14px;color:var(--text2);">' + (p.nama_entiti || '—') + '</td>'
+      + '<td style="padding:10px 14px;color:var(--text2);">' + (p.nama_perniagaan || '—') + '</td>'
       + '<td style="padding:10px 14px;font-weight:600;color:var(--muted);">' + (p.fasal || '—') + '</td>'
       + '<td style="padding:10px 14px;color:var(--muted);font-size:12px;">' + d + '</td>'
       + '<td style="padding:10px 14px;"><span style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;background:' + cfg.bg + ';color:' + cfg.color + ';">' + cfg.label + '</span></td>'
@@ -6363,7 +6375,7 @@ function openPermohonanModal(id) {
 
   var cfg = P_STATUS[p.status] || { label: p.status, color:'#888' };
   document.getElementById('pm-ref').textContent    = p.ref_id || '—';
-  document.getElementById('pm-entity').textContent = (p.nama_entiti || '—') + '  •  ' + (JENIS_LABEL_MAP[p.jenis_keahlian] || '') + ' (' + (p.fasal || '') + ')';
+  document.getElementById('pm-entity').textContent = (p.nama_perniagaan || '—') + '  •  ' + (JENIS_LABEL_MAP[p.jenis_keahlian] || '') + ' (' + (p.fasal || '') + ')';
   document.getElementById('pm-status-badge').textContent   = cfg.label;
   document.getElementById('pm-status-badge').style.background = cfg.color;
 
@@ -6533,7 +6545,7 @@ function buildTabMaklumat(p) {
     + row('Jenama', p.jenama)
     + row('Aktiviti', p.aktiviti_perniagaan)
     + section('Butiran Perniagaan')
-    + row('Nama Entiti', p.nama_entiti)
+    + row('Nama Perniagaan', p.nama_perniagaan)
     + row('No. Pendaftaran', p.no_pendaftaran)
     + row('Tarikh Daftar', p.tarikh_daftar)
     + row('Tarikh Luput', p.tarikh_luput)
@@ -6724,7 +6736,7 @@ function openLulusModal(id) {
   var p = permohonanData.find(function(x){ return x.id === id; });
   if (!p) return;
   permohonanSelected = p;
-  document.getElementById('lulus-ref-label').textContent = (p.ref_id || '') + ' — ' + (p.nama_entiti || '');
+  document.getElementById('lulus-ref-label').textContent = (p.ref_id || '') + ' — ' + (p.nama_perniagaan || '');
   document.getElementById('lulus-no-ahli').value = '';
   document.getElementById('lulus-tarikh').value  = new Date().toISOString().split('T')[0];
   document.getElementById('lulus-minit').value   = '';
@@ -6757,7 +6769,7 @@ async function confirmLulus() {
     NAMA_PIC:        p.proksi_nama  || '',
     NO_IC:           p.proksi_ic   || '',
     NO_HP:           p.proksi_hp   || '',
-    NAMA_SYARIKAT:   p.nama_entiti || '',
+    NAMA_SYARIKAT:   p.nama_perniagaan || '',
     NO_SSM:          p.no_pendaftaran || '',
     JENIS_AHLI:      p.jenis_keahlian === 'A' && ['6.2.1','6.2.2','6.2.3a','6.2.3b'].includes(p.fasal) ? 'ENT' : 'SB',
     DAERAH:          p.bandar || '',
@@ -6777,7 +6789,7 @@ async function confirmLulus() {
   
   // Log the insert to audit table
   if (insData && insData[0]) {
-    await supabaseClientClient.from('DPMM_AUDIT_LOG').insert({
+    await supabaseClient.from('DPMM_AUDIT_LOG').insert({
       user_id: currentUser ? currentUser.email : 'anonymous',
       action: 'INSERT',
       table_name: 'AHLI DPMM JOHOR',
@@ -6821,7 +6833,7 @@ async function confirmLulus() {
   await renderPermohonanPage();
   // Refresh senarai ahli jika ada
   if (typeof loadMembers === 'function') loadMembers();
-  showSnack && showSnack('✅ ' + (p.proksi_nama || p.nama_entiti) + ' telah diluluskan sebagai Ahli No. ' + noAhli);
+  showSnack && showSnack('✅ ' + (p.proksi_nama || p.nama_perniagaan) + ' telah diluluskan sebagai Ahli No. ' + noAhli);
 }
 
 /* ── TOLAK MODAL ─────────────────────────────────────────── */
@@ -6829,7 +6841,7 @@ function openTolakModal(id) {
   var p = permohonanData.find(function(x){ return x.id === id; });
   if (!p) return;
   permohonanSelected = p;
-  document.getElementById('tolak-ref-label').textContent = (p.ref_id || '') + ' — ' + (p.nama_entiti || '');
+  document.getElementById('tolak-ref-label').textContent = (p.ref_id || '') + ' — ' + (p.nama_perniagaan || '');
   document.getElementById('tolak-sebab').value = '';
   document.getElementById('tolak-error').style.display = 'none';
   document.getElementById('tolak-maklumat-wrap').style.display = 'none';
@@ -6935,7 +6947,7 @@ async function retryEmail(id, type) {
         <p><strong>No. Rujukan:</strong> ${p.ref_id}</p>
         <p><strong>Jenis:</strong> ${p.jenis_keahlian_label || p.jenis_keahlian}</p>
         <p><strong>Fasal:</strong> ${p.fasal}</p>
-        <p><strong>Nama Entiti:</strong> ${p.nama_entiti}</p>
+        <p><strong>Nama Perniagaan:</strong> ${p.nama_perniagaan}</p>
         <p><strong>Proksi/Wakil:</strong> ${p.nama_lengkap_pemohon || 'Pemunya Tunggal'}</p>
         <p><strong>Jumlah Bayaran:</strong> RM ${(p.jumlah_bayar || 0).toLocaleString()}</p>
         <p><strong>[ADMIN ALERT]</strong> Ini adalah penghantaran semula e-mel notifikasi permohonan baharu.</p>
@@ -6949,7 +6961,7 @@ async function retryEmail(id, type) {
         <p><strong>No. Rujukan Permohonan:</strong> ${p.ref_id}</p>
         <p><strong>Jenis:</strong> ${p.jenis_keahlian_label || p.jenis_keahlian}</p>
         <p><strong>Fasal:</strong> ${p.fasal}</p>
-        <p><strong>Nama Entiti:</strong> ${p.nama_entiti}</p>
+        <p><strong>Nama Perniagaan:</strong> ${p.nama_perniagaan}</p>
         <p><strong>Jumlah Bayaran:</strong> RM ${(p.jumlah_bayar || 0).toLocaleString()}</p>
         <div style="background: #fff8e1; border: 1.5px solid #e8b800; border-radius: 10px; padding: 16px; margin: 20px 0;">
           <strong>DISCLAIMER — SILA BACA:</strong><br>
@@ -7061,7 +7073,7 @@ No. Rujukan: ${p.ref_id}
 Tarikh: ${new Date(p.submitted_at).toLocaleDateString('ms-MY')}
 Jenis: ${p.jenis_keahlian_label || p.jenis_keahlian}
 Fasal: ${p.fasal}
-Nama Entiti: ${p.nama_entiti}
+Nama Perniagaan: ${p.nama_perniagaan}
 Jumlah Bayaran: RM ${(p.jumlah_bayar || 0).toLocaleString()}
 
 Status: Permohonan Baru

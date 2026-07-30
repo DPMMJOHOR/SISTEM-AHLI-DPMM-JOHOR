@@ -1,0 +1,10 @@
+{
+  "skills": [
+    {
+      "source": "addyosmani/agent-skills",
+      "skills": [
+        "planning-and-task-breakdown"
+      ]
+    }
+  ]
+}

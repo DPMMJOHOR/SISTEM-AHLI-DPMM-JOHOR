@@ -66,7 +66,7 @@ function getAdminEmailTemplate(data: any) {
           </tr>
           <tr>
             <td style="padding: 10px; font-weight: bold;">Nama Syarikat:</td>
-            <td style="padding: 10px;">${data.nama_entiti || '-'}</td>
+            <td style="padding: 10px;">${data.nama_perniagaan || '-'}</td>
           </tr>
           <tr style="background: #f7fafc;">
             <td style="padding: 10px; font-weight: bold;">Nama Pemohon:</td>
@@ -113,7 +113,7 @@ function getApplicantEmailTemplate(data: any) {
           </tr>
           <tr>
             <td style="padding: 10px; font-weight: bold;">Nama Syarikat:</td>
-            <td style="padding: 10px;">${data.nama_entiti || '-'}</td>
+            <td style="padding: 10px;">${data.nama_perniagaan || '-'}</td>
           </tr>
           <tr style="background: #f7fafc;">
             <td style="padding: 10px; font-weight: bold;">Tarikh Hantar:</td>

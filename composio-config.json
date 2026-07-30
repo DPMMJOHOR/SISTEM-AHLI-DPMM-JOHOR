@@ -1,0 +1,20 @@
+{
+  "enabled": true,
+  "apiKey": "",
+  "toolRouting": {
+    "enabled": true,
+    "categories": {
+      "email": ["gmail", "outlook"],
+      "chat": ["slack", "discord", "teams"],
+      "devTools": ["github", "gitlab", "jira"],
+      "productivity": ["notion", "trello", "asana"],
+      "crm": ["salesforce", "hubspot"]
+    }
+  },
+  "allowedApps": [],
+  "blockedApps": [],
+  "logging": {
+    "enabled": true,
+    "level": "info"
+  }
+}

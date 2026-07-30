@@ -29,8 +29,8 @@ def test_emailjs():
         page.select_option('#business-type-selector', 'enterprise_sole')
         page.wait_for_timeout(1000)
         
-        # Click "Mula Mengisi Borang" button
-        page.click('button:has-text("Mula Mengisi Borang")')
+        # Click "Isi Manual" button
+        page.click('#btn-start-form')
         page.wait_for_timeout(500)
         
         # Step 1: Select membership type (Ahli Biasa - A)

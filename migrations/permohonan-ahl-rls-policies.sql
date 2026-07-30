@@ -30,8 +30,8 @@ WITH CHECK (
   ref_id IS NOT NULL AND
   jenis_keahlian IS NOT NULL AND
   fasal IS NOT NULL AND
-  nama_entiti IS NOT NULL AND
-  LENGTH(TRIM(nama_entiti)) >= 3 AND
+  nama_perniagaan IS NOT NULL AND
+  LENGTH(TRIM(nama_perniagaan)) >= 3 AND
   -- IC validation for Malaysian IC format
   no_kad_pengenalan ~ '^\d{6}-\d{2}-\d{4}$' OR
   no_kad_pengenalan ~ '^\d{12}$' OR

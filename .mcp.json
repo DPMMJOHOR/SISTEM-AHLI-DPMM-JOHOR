@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "composio": {
+      "command": "node",
+      "args": ["-e", "require('dotenv').config({ path: '.env.local' }); const { Composio } = require('@composio/core'); const composio = new Composio({ apiKey: process.env.COMPOSIO_API_KEY }); composio.create('cascade-user', { mcp: true }).then(session => { console.log(JSON.stringify({ url: session.mcp.url, headers: session.mcp.headers })); });"],
+      "env": {
+        "COMPOSIO_API_KEY": "${COMPOSIO_API_KEY}"
+      }
+    }
+  }
+}
