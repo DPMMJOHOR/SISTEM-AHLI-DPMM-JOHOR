@@ -6786,7 +6786,15 @@ function renderIpSsmGuidance() {
     guidanceEl = document.createElement('div');
     guidanceEl.id = 'ip-ssm-guidance';
     const zoneSsm = document.getElementById('zone-ssm');
-    zoneSsm.parentNode.insertBefore(guidanceEl, zoneSsm);
+    if (zoneSsm && zoneSsm.parentNode) {
+      zoneSsm.parentNode.insertBefore(guidanceEl, zoneSsm);
+    } else {
+      // If zone-ssm doesn't exist, append to isi-pintar-overlay
+      const overlay = document.getElementById('isi-pintar-overlay');
+      if (overlay) {
+        overlay.appendChild(guidanceEl);
+      }
+    }
   }
   let docListHtml = allSsmDocs.map(d => `<li>${d.label}</li>`).join('');
   guidanceEl.innerHTML = `
