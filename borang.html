@@ -6817,17 +6817,28 @@ function closeIsiPintar() {
   _ip.icFile = null;
   _ip.ssmFile = null;
   _ip.ssmDocKeys = [];
-  document.getElementById('file-ic').value = '';
-  document.getElementById('file-ssm').value = '';
-  document.getElementById('zone-ic').classList.remove('has-file');
-  document.getElementById('zone-ssm').classList.remove('has-file');
-  document.getElementById('fname-ic').textContent = '';
-  document.getElementById('fname-ssm').textContent = '';
-  document.getElementById('consent-ai').checked = false;
-  document.getElementById('btn-analyze').disabled = true;
-  document.getElementById('isi-pintar-loading').classList.remove('active');
-  document.getElementById('isi-pintar-error').classList.remove('active');
-  document.getElementById('isi-pintar-actions').style.display = 'flex';
+  const fileIc = document.getElementById('file-ic');
+  if (fileIc) fileIc.value = '';
+  const fileSsm = document.getElementById('file-ssm');
+  if (fileSsm) fileSsm.value = '';
+  const zoneIc = document.getElementById('zone-ic');
+  if (zoneIc) zoneIc.classList.remove('has-file');
+  const zoneSsm = document.getElementById('zone-ssm');
+  if (zoneSsm) zoneSsm.classList.remove('has-file');
+  const fnameIc = document.getElementById('fname-ic');
+  if (fnameIc) fnameIc.textContent = '';
+  const fnameSsm = document.getElementById('fname-ssm');
+  if (fnameSsm) fnameSsm.textContent = '';
+  const consentAi = document.getElementById('consent-ai');
+  if (consentAi) consentAi.checked = false;
+  const btnAnalyze = document.getElementById('btn-analyze');
+  if (btnAnalyze) btnAnalyze.disabled = true;
+  const loadingEl = document.getElementById('isi-pintar-loading');
+  if (loadingEl) loadingEl.classList.remove('active');
+  const errorEl = document.getElementById('isi-pintar-error');
+  if (errorEl) errorEl.classList.remove('active');
+  const actionsEl = document.getElementById('isi-pintar-actions');
+  if (actionsEl) actionsEl.style.display = 'flex';
   const checklistEl = document.getElementById('ip-ssm-checklist');
   if (checklistEl) checklistEl.style.display = 'none';
 }
@@ -6896,7 +6907,15 @@ function renderIpSsmChecklist(fileName) {
     checklistEl.id = 'ip-ssm-checklist';
     checklistEl.className = 'ip-ssm-checklist';
     const zoneSsm = document.getElementById('zone-ssm');
-    zoneSsm.parentNode.insertBefore(checklistEl, zoneSsm.nextSibling);
+    if (zoneSsm && zoneSsm.parentNode) {
+      zoneSsm.parentNode.insertBefore(checklistEl, zoneSsm.nextSibling);
+    } else {
+      // If zone-ssm doesn't exist, append to isi-pintar-overlay
+      const overlay = document.getElementById('isi-pintar-overlay');
+      if (overlay) {
+        overlay.appendChild(checklistEl);
+      }
+    }
   }
 
   const itemsHtml = allDocs.map((d, i) => {
