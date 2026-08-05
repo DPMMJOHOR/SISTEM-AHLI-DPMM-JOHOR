@@ -39,13 +39,13 @@ function showReceiptActions(receiptData) {
     <h4 style="margin: 0 0 12px 0; color: #1a365d;">Tindakan Resit</h4>
     <div style="display: flex; gap: 12px; flex-wrap: wrap;">
       <button id="download-receipt-btn" class="btn btn-primary" style="flex: 1; min-width: 150px;">
-        📥 Muat Turun PDF
+        Muat Turun PDF
       </button>
       <button id="print-receipt-template-btn" class="btn btn-outline" style="flex: 1; min-width: 150px;">
-        🖨️ Cetak Resit
+        Cetak Resit
       </button>
       <button id="whatsapp-receipt-btn" class="btn btn-success" style="flex: 1; min-width: 150px; background: #25D366;">
-        📱 Hantar WhatsApp
+        Hantar WhatsApp
       </button>
     </div>
   `;
@@ -302,15 +302,15 @@ async function showReceiptDetailModal(receipt, slip) {
     <div class="field-grp full">
       <label class="field-label">Bukti Pembayaran</label>
       <div>${slip && slip.slip_image_url
-        ? `<span style="color: var(--success);">✓ Slip pembayaran tersedia (No. Slip: ${slip.slip_number || '-'})</span>`
+        ? `<span style="color: var(--success);">Slip pembayaran tersedia (No. Slip: ${slip.slip_number || '-'})</span>`
         : `<span style="color: var(--muted); font-style: italic;">Tiada bukti pembayaran</span>`}</div>
     </div>
   `;
   document.getElementById('receipt-detail-fields').innerHTML = fieldsHtml;
   
-  let actionsHtml = `<button class="btn btn-outline" id="receipt-detail-print-btn">🖨️ Lihat/Cetak Resit</button>`;
+  let actionsHtml = `<button class="btn btn-outline" id="receipt-detail-print-btn">Lihat/Cetak Resit</button>`;
   if (slip && slip.slip_image_url) {
-    actionsHtml += `<button class="btn btn-primary" id="receipt-detail-view-proof-btn">📎 Lihat Bukti Pembayaran</button>`;
+    actionsHtml += `<button class="btn btn-primary" id="receipt-detail-view-proof-btn">Lihat Bukti Pembayaran</button>`;
   }
   document.getElementById('receipt-detail-actions').innerHTML = actionsHtml;
   
@@ -844,7 +844,7 @@ async function loadVouchers() {
       tdAction.style.minWidth = '200px';
       
       const btn = document.createElement('button');
-      btn.textContent = '📥 Muat Turun PDF';
+      btn.textContent = 'Muat Turun PDF';
       btn.className = 'btn btn-sm btn-outline';
       btn.style.padding = '8px 16px';
       btn.style.borderRadius = '6px';
