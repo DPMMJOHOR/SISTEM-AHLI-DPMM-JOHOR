@@ -277,7 +277,7 @@ async function showReceiptDetailModal(receipt, slip) {
       <div class="modal">
         <div class="modal-head">
           <h3>Butiran Resit</h3>
-          <button class="modal-close" onclick="closeModal('receipt-detail-modal')">✕</button>
+          <button class="modal-close" onclick="closeModal('receipt-detail-modal')">×</button>
         </div>
         <div class="modal-body">
           <div class="field-grid" id="receipt-detail-fields"></div>
@@ -435,7 +435,7 @@ function showReceiptsPage() {
               <option value="">Semua Tahun</option>
             </select>
           </div>
-          <button onclick="generateReceiptReport()" class="btn btn-primary" style="flex: 0 0 auto;">📊 Jana Laporan</button>
+          <button onclick="generateReceiptReport()" class="btn btn-primary" style="flex: 0 0 auto;">Jana Laporan</button>
         </div>
         <div class="table-wrap">
           <table class="table">
@@ -696,7 +696,7 @@ async function loadReceipts() {
       const tdProof = document.createElement('td');
       if (slip && slip.slip_image_url) {
         const proofBtn = document.createElement('button');
-        proofBtn.textContent = '📎 Lihat Bukti';
+        proofBtn.textContent = 'Lihat Bukti';
         proofBtn.className = 'btn btn-sm btn-outline';
         proofBtn.style.padding = '6px 12px';
         proofBtn.style.borderRadius = '6px';
@@ -732,7 +732,7 @@ async function loadReceipts() {
       
       // View/Print button - regenerates PDF from database data
       const btnView = document.createElement('button');
-      btnView.textContent = '🖨️ Lihat/Cetak';
+      btnView.textContent = 'Lihat/Cetak';
       btnView.className = 'btn btn-sm btn-outline';
       btnView.style.padding = '8px 16px';
       btnView.style.borderRadius = '6px';
@@ -745,7 +745,7 @@ async function loadReceipts() {
       
       // Delete button
       const btnDelete = document.createElement('button');
-      btnDelete.textContent = '🗑️ Padam';
+      btnDelete.textContent = 'Padam';
       btnDelete.className = 'btn btn-sm';
       btnDelete.style.background = '#dc3545';
       btnDelete.style.color = '#fff';
@@ -928,7 +928,7 @@ async function loadPendingApprovals() {
       tdAction.style.minWidth = '150px';
       
       const btn = document.createElement('button');
-      btn.textContent = '🔍 Semak';
+      btn.textContent = 'Semak';
       btn.className = 'btn btn-sm btn-primary';
       btn.style.padding = '8px 16px';
       btn.style.borderRadius = '6px';
