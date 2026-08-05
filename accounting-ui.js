@@ -105,7 +105,7 @@ function showAccountingPage() {
             '<select id="acct-entry-subcategory" class="field-input"><option value="CORPORATE">Corporate</option><option value="GOVERNMENT">Government</option><option value="PERSONAL">Personal</option></select></div>' +
           '<div class="field-grp" id="acct-entry-property-grp" style="display:none;"><label class="field-label">Nama Hartanah</label><input type="text" id="acct-entry-property" class="field-input" placeholder="Nama / lokasi hartanah"></div>' +
           '<div class="field-grp" id="acct-entry-custom-desc-grp" style="display:none;grid-column:span 2;"><label class="field-label">Penerangan (Lain-lain)</label><textarea id="acct-entry-custom-desc" class="field-input" rows="2" placeholder="Nyatakan sumber pendapatan"></textarea></div>' +
-          '<div class="field-grp" id="acct-entry-upload-grp" style="display:none;grid-column:span 2;"><label class="field-label">Muat Naik Dokumen Bank</label><input type="file" id="acct-entry-upload" class="field-input" accept="image/*,application/pdf"></div>' +
+          '<div class="field-grp" id="acct-entry-upload-grp" style="display:none;grid-column:span 2;"><label class="field-label">Muat Naik Dokumen Bank</label><input type="file" id="acct-entry-upload" class="field-input" accept="image/*,application/pdf" style="cursor:pointer;" onchange="onAccountingFileSelected()"></div>' +
           '<div class="field-grp"><label class="field-label">Ahli (Pilihan)</label><select id="acct-entry-member" class="field-input"><option value="">— Tidak berkaitan ahli —</option></select></div>' +
           '<div class="field-grp"><label class="field-label">Jumlah (RM)</label><input type="number" id="acct-entry-amount" class="field-input" step="0.01" placeholder="0.00"></div>' +
           '<div class="field-grp"><label class="field-label">Akaun Bank</label><select id="acct-entry-bank" class="field-input"></select></div>' +
@@ -155,6 +155,18 @@ function onAccountingCategoryChange() {
   document.getElementById('acct-entry-property-grp').style.display = (cat === 'SEWA') ? 'block' : 'none';
   document.getElementById('acct-entry-custom-desc-grp').style.display = (cat === 'OTHER') ? 'block' : 'none';
   document.getElementById('acct-entry-upload-grp').style.display = (cat === 'BANK STATEMENT') ? 'block' : 'none';
+}
+
+// ── File upload indicator ──
+function onAccountingFileSelected() {
+  var input = document.getElementById('acct-entry-upload');
+  if (input && input.files && input.files[0]) {
+    var fileName = input.files[0].name;
+    var label = document.querySelector('#acct-entry-upload-grp label');
+    if (label) {
+      label.innerHTML = 'Muat Naik Dokumen Bank <span style="color:var(--success);font-size:12px;">(' + fileName + ')</span>';
+    }
+  }
 }
 
 // ── Members dropdown (mirrors loadMembers in receipt-pv-ui.js) ──
