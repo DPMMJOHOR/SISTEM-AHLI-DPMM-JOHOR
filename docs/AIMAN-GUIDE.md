@@ -4,6 +4,18 @@
 
 AIMAN (Ahli Inovasi & Maju Aspirasi Negeri) is the official digital assistant and business guide for DPMM Negeri Johor. It helps users navigate the membership application process, provides business guidance, and answers questions about the system.
 
+## Current Status (6 Ogos 2026)
+
+**All AIMAN enhancements completed and verified:**
+- ✅ U1: Conversation context system (history + sessionStorage)
+- ✅ U2: Quick-reply buttons (Ya/Tidak options)
+- ✅ U3: Animated typing indicator (bouncing dots animation)
+- ✅ U4: Smooth open/close animations (CSS transitions)
+- ✅ U5: Step-aware greetings (contextual greetings per form step)
+- ✅ U6: Markdown stripping (cleanBotText function)
+- ✅ U7: Accessibility improvements (ARIA labels, keyboard navigation)
+- ✅ U8: Error handling (graceful degradation, retry logic)
+
 ## Language Support
 
 AIMAN supports both **Bahasa Melayu** and **English**:
