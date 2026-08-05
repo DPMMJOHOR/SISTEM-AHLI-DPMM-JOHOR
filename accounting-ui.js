@@ -70,7 +70,7 @@ function showAccountingPage() {
 
   listEl.innerHTML =
     '<div class="sec-card" style="margin-bottom:18px;">' +
-      '<div class="sec-head"><h3>&#x1F3E6; Akaun Bank</h3>' +
+      '<div class="sec-head"><h3>Akaun Bank</h3>' +
         (canWrite ? '<button class="btn btn-primary btn-sm" onclick="openBankAccountModal()">+ Tambah Akaun Bank</button>' : '') +
       '</div>' +
       '<div class="sec-body">' +
@@ -81,7 +81,7 @@ function showAccountingPage() {
     '</div>' +
 
     '<div class="sec-card" style="margin-bottom:18px;">' +
-      '<div class="sec-head"><h3>&#x1F4B0; Akaun Tunai</h3>' +
+      '<div class="sec-head"><h3>Akaun Tunai</h3>' +
         (canWrite ? '<button class="btn btn-primary btn-sm" onclick="openCashAccountModal()">+ Tambah Akaun Tunai</button>' : '') +
       '</div>' +
       '<div class="sec-body">' +
@@ -93,7 +93,7 @@ function showAccountingPage() {
 
     (canWrite ?
     '<div class="sec-card" style="margin-bottom:18px;">' +
-      '<div class="sec-head"><h3>&#x2795; Rekod Pendapatan Baru</h3></div>' +
+      '<div class="sec-head"><h3>Rekod Pendapatan Baru</h3></div>' +
       '<div class="sec-body">' +
         '<div class="field-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">' +
           '<div class="field-grp"><label class="field-label">Kategori Pendapatan</label>' +
@@ -118,11 +118,25 @@ function showAccountingPage() {
     '</div>' : '') +
 
     '<div class="sec-card">' +
-      '<div class="sec-head"><h3>&#x1F4CB; Senarai Rekod Pendapatan</h3></div>' +
+      '<div class="sec-head"><h3>Senarai Rekod Pendapatan</h3>' +
+        '<div style="display:flex;gap:10px;align-items:center;">' +
+          '<select id="acct-filter-month" class="field-input" style="width:auto;padding:6px 10px;font-size:13px;" onchange="filterAccountingEntries()">' +
+            '<option value="">Semua Bulan</option>' +
+          '</select>' +
+          '<select id="acct-filter-year" class="field-input" style="width:auto;padding:6px 10px;font-size:13px;" onchange="filterAccountingEntries()">' +
+            '<option value="">Semua Tahun</option>' +
+          '</select>' +
+          '<button class="btn btn-outline btn-sm" onclick="exportAccountingCSV()">Eksport CSV</button>' +
+        '</div>' +
+      '</div>' +
       '<div class="sec-body">' +
         '<div class="table-wrap"><table class="table"><thead><tr>' +
           '<th>No. Rekod</th><th>Tarikh</th><th>Kategori</th><th>Ahli</th><th>Jumlah (RM)</th><th>Status</th><th>Tindakan</th>' +
         '</tr></thead><tbody id="acct-entries-table-body"><tr><td colspan="7" style="text-align:center;color:var(--muted);">Memuatkan...</td></tr></tbody></table></div>' +
+        '<div id="acct-summary" style="margin-top:14px;padding:12px;background:var(--gray1);border-radius:8px;display:none;">' +
+          '<div><strong>Jumlah Rekod:</strong> <span id="acct-summary-count">0</span></div>' +
+          '<div><strong>Jumlah Pendapatan (Diluluskan):</strong> RM <span id="acct-summary-total">0.00</span></div>' +
+        '</div>' +
       '</div>' +
     '</div>';
 
@@ -131,6 +145,7 @@ function showAccountingPage() {
   loadAccountingEntries();
   loadAccountingMembers();
   loadAccountingKpis();
+  populateAccountingFilters();
 }
 
 // ── Conditional field logic ──
@@ -190,7 +205,7 @@ async function loadBankAccounts() {
         '<td style="font-family:var(--mono);">' + b.account_number + '</td>' +
         '<td>' + (b.account_type || '—') + '</td>' +
         '<td style="font-family:var(--mono);font-weight:700;">' + Number(b.balance || 0).toLocaleString('en-MY', {minimumFractionDigits:2}) + '</td>' +
-        '<td>' + (b.is_main ? '&#x2705;' : '—') + '</td>' +
+        '<td>' + (b.is_main ? 'Ya' : '—') + '</td>' +
         (canWrite ? '<td><button class="btn btn-outline btn-sm" onclick="openBankAccountModal(' + b.id + ')">Edit</button></td>' : '') +
       '</tr>';
     }).join('');
@@ -301,8 +316,8 @@ async function loadCashAccounts() {
         '<td>' + (c.location || '—') + '</td>' +
         '<td>' + (c.custodian || '—') + '</td>' +
         '<td style="font-family:var(--mono);font-weight:700;">' + Number(c.balance || 0).toLocaleString('en-MY', {minimumFractionDigits:2}) + '</td>' +
-        '<td>' + (c.is_active ? '&#x2705;' : '&#x274C;') + '</td>' +
-        (canWrite ? '<td><button class="btn btn-outline btn-sm" onclick="openCashAccountModal(' + c.id + ')">Edit</button></td>' : '') +
+        '<td>' + (c.is_active ? 'Ya' : 'Tidak') + '</td>' +
+        (canWrite ? '<td><button class="btn btn-outline btn-sm" onclick="openCashAccountModal(' + c.id + ')">Edit</button> <button class="btn btn-outline btn-sm" onclick="viewCashTransactions(' + c.id + ')">Transaksi</button></td>' : '<td><button class="btn btn-outline btn-sm" onclick="viewCashTransactions(' + c.id + ')">Transaksi</button></td>') +
       '</tr>';
     }).join('');
   } catch (err) {
@@ -648,8 +663,43 @@ async function handleAccountingApproval(entryId, action) {
   }
 
   var performedBy = (typeof currentUser !== 'undefined' && currentUser) ? (currentUser.name || currentUser.id) : 'system';
+  var userRole = (typeof currentUser !== 'undefined' && currentUser) ? currentUser.role : null;
 
   try {
+    var entryRes = await supabaseClient.from('accounting_entries').select('amount, approval_status').eq('id', entryId).single();
+    if (entryRes.error) throw entryRes.error;
+    var entry = entryRes.data;
+
+    if (action === 'approved') {
+      var amount = Number(entry.amount || 0);
+      
+      // Check spending limits for bendahari and ajk
+      if (userRole === 'bendahari' || userRole === 'ajk') {
+        var limitCheckRes = await supabaseClient.rpc('check_spending_limit', {
+          p_amount: amount,
+          p_role: userRole,
+          p_limit_type: 'single_transaction',
+          p_date: new Date().toISOString().slice(0, 10)
+        });
+        if (limitCheckRes.error) {
+          console.warn('Spending limit check failed:', limitCheckRes.error);
+        } else if (limitCheckRes.data === false) {
+          showError('Jumlah melebihi had perbelanjaan untuk peranan ' + userRole);
+          return;
+        }
+      }
+
+      // Dual-signature requirement for amounts above RM5000
+      if (amount >= 5000) {
+        var historyRes = await supabaseClient.from('approval_history').select('*')
+          .eq('voucher_id', entryId).eq('entity_type', 'accounting_entry').eq('action', 'approved');
+        if (!historyRes.error && historyRes.data && historyRes.data.length > 0) {
+          showError('Jumlah RM5,000 ke atas memerlukan kelulusan berganda. Rekod ini telah diluluskan oleh ' + historyRes.data[0].performed_by);
+          return;
+        }
+      }
+    }
+
     var updateRes = await supabaseClient.from('accounting_entries').update({
       approval_status: action,
       approved_by: performedBy,
@@ -658,12 +708,27 @@ async function handleAccountingApproval(entryId, action) {
     }).eq('id', entryId);
     if (updateRes.error) throw updateRes.error;
 
+    // Capture IP address and user agent for audit trail
+    var ipAddress = null;
+    var userAgent = navigator.userAgent || 'unknown';
+    try {
+      var ipRes = await fetch('https://api.ipify.org?format=json');
+      if (ipRes.ok) {
+        var ipData = await ipRes.json();
+        ipAddress = ipData.ip;
+      }
+    } catch (e) {
+      console.warn('Failed to capture IP address:', e);
+    }
+
     await supabaseClient.from('approval_history').insert([{
       voucher_id: entryId,
       entity_type: 'accounting_entry',
       action: action,
       performed_by: performedBy,
-      comments: rejectionReason || 'Diluluskan'
+      comments: rejectionReason || 'Diluluskan',
+      ip_address: ipAddress,
+      user_agent: userAgent
     }]);
 
     showSuccess(action === 'approved' ? 'Rekod berjaya diluluskan' : 'Rekod berjaya ditolak');
@@ -673,5 +738,232 @@ async function handleAccountingApproval(entryId, action) {
   } catch (err) {
     console.error('Error updating approval:', err);
     showError('Ralat: ' + err.message);
+  }
+}
+
+// ── Cash Transaction History ──
+async function viewCashTransactions(cashAccountId) {
+  try {
+    var cashRes = await supabaseClient.from('cash_accounts').select('*').eq('id', cashAccountId).single();
+    if (cashRes.error) throw cashRes.error;
+    var cashAccount = cashRes.data;
+
+    var transRes = await supabaseClient.from('cash_transactions').select('*').eq('cash_account_id', cashAccountId).order('transaction_date', { ascending: false }).limit(50);
+    if (transRes.error) throw transRes.error;
+    var transactions = transRes.data || [];
+
+    var overlay = document.getElementById('cash-transactions-modal');
+    if (overlay) overlay.remove();
+
+    overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.id = 'cash-transactions-modal';
+
+    var transHtml = '';
+    if (transactions.length === 0) {
+      transHtml = '<tr><td colspan="6" style="text-align:center;color:var(--muted);">Tiada transaksi direkodkan.</td></tr>';
+    } else {
+      transHtml = transactions.map(function(t){
+        var typeBadge = t.transaction_type === 'deposit'
+          ? '<span style="color:var(--success);font-weight:700;">Masuk</span>'
+          : (t.transaction_type === 'withdrawal'
+            ? '<span style="color:var(--danger);font-weight:700;">Keluar</span>'
+            : (t.transaction_type === 'expense'
+              ? '<span style="color:var(--warning);font-weight:700;">Perbelanjaan</span>'
+              : '<span style="color:var(--info);font-weight:700;">Pindahan</span>'));
+        return '<tr>' +
+          '<td>' + t.transaction_date + '</td>' +
+          '<td>' + typeBadge + '</td>' +
+          '<td>' + (t.description || '—') + '</td>' +
+          '<td>' + (t.recipient_payee || '—') + '</td>' +
+          '<td style="font-family:var(--mono);font-weight:700;">' + Number(t.amount).toLocaleString('en-MY', {minimumFractionDigits:2}) + '</td>' +
+          '<td>' + (t.reference_number || '—') + '</td>' +
+        '</tr>';
+      }).join('');
+    }
+
+    overlay.innerHTML =
+      '<div class="modal" style="max-width:800px;">' +
+        '<div class="modal-head"><h3>Sejarah Transaksi: ' + cashAccount.account_name + '</h3><button class="modal-close" onclick="closeModal(\'cash-transactions-modal\')">&#x2715;</button></div>' +
+        '<div class="modal-body">' +
+          '<div style="margin-bottom:16px;padding:12px;background:var(--gray1);border-radius:8px;">' +
+            '<div><strong>Jenis Akaun:</strong> ' + (cashAccount.account_type || '—') + '</div>' +
+            '<div><strong>Lokasi:</strong> ' + (cashAccount.location || '—') + '</div>' +
+            '<div><strong>Pengurus:</strong> ' + (cashAccount.custodian || '—') + '</div>' +
+            '<div><strong>Baki Semasa:</strong> RM ' + Number(cashAccount.balance || 0).toLocaleString('en-MY', {minimumFractionDigits:2}) + '</div>' +
+          '</div>' +
+          '<div class="table-wrap"><table class="table"><thead><tr>' +
+            '<th>Tarikh</th><th>Jenis</th><th>Penerangan</th><th>Penerima/Pembayar</th><th>Jumlah (RM)</th><th>No. Rujukan</th>' +
+          '</tr></thead><tbody>' + transHtml + '</tbody></table></div>' +
+          '<div style="margin-top:14px;display:flex;justify-content:flex-end;"><button class="btn btn-outline" onclick="closeModal(\'cash-transactions-modal\')">Tutup</button></div>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(overlay);
+    overlay.classList.add('show');
+  } catch (err) {
+    console.error('Error loading cash transactions:', err);
+    showError('Ralat memuat sejarah transaksi: ' + err.message);
+  }
+}
+
+// ── Accounting Reporting Functions ──
+async function populateAccountingFilters() {
+  try {
+    var yearSelect = document.getElementById('acct-filter-year');
+    var monthSelect = document.getElementById('acct-filter-month');
+    if (!yearSelect || !monthSelect) return;
+
+    var res = await supabaseClient.from('accounting_entries').select('entry_date');
+    if (res.error) throw res.error;
+    var entries = res.data || [];
+
+    var years = new Set();
+    var months = new Set();
+    entries.forEach(function(e){
+      if (e.entry_date) {
+        var date = new Date(e.entry_date);
+        years.add(date.getFullYear());
+        months.add(date.getMonth() + 1);
+      }
+    });
+
+    var yearOpts = '<option value="">Semua Tahun</option>';
+    Array.from(years).sort().reverse().forEach(function(y){
+      yearOpts += '<option value="' + y + '">' + y + '</option>';
+    });
+    yearSelect.innerHTML = yearOpts;
+
+    var monthOpts = '<option value="">Semua Bulan</option>';
+    var monthNames = ['Januari', 'Februari', 'Mac', 'April', 'Mei', 'Jun', 'Julai', 'Ogos', 'September', 'Oktober', 'November', 'Disember'];
+    Array.from(months).sort(function(a, b){ return a - b; }).forEach(function(m){
+      monthOpts += '<option value="' + m + '">' + monthNames[m - 1] + '</option>';
+    });
+    monthSelect.innerHTML = monthOpts;
+  } catch (err) {
+    console.error('Error populating filters:', err);
+  }
+}
+
+async function filterAccountingEntries() {
+  var year = document.getElementById('acct-filter-year').value;
+  var month = document.getElementById('acct-filter-month').value;
+  var tbody = document.getElementById('acct-entries-table-body');
+  if (!tbody) return;
+
+  try {
+    var query = supabaseClient.from('accounting_entries').select('*');
+    
+    if (year) {
+      query = query.gte('entry_date', year + '-01-01').lte('entry_date', year + '-12-31');
+    }
+    if (month) {
+      var yearFilter = year || new Date().getFullYear();
+      var daysInMonth = new Date(yearFilter, month, 0).getDate();
+      query = query.gte('entry_date', yearFilter + '-' + String(month).padStart(2, '0') + '-01')
+                   .lte('entry_date', yearFilter + '-' + String(month).padStart(2, '0') + '-' + daysInMonth);
+    }
+
+    var res = await query.order('entry_date', { ascending: false }).limit(100);
+    if (res.error) throw res.error;
+    var rows = res.data || [];
+
+    if (rows.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);">Tiada rekod pendapatan.</td></tr>';
+      document.getElementById('acct-summary').style.display = 'none';
+      return;
+    }
+
+    tbody.innerHTML = rows.map(function(e){
+      var statusBadge = e.approval_status === 'approved'
+        ? '<span style="color:var(--success);font-weight:700;">Diluluskan</span>'
+        : (e.approval_status === 'rejected'
+          ? '<span style="color:var(--danger);font-weight:700;">Ditolak</span>'
+          : '<span style="color:var(--warning);font-weight:700;">Menunggu</span>');
+      return '<tr>' +
+        '<td style="font-family:var(--mono);">' + e.entry_number + '</td>' +
+        '<td>' + e.entry_date + '</td>' +
+        '<td>' + e.income_category + (e.income_subcategory ? ' (' + e.income_subcategory + ')' : '') + '</td>' +
+        '<td>' + (e.member_name || '—') + '</td>' +
+        '<td style="font-family:var(--mono);font-weight:700;">' + Number(e.amount).toLocaleString('en-MY', {minimumFractionDigits:2}) + '</td>' +
+        '<td>' + statusBadge + '</td>' +
+        '<td><button class="btn btn-outline btn-sm" onclick="reviewAccountingEntry(' + e.id + ')">Semak</button></td>' +
+      '</tr>';
+    }).join('');
+
+    var approvedTotal = rows.filter(function(e){ return e.approval_status === 'approved'; })
+      .reduce(function(s, e){ return s + Number(e.amount || 0); }, 0);
+    var summaryEl = document.getElementById('acct-summary');
+    if (summaryEl) {
+      summaryEl.style.display = 'block';
+      document.getElementById('acct-summary-count').textContent = rows.length;
+      document.getElementById('acct-summary-total').textContent = approvedTotal.toLocaleString('en-MY', {minimumFractionDigits:2});
+    }
+  } catch (err) {
+    console.error('Error filtering entries:', err);
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--danger);">Ralat memuat rekod.</td></tr>';
+  }
+}
+
+async function exportAccountingCSV() {
+  var year = document.getElementById('acct-filter-year').value;
+  var month = document.getElementById('acct-filter-month').value;
+  
+  try {
+    var query = supabaseClient.from('accounting_entries').select('*');
+    
+    if (year) {
+      query = query.gte('entry_date', year + '-01-01').lte('entry_date', year + '-12-31');
+    }
+    if (month) {
+      var yearFilter = year || new Date().getFullYear();
+      var daysInMonth = new Date(yearFilter, month, 0).getDate();
+      query = query.gte('entry_date', yearFilter + '-' + String(month).padStart(2, '0') + '-01')
+                   .lte('entry_date', yearFilter + '-' + String(month).padStart(2, '0') + '-' + daysInMonth);
+    }
+
+    var res = await query.order('entry_date', { ascending: true });
+    if (res.error) throw res.error;
+    var rows = res.data || [];
+
+    if (rows.length === 0) {
+      showError('Tiada rekod untuk dieksport');
+      return;
+    }
+
+    var headers = ['No. Rekod', 'Tarikh', 'Kategori', 'Sub-Kategori', 'Ahli', 'Jumlah (RM)', 'Kaedah Pembayaran', 'No. Rujukan', 'Penerangan', 'Status', 'Diluluskan Oleh', 'Tarikh Kelulusan'];
+    var csvContent = headers.join(',') + '\n';
+
+    rows.forEach(function(e){
+      var row = [
+        e.entry_number,
+        e.entry_date,
+        e.income_category,
+        e.income_subcategory || '',
+        e.member_name || '',
+        Number(e.amount).toFixed(2),
+        e.payment_method || '',
+        e.reference_number || '',
+        (e.description || e.custom_description || e.property_name || '').replace(/,/g, ' '),
+        e.approval_status,
+        e.approved_by || '',
+        e.approval_date || ''
+      ];
+      csvContent += row.map(function(cell){ return '"' + String(cell).replace(/"/g, '""') + '"'; }).join(',') + '\n';
+    });
+
+    var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    var link = document.createElement('a');
+    var url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'laporan_perakaunan_' + (year || 'semua') + '_' + (month || 'semua') + '.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    showSuccess('Laporan berjaya dieksport');
+  } catch (err) {
+    console.error('Error exporting CSV:', err);
+    showError('Ralat mengeksport: ' + err.message);
   }
 }
