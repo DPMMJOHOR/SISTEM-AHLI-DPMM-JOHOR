@@ -2323,6 +2323,12 @@ tr.row-unpaid { background: #fff0f0 !important; }
     </div>
   </div>
 
+  <!-- ══ PERAKAUNAN (ACCOUNTING) PAGE ══ -->
+  <div id="page-accounting" class="page">
+    <div id="accounting-dashboard"></div>
+    <div id="accounting-list"></div>
+  </div>
+
 </div><!-- /#app -->
 
 <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
@@ -3134,6 +3140,7 @@ function _continueLogin(user, btn) {
   document.getElementById('sidebar-userid').textContent = dn;
   if (user.role === 'admin') document.getElementById('admin-nav-item').style.display = 'flex';
   if (typeof addReceiptPVNavigation === 'function') addReceiptPVNavigation();
+  if (typeof addAccountingNavigation === 'function') addAccountingNavigation();
   sessionStartTime = new Date();
   addLog('Log masuk: ' + user.name);
 
@@ -3457,6 +3464,7 @@ var PAGE_META = {
   receipts:    ['RESIT BAYARAN','Jana & urus resit pembayaran ahli'],
   vouchers:    ['BAUCAR BAYARAN','Cipta & urus baucar pembayaran'],
   approvals:   ['KELULUSAN BAUCAR','Semak & luluskan baucar pembayaran'],
+  accounting:  ['PERAKAUNAN','Urus pendapatan, bank, tunai & kelulusan kewangan'],
 };
 
 function showPage(id) {
@@ -3500,6 +3508,7 @@ function showPage(id) {
   if (id === 'receipts' && typeof showReceiptsPage === 'function') showReceiptsPage();
   if (id === 'vouchers' && typeof showVouchersPage === 'function') showVouchersPage();
   if (id === 'approvals' && typeof showApprovalsPage === 'function') showApprovalsPage();
+  if (id === 'accounting' && typeof showAccountingPage === 'function') showAccountingPage();
   closeSidebar();
 }
 
@@ -8606,6 +8615,7 @@ async function applyDigitalSignatureToPDF(pdfUrl, signatureUrl, documentType) {
 }
 </script>
 <script src="receipt-pv-ui.js?v=70"></script>
+<script src="accounting-ui.js?v=1"></script>
 </body>
 </html>
 

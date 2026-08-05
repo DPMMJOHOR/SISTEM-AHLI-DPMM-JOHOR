@@ -242,6 +242,108 @@ CREATE INDEX idx_action ON dpmm_audit_log(action);
 CREATE INDEX idx_created_at ON dpmm_audit_log(created_at);
 ```
 
+#### **bank_accounts** (Bank Account Management)
+```sql
+CREATE TABLE bank_accounts (
+  id SERIAL PRIMARY KEY,
+  bank_name VARCHAR(255) NOT NULL,
+  account_number VARCHAR(50) NOT NULL,
+  account_type VARCHAR(50),
+  balance NUMERIC(15,2) DEFAULT 0.00,
+  is_main BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Indexes
+CREATE INDEX idx_bank_accounts_main ON bank_accounts(is_main);
+CREATE INDEX idx_bank_accounts_type ON bank_accounts(account_type);
+```
+
+#### **cash_accounts** (Cash Account Management)
+```sql
+CREATE TABLE cash_accounts (
+  id SERIAL PRIMARY KEY,
+  account_name VARCHAR(255) NOT NULL,
+  account_type VARCHAR(50) DEFAULT 'petty_cash',
+  balance NUMERIC(15,2) DEFAULT 0.00,
+  location VARCHAR(255),
+  custodian VARCHAR(255),
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Indexes
+CREATE INDEX idx_cash_accounts_active ON cash_accounts(is_active);
+CREATE INDEX idx_cash_accounts_type ON cash_accounts(account_type);
+```
+
+#### **accounting_entries** (Income/Expense Records)
+```sql
+CREATE TABLE accounting_entries (
+  id SERIAL PRIMARY KEY,
+  entry_number VARCHAR(50) UNIQUE NOT NULL,
+  entry_date DATE NOT NULL,
+  income_category VARCHAR(50) NOT NULL,
+  income_subcategory VARCHAR(50),
+  amount NUMERIC(15,2) NOT NULL,
+  member_id INTEGER,
+  member_name VARCHAR(255),
+  description TEXT,
+  property_name VARCHAR(255),
+  custom_description TEXT,
+  bank_account_id INTEGER,
+  payment_method VARCHAR(50),
+  reference_number VARCHAR(100),
+  supporting_document_url TEXT,
+  approval_status VARCHAR(20) DEFAULT 'pending',
+  approved_by VARCHAR(255),
+  approval_date DATE,
+  rejection_reason TEXT,
+  created_by VARCHAR(255),
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Indexes
+CREATE INDEX idx_entry_number ON accounting_entries(entry_number);
+CREATE INDEX idx_entry_date ON accounting_entries(entry_date);
+CREATE INDEX idx_approval_status ON accounting_entries(approval_status);
+CREATE INDEX idx_member_id ON accounting_entries(member_id);
+```
+
+#### **approval_history** (Approval Audit Trail)
+```sql
+CREATE TABLE approval_history (
+  id SERIAL PRIMARY KEY,
+  voucher_id INTEGER NOT NULL,
+  entity_type VARCHAR(50) NOT NULL,
+  action VARCHAR(50) NOT NULL,
+  performed_by VARCHAR(255),
+  comments TEXT,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Indexes
+CREATE INDEX idx_voucher_id ON approval_history(voucher_id);
+CREATE INDEX idx_entity_type ON approval_history(entity_type);
+CREATE INDEX idx_created_at ON approval_history(created_at);
+```
+
+#### **running_numbers** (Sequential Number Generator)
+```sql
+CREATE TABLE running_numbers (
+  id SERIAL PRIMARY KEY,
+  prefix VARCHAR(20) NOT NULL UNIQUE,
+  current_number INTEGER DEFAULT 0,
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Index
+CREATE INDEX idx_prefix ON running_numbers(prefix);
+```
+
 ### **Storage Buckets**
 
 #### **permohonan-dokumen** (PDF Storage)
@@ -250,6 +352,20 @@ Bucket Name: permohonan-dokumen
 Type: Private
 Max File Size: 10MB
 Path Format: borang/[ref_id]/borang-[ref_id].pdf
+
+RLS Policies:
+- SELECT: Authenticated users only
+- INSERT: Authenticated users only
+- UPDATE: Authenticated users only
+- DELETE: Authenticated users only
+```
+
+#### **bank-statements** (Bank Statement Documents)
+```
+Bucket Name: bank-statements
+Type: Private
+Max File Size: 10MB
+Path Format: statements/[entry_id]/statement-[entry_id].pdf
 
 RLS Policies:
 - SELECT: Authenticated users only
