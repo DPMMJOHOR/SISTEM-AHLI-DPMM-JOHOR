@@ -15,7 +15,115 @@ All 22 implementation units completed successfully on **26 Julai 2026**. Merged 
 
 ---
 
-## What Was Implemented
+## Accounting Module Implementation (5 Ogos 2026)
+
+**Status:** ✅ **COMPLETE**
+
+### Phases Completed
+
+#### Phase 1: Database Setup
+- Created Supabase tables: bank_accounts, cash_accounts, accounting_entries, approval_history
+- Added running_numbers sequence for accounting_entry
+- Created bank-statements storage bucket
+- Applied migration accounting-cash-accounts-alter.sql to add missing columns
+
+#### Phase 2: UI & Bank Accounts Management
+- Accounting page with KPI dashboard
+- Bank accounts CRUD (Create, Read, Update, Delete)
+- Income entry form with conditional fields
+- Categories: Yuran, Yuran Pendaftaran, Sumbangan, Sewa, Bank Statement, Lain-lain
+- Bank statement document upload support
+- Member linkage for income records
+
+#### Phase 3: Cash Accounts Management
+- Cash accounts CRUD (petty cash, safe, drawer)
+- Fields: account name, type, location, custodian, balance, active status
+- Cash balance KPI on dashboard
+
+#### Phase 4: Approval Workflow
+- Approval workflow (pending → approved/rejected)
+- Review modal with approval history
+- Rejection reason tracking
+- Role-based access control (admin, bendahari, ajk)
+
+### Database Schema
+```sql
+-- bank_accounts
+CREATE TABLE bank_accounts (
+  id SERIAL PRIMARY KEY,
+  bank_name VARCHAR(255) NOT NULL,
+  account_number VARCHAR(50) NOT NULL,
+  account_type VARCHAR(50),
+  balance NUMERIC(15,2) DEFAULT 0.00,
+  is_main BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- cash_accounts
+CREATE TABLE cash_accounts (
+  id SERIAL PRIMARY KEY,
+  account_name VARCHAR(255) NOT NULL,
+  account_type VARCHAR(50) DEFAULT 'petty_cash',
+  balance NUMERIC(15,2) DEFAULT 0.00,
+  location VARCHAR(255),
+  custodian VARCHAR(255),
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- accounting_entries
+CREATE TABLE accounting_entries (
+  id SERIAL PRIMARY KEY,
+  entry_number VARCHAR(50) UNIQUE NOT NULL,
+  entry_date DATE NOT NULL,
+  income_category VARCHAR(50) NOT NULL,
+  income_subcategory VARCHAR(50),
+  amount NUMERIC(15,2) NOT NULL,
+  member_id INTEGER,
+  member_name VARCHAR(255),
+  description TEXT,
+  property_name VARCHAR(255),
+  custom_description TEXT,
+  bank_account_id INTEGER,
+  payment_method VARCHAR(50),
+  reference_number VARCHAR(100),
+  supporting_document_url TEXT,
+  approval_status VARCHAR(20) DEFAULT 'pending',
+  approved_by VARCHAR(255),
+  approval_date DATE,
+  rejection_reason TEXT,
+  created_by VARCHAR(255),
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- approval_history
+CREATE TABLE approval_history (
+  id SERIAL PRIMARY KEY,
+  voucher_id INTEGER NOT NULL,
+  entity_type VARCHAR(50) NOT NULL,
+  action VARCHAR(50) NOT NULL,
+  performed_by VARCHAR(255),
+  comments TEXT,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+```
+
+### Files Modified
+- `accounting-ui.js` - New file (678 lines)
+- `index.html` - Added accounting page container, navigation, script include
+- `migrations/accounting-cash-accounts-alter.sql` - New migration file
+
+### Access Control
+- Write roles: admin, bendahari
+- Approve roles: admin, bendahari, ajk
+- RLS policies applied for anon role
+
+---
+
+## What Was Implemented (Index.html Redesign)
 
 ### ✅ Phase 1: CSS Variables & Display Fixes (U1-U4)
 - 44 CSS variables for responsive design system
