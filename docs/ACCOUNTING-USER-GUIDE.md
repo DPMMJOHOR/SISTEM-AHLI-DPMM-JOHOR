@@ -6,7 +6,22 @@
 
 ---
 
-## 📋 Kandungan
+## PENTING: Status Pelaksanaan
+
+**AMARAN**: Dokumen ini menerangkan ciri-ciri yang dirancang untuk modul perakaunan. Beberapa ciri yang diterangkan di bawah mungkin belum dilaksanakan sepenuhnya dalam pangkalan data semasa.
+
+**Status Semasa**:
+- Akaun Tunai (cash_accounts): Tersedia
+- Akaun Bank (bank_accounts): BELUM dilaksanakan
+- Rekod Pendapatan (accounting_entries): BELUM dilaksanakan
+- Aliran Kerja Kelulusan: Bahagian tersedia
+- Laporan: KPI asas tersedia, eksport CSV belum dilaksanakan
+
+Sila rujuk IMPLEMENTATION-STATUS.md untuk status pelaksanaan terkini.
+
+---
+
+## Kandungan
 
 1. [Pengenalan](#pengenalan)
 2. [Akses dan Keizinan](#akses-dan-keizinan)
