@@ -1,7 +1,7 @@
 // Accounting Software - Frontend UI Components (Perakaunan)
 // Integrated with Sistem Ahli DPMM Johor
 // Follows conventions established in receipt-pv-ui.js
-// Cache-bust: 2026-08-06-02-00
+// Cache-bust: 2026-08-06-03-00
 
 // ── Roles allowed to write/approve accounting data ──
 var ACCOUNTING_WRITE_ROLES = ['admin', 'bendahari'];
@@ -60,6 +60,9 @@ function showAccountingPage() {
   if (!dashEl || !listEl) return;
 
   var canWrite = accountingCanWrite();
+  
+  // Initialize drag and drop
+  setTimeout(setupDragAndDrop, 100);
 
   dashEl.innerHTML =
     '<div class="kpi-grid kpi-4" style="margin-bottom:24px;">' +
@@ -106,7 +109,28 @@ function showAccountingPage() {
             '<select id="acct-entry-subcategory" class="field-input"><option value="CORPORATE">Corporate</option><option value="GOVERNMENT">Government</option><option value="PERSONAL">Personal</option></select></div>' +
           '<div class="field-grp" id="acct-entry-property-grp" style="display:none;"><label class="field-label">Nama Hartanah</label><input type="text" id="acct-entry-property" class="field-input" placeholder="Nama / lokasi hartanah"></div>' +
           '<div class="field-grp" id="acct-entry-custom-desc-grp" style="display:none;grid-column:span 2;"><label class="field-label">Penerangan (Lain-lain)</label><textarea id="acct-entry-custom-desc" class="field-input" rows="2" placeholder="Nyatakan sumber pendapatan"></textarea></div>' +
-          '<div class="field-grp" id="acct-entry-upload-grp" style="display:none;grid-column:span 2;"><label class="field-label">Muat Naik Dokumen Bank</label><div class="upload-zone" style="border:2px dashed var(--gray2);border-radius:8px;padding:16px;text-align:center;position:relative;cursor:pointer;" onclick="document.getElementById(\'acct-entry-upload\').click()"><input type="file" id="acct-entry-upload" accept="image/*,application/pdf" style="position:absolute;inset:0;opacity:0;cursor:pointer;" onchange="onAccountingFileSelected()"><span id="acct-upload-label" style="color:var(--muted);font-size:13px;">Klik untuk memilih fail (JPG, PNG atau PDF)</span></div></div>' +
+          '<div class="field-grp" id="acct-entry-upload-grp" style="display:none;grid-column:span 2;"><label class="field-label">Muat Naik Dokumen</label>' +
+            '<div class="premium-upload-container">' +
+              '<div class="upload-type-selector">' +
+                '<select id="acct-upload-type" class="field-input" style="flex:1;padding:10px 14px;border-radius:8px;border:1px solid var(--gray2);font-size:13px;">' +
+                  '<option value="bank_statement">Bank Statement</option>' +
+                  '<option value="payment_slip">Payment Slip</option>' +
+                  '<option value="invoice">Invoice</option>' +
+                '</select>' +
+              '</div>' +
+              '<div class="upload-zone premium-glass" id="acct-upload-zone" style="border:2px dashed var(--gray2);border-radius:12px;padding:24px;text-align:center;position:relative;cursor:pointer;transition:all 0.3s ease;" onclick="document.getElementById(\'acct-entry-upload\').click()">' +
+                '<input type="file" id="acct-entry-upload" accept="image/*,application/pdf" style="position:absolute;inset:0;opacity:0;cursor:pointer;" onchange="onAccountingFileSelected()">' +
+                '<div id="acct-upload-icon" style="font-size:32px;margin-bottom:12px;color:var(--primary);">📄</div>' +
+                '<span id="acct-upload-label" style="color:var(--muted);font-size:13px;">Klik atau seret fail ke sini (JPG, PNG atau PDF)</span>' +
+                '<div id="acct-upload-progress" style="display:none;margin-top:12px;">' +
+                  '<div style="background:var(--gray1);border-radius:6px;height:6px;overflow:hidden;">' +
+                    '<div id="acct-progress-bar" style="background:var(--primary);height:100%;width:0%;transition:width 0.3s ease;"></div>' +
+                  '</div>' +
+                  '<span id="acct-progress-text" style="font-size:12px;color:var(--muted);margin-top:6px;display:block;">0%</span>' +
+                '</div>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
           '<div class="field-grp"><label class="field-label">Ahli (Pilihan)</label><select id="acct-entry-member" class="field-input"><option value="">— Tidak berkaitan ahli —</option></select></div>' +
           '<div class="field-grp"><label class="field-label">Jumlah (RM)</label><input type="number" id="acct-entry-amount" class="field-input" step="0.01" placeholder="0.00"></div>' +
           '<div class="field-grp"><label class="field-label">Akaun Bank</label><select id="acct-entry-bank" class="field-input"></select></div>' +
@@ -164,19 +188,75 @@ function onAccountingFileSelected() {
   if (input && input.files && input.files[0]) {
     var file = input.files[0];
     var fileName = file.name;
+    var uploadType = document.getElementById('acct-upload-type').value;
     var label = document.getElementById('acct-upload-label');
+    var icon = document.getElementById('acct-upload-icon');
+    var progressDiv = document.getElementById('acct-upload-progress');
+    var progressBar = document.getElementById('acct-progress-bar');
+    var progressText = document.getElementById('acct-progress-text');
+    
     if (label) {
       label.innerHTML = '<span style="color:var(--muted);">Memproses ' + fileName + '...</span>';
     }
     
-    // Process OCR for bank statements
-    processBankStatementOCR(file);
+    // Update icon based on document type
+    if (icon) {
+      var icons = {
+        'bank_statement': '🏦',
+        'payment_slip': '💳',
+        'invoice': '📋'
+      };
+      icon.textContent = icons[uploadType] || '📄';
+    }
+    
+    // Show progress bar
+    if (progressDiv) {
+      progressDiv.style.display = 'block';
+    }
+    
+    // Process OCR based on document type
+    processDocumentOCR(file, uploadType);
   }
 }
 
-// ── OCR processing for bank statements ──
-async function processBankStatementOCR(file) {
+// ── Drag and drop handlers ──
+function setupDragAndDrop() {
+  var uploadZone = document.getElementById('acct-upload-zone');
+  if (!uploadZone) return;
+  
+  uploadZone.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    uploadZone.classList.add('drag-over');
+  });
+  
+  uploadZone.addEventListener('dragleave', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    uploadZone.classList.remove('drag-over');
+  });
+  
+  uploadZone.addEventListener('drop', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    uploadZone.classList.remove('drag-over');
+    
+    var files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      var input = document.getElementById('acct-entry-upload');
+      if (input) {
+        input.files = files;
+        onAccountingFileSelected();
+      }
+    }
+  });
+}
+
+// ── OCR processing for different document types ──
+async function processDocumentOCR(file, docType) {
   var label = document.getElementById('acct-upload-label');
+  var progressBar = document.getElementById('acct-progress-bar');
+  var progressText = document.getElementById('acct-progress-text');
   
   try {
     // Check if PDF or image
@@ -200,14 +280,13 @@ async function processBankStatementOCR(file) {
           logger: function(m) {
             if (m.status === 'recognizing text') {
               var progress = Math.round(m.progress * 100);
-              if (label) {
-                label.innerHTML = '<span style="color:var(--muted);">Memproses ' + file.name + '... ' + progress + '%</span>';
-              }
+              if (progressBar) progressBar.style.width = progress + '%';
+              if (progressText) progressText.textContent = progress + '%';
             }
           }
         });
         
-        extractAndFillBankData(result.data.text);
+        extractDocumentData(result.data.text, docType);
       }
     } else {
       // For images, OCR directly
@@ -215,14 +294,13 @@ async function processBankStatementOCR(file) {
         logger: function(m) {
           if (m.status === 'recognizing text') {
             var progress = Math.round(m.progress * 100);
-            if (label) {
-              label.innerHTML = '<span style="color:var(--muted);">Memproses ' + file.name + '... ' + progress + '%</span>';
-            }
+            if (progressBar) progressBar.style.width = progress + '%';
+            if (progressText) progressText.textContent = progress + '%';
           }
         }
       });
       
-      extractAndFillBankData(result.data.text);
+      extractDocumentData(result.data.text, docType);
     }
     
     if (label) {
@@ -238,10 +316,32 @@ async function processBankStatementOCR(file) {
   }
 }
 
-// ── Extract and auto-fill bank statement data ──
-function extractAndFillBankData(ocrText) {
+// ── Extract data based on document type ──
+function extractDocumentData(ocrText, docType) {
   var text = ocrText.toUpperCase();
   
+  if (docType === 'bank_statement') {
+    extractBankStatementData(text);
+  } else if (docType === 'payment_slip') {
+    extractPaymentSlipData(text);
+  } else if (docType === 'invoice') {
+    extractInvoiceData(text);
+  }
+  
+  showSuccess('Data diekstrak secara automatik dari ' + getDocumentTypeName(docType));
+}
+
+function getDocumentTypeName(type) {
+  var names = {
+    'bank_statement': 'Bank Statement',
+    'payment_slip': 'Payment Slip',
+    'invoice': 'Invoice'
+  };
+  return names[type] || 'dokumen';
+}
+
+// ── Extract bank statement data ──
+function extractBankStatementData(text) {
   // Try to extract amount (look for RM or currency patterns)
   var amountMatch = text.match(/RM\s*[\d,]+\.?\d*/g);
   if (amountMatch && amountMatch.length > 0) {
@@ -256,7 +356,6 @@ function extractAndFillBankData(ocrText) {
   var dateMatch = text.match(/\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}/);
   if (dateMatch) {
     var dateStr = dateMatch[0].replace(/\//g, '-');
-    // Convert to YYYY-MM-DD format
     var parts = dateStr.split('-');
     if (parts.length === 3) {
       var day = parts[0].padStart(2, '0');
@@ -281,9 +380,84 @@ function extractAndFillBankData(ocrText) {
       descField.value = 'Bank Statement - ' + bankName;
     }
   }
-  
-  showSuccess('Data diekstrak secara automatik dari bank statement');
 }
+
+// ── Extract payment slip data ──
+function extractPaymentSlipData(text) {
+  // Try to extract amount
+  var amountMatch = text.match(/RM\s*[\d,]+\.?\d*/g);
+  if (amountMatch && amountMatch.length > 0) {
+    var amountStr = amountMatch[0].replace(/RM\s*/, '').replace(/,/g, '');
+    var amount = parseFloat(amountStr);
+    if (!isNaN(amount) && amount > 0) {
+      document.getElementById('acct-entry-amount').value = amount;
+    }
+  }
+  
+  // Try to extract date
+  var dateMatch = text.match(/\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}/);
+  if (dateMatch) {
+    var dateStr = dateMatch[0].replace(/\//g, '-');
+    var parts = dateStr.split('-');
+    if (parts.length === 3) {
+      var day = parts[0].padStart(2, '0');
+      var month = parts[1].padStart(2, '0');
+      var year = parts[2];
+      document.getElementById('acct-entry-date').value = year + '-' + month + '-' + day;
+    }
+  }
+  
+  // Try to extract transaction ID
+  var txMatch = text.match(/(?:TX|TRANSACTION|ID|REF)[:\s]*([A-Z0-9\-]+)/i);
+  if (txMatch && txMatch[1]) {
+    document.getElementById('acct-entry-reference').value = txMatch[1];
+  }
+  
+  // Auto-fill description
+  var descField = document.getElementById('acct-entry-desc');
+  if (descField && !descField.value) {
+    descField.value = 'Payment Slip';
+  }
+}
+
+// ── Extract invoice data ──
+function extractInvoiceData(text) {
+  // Try to extract amount (look for TOTAL or INVOICE TOTAL)
+  var amountMatch = text.match(/(?:TOTAL|INVOICE TOTAL|AMOUNT)[:\s]*RM\s*[\d,]+\.?\d*/i);
+  if (amountMatch && amountMatch.length > 0) {
+    var amountStr = amountMatch[0].replace(/(?:TOTAL|INVOICE TOTAL|AMOUNT)[:\s]*RM\s*/i, '').replace(/,/g, '');
+    var amount = parseFloat(amountStr);
+    if (!isNaN(amount) && amount > 0) {
+      document.getElementById('acct-entry-amount').value = amount;
+    }
+  }
+  
+  // Try to extract invoice number
+  var invMatch = text.match(/(?:INVOICE|INV|NO\.?)[:\s]*([A-Z0-9\-]+)/i);
+  if (invMatch && invMatch[1]) {
+    document.getElementById('acct-entry-reference').value = invMatch[1];
+  }
+  
+  // Try to extract date
+  var dateMatch = text.match(/\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}/);
+  if (dateMatch) {
+    var dateStr = dateMatch[0].replace(/\//g, '-');
+    var parts = dateStr.split('-');
+    if (parts.length === 3) {
+      var day = parts[0].padStart(2, '0');
+      var month = parts[1].padStart(2, '0');
+      var year = parts[2];
+      document.getElementById('acct-entry-date').value = year + '-' + month + '-' + day;
+    }
+  }
+  
+  // Auto-fill description
+  var descField = document.getElementById('acct-entry-desc');
+  if (descField && !descField.value) {
+    descField.value = 'Invoice';
+  }
+}
+
 
 // ── Members dropdown (mirrors loadMembers in receipt-pv-ui.js) ──
 async function loadAccountingMembers() {
@@ -577,15 +751,27 @@ async function createAccountingEntry() {
 
     var supportingDocumentUrl = null;
     var uploadInput = document.getElementById('acct-entry-upload');
+    var uploadType = document.getElementById('acct-upload-type').value;
+    
     if (category === 'BANK STATEMENT' && uploadInput && uploadInput.files && uploadInput.files[0]) {
       var file = uploadInput.files[0];
-      var filePath = entryNumber.replace(/\//g, '_') + '_' + Date.now() + '_' + file.name;
-      var uploadRes = await supabaseClient.storage.from('bank-statements').upload(filePath, file);
+      
+      // Use folder structure based on document type
+      var folderMap = {
+        'bank_statement': 'bank-statements',
+        'payment_slip': 'payment-slips',
+        'invoice': 'invoices'
+      };
+      var folder = folderMap[uploadType] || 'documents';
+      
+      var filePath = folder + '/' + entryNumber.replace(/\//g, '_') + '_' + Date.now() + '_' + file.name;
+      var uploadRes = await supabaseClient.storage.from('accounting-documents').upload(filePath, file);
+      
       if (uploadRes.error) {
-        console.warn('Bank statement upload failed:', uploadRes.error);
+        console.warn('Document upload failed:', uploadRes.error);
         showError('Amaran: Muat naik dokumen gagal, tetapi rekod tetap disimpan.');
       } else {
-        var pub = supabaseClient.storage.from('bank-statements').getPublicUrl(filePath);
+        var pub = supabaseClient.storage.from('accounting-documents').getPublicUrl(filePath);
         supportingDocumentUrl = pub && pub.data ? pub.data.publicUrl : null;
       }
     }
