@@ -335,7 +335,20 @@ function extractDocumentData(ocrText, docType) {
     extractInvoiceData(text);
   }
   
-  showSuccess('Data diekstrak secara automatik dari ' + getDocumentTypeName(docType));
+  // Validate that fields were filled
+  var amountFilled = document.getElementById('acct-entry-amount').value;
+  var dateFilled = document.getElementById('acct-entry-date').value;
+  var referenceFilled = document.getElementById('acct-entry-reference').value;
+  var descFilled = document.getElementById('acct-entry-desc').value;
+  
+  console.log('OCR Validation - Amount:', amountFilled, 'Date:', dateFilled, 'Reference:', referenceFilled, 'Desc:', descFilled);
+  
+  if (!amountFilled && !dateFilled && !referenceFilled && !descFilled) {
+    console.warn('OCR did not fill any fields');
+    showWarning('OCR tidak dapat mengekstrak data. Sila isi secara manual.');
+  } else {
+    showSuccess('Data diekstrak secara automatik dari ' + getDocumentTypeName(docType));
+  }
 }
 
 function getDocumentTypeName(type) {
@@ -798,6 +811,7 @@ async function createAccountingEntry() {
       payment_method: paymentMethod,
       reference_number: reference || null,
       supporting_document_url: supportingDocumentUrl,
+      document_path: filePath || null,
       approval_status: 'pending',
       created_by: (typeof currentUser !== 'undefined' && currentUser) ? currentUser.id : 'system'
     };
@@ -936,6 +950,51 @@ async function reviewAccountingEntry(entryId) {
         '</div>';
       }).join('') + '</div>') : '';
 
+    // Document viewing with signed URL
+    var documentHtml = '';
+    if (entry.supporting_document_url) {
+      documentHtml = '<div style="margin-bottom:16px;padding:12px;background:var(--gray1);border-radius:8px;">' +
+        '<label class="field-label">Dokumen Sokongan</label>';
+      
+      // Try to get document path from URL or use stored path
+      var docPath = entry.document_path || null;
+      if (docPath) {
+        // Generate signed URL with 60 second expiration
+        supabaseClient.storage
+          .from('accounting-documents')
+          .createSignedUrl(docPath, 60)
+          .then(function(signedRes) {
+            if (signedRes.error) {
+              console.error('Error creating signed URL:', signedRes.error);
+              var docContainer = document.getElementById('acct-doc-container');
+              if (docContainer) {
+                docContainer.innerHTML = '<p style="color:var(--danger);font-size:12px;">Unable to load document</p>';
+              }
+            } else {
+              var docContainer = document.getElementById('acct-doc-container');
+              if (docContainer) {
+                docContainer.innerHTML =
+                  '<a href="' + signedRes.data.signedUrl + '" target="_blank" class="btn btn-outline btn-sm" style="display:inline-flex;align-items:center;gap:6px;margin-top:6px;">' +
+                    '× Lihat Dokumen' +
+                  '</a>';
+              }
+            }
+          })
+          .catch(function(err) {
+            console.error('Signed URL error:', err);
+          });
+        
+        documentHtml += '<div id="acct-doc-container" style="margin-top:6px;">Loading...</div>';
+      } else {
+        // Fallback to public URL if no path stored
+        documentHtml += '<a href="' + entry.supporting_document_url + '" target="_blank" class="btn btn-outline btn-sm" style="display:inline-flex;align-items:center;gap:6px;margin-top:6px;">' +
+          '× Lihat Dokumen' +
+        '</a>';
+      }
+      
+      documentHtml += '</div>';
+    }
+
     var actionsHtml = '';
     if (entry.approval_status === 'pending' && accountingCanApprove()) {
       actionsHtml =
@@ -962,7 +1021,7 @@ async function reviewAccountingEntry(entryId) {
             '<div><label class="field-label">Kaedah Pembayaran</label><div>' + (entry.payment_method || '—') + '</div></div>' +
             '<div style="grid-column:span 2;"><label class="field-label">Penerangan</label><div>' + (entry.description || entry.custom_description || entry.property_name || '—') + '</div></div>' +
           '</div>' +
-          statusHtml + historyHtml + actionsHtml +
+          documentHtml + statusHtml + historyHtml + actionsHtml +
         '</div>' +
       '</div>';
 

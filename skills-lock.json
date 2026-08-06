@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "accounting": {
+      "source": "whawkinsiv/claude-code-skills",
+      "sourceType": "github",
+      "skillPath": "skills/accounting/SKILL.md",
+      "computedHash": "6eb3bff88078d80edc653b2b8775d483e66280790f19527482437cad75df2b5f"
+    }
+  }
+}
