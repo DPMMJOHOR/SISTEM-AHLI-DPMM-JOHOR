@@ -10,14 +10,30 @@
 
 **AMARAN**: Dokumen ini menerangkan ciri-ciri yang dirancang untuk modul perakaunan. Beberapa ciri yang diterangkan di bawah mungkin belum dilaksanakan sepenuhnya dalam pangkalan data semasa.
 
-**Status Semasa**:
-- Akaun Tunai (cash_accounts): Tersedia
-- Akaun Bank (bank_accounts): BELUM dilaksanakan
-- Rekod Pendapatan (accounting_entries): BELUM dilaksanakan
+**Status Semasa (6 Ogos 2026)**:
+- Akaun Tunai (cash_accounts): Tersedia (6 akaun aktif)
+- Akaun Bank (bank_accounts): BELUM dilaksanakan (0 akaun)
+- Rekod Pendapatan (accounting_entries): BELUM dilaksanakan (0 rekod)
+- Chart of Accounts: Tersedia (40 akaun)
+- Journal Entries: BELUM dilaksanakan (0 rekod)
+- Receipts: BELUM dilaksanakan (0 rekod)
+- Vouchers: BELUM dilaksanakan (0 rekod)
+- Spending Limits: Tersedia (6 konfigurasi)
 - Aliran Kerja Kelulusan: Bahagian tersedia
 - Laporan: KPI asas tersedia, eksport CSV belum dilaksanakan
 
-Sila rujuk IMPLEMENTATION-STATUS.md untuk status pelaksanaan terkini.
+**Isu Keselamatan**:
+- dpmm_templates table: RLS dilumpuhkan (isu kritikal)
+
+**Rancangan Pelaksanaan**:
+Satu pelan pelaksanaan komprehensif telah dibuat untuk menyelesaikan semua isu:
+- docs/plans/2026-08-06-001-feat-comprehensive-system-upgrade-plan.md
+
+Pelan ini merangkumi:
+- Pelengkapkan modul perakaunan (bank_accounts, accounting_entries)
+- Peningkatan keselamatan (RLS policies, separation of duties)
+- Integrasi OCR untuk bank statement
+- Penambahbaikan AIMAN chatbot
 
 ---
 
