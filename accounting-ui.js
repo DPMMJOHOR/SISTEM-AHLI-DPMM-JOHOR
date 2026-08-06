@@ -1,7 +1,7 @@
 // Accounting Software - Frontend UI Components (Perakaunan)
 // Integrated with Sistem Ahli DPMM Johor
 // Follows conventions established in receipt-pv-ui.js
-// Cache-bust: 2026-08-06-01-00
+// Cache-bust: 2026-08-06-02-00
 
 // ── Roles allowed to write/approve accounting data ──
 var ACCOUNTING_WRITE_ROLES = ['admin', 'bendahari'];
@@ -158,16 +158,131 @@ function onAccountingCategoryChange() {
   document.getElementById('acct-entry-upload-grp').style.display = (cat === 'BANK STATEMENT') ? 'block' : 'none';
 }
 
-// ── File upload indicator ──
+// ── File upload indicator with OCR auto-fill ──
 function onAccountingFileSelected() {
   var input = document.getElementById('acct-entry-upload');
   if (input && input.files && input.files[0]) {
-    var fileName = input.files[0].name;
+    var file = input.files[0];
+    var fileName = file.name;
     var label = document.getElementById('acct-upload-label');
     if (label) {
-      label.innerHTML = '<span style="color:var(--success);font-weight:600;">' + fileName + '</span>';
+      label.innerHTML = '<span style="color:var(--muted);">Memproses ' + fileName + '...</span>';
+    }
+    
+    // Process OCR for bank statements
+    processBankStatementOCR(file);
+  }
+}
+
+// ── OCR processing for bank statements ──
+async function processBankStatementOCR(file) {
+  var label = document.getElementById('acct-upload-label');
+  
+  try {
+    // Check if PDF or image
+    if (file.type === 'application/pdf') {
+      // For PDF, use pdf.js to render first page then OCR
+      if (typeof pdfjsLib !== 'undefined') {
+        var arrayBuffer = await file.arrayBuffer();
+        var pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        var page = await pdf.getPage(1);
+        var scale = 2.0;
+        var viewport = page.getViewport({ scale: scale });
+        var canvas = document.createElement('canvas');
+        var context = canvas.getContext('2d');
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+        
+        await page.render({ canvasContext: context, viewport: viewport }).promise;
+        
+        // OCR the rendered canvas
+        var result = await Tesseract.recognize(canvas, 'eng', {
+          logger: function(m) {
+            if (m.status === 'recognizing text') {
+              var progress = Math.round(m.progress * 100);
+              if (label) {
+                label.innerHTML = '<span style="color:var(--muted);">Memproses ' + file.name + '... ' + progress + '%</span>';
+              }
+            }
+          }
+        });
+        
+        extractAndFillBankData(result.data.text);
+      }
+    } else {
+      // For images, OCR directly
+      var result = await Tesseract.recognize(file, 'eng', {
+        logger: function(m) {
+          if (m.status === 'recognizing text') {
+            var progress = Math.round(m.progress * 100);
+            if (label) {
+              label.innerHTML = '<span style="color:var(--muted);">Memproses ' + file.name + '... ' + progress + '%</span>';
+            }
+          }
+        }
+      });
+      
+      extractAndFillBankData(result.data.text);
+    }
+    
+    if (label) {
+      label.innerHTML = '<span style="color:var(--success);font-weight:600;">' + file.name + ' (Selesai)</span>';
+    }
+    
+  } catch (err) {
+    console.error('OCR processing error:', err);
+    if (label) {
+      label.innerHTML = '<span style="color:var(--danger);font-weight:600;">' + file.name + ' (Gagal - Sila isi manual)</span>';
+    }
+    showError('OCR gagal: ' + err.message);
+  }
+}
+
+// ── Extract and auto-fill bank statement data ──
+function extractAndFillBankData(ocrText) {
+  var text = ocrText.toUpperCase();
+  
+  // Try to extract amount (look for RM or currency patterns)
+  var amountMatch = text.match(/RM\s*[\d,]+\.?\d*/g);
+  if (amountMatch && amountMatch.length > 0) {
+    var amountStr = amountMatch[0].replace(/RM\s*/, '').replace(/,/g, '');
+    var amount = parseFloat(amountStr);
+    if (!isNaN(amount) && amount > 0) {
+      document.getElementById('acct-entry-amount').value = amount;
     }
   }
+  
+  // Try to extract date (DD/MM/YYYY or DD-MM-YYYY patterns)
+  var dateMatch = text.match(/\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}/);
+  if (dateMatch) {
+    var dateStr = dateMatch[0].replace(/\//g, '-');
+    // Convert to YYYY-MM-DD format
+    var parts = dateStr.split('-');
+    if (parts.length === 3) {
+      var day = parts[0].padStart(2, '0');
+      var month = parts[1].padStart(2, '0');
+      var year = parts[2];
+      document.getElementById('acct-entry-date').value = year + '-' + month + '-' + day;
+    }
+  }
+  
+  // Try to extract reference number
+  var refMatch = text.match(/(?:REF|RUJUKAN|NO\.?\s*)[:\s]*([A-Z0-9\-]+)/i);
+  if (refMatch && refMatch[1]) {
+    document.getElementById('acct-entry-reference').value = refMatch[1];
+  }
+  
+  // Auto-fill description with bank name if found
+  var bankMatch = text.match(/(?:BANK|CIMB|MAYBANK|PUBLIC BANK|RHB|HSBC|AMBANK)/i);
+  if (bankMatch) {
+    var bankName = bankMatch[0];
+    var descField = document.getElementById('acct-entry-desc');
+    if (descField && !descField.value) {
+      descField.value = 'Bank Statement - ' + bankName;
+    }
+  }
+  
+  showSuccess('Data diekstrak secara automatik dari bank statement');
 }
 
 // ── Members dropdown (mirrors loadMembers in receipt-pv-ui.js) ──
