@@ -268,32 +268,40 @@ async function processDocumentOCR(file, docType) {
   try {
     // Check if PDF or image
     if (file.type === 'application/pdf') {
-      // For PDF, use pdf.js to render first page then OCR
+      // For PDF, use pdf.js to render ALL pages then OCR
       if (typeof pdfjsLib !== 'undefined') {
         var arrayBuffer = await file.arrayBuffer();
         var pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-        var page = await pdf.getPage(1);
-        var scale = 2.0;
-        var viewport = page.getViewport({ scale: scale });
-        var canvas = document.createElement('canvas');
-        var context = canvas.getContext('2d');
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
+        var numPages = pdf.numPages;
+        var fullText = '';
         
-        await page.render({ canvasContext: context, viewport: viewport }).promise;
-        
-        // OCR the rendered canvas
-        var result = await Tesseract.recognize(canvas, 'eng', {
-          logger: function(m) {
-            if (m.status === 'recognizing text') {
-              var progress = Math.round(m.progress * 100);
-              if (progressBar) progressBar.style.width = progress + '%';
-              if (progressText) progressText.textContent = progress + '%';
+        // Process all pages
+        for (var i = 1; i <= numPages; i++) {
+          var page = await pdf.getPage(i);
+          var scale = 2.0;
+          var viewport = page.getViewport({ scale: scale });
+          var canvas = document.createElement('canvas');
+          var context = canvas.getContext('2d');
+          canvas.height = viewport.height;
+          canvas.width = viewport.width;
+          
+          await page.render({ canvasContext: context, viewport: viewport }).promise;
+          
+          // OCR the rendered canvas
+          var result = await Tesseract.recognize(canvas, 'eng', {
+            logger: function(m) {
+              if (m.status === 'recognizing text') {
+                var progress = Math.round(((i - 1) / numPages + m.progress / numPages) * 100);
+                if (progressBar) progressBar.style.width = progress + '%';
+                if (progressText) progressText.textContent = progress + '%';
+              }
             }
-          }
-        });
+          });
+          
+          fullText += result.data.text + '\n\n';
+        }
         
-        extractDocumentData(result.data.text, docType);
+        extractDocumentData(fullText, docType);
       }
     } else {
       // For images, OCR directly
@@ -360,44 +368,101 @@ function getDocumentTypeName(type) {
   return names[type] || 'dokumen';
 }
 
-// ── Extract bank statement data ──
+// ── Extract bank statement data (ALL transactions) ──
 function extractBankStatementData(text) {
-  // Try to extract amount (look for RM or currency patterns)
-  var amountMatch = text.match(/RM\s*[\d,]+\.?\d*/g);
-  if (amountMatch && amountMatch.length > 0) {
-    var amountStr = amountMatch[0].replace(/RM\s*/, '').replace(/,/g, '');
-    var amount = parseFloat(amountStr);
-    if (!isNaN(amount) && amount > 0) {
-      document.getElementById('acct-entry-amount').value = amount;
-    }
-  }
+  // Try to extract ALL transactions (IN and OUT)
+  var transactions = [];
+  var lines = text.split('\n');
   
-  // Try to extract date (DD/MM/YYYY or DD-MM-YYYY patterns)
-  var dateMatch = text.match(/\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}/);
-  if (dateMatch) {
-    var dateStr = dateMatch[0].replace(/\//g, '-');
+  // Pattern to match transaction lines
+  // Format: DD/MM/YYYY DESCRIPTION AMOUNT (IN/OUT)
+  var transactionPattern = /(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4})\s+(.+?)\s+(RM\s*[\d,]+\.?\d*)/g;
+  var match;
+  
+  while ((match = transactionPattern.exec(text)) !== null) {
+    var dateStr = match[1].replace(/\//g, '-');
     var parts = dateStr.split('-');
+    var formattedDate = '';
     if (parts.length === 3) {
       var day = parts[0].padStart(2, '0');
       var month = parts[1].padStart(2, '0');
       var year = parts[2];
-      document.getElementById('acct-entry-date').value = year + '-' + month + '-' + day;
+      formattedDate = year + '-' + month + '-' + day;
+    }
+    
+    var description = match[2].trim();
+    var amountStr = match[3].replace(/RM\s*/, '').replace(/,/g, '');
+    var amount = parseFloat(amountStr);
+    
+    // Determine if IN or OUT based on context
+    var type = 'OUT'; // Default to OUT
+    if (description.match(/credit|deposit|masuk|in|penerimaan/i)) {
+      type = 'IN';
+    }
+    
+    if (!isNaN(amount) && amount > 0) {
+      transactions.push({
+        date: formattedDate,
+        description: description,
+        amount: amount,
+        type: type
+      });
     }
   }
   
-  // Try to extract reference number
-  var refMatch = text.match(/(?:REF|RUJUKAN|NO\.?\s*)[:\s]*([A-Z0-9\-]+)/i);
-  if (refMatch && refMatch[1]) {
-    document.getElementById('acct-entry-reference').value = refMatch[1];
-  }
+  console.log('Extracted transactions:', transactions);
   
-  // Auto-fill description with bank name if found
-  var bankMatch = text.match(/(?:BANK|CIMB|MAYBANK|PUBLIC BANK|RHB|HSBC|AMBANK)/i);
-  if (bankMatch) {
-    var bankName = bankMatch[0];
-    var descField = document.getElementById('acct-entry-desc');
-    if (descField && !descField.value) {
-      descField.value = 'Bank Statement - ' + bankName;
+  // If transactions found, show them to user
+  if (transactions.length > 0) {
+    // Store transactions for later use
+    window.extractedBankTransactions = transactions;
+    
+    // Auto-fill with the first transaction (largest amount)
+    var largestTx = transactions.reduce(function(prev, current) {
+      return (prev.amount > current.amount) ? prev : current;
+    });
+    
+    document.getElementById('acct-entry-amount').value = largestTx.amount;
+    document.getElementById('acct-entry-date').value = largestTx.date;
+    document.getElementById('acct-entry-desc').value = largestTx.description.substring(0, 100);
+    
+    // Show info about extracted transactions
+    showInfo('Diekstrak ' + transactions.length + ' transaksi. Memilih transaksi terbesar: RM ' + largestTx.amount.toLocaleString('en-MY', {minimumFractionDigits:2}));
+  } else {
+    // Fallback to original single extraction logic
+    var amountMatch = text.match(/RM\s*[\d,]+\.?\d*/g);
+    if (amountMatch && amountMatch.length > 0) {
+      var amountStr = amountMatch[0].replace(/RM\s*/, '').replace(/,/g, '');
+      var amount = parseFloat(amountStr);
+      if (!isNaN(amount) && amount > 0) {
+        document.getElementById('acct-entry-amount').value = amount;
+      }
+    }
+    
+    var dateMatch = text.match(/\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}/);
+    if (dateMatch) {
+      var dateStr = dateMatch[0].replace(/\//g, '-');
+      var parts = dateStr.split('-');
+      if (parts.length === 3) {
+        var day = parts[0].padStart(2, '0');
+        var month = parts[1].padStart(2, '0');
+        var year = parts[2];
+        document.getElementById('acct-entry-date').value = year + '-' + month + '-' + day;
+      }
+    }
+    
+    var refMatch = text.match(/(?:REF|RUJUKAN|NO\.?\s*)[:\s]*([A-Z0-9\-]+)/i);
+    if (refMatch && refMatch[1]) {
+      document.getElementById('acct-entry-reference').value = refMatch[1];
+    }
+    
+    var bankMatch = text.match(/(?:BANK|CIMB|MAYBANK|PUBLIC BANK|RHB|HSBC|AMBANK)/i);
+    if (bankMatch) {
+      var bankName = bankMatch[0];
+      var descField = document.getElementById('acct-entry-desc');
+      if (descField && !descField.value) {
+        descField.value = 'Bank Statement - ' + bankName;
+      }
     }
   }
 }
@@ -859,6 +924,9 @@ async function loadAccountingEntries() {
         : (e.approval_status === 'rejected'
           ? '<span style="color:var(--danger);font-weight:700;">Ditolak</span>'
           : '<span style="color:var(--warning);font-weight:700;">Menunggu</span>');
+      var deleteBtn = (e.approval_status === 'pending' && canWrite)
+        ? '<button class="btn btn-outline-red btn-sm" onclick="deleteAccountingEntry(' + e.id + ')">Padam</button> '
+        : '';
       return '<tr>' +
         '<td style="font-family:var(--mono);">' + e.entry_number + '</td>' +
         '<td>' + e.entry_date + '</td>' +
@@ -866,12 +934,27 @@ async function loadAccountingEntries() {
         '<td>' + (e.member_name || '—') + '</td>' +
         '<td style="font-family:var(--mono);font-weight:700;">' + Number(e.amount).toLocaleString('en-MY', {minimumFractionDigits:2}) + '</td>' +
         '<td>' + statusBadge + '</td>' +
-        '<td><button class="btn btn-outline btn-sm" onclick="reviewAccountingEntry(' + e.id + ')">Semak</button></td>' +
+        '<td>' + deleteBtn + '<button class="btn btn-outline btn-sm" onclick="reviewAccountingEntry(' + e.id + ')">Semak</button></td>' +
       '</tr>';
     }).join('');
   } catch (err) {
     console.error('Error loading accounting entries:', err);
     tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--danger);">Ralat memuat rekod.</td></tr>';
+  }
+}
+
+// ── Delete accounting entry ──
+async function deleteAccountingEntry(entryId) {
+  if (!confirm('Adakah anda pasti mahu memadam rekod ini? Tindakan ini tidak boleh diundur.')) return;
+  try {
+    var res = await supabaseClient.from('accounting_entries').delete().eq('id', entryId);
+    if (res.error) throw res.error;
+    showSuccess('Rekod berjaya dipadam');
+    loadAccountingEntries();
+    loadAccountingKpis();
+  } catch (err) {
+    console.error('Error deleting accounting entry:', err);
+    showError('Gagal memadam rekod: ' + err.message);
   }
 }
 
@@ -1259,6 +1342,9 @@ async function filterAccountingEntries() {
         : (e.approval_status === 'rejected'
           ? '<span style="color:var(--danger);font-weight:700;">Ditolak</span>'
           : '<span style="color:var(--warning);font-weight:700;">Menunggu</span>');
+      var deleteBtn = (e.approval_status === 'pending' && canWrite)
+        ? '<button class="btn btn-outline-red btn-sm" onclick="deleteAccountingEntry(' + e.id + ')">Padam</button> '
+        : '';
       return '<tr>' +
         '<td style="font-family:var(--mono);">' + e.entry_number + '</td>' +
         '<td>' + e.entry_date + '</td>' +
@@ -1266,7 +1352,7 @@ async function filterAccountingEntries() {
         '<td>' + (e.member_name || '—') + '</td>' +
         '<td style="font-family:var(--mono);font-weight:700;">' + Number(e.amount).toLocaleString('en-MY', {minimumFractionDigits:2}) + '</td>' +
         '<td>' + statusBadge + '</td>' +
-        '<td><button class="btn btn-outline btn-sm" onclick="reviewAccountingEntry(' + e.id + ')">Semak</button></td>' +
+        '<td>' + deleteBtn + '<button class="btn btn-outline btn-sm" onclick="reviewAccountingEntry(' + e.id + ')">Semak</button></td>' +
       '</tr>';
     }).join('');
 
