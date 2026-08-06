@@ -1110,10 +1110,12 @@ small {
   transition: all 0.3s ease;
   background: rgba(255, 255, 255, 0.5);
 }
-.upload-zone:hover {
-  border-color: var(--primary);
-  background: rgba(255, 255, 255, 0.8);
-  transform: translateY(-2px);
+@media (hover: hover) {
+  .upload-zone:hover {
+    border-color: var(--primary);
+    background: rgba(255, 255, 255, 0.8);
+    transform: translateY(-2px);
+  }
 }
 .upload-zone.drag-over {
   border-color: var(--success);
@@ -1123,6 +1125,15 @@ small {
 .upload-zone.drag-over #acct-upload-icon {
   transform: scale(1.2);
   color: var(--success);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .upload-zone {
+    will-change: transform, background-color, border-color;
+  }
+}
+#acct-progress-bar {
+  transform-origin: left;
+  transition: transform 0.3s ease;
 }
 
 /* ── PAGE EXPORT BUTTON ── */

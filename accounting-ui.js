@@ -1,7 +1,7 @@
 // Accounting Software - Frontend UI Components (Perakaunan)
 // Integrated with Sistem Ahli DPMM Johor
 // Follows conventions established in receipt-pv-ui.js
-// Cache-bust: 2026-08-06-03-00
+// Cache-bust: 2026-08-06-04-00
 
 // ── Roles allowed to write/approve accounting data ──
 var ACCOUNTING_WRITE_ROLES = ['admin', 'bendahari'];
@@ -248,6 +248,13 @@ function setupDragAndDrop() {
         input.files = files;
         onAccountingFileSelected();
       }
+    }
+  });
+  
+  // Remove will-change after animation completes to conserve memory
+  uploadZone.addEventListener('transitionend', function(e) {
+    if (e.propertyName === 'transform' || e.propertyName === 'background-color') {
+      uploadZone.style.willChange = 'auto';
     }
   });
 }
