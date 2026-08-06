@@ -100,6 +100,28 @@ README.md              ← Dokumentasi ini
 
 ## 📝 Perubahan Terkini (Ogos 2026)
 
+### Comprehensive System Upgrade (6 Ogos 2026)
+- **Security Enhancement (U11):**
+  - RLS Policy Migration: Replace anon role with authenticated in accounting tables
+  - All accounting tables now require authenticated role for secure access
+  - Tables updated: cash_accounts, bank_accounts, accounting_entries, cash_transactions, chart_of_accounts, journal_entries, journal_entry_lines
+- **UI Enhancement (U20):**
+  - Removed all emoji icons from index.html and receipt-pv-ui.js
+  - Replaced emoji crosses with multiplication sign (×)
+  - Cleaned WhatsApp modal and QR code modal text
+  - Professional UI without emoji clutter
+- **Accounting Consolidation (U22):**
+  - Single PERAKAUNAN tab already implemented
+  - Unified accounting interface for receipts and payment vouchers
+  - Role-based visibility (admin, bendahari, ajk)
+- **AIMAN Chatbot Enhancements (U1-U8):**
+  - All 8 features already implemented in borang.html
+  - Conversation context, quick-reply buttons, animated typing indicator
+  - Smooth animations, step-aware greetings, markdown stripping
+  - Accessibility improvements and error handling
+- **Branch:** feat/comprehensive-system-upgrade
+- **Status:** Pushed to GitHub, PR ready for merge
+
 ### Sistem Perakaunan (5 Ogos 2026)
 - **Phase 2: UI & Bank Accounts Management**
   - Halaman perakaunan baru dengan papan pemuka KPI

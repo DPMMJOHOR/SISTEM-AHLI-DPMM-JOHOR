@@ -1488,7 +1488,7 @@ tr.row-unpaid { background: #fff0f0 !important; }
   <div class="sb-user-chip">
     <div class="sb-user-label">PENGGUNA AKTIF</div>
     <div class="sb-user-name" id="sidebar-userid">â</div>
-    <div style="margin-top:6px;font-size:9.5px;color:var(--success);font-weight:700;">🟢 SUPABASE LIVE</div>
+    <div style="margin-top:6px;font-size:9.5px;color:var(--success);font-weight:700;">SUPABASE LIVE</div>
   </div>
 
   <div class="sb-divider"></div>
@@ -1603,14 +1603,14 @@ tr.row-unpaid { background: #fff0f0 !important; }
       <div class="topbar-title" id="page-title">DASHBOARD</div>
     </div>
     <div class="topbar-right no-print" id="topbar-actions">
-      <button id="refresh-db-btn" class="btn btn-outline btn-sm" onclick="refreshFromSupabase()" title="Refresh data dari Supabase" style="font-size:12px;">🔄 Refresh Data</button>
+      <button id="refresh-db-btn" class="btn btn-outline btn-sm" onclick="refreshFromSupabase()" title="Refresh data dari Supabase" style="font-size:12px;">Refresh Data</button>
     </div>
   </div>
 
   <!-- ══ DASHBOARD ══ -->
   <div id="page-dashboard" class="page active">
     <div style="display:flex;justify-content:flex-end;align-items:center;margin-bottom:10px;gap:6px;" class="no-print">
-      <span style="font-size:10px;color:var(--muted);font-family:var(--mono);">🕐 Dikemaskini:</span>
+      <span style="font-size:10px;color:var(--muted);font-family:var(--mono);">Dikemaskini:</span>
       <span id="dash-last-updated" style="font-size:10px;font-weight:700;color:var(--primary);font-family:var(--mono);">—</span>
     </div>
     <div class="kpi-grid kpi-4">
@@ -1683,7 +1683,7 @@ tr.row-unpaid { background: #fff0f0 !important; }
         <div style="display:flex;align-items:center;gap:10px;">
           <span class="sec-count" id="table-count">—</span>
           <button class="btn btn-white btn-sm" onclick="openAddMemberModal()">+ Tambah Ahli</button>
-          <div class="page-export-wrap no-print"><button class="page-export-btn" onclick="togglePageExport(this,event)">📤 Eksport ▾</button><div class="page-export-dd"><div class="page-export-item" onclick="pageExport('senarai','csv')">📊 &nbsp;CSV / Excel</div><div class="page-export-item" onclick="pageExport('senarai','pdf')">📄 &nbsp;PDF (A4)</div><div class="page-export-item" onclick="pageExport('senarai','image')">🖼 &nbsp;Imej (A4)</div></div></div>
+          <div class="page-export-wrap no-print"><button class="page-export-btn" onclick="togglePageExport(this,event)">Eksport ▾</button><div class="page-export-dd"><div class="page-export-item" onclick="pageExport('senarai','csv')">CSV / Excel</div><div class="page-export-item" onclick="pageExport('senarai','pdf')">PDF (A4)</div><div class="page-export-item" onclick="pageExport('senarai','image')">Imej (A4)</div></div></div>
         </div>
       </div>
       <div class="table-wrap">
@@ -1709,7 +1709,7 @@ tr.row-unpaid { background: #fff0f0 !important; }
 
   <!-- ══ DAERAH ══ -->
   <div id="page-daerah" class="page">
-    <div class="no-print" style="display:flex;justify-content:flex-end;margin-bottom:12px;"><div class="page-export-wrap" style="position:relative;"><button class="page-export-btn" onclick="togglePageExport(this,event)">📤 Eksport ▾</button><div class="page-export-dd"><div class="page-export-item" onclick="pageExport('daerah','csv')">📊 &nbsp;CSV / Excel</div><div class="page-export-item" onclick="pageExport('daerah','pdf')">📄 &nbsp;PDF (A4)</div><div class="page-export-item" onclick="pageExport('daerah','image')">🖼 &nbsp;Imej (A4)</div></div></div></div>
+    <div class="no-print" style="display:flex;justify-content:flex-end;margin-bottom:12px;"><div class="page-export-wrap" style="position:relative;"><button class="page-export-btn" onclick="togglePageExport(this,event)">Eksport ▾</button><div class="page-export-dd"><div class="page-export-item" onclick="pageExport('daerah','csv')">CSV / Excel</div><div class="page-export-item" onclick="pageExport('daerah','pdf')">PDF (A4)</div><div class="page-export-item" onclick="pageExport('daerah','image')">Imej (A4)</div></div></div></div>
 
     <div class="district-grid" id="district-grid"></div>
     <div id="district-tables"></div>
@@ -1753,11 +1753,11 @@ tr.row-unpaid { background: #fff0f0 !important; }
       <!-- Col 2: Export Button (center) -->
       <div class="no-print" style="display:flex;align-items:center;justify-content:center;min-width:120px;">
         <div class="page-export-wrap" style="position:relative;">
-          <button class="page-export-btn" onclick="togglePageExport(this,event)" style="font-size:14px;padding:14px 22px;border-radius:10px;box-shadow:0 4px 18px rgba(108,92,231,.35);">📤 Eksport ▾</button>
+          <button class="page-export-btn" onclick="togglePageExport(this,event)" style="font-size:14px;padding:14px 22px;border-radius:10px;box-shadow:0 4px 18px rgba(108,92,231,.35);">Eksport ▾</button>
           <div class="page-export-dd">
-            <div class="page-export-item" onclick="pageExport('yuran','csv')">📊 &nbsp;CSV / Excel</div>
-            <div class="page-export-item" onclick="pageExport('yuran','pdf')">📄 &nbsp;PDF (A4)</div>
-            <div class="page-export-item" onclick="pageExport('yuran','image')">🖼 &nbsp;Imej (A4)</div>
+            <div class="page-export-item" onclick="pageExport('yuran','csv')">CSV / Excel</div>
+            <div class="page-export-item" onclick="pageExport('yuran','pdf')">PDF (A4)</div>
+            <div class="page-export-item" onclick="pageExport('yuran','image')">Imej (A4)</div>
           </div>
         </div>
       </div>
@@ -1768,7 +1768,7 @@ tr.row-unpaid { background: #fff0f0 !important; }
       </div>
     </div>
     <div class="sec-card" style="margin-bottom:18px;">
-      <div class="sec-head"><h3>&#x26A0; Ahli Belum Bayar Yuran</h3><span class="sec-count" id="unpaid-count">—</span></div>
+      <div class="sec-head"><h3>Ahli Belum Bayar Yuran</h3><span class="sec-count" id="unpaid-count">—</span></div>
       <div class="table-wrap">
         <table>
           <thead><tr><th>#</th><th>No. Ahli</th><th>Nama Syarikat / PIC</th><th>Daerah</th><th>Fasal</th><th>Yuran Tahunan</th><th>No. HP</th><th>Tindakan</th></tr></thead>
@@ -1777,7 +1777,7 @@ tr.row-unpaid { background: #fff0f0 !important; }
       </div>
     </div>
     <div class="sec-card">
-      <div class="sec-head"><h3>&#x2705; Ahli Telah Bayar Yuran</h3><span class="sec-count" id="paid-count">—</span></div>
+      <div class="sec-head"><h3>Ahli Telah Bayar Yuran</h3><span class="sec-count" id="paid-count">—</span></div>
       <div class="table-wrap">
         <table>
           <thead><tr><th>#</th><th>No. Ahli</th><th>Nama Syarikat / PIC</th><th>Tarikh Bayar <span class="yuran-year-label">2025</span></th><th>Kaedah Bayar</th><th>Tahun Dibayar</th><th>Jumlah Terkumpul</th></tr></thead>
@@ -1789,7 +1789,7 @@ tr.row-unpaid { background: #fff0f0 !important; }
 
   <!-- ══ SSM TRACKER ══ -->
   <div id="page-ssm" class="page">
-    <div class="no-print" style="display:flex;justify-content:flex-end;margin-bottom:12px;"><div class="page-export-wrap" style="position:relative;"><button class="page-export-btn" onclick="togglePageExport(this,event)">📤 Eksport ▾</button><div class="page-export-dd"><div class="page-export-item" onclick="pageExport('ssm','csv')">📊 &nbsp;CSV / Excel</div><div class="page-export-item" onclick="pageExport('ssm','pdf')">📄 &nbsp;PDF (A4)</div><div class="page-export-item" onclick="pageExport('ssm','image')">🖼 &nbsp;Imej (A4)</div></div></div></div>
+    <div class="no-print" style="display:flex;justify-content:flex-end;margin-bottom:12px;"><div class="page-export-wrap" style="position:relative;"><button class="page-export-btn" onclick="togglePageExport(this,event)">Eksport ▾</button><div class="page-export-dd"><div class="page-export-item" onclick="pageExport('ssm','csv')">CSV / Excel</div><div class="page-export-item" onclick="pageExport('ssm','pdf')">PDF (A4)</div><div class="page-export-item" onclick="pageExport('ssm','image')">Imej (A4)</div></div></div></div>
 
     <div class="kpi-grid kpi-3">
       <div class="modern-kpi-card modern-kpi-danger">
@@ -1820,7 +1820,7 @@ tr.row-unpaid { background: #fff0f0 !important; }
 
   <!-- ══ FOLLOW UP ══ -->
   <div id="page-followup" class="page">
-    <div class="no-print" style="display:flex;justify-content:flex-end;margin-bottom:12px;"><div class="page-export-wrap" style="position:relative;"><button class="page-export-btn" onclick="togglePageExport(this,event)">📤 Eksport ▾</button><div class="page-export-dd"><div class="page-export-item" onclick="pageExport('followup','csv')">📊 &nbsp;CSV / Excel</div><div class="page-export-item" onclick="pageExport('followup','pdf')">📄 &nbsp;PDF (A4)</div><div class="page-export-item" onclick="pageExport('followup','image')">🖼 &nbsp;Imej (A4)</div></div></div></div>
+    <div class="no-print" style="display:flex;justify-content:flex-end;margin-bottom:12px;"><div class="page-export-wrap" style="position:relative;"><button class="page-export-btn" onclick="togglePageExport(this,event)">Eksport ▾</button><div class="page-export-dd"><div class="page-export-item" onclick="pageExport('followup','csv')">CSV / Excel</div><div class="page-export-item" onclick="pageExport('followup','pdf')">PDF (A4)</div><div class="page-export-item" onclick="pageExport('followup','image')">Imej (A4)</div></div></div></div>
 
     <div class="fu-counters">
       <div class="fu-counter"><div class="fu-count" id="fu-count-yuran">0</div><div class="fu-label">Yuran Belum Bayar</div></div>
@@ -1829,7 +1829,7 @@ tr.row-unpaid { background: #fff0f0 !important; }
     </div>
 
     <div class="sec-card" style="margin-bottom:18px;">
-      <div class="sec-head"><h3>&#x1F4B0; Ahli Belum Bayar Yuran</h3><span class="sec-count" id="fu-yuran-count">—</span></div>
+      <div class="sec-head"><h3>Ahli Belum Bayar Yuran</h3><span class="sec-count" id="fu-yuran-count">—</span></div>
       <div class="table-wrap">
         <table>
           <thead><tr><th>#</th><th>No. Ahli</th><th>Nama Syarikat</th><th>Nama PIC</th><th>No. HP</th><th>Daerah</th><th>WhatsApp</th><th>Salin Mesej</th></tr></thead>
@@ -1838,7 +1838,7 @@ tr.row-unpaid { background: #fff0f0 !important; }
       </div>
     </div>
     <div class="sec-card" style="margin-bottom:18px;">
-      <div class="sec-head"><h3>&#x1F4C5; SSM Perlu Diperbaharui</h3><span class="sec-count" id="fu-ssm-count">—</span></div>
+      <div class="sec-head"><h3>SSM Perlu Diperbaharui</h3><span class="sec-count" id="fu-ssm-count">—</span></div>
       <div class="table-wrap">
         <table>
           <thead><tr><th>#</th><th>No. Ahli</th><th>Nama Syarikat</th><th>Tarikh Luput</th><th>Status</th><th>No. HP</th><th>Salin Mesej</th></tr></thead>
@@ -1847,7 +1847,7 @@ tr.row-unpaid { background: #fff0f0 !important; }
       </div>
     </div>
     <div class="sec-card">
-      <div class="sec-head"><h3>&#x26A0; Data Tidak Lengkap</h3><span class="sec-count" id="fu-incomplete-count">—</span></div>
+      <div class="sec-head"><h3>Data Tidak Lengkap</h3><span class="sec-count" id="fu-incomplete-count">—</span></div>
       <div class="table-wrap">
         <table>
           <thead><tr><th>#</th><th>No. Ahli</th><th>Nama Syarikat</th><th>Nama PIC</th><th>Maklumat Hilang</th><th>Tindakan</th></tr></thead>
@@ -1940,25 +1940,25 @@ tr.row-unpaid { background: #fff0f0 !important; }
     </div>
     <div id="backup-status-alert"></div>
     <div class="sec-card" style="margin-bottom:18px;">
-      <div class="sec-head"><h3>&#x1F4BE; Eksport Data</h3></div>
+      <div class="sec-head"><h3>Eksport Data</h3></div>
       <div class="sec-body">
         <p style="font-size:14px;color:var(--muted);margin-bottom:16px;line-height:1.6;">Muat turun semua data ahli dalam format CSV atau JSON. Simpan fail ini di lokasi yang selamat sebagai sandaran data penting.</p>
         <div style="display:flex;gap:12px;flex-wrap:wrap;">
-          <button class="btn btn-primary btn-shine" onclick="doBackupCSV()">&#x1F4CA;&nbsp; Muat Turun CSV</button>
-          <button class="btn btn-outline" onclick="doBackupJSON()">&#x1B2F5;&nbsp; Muat Turun JSON</button>
+          <button class="btn btn-primary btn-shine" onclick="doBackupCSV()">Muat Turun CSV</button>
+          <button class="btn btn-outline" onclick="doBackupJSON()">Muat Turun JSON</button>
         </div>
       </div>
     </div>
     <div class="sec-card">
-      <div class="sec-head"><h3>&#x1F4CB; Log Sandaran Tempatan</h3></div>
+      <div class="sec-head"><h3>Log Sandaran Tempatan</h3></div>
       <div class="sec-body" style="padding:0;">
         <div id="backup-log-list"></div>
       </div>
     </div>
     <div class="sec-card" style="margin-top:18px;">
       <div class="sec-head">
-        <h3>☁️ Sandaran Automatik Supabase</h3>
-        <button class="btn btn-white btn-sm" onclick="triggerManualBackup()" id="manual-backup-btn">🔄 Backup Sekarang</button>
+        <h3>Sandaran Automatik Supabase</h3>
+        <button class="btn btn-white btn-sm" onclick="triggerManualBackup()" id="manual-backup-btn">Backup Sekarang</button>
       </div>
       <div class="sec-body" style="padding:0;">
         <div id="supabase-backup-info" style="padding:12px 16px;font-size:13px;color:var(--muted);">Memuatkan sejarah sandaran...</div>
@@ -1971,7 +1971,7 @@ tr.row-unpaid { background: #fff0f0 !important; }
           </table>
         </div>
         <div style="padding:10px 16px;font-size:11px;color:var(--muted);border-top:1px solid var(--gray1);">
-          ⏰ Backup automatik setiap hari jam <strong>12:00 Tengah Malam (MYT)</strong> &nbsp;|&nbsp; Simpan <strong>30 backup</strong> terakhir
+          Backup automatik setiap hari jam <strong>12:00 Tengah Malam (MYT)</strong> &nbsp;|&nbsp; Simpan <strong>30 backup</strong> terakhir
         </div>
       </div>
     </div>
@@ -1981,7 +1981,7 @@ tr.row-unpaid { background: #fff0f0 !important; }
   <div id="page-admin" class="page">
     <div class="sec-card" style="margin-bottom:18px;">
       <div class="sec-head">
-        <h3>&#x1F465; Pengurusan Pengguna</h3>
+        <h3>Pengurusan Pengguna</h3>
         <button class="btn btn-white btn-sm" onclick="openAddUserModal()">+ Tambah Pengguna</button>
       </div>
       <div class="sec-body" style="padding:0;">
@@ -1989,7 +1989,7 @@ tr.row-unpaid { background: #fff0f0 !important; }
       </div>
     </div>
     <div class="sec-card">
-      <div class="sec-head"><h3>&#x1F4CB; Log Aktiviti</h3></div>
+      <div class="sec-head"><h3>Log Aktiviti</h3></div>
       <div class="sec-body" style="padding:0;max-height:400px;overflow-y:auto;">
         <div id="activity-log"></div>
       </div>
@@ -2151,17 +2151,17 @@ tr.row-unpaid { background: #fff0f0 !important; }
       <!-- Quick Reference Cards -->
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px;">
         <div class="sec-card" style="border-top:3px solid var(--primary);text-align:center;padding:16px;">
-          <div style="font-size:28px;">📋</div>
+          <div style="font-size:28px;">&nbsp;</div>
           <div style="font-weight:800;color:var(--primary);font-size:13px;margin-top:6px;">Urus Ahli</div>
           <div style="font-size:11.5px;color:var(--muted);margin-top:4px;">Tambah, edit, cari & eksport rekod ahli</div>
         </div>
         <div class="sec-card" style="border-top:3px solid var(--gold);text-align:center;padding:16px;">
-          <div style="font-size:28px;">💰</div>
+          <div style="font-size:28px;">&nbsp;</div>
           <div style="font-weight:800;color:var(--gold);font-size:13px;margin-top:6px;">Urus Yuran</div>
           <div style="font-size:11.5px;color:var(--muted);margin-top:4px;">Track yuran tahunan, jana laporan</div>
         </div>
         <div class="sec-card" style="border-top:3px solid #1a7a4a;text-align:center;padding:16px;">
-          <div style="font-size:28px;">📲</div>
+          <div style="font-size:28px;">&nbsp;</div>
           <div style="font-weight:800;color:#1a7a4a;font-size:13px;margin-top:6px;">Follow Up WA</div>
           <div style="font-size:11.5px;color:var(--muted);margin-top:4px;">Hantar notis melalui WhatsApp</div>
         </div>
@@ -2169,12 +2169,12 @@ tr.row-unpaid { background: #fff0f0 !important; }
 
       <!-- User Guide -->
       <div class="sec-card" style="margin-bottom:18px;">
-        <div class="sec-head"><h3>📖 Panduan Penggunaan Sistem</h3></div>
+        <div class="sec-head"><h3>Panduan Penggunaan Sistem</h3></div>
         <div class="sec-body">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 24px;">
 
             <div>
-              <div style="font-weight:800;color:var(--primary);font-size:13px;border-bottom:2px solid var(--primary);padding-bottom:4px;margin-bottom:10px;">🏠 DASHBOARD</div>
+              <div style="font-weight:800;color:var(--primary);font-size:13px;border-bottom:2px solid var(--primary);padding-bottom:4px;margin-bottom:10px;">DASHBOARD</div>
               <p style="font-size:12.5px;line-height:1.7;color:#333;margin-bottom:8px;">Papan pemuka utama menunjukkan ringkasan keseluruhan — jumlah ahli, status yuran, SSM kritikal, dan graf peratusan.</p>
               <ul style="font-size:12px;line-height:1.9;color:#444;padding-left:18px;margin-bottom:14px;">
                 <li>Klik <strong>"Jana Laporan"</strong> untuk hasilkan laporan PDF lengkap</li>
@@ -2182,16 +2182,16 @@ tr.row-unpaid { background: #fff0f0 !important; }
                 <li>Kad KPI di atas boleh diklik untuk navigasi pantas</li>
               </ul>
 
-              <div style="font-weight:800;color:var(--primary);font-size:13px;border-bottom:2px solid var(--primary);padding-bottom:4px;margin-bottom:10px;">👥 SENARAI AHLI</div>
+              <div style="font-weight:800;color:var(--primary);font-size:13px;border-bottom:2px solid var(--primary);padding-bottom:4px;margin-bottom:10px;">SENARAI AHLI</div>
               <ul style="font-size:12px;line-height:1.9;color:#444;padding-left:18px;margin-bottom:14px;">
                 <li>Klik baris ahli untuk lihat butiran penuh</li>
-                <li>Butang <strong>"✏ Edit Ahli"</strong> dalam modal untuk kemaskini maklumat</li>
+                <li>Butang <strong>"Edit Ahli"</strong> dalam modal untuk kemaskini maklumat</li>
                 <li>Gunakan bar carian dan penapis daerah/fasal untuk tapis rekod</li>
-                <li>Butang <strong>"📤 Eksport"</strong> untuk muat turun sebagai CSV, PDF atau Imej</li>
+                <li>Butang <strong>"Eksport"</strong> untuk muat turun sebagai CSV, PDF atau Imej</li>
                 <li>Butang <strong>"+ Tambah Ahli"</strong> untuk daftar ahli baharu</li>
               </ul>
 
-              <div style="font-weight:800;color:var(--primary);font-size:13px;border-bottom:2px solid var(--primary);padding-bottom:4px;margin-bottom:10px;">💰 YURAN TRACKER</div>
+              <div style="font-weight:800;color:var(--primary);font-size:13px;border-bottom:2px solid var(--primary);padding-bottom:4px;margin-bottom:10px;">YURAN TRACKER</div>
               <ul style="font-size:12px;line-height:1.9;color:#444;padding-left:18px;margin-bottom:14px;">
                 <li>Lihat status bayaran yuran mengikut fasal dan daerah</li>
                 <li>Rekod bertanda <span style="background:#fce8e8;color:#c0392b;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:700;">BELUM BAYAR</span> perlu tindakan susulan</li>
@@ -2200,24 +2200,24 @@ tr.row-unpaid { background: #fff0f0 !important; }
             </div>
 
             <div>
-              <div style="font-weight:800;color:var(--primary);font-size:13px;border-bottom:2px solid var(--primary);padding-bottom:4px;margin-bottom:10px;">📅 SSM TRACKER</div>
+              <div style="font-weight:800;color:var(--primary);font-size:13px;border-bottom:2px solid var(--primary);padding-bottom:4px;margin-bottom:10px;">SSM TRACKER</div>
               <ul style="font-size:12px;line-height:1.9;color:#444;padding-left:18px;margin-bottom:14px;">
-                <li>Rekod SSM disusun mengikut kumpulan: <span style="color:#c0392b;font-weight:700;">🔴 LUPUT</span>, <span style="color:#b07800;font-weight:700;">🟡 HAMPIR LUPUT</span>, <span style="color:#1a7a4a;font-weight:700;">🟢 SAH</span></li>
+                <li>Rekod SSM disusun mengikut kumpulan: <span style="color:#c0392b;font-weight:700;">LUPUT</span>, <span style="color:#b07800;font-weight:700;">HAMPIR LUPUT</span>, <span style="color:#1a7a4a;font-weight:700;">SAH</span></li>
                 <li>Tempoh <strong>"Hampir Luput"</strong> = dalam masa 180 hari</li>
                 <li>Klik baris ahli untuk kemaskini tarikh SSM melalui butang Edit</li>
               </ul>
 
-              <div style="font-weight:800;color:var(--primary);font-size:13px;border-bottom:2px solid var(--primary);padding-bottom:4px;margin-bottom:10px;">🔔 FOLLOW UP</div>
+              <div style="font-weight:800;color:var(--primary);font-size:13px;border-bottom:2px solid var(--primary);padding-bottom:4px;margin-bottom:10px;">FOLLOW UP</div>
               <ul style="font-size:12px;line-height:1.9;color:#444;padding-left:18px;margin-bottom:14px;">
                 <li>Tiga senarai tindakan: Yuran Belum Bayar, SSM Kritikal, Data Tidak Lengkap</li>
                 <li>Klik <strong>"WA"</strong> untuk hantar mesej WhatsApp dengan template pilihan</li>
                 <li>Klik <strong>"Salin Mesej"</strong> untuk salin teks ke clipboard</li>
-                <li>Butang <strong>"📤 Eksport"</strong> hasilkan laporan Follow Up dalam format landskap A4</li>
+                <li>Butang <strong>"Eksport"</strong> hasilkan laporan Follow Up dalam format landskap A4</li>
               </ul>
 
-              <div style="font-weight:800;color:var(--primary);font-size:13px;border-bottom:2px solid var(--primary);padding-bottom:4px;margin-bottom:10px;">💬 TEMPLATE MESEJ</div>
+              <div style="font-weight:800;color:var(--primary);font-size:13px;border-bottom:2px solid var(--primary);padding-bottom:4px;margin-bottom:10px;">TEMPLATE MESEJ</div>
               <ul style="font-size:12px;line-height:1.9;color:#444;padding-left:18px;margin-bottom:14px;">
-                <li>Klik <strong>"✏ Edit"</strong> pada mana-mana kad template untuk ubahsuai</li>
+                <li>Klik <strong>"Edit"</strong> pada mana-mana kad template untuk ubahsuai</li>
                 <li>Klik <strong>"+ Tambah Template"</strong> untuk cipta template baharu</li>
                 <li>Placeholder yang tersedia: <code style="background:#f0f0f0;padding:1px 5px;border-radius:3px;">[NAMA PIC]</code>, <code style="background:#f0f0f0;padding:1px 5px;border-radius:3px;">[NO. AHLI]</code>, <code style="background:#f0f0f0;padding:1px 5px;border-radius:3px;">[NAMA SYARIKAT]</code>, <code style="background:#f0f0f0;padding:1px 5px;border-radius:3px;">[TARIKH LUPUT SSM]</code></li>
                 <li>Template disimpan secara automatik dalam pelayar (localStorage)</li>
@@ -2229,57 +2229,57 @@ tr.row-unpaid { background: #fff0f0 !important; }
 
       <!-- FAQ -->
       <div class="sec-card">
-        <div class="sec-head"><h3>❓ Soalan Lazim (FAQ)</h3></div>
+        <div class="sec-head"><h3>Soalan Lazim (FAQ)</h3></div>
         <div class="sec-body" id="faq-accordion">
 
           <div class="faq-item">
-            <div class="faq-q" onclick="toggleFaq(this)">▶ &nbsp;Data ahli tidak kelihatan / kosong selepas log masuk</div>
+            <div class="faq-q" onclick="toggleFaq(this)">• Data ahli tidak kelihatan / kosong selepas log masuk</div>
             <div class="faq-a">Sistem akan cuba memuat data dari pangkalan data Supabase. Sekiranya sambungan gagal, ralat akan dipaparkan di skrin log masuk. Pastikan anda mempunyai sambungan internet yang stabil. Cuba muat semula halaman (F5) dan log masuk semula. Sekiranya masalah berterusan, hubungi pentadbir sistem.</div>
           </div>
 
           <div class="faq-item">
-            <div class="faq-q" onclick="toggleFaq(this)">▶ &nbsp;Bagaimana cara kemaskini yuran ahli selepas bayaran diterima?</div>
-            <div class="faq-a">Klik pada baris ahli dalam Senarai Ahli → klik butang <strong>"✏ Edit Ahli"</strong> → tukar status "Yuran Tahunan" kepada <strong>"Telah Bayar"</strong> → klik "Simpan". Rekod pembayaran akan dikemaskini secara automatik berserta tarikh hari ini.</div>
+            <div class="faq-q" onclick="toggleFaq(this)">• Bagaimana cara kemaskini yuran ahli selepas bayaran diterima?</div>
+            <div class="faq-a">Klik pada baris ahli dalam Senarai Ahli → klik butang <strong>"Edit Ahli"</strong> → tukar status "Yuran Tahunan" kepada <strong>"Telah Bayar"</strong> → klik "Simpan". Rekod pembayaran akan dikemaskini secara automatik berserta tarikh hari ini.</div>
           </div>
 
           <div class="faq-item">
-            <div class="faq-q" onclick="toggleFaq(this)">▶ &nbsp;Apakah perbezaan antara Fasal 6.2.1 dan 6.2.4?</div>
+            <div class="faq-q" onclick="toggleFaq(this)">• Apakah perbezaan antara Fasal 6.2.1 dan 6.2.4?</div>
             <div class="faq-a"><strong>Fasal 6.2.1</strong> adalah untuk ahli bertaraf Enterprise (ENT) — yuran tahunan RM 50. <strong>Fasal 6.2.4</strong> adalah untuk ahli bertaraf Syarikat Sendirian Berhad (Sdn Bhd) — yuran tahunan RM 150. Status ini menentukan yuran pendaftaran dan yuran tahunan secara automatik.</div>
           </div>
 
           <div class="faq-item">
-            <div class="faq-q" onclick="toggleFaq(this)">▶ &nbsp;Mengapa SSM ahli tidak muncul dalam SSM Tracker?</div>
+            <div class="faq-q" onclick="toggleFaq(this)">• Mengapa SSM ahli tidak muncul dalam SSM Tracker?</div>
             <div class="faq-a">SSM Tracker hanya memaparkan ahli yang mempunyai <strong>No. SSM</strong> DAN <strong>Tarikh Luput SSM</strong> yang diisi. Sekiranya salah satu medan ini kosong, ahli tersebut tidak akan tersenarai. Kemaskini maklumat SSM melalui butang Edit dalam modal butiran ahli.</div>
           </div>
 
           <div class="faq-item">
-            <div class="faq-q" onclick="toggleFaq(this)">▶ &nbsp;Bagaimana cara menghantar mesej WhatsApp secara pukal kepada ahli?</div>
+            <div class="faq-q" onclick="toggleFaq(this)">• Bagaimana cara menghantar mesej WhatsApp secara pukal kepada ahli?</div>
             <div class="faq-a">Pergi ke tab <strong>Follow Up</strong> → pilih senarai ahli yang dikehendaki → klik butang <strong>"WA"</strong> pada baris ahli → pilih template mesej → semak kandungan → klik <strong>"Buka WhatsApp"</strong>. Mesej perlu dihantar satu persatu secara manual melalui WhatsApp Web atau aplikasi WhatsApp.</div>
           </div>
 
           <div class="faq-item">
-            <div class="faq-q" onclick="toggleFaq(this)">▶ &nbsp;Adakah data disimpan secara selamat?</div>
+            <div class="faq-q" onclick="toggleFaq(this)">• Adakah data disimpan secara selamat?</div>
             <div class="faq-a">Data ahli disimpan dalam pangkalan data Supabase yang dilindungi dengan enkripsi SSL. Template mesej dan log aktiviti disimpan dalam localStorage pelayar anda — data ini hanya boleh diakses dari peranti yang sama. Lakukan Backup secara berkala melalui tab <strong>Back Up</strong> untuk memastikan data selamat.</div>
           </div>
 
           <div class="faq-item">
-            <div class="faq-q" onclick="toggleFaq(this)">▶ &nbsp;Bagaimana cara menambah pengguna baharu?</div>
+            <div class="faq-q" onclick="toggleFaq(this)">• Bagaimana cara menambah pengguna baharu?</div>
             <div class="faq-a">Hanya <strong>Admin</strong> boleh menambah pengguna. Log masuk sebagai admin → pergi ke <strong>Panel Admin</strong> → klik <strong>"+ Tambah Pengguna"</strong> → isi ID, nama, kata laluan, dan peranan → klik "Simpan". Pengguna baharu boleh terus log masuk dengan kelayakan tersebut.</div>
           </div>
 
           <div class="faq-item">
-            <div class="faq-q" onclick="toggleFaq(this)">▶ &nbsp;Apakah yang perlu dilakukan jika laporan PDF tidak dapat dicetak?</div>
-            <div class="faq-a">Pastikan pelayar anda membenarkan pop-up dari aplikasi ini. Di Chrome: klik ikon 🔒 di bar alamat → Tetapan Tapak → Pop-up dan ubah hala → Benarkan. Kemudian cuba jana laporan semula. Untuk hasil terbaik, gunakan Google Chrome atau Microsoft Edge.</div>
+            <div class="faq-q" onclick="toggleFaq(this)">• Apakah yang perlu dilakukan jika laporan PDF tidak dapat dicetak?</div>
+            <div class="faq-a">Pastikan pelayar anda membenarkan pop-up dari aplikasi ini. Di Chrome: klik ikon di bar alamat → Tetapan Tapak → Pop-up dan ubah hala → Benarkan. Kemudian cuba jana laporan semula. Untuk hasil terbaik, gunakan Google Chrome atau Microsoft Edge.</div>
           </div>
 
           <div class="faq-item">
-            <div class="faq-q" onclick="toggleFaq(this)">▶ &nbsp;Bagaimana cara membuat Backup data?</div>
-            <div class="faq-a">Pergi ke tab <strong>Back Up</strong> → klik <strong>"🔄 Backup Sekarang"</strong> untuk muat turun salinan data dalam format JSON. Simpan fail ini di lokasi yang selamat. Sekiranya data hilang, hubungi pentadbir sistem untuk pulihkan dari Supabase.</div>
+            <div class="faq-q" onclick="toggleFaq(this)">• Bagaimana cara membuat Backup data?</div>
+            <div class="faq-a">Pergi ke tab <strong>Back Up</strong> → klik <strong>"Backup Sekarang"</strong> untuk muat turun salinan data dalam format JSON. Simpan fail ini di lokasi yang selamat. Sekiranya data hilang, hubungi pentadbir sistem untuk pulihkan dari Supabase.</div>
           </div>
 
           <div class="faq-item">
-            <div class="faq-q" onclick="toggleFaq(this)">▶ &nbsp;Adakah sistem ini boleh digunakan pada telefon bimbit?</div>
-            <div class="faq-a">Ya, sistem ini responsif dan boleh digunakan pada telefon bimbit. Klik ikon <strong>☰</strong> di bahagian bawah kiri untuk buka menu navigasi. Untuk pengalaman terbaik, disyorkan menggunakan tablet atau komputer desktop terutamanya untuk operasi seperti menjana laporan dan eksport PDF.</div>
+            <div class="faq-q" onclick="toggleFaq(this)">• Adakah sistem ini boleh digunakan pada telefon bimbit?</div>
+            <div class="faq-a">Ya, sistem ini responsif dan boleh digunakan pada telefon bimbit. Klik ikon menu di bahagian bawah kiri untuk buka menu navigasi. Untuk pengalaman terbaik, disyorkan menggunakan tablet atau komputer desktop terutamanya untuk operasi seperti menjana laporan dan eksport PDF.</div>
           </div>
 
         </div>
@@ -2296,7 +2296,7 @@ tr.row-unpaid { background: #fff0f0 !important; }
   <!-- ══ RECEIPTS PAGE ══ -->
   <div id="page-receipts" class="page">
     <div class="sec-card">
-      <div class="sec-head"><h3>📄 Resit Bayaran</h3></div>
+      <div class="sec-head"><h3>Resit Bayaran</h3></div>
       <div class="sec-body">
         <div id="receipts-list"></div>
       </div>
@@ -2306,7 +2306,7 @@ tr.row-unpaid { background: #fff0f0 !important; }
   <!-- ══ VOUCHERS PAGE ══ -->
   <div id="page-vouchers" class="page">
     <div class="sec-card">
-      <div class="sec-head"><h3>💳 Voucher Bayaran</h3></div>
+      <div class="sec-head"><h3>Voucher Bayaran</h3></div>
       <div class="sec-body">
         <div id="vouchers-list"></div>
       </div>
@@ -2316,7 +2316,7 @@ tr.row-unpaid { background: #fff0f0 !important; }
   <!-- ══ APPROVALS PAGE ══ -->
   <div id="page-approvals" class="page">
     <div class="sec-card">
-      <div class="sec-head"><h3>✅ Kelulusan Voucher</h3></div>
+      <div class="sec-head"><h3>Kelulusan Voucher</h3></div>
       <div class="sec-body">
         <div id="approvals-list"></div>
       </div>
@@ -2331,14 +2331,14 @@ tr.row-unpaid { background: #fff0f0 !important; }
 
 </div><!-- /#app -->
 
-<button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+<button class="mobile-menu-btn" onclick="toggleSidebar()">Menu</button>
 
 <!-- ══ MODAL: MEMBER DETAIL ══ -->
 <div class="modal-overlay" id="member-modal">
   <div class="modal">
     <div class="modal-head">
       <h3 id="modal-title">Butiran Ahli</h3>
-      <button class="modal-close" onclick="closeModal('member-modal')">✕</button>
+      <button class="modal-close" onclick="closeModal('member-modal')">×</button>
     </div>
     <div class="modal-body">
       <div class="field-grid" id="modal-fields"></div>
@@ -2352,18 +2352,18 @@ tr.row-unpaid { background: #fff0f0 !important; }
   <div class="modal" style="max-width:580px;">
     <div class="modal-head">
       <h3 id="wa-modal-title">Pilih Template WhatsApp</h3>
-      <button class="modal-close" onclick="closeModal('wa-modal')">✕</button>
+      <button class="modal-close" onclick="closeModal('wa-modal')">×</button>
     </div>
     <div class="modal-body">
       <p style="font-size:13px;color:var(--muted);margin-bottom:14px;font-weight:600;">Pilih template dan semak mesej sebelum menghantar:</p>
       <div style="display:flex;gap:9px;flex-wrap:wrap;margin-bottom:16px;" id="wa-template-btns"></div>
       <div class="wa-preview" style="margin-bottom:16px;">
         <div class="wa-bubble" id="wa-preview-full" style="max-width:100%;"></div>
-        <div class="wa-time" id="wa-preview-time">— ✓✓</div>
+        <div class="wa-time" id="wa-preview-time">— Dibaca</div>
       </div>
       <div style="display:flex;gap:9px;flex-wrap:wrap;">
-        <button class="btn btn-primary btn-shine" id="wa-proceed-btn" onclick="waOpenWhatsApp()">&#x1F4F1; Buka WhatsApp Web</button>
-        <button class="btn btn-outline" id="wa-copy-btn" onclick="waCopyMsg()">&#x1F4CB; Salin Mesej</button>
+        <button class="btn btn-primary btn-shine" id="wa-proceed-btn" onclick="waOpenWhatsApp()">Buka WhatsApp Web</button>
+        <button class="btn btn-outline" id="wa-copy-btn" onclick="waCopyMsg()">Salin Mesej</button>
         <button class="btn btn-outline-red" onclick="closeModal('wa-modal')">Batal</button>
       </div>
     </div>
@@ -2375,7 +2375,7 @@ tr.row-unpaid { background: #fff0f0 !important; }
   <div class="modal" style="max-width:660px;">
     <div class="modal-head">
       <h3 id="edit-template-title">Template</h3>
-      <button class="modal-close" onclick="closeModal('edit-template-modal')">✕</button>
+      <button class="modal-close" onclick="closeModal('edit-template-modal')">×</button>
     </div>
     <div class="modal-body">
       <div style="margin-bottom:12px;">
@@ -2392,10 +2392,10 @@ tr.row-unpaid { background: #fff0f0 !important; }
       </div>
       <div style="display:flex;gap:10px;justify-content:space-between;align-items:center;">
         <div style="display:flex;gap:10px;">
-          <button class="btn btn-primary btn-shine" onclick="saveTemplate()">💾 Simpan Template</button>
+          <button class="btn btn-primary btn-shine" onclick="saveTemplate()">Simpan Template</button>
           <button class="btn btn-outline" onclick="closeModal('edit-template-modal')">Batal</button>
         </div>
-        <button class="btn btn-outline-red btn-sm" id="delete-template-btn" onclick="deleteTemplate()" style="display:none;">🗑 Padam Template</button>
+        <button class="btn btn-outline-red btn-sm" id="delete-template-btn" onclick="deleteTemplate()" style="display:none;">Padam Template</button>
       </div>
     </div>
   </div>
@@ -2406,7 +2406,7 @@ tr.row-unpaid { background: #fff0f0 !important; }
   <div class="modal" style="max-width:720px;">
     <div class="modal-head">
       <h3 id="add-member-title">Tambah Ahli Baru</h3>
-      <button class="modal-close" onclick="closeModal('add-member-modal')">✕</button>
+      <button class="modal-close" onclick="closeModal('add-member-modal')">×</button>
     </div>
     <div class="modal-body">
       <div class="field-grid">
@@ -2476,7 +2476,7 @@ tr.row-unpaid { background: #fff0f0 !important; }
   <div class="modal" style="max-width:500px;">
     <div class="modal-head">
       <h3 id="add-user-modal-title">Tambah Pengguna Baru</h3>
-      <button class="modal-close" onclick="closeModal('add-user-modal')">✕</button>
+      <button class="modal-close" onclick="closeModal('add-user-modal')">×</button>
     </div>
     <div class="modal-body">
       <div class="field-grid">
@@ -2506,7 +2506,7 @@ tr.row-unpaid { background: #fff0f0 !important; }
         <h3 id="user-log-modal-title" style="margin:0;">Log Aktiviti</h3>
         <div id="user-log-modal-sub" style="font-size:12px;color:var(--muted);margin-top:2px;"></div>
       </div>
-      <button class="modal-close" onclick="closeModal('user-log-modal')">✕</button>
+      <button class="modal-close" onclick="closeModal('user-log-modal')">×</button>
     </div>
     <div class="modal-body" style="padding:0;">
       <div id="user-log-stats" style="display:flex;gap:0;border-bottom:1px solid var(--gray1);"></div>
@@ -2525,7 +2525,7 @@ tr.row-unpaid { background: #fff0f0 !important; }
         </table>
       </div>
       <div style="padding:12px 16px;border-top:1px solid var(--gray1);display:flex;justify-content:flex-end;gap:10px;">
-        <button class="btn btn-outline-red btn-sm" onclick="clearUserLog()">🗑 Padam Log</button>
+        <button class="btn btn-outline-red btn-sm" onclick="clearUserLog()">Padam Log</button>
         <button class="btn btn-outline btn-sm" onclick="closeModal('user-log-modal')">Tutup</button>
       </div>
     </div>
@@ -2554,7 +2554,7 @@ tr.row-unpaid { background: #fff0f0 !important; }
         <div style="font-weight:700;font-size:13px;color:var(--text)" id="permohonan-tab-label">Mohon Baru</div>
         <div style="display:flex;gap:8px;align-items:center;">
           <input type="text" id="permohonan-search" placeholder="Cari nama / syarikat / ref..." oninput="renderPermohonanTable()" style="padding:7px 12px;border:1.5px solid var(--gray2);border-radius:7px;font-size:12px;font-family:var(--sans);width:240px;outline:none;">
-          <button class="btn btn-outline btn-sm" onclick="renderPermohonanPage()" style="font-size:12px;">🔄 Muat Semula</button>
+          <button class="btn btn-outline btn-sm" onclick="renderPermohonanPage()" style="font-size:12px;">Muat Semula</button>
         </div>
       </div>
       <div style="overflow-x:auto;">
@@ -2571,7 +2571,7 @@ tr.row-unpaid { background: #fff0f0 !important; }
             </tr>
           </thead>
           <tbody id="permohonan-tbody">
-            <tr><td colspan="7" style="padding:40px;text-align:center;color:var(--muted)">⏳ Memuatkan data...</td></tr>
+            <tr><td colspan="7" style="padding:40px;text-align:center;color:var(--muted)">Memuatkan data...</td></tr>
           </tbody>
         </table>
       </div>
@@ -2582,17 +2582,17 @@ tr.row-unpaid { background: #fff0f0 !important; }
   <!-- ══ MODAL: QR BORANG ══ -->
   <div id="modal-qr" class="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9000;align-items:center;justify-content:center;">
     <div style="background:var(--white);border-radius:16px;max-width:380px;width:92%;padding:28px 24px;box-shadow:0 24px 60px rgba(0,0,0,.35);text-align:center;position:relative;">
-      <button onclick="closeQRModal()" style="position:absolute;top:12px;right:14px;background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted);">✕</button>
+      <button onclick="closeQRModal()" style="position:absolute;top:12px;right:14px;background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted);">×</button>
       <div style="font-size:13px;font-weight:800;letter-spacing:.08em;color:var(--primary);text-transform:uppercase;margin-bottom:4px;">QR Code Borang Permohonan</div>
       <div style="font-size:11px;color:var(--muted);margin-bottom:18px;">Imbas untuk mengisi permohonan keahlian DPMM Johor</div>
       <div style="display:inline-block;padding:10px;background:#fff;border:2px solid var(--gray1);border-radius:10px;margin-bottom:16px;">
         <canvas id="qr-canvas" width="300" height="300" style="display:block;width:240px;height:240px;"></canvas>
       </div>
-      <div id="qr-loading" style="font-size:11px;color:var(--muted);margin-bottom:6px;">⏳ Menjana QR Code...</div>
+      <div id="qr-loading" style="font-size:11px;color:var(--muted);margin-bottom:6px;">Menjana QR Code...</div>
       <div style="font-family:var(--mono);font-size:9.5px;color:var(--muted);word-break:break-all;margin-bottom:18px;padding:8px 10px;background:var(--body-bg);border-radius:6px;" id="qr-url-display"></div>
       <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
-        <a id="qr-download-btn" download="QR-Borang-DPMM.png" style="padding:8px 18px;background:var(--primary);color:#fff;border-radius:7px;font-size:12px;font-weight:700;text-decoration:none;cursor:pointer;">⬇ Muat Turun PNG</a>
-        <button onclick="window.open(document.getElementById('qr-url-display').textContent,'_blank')" style="padding:8px 18px;background:none;border:1.5px solid var(--primary);color:var(--primary);border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;">🔗 Buka Borang</button>
+        <a id="qr-download-btn" download="QR-Borang-DPMM.png" style="padding:8px 18px;background:var(--primary);color:#fff;border-radius:7px;font-size:12px;font-weight:700;text-decoration:none;cursor:pointer;">Muat Turun PNG</a>
+        <button onclick="window.open(document.getElementById('qr-url-display').textContent,'_blank')" style="padding:8px 18px;background:none;border:1.5px solid var(--primary);color:var(--primary);border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;">Buka Borang</button>
       </div>
     </div>
   </div>

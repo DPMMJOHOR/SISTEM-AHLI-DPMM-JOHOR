@@ -39,13 +39,13 @@ function showReceiptActions(receiptData) {
     <h4 style="margin: 0 0 12px 0; color: #1a365d;">Tindakan Resit</h4>
     <div style="display: flex; gap: 12px; flex-wrap: wrap;">
       <button id="download-receipt-btn" class="btn btn-primary" style="flex: 1; min-width: 150px;">
-        📥 Muat Turun PDF
+        Muat Turun PDF
       </button>
       <button id="print-receipt-template-btn" class="btn btn-outline" style="flex: 1; min-width: 150px;">
-        🖨️ Cetak Resit
+        Cetak Resit
       </button>
       <button id="whatsapp-receipt-btn" class="btn btn-success" style="flex: 1; min-width: 150px; background: #25D366;">
-        📱 Hantar WhatsApp
+        Hantar WhatsApp
       </button>
     </div>
   `;
@@ -277,7 +277,7 @@ async function showReceiptDetailModal(receipt, slip) {
       <div class="modal">
         <div class="modal-head">
           <h3>Butiran Resit</h3>
-          <button class="modal-close" onclick="closeModal('receipt-detail-modal')">✕</button>
+          <button class="modal-close" onclick="closeModal('receipt-detail-modal')">×</button>
         </div>
         <div class="modal-body">
           <div class="field-grid" id="receipt-detail-fields"></div>
@@ -302,15 +302,15 @@ async function showReceiptDetailModal(receipt, slip) {
     <div class="field-grp full">
       <label class="field-label">Bukti Pembayaran</label>
       <div>${slip && slip.slip_image_url
-        ? `<span style="color: var(--success);">✓ Slip pembayaran tersedia (No. Slip: ${slip.slip_number || '-'})</span>`
+        ? `<span style="color: var(--success);">Slip pembayaran tersedia (No. Slip: ${slip.slip_number || '-'})</span>`
         : `<span style="color: var(--muted); font-style: italic;">Tiada bukti pembayaran</span>`}</div>
     </div>
   `;
   document.getElementById('receipt-detail-fields').innerHTML = fieldsHtml;
   
-  let actionsHtml = `<button class="btn btn-outline" id="receipt-detail-print-btn">🖨️ Lihat/Cetak Resit</button>`;
+  let actionsHtml = `<button class="btn btn-outline" id="receipt-detail-print-btn">Lihat/Cetak Resit</button>`;
   if (slip && slip.slip_image_url) {
-    actionsHtml += `<button class="btn btn-primary" id="receipt-detail-view-proof-btn">📎 Lihat Bukti Pembayaran</button>`;
+    actionsHtml += `<button class="btn btn-primary" id="receipt-detail-view-proof-btn">Lihat Bukti Pembayaran</button>`;
   }
   document.getElementById('receipt-detail-actions').innerHTML = actionsHtml;
   
@@ -435,7 +435,7 @@ function showReceiptsPage() {
               <option value="">Semua Tahun</option>
             </select>
           </div>
-          <button onclick="generateReceiptReport()" class="btn btn-primary" style="flex: 0 0 auto;">📊 Jana Laporan</button>
+          <button onclick="generateReceiptReport()" class="btn btn-primary" style="flex: 0 0 auto;">Jana Laporan</button>
         </div>
         <div class="table-wrap">
           <table class="table">
@@ -696,7 +696,7 @@ async function loadReceipts() {
       const tdProof = document.createElement('td');
       if (slip && slip.slip_image_url) {
         const proofBtn = document.createElement('button');
-        proofBtn.textContent = '📎 Lihat Bukti';
+        proofBtn.textContent = 'Lihat Bukti';
         proofBtn.className = 'btn btn-sm btn-outline';
         proofBtn.style.padding = '6px 12px';
         proofBtn.style.borderRadius = '6px';
@@ -732,7 +732,7 @@ async function loadReceipts() {
       
       // View/Print button - regenerates PDF from database data
       const btnView = document.createElement('button');
-      btnView.textContent = '🖨️ Lihat/Cetak';
+      btnView.textContent = 'Lihat/Cetak';
       btnView.className = 'btn btn-sm btn-outline';
       btnView.style.padding = '8px 16px';
       btnView.style.borderRadius = '6px';
@@ -745,7 +745,7 @@ async function loadReceipts() {
       
       // Delete button
       const btnDelete = document.createElement('button');
-      btnDelete.textContent = '🗑️ Padam';
+      btnDelete.textContent = 'Padam';
       btnDelete.className = 'btn btn-sm';
       btnDelete.style.background = '#dc3545';
       btnDelete.style.color = '#fff';
@@ -844,7 +844,7 @@ async function loadVouchers() {
       tdAction.style.minWidth = '200px';
       
       const btn = document.createElement('button');
-      btn.textContent = '📥 Muat Turun PDF';
+      btn.textContent = 'Muat Turun PDF';
       btn.className = 'btn btn-sm btn-outline';
       btn.style.padding = '8px 16px';
       btn.style.borderRadius = '6px';
@@ -928,7 +928,7 @@ async function loadPendingApprovals() {
       tdAction.style.minWidth = '150px';
       
       const btn = document.createElement('button');
-      btn.textContent = '🔍 Semak';
+      btn.textContent = 'Semak';
       btn.className = 'btn btn-sm btn-primary';
       btn.style.padding = '8px 16px';
       btn.style.borderRadius = '6px';
