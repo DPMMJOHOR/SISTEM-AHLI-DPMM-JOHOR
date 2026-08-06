@@ -1,30 +1,36 @@
 // Receipt and Payment Voucher System - Frontend UI Components
 // Integrated with Sistem Ahli
-// Cache-bust: 2026-07-28-02-45
+// Cache-bust: 2026-08-06-01-00
 
 // Error and Success UI Helpers
 function showError(message) {
   const errorDiv = document.createElement('div');
-  errorDiv.className = 'error-message';
-  errorDiv.style.cssText = 'background: #fee; color: #c33; padding: 12px; border-radius: 6px; border: 1px solid #fcc; margin: 10px 0; font-size: 14px;';
+  errorDiv.className = 'error-message premium-toast premium-toast-error';
+  errorDiv.style.cssText = 'background: rgba(255, 107, 107, 0.95); color: white; padding: 14px 20px; border-radius: 10px; border: 1px solid rgba(255, 107, 107, 0.3); margin: 10px 0; font-size: 14px; font-weight: 500; backdrop-filter: blur(10px); box-shadow: 0 8px 32px rgba(255, 107, 107, 0.2); animation: slideIn 0.3s ease-out;';
   errorDiv.textContent = message;
   
   const container = document.querySelector('.sec-body') || document.body;
   container.insertBefore(errorDiv, container.firstChild);
   
-  setTimeout(() => errorDiv.remove(), 5000);
+  setTimeout(() => {
+    errorDiv.style.animation = 'slideOut 0.3s ease-in forwards';
+    setTimeout(() => errorDiv.remove(), 300);
+  }, 5000);
 }
 
 function showSuccess(message) {
   const successDiv = document.createElement('div');
-  successDiv.className = 'success-message';
-  successDiv.style.cssText = 'background: #efe; color: #3c3; padding: 12px; border-radius: 6px; border: 1px solid #cfc; margin: 10px 0; font-size: 14px;';
+  successDiv.className = 'success-message premium-toast premium-toast-success';
+  successDiv.style.cssText = 'background: rgba(0, 212, 160, 0.95); color: white; padding: 14px 20px; border-radius: 10px; border: 1px solid rgba(0, 212, 160, 0.3); margin: 10px 0; font-size: 14px; font-weight: 500; backdrop-filter: blur(10px); box-shadow: 0 8px 32px rgba(0, 212, 160, 0.2); animation: slideIn 0.3s ease-out;';
   successDiv.textContent = message;
   
   const container = document.querySelector('.sec-body') || document.body;
   container.insertBefore(successDiv, container.firstChild);
   
-  setTimeout(() => successDiv.remove(), 5000);
+  setTimeout(() => {
+    successDiv.style.animation = 'slideOut 0.3s ease-in forwards';
+    setTimeout(() => successDiv.remove(), 300);
+  }, 5000);
 }
 
 // Show download and WhatsApp actions for generated receipt
@@ -32,19 +38,19 @@ function showReceiptActions(receiptData) {
   console.log('showReceiptActions called with:', receiptData);
   
   const actionsDiv = document.createElement('div');
-  actionsDiv.className = 'receipt-actions';
-  actionsDiv.style.cssText = 'background: #f0f8ff; padding: 16px; border-radius: 8px; margin: 16px 0; border: 1px solid #d0e0ff; display: block !important;';
+  actionsDiv.className = 'receipt-actions premium-glass';
+  actionsDiv.style.cssText = 'background: rgba(240, 248, 255, 0.9); padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid rgba(208, 224, 255, 0.5); display: block !important; box-shadow: 0 8px 32px rgba(29, 60, 150, 0.1);';
   
   actionsDiv.innerHTML = `
-    <h4 style="margin: 0 0 12px 0; color: #1a365d;">Tindakan Resit</h4>
+    <h4 style="margin: 0 0 16px 0; color: #1a365d; font-weight: 700; font-size: 15px; letter-spacing: 0.3px;">Tindakan Resit</h4>
     <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-      <button id="download-receipt-btn" class="btn btn-primary" style="flex: 1; min-width: 150px;">
+      <button id="download-receipt-btn" class="btn btn-primary btn-shine" style="flex: 1; min-width: 150px; padding: 12px 20px; font-weight: 600; border-radius: 8px; transition: all 0.2s;">
         Muat Turun PDF
       </button>
-      <button id="print-receipt-template-btn" class="btn btn-outline" style="flex: 1; min-width: 150px;">
+      <button id="print-receipt-template-btn" class="btn btn-outline" style="flex: 1; min-width: 150px; padding: 12px 20px; font-weight: 600; border-radius: 8px; transition: all 0.2s;">
         Cetak Resit
       </button>
-      <button id="whatsapp-receipt-btn" class="btn btn-success" style="flex: 1; min-width: 150px; background: #25D366;">
+      <button id="whatsapp-receipt-btn" class="btn btn-success" style="flex: 1; min-width: 150px; background: #25D366; padding: 12px 20px; font-weight: 600; border-radius: 8px; transition: all 0.2s; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);">
         Hantar WhatsApp
       </button>
     </div>

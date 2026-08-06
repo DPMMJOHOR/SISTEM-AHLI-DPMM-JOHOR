@@ -1,6 +1,7 @@
 // Accounting Software - Frontend UI Components (Perakaunan)
 // Integrated with Sistem Ahli DPMM Johor
 // Follows conventions established in receipt-pv-ui.js
+// Cache-bust: 2026-08-06-01-00
 
 // ── Roles allowed to write/approve accounting data ──
 var ACCOUNTING_WRITE_ROLES = ['admin', 'bendahari'];
@@ -61,11 +62,11 @@ function showAccountingPage() {
   var canWrite = accountingCanWrite();
 
   dashEl.innerHTML =
-    '<div class="kpi-grid kpi-4" style="margin-bottom:16px;">' +
-      '<div class="modern-kpi-card"><div class="modern-kpi-label">JUMLAH PENDAPATAN (BULAN INI)</div><div class="modern-kpi-val" id="acct-kpi-month-total">RM 0.00</div></div>' +
-      '<div class="modern-kpi-card modern-kpi-danger"><div class="modern-kpi-label">MENUNGGU KELULUSAN</div><div class="modern-kpi-val" id="acct-kpi-pending">0</div></div>' +
-      '<div class="modern-kpi-card"><div class="modern-kpi-label">BAKI BANK (SEMUA AKAUN)</div><div class="modern-kpi-val" id="acct-kpi-bank-balance">RM 0.00</div></div>' +
-      '<div class="modern-kpi-card"><div class="modern-kpi-label">BAKI TUNAI</div><div class="modern-kpi-val" id="acct-kpi-cash-balance">RM 0.00</div></div>' +
+    '<div class="kpi-grid kpi-4" style="margin-bottom:24px;">' +
+      '<div class="modern-kpi-card premium-glass"><div class="modern-kpi-label">JUMLAH PENDAPATAN (BULAN INI)</div><div class="modern-kpi-val" id="acct-kpi-month-total">RM 0.00</div></div>' +
+      '<div class="modern-kpi-card modern-kpi-danger premium-glass"><div class="modern-kpi-label">MENUNGGU KELULUSAN</div><div class="modern-kpi-val" id="acct-kpi-pending">0</div></div>' +
+      '<div class="modern-kpi-card premium-glass"><div class="modern-kpi-label">BAKI BANK (SEMUA AKAUN)</div><div class="modern-kpi-val" id="acct-kpi-bank-balance">RM 0.00</div></div>' +
+      '<div class="modern-kpi-card premium-glass"><div class="modern-kpi-label">BAKI TUNAI</div><div class="modern-kpi-val" id="acct-kpi-cash-balance">RM 0.00</div></div>' +
     '</div>';
 
   listEl.innerHTML =
