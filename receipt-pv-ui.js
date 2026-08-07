@@ -345,13 +345,44 @@ function showReceiptsPage() {
         </div>
       </div>
       <div class="sec-body" style="padding: 16px;">
-        <div class="field-grp" style="margin-bottom: 16px;">
-          <label class="field-label" style="font-weight: 500; color: var(--foreground); margin-bottom: 6px; display: block; font-size: 13px;">Slip Pembayaran / Bukti Pembayaran (pilihan)</label>
-          <div style="position: relative;">
+        <div style="display: grid; grid-template-columns: 1fr 120px 1fr 1fr; gap: 12px; margin-bottom: 16px; align-items: end;">
+          <div class="field-grp">
+            <label class="field-label" style="font-weight: 500; color: var(--foreground); margin-bottom: 6px; display: block; font-size: 13px;">Slip Pembayaran / Bukti Pembayaran (pilihan)</label>
             <input type="file" id="receipt-payment-slip" class="field-input" accept="image/*,application/pdf" style="padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--background); cursor: pointer; transition: all 0.2s ease; font-size: 13px;">
-            <small style="color: var(--muted-foreground); font-size: 11px; display: block; margin-top: 4px;">Muat naik imej atau PDF slip pembayaran. Fail ini akan disimpan sebagai bukti pembayaran dan diproses dengan OCR.</small>
+          </div>
+          <div class="field-grp">
+            <label class="field-label" style="font-weight: 500; color: var(--foreground); margin-bottom: 6px; display: block; font-size: 13px;">Jumlah (RM)</label>
+            <input type="number" id="receipt-amount" class="field-input" placeholder="0.00" step="0.01" style="padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--background); font-weight: 600; font-size: 14px; transition: all 0.2s ease;">
+          </div>
+          <div class="field-grp">
+            <label class="field-label" style="font-weight: 500; color: var(--foreground); margin-bottom: 6px; display: block; font-size: 13px;">Kaedah Pembayaran</label>
+            <div class="payment-method-checkboxes" style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px;">
+              <label style="display: flex; align-items: center; gap: 4px; cursor: pointer; font-weight: 500; padding: 4px 8px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--background); transition: all 0.2s ease; font-size: 11px;">
+                <input type="checkbox" id="receipt-pm-cash" class="receipt-pm-checkbox" data-method="cash" style="accent-color: var(--primary);">
+                Tunai
+              </label>
+              <label style="display: flex; align-items: center; gap: 4px; cursor: pointer; font-weight: 500; padding: 4px 8px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--background); transition: all 0.2s ease; font-size: 11px;">
+                <input type="checkbox" id="receipt-pm-online" class="receipt-pm-checkbox" data-method="online" style="accent-color: var(--primary);">
+                Online
+              </label>
+              <label style="display: flex; align-items: center; gap: 4px; cursor: pointer; font-weight: 500; padding: 4px 8px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--background); transition: all 0.2s ease; font-size: 11px;">
+                <input type="checkbox" id="receipt-pm-cheque" class="receipt-pm-checkbox" data-method="cheque" style="accent-color: var(--primary);">
+                Cek
+              </label>
+            </div>
+          </div>
+          <div class="field-grp">
+            <label class="field-label" style="font-weight: 500; color: var(--foreground); margin-bottom: 6px; display: block; font-size: 13px;">Tarikh Pembayaran</label>
+            <input type="date" id="receipt-payment-date" class="field-input" style="padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--background); transition: all 0.2s ease; font-size: 13px;">
           </div>
         </div>
+        
+        <div class="field-grp" id="receipt-cheque-info-grp" style="display: none; margin-bottom: 16px;">
+          <label class="field-label" style="font-weight: 500; color: var(--foreground); margin-bottom: 6px; display: block; font-size: 13px;">No. Cek / Bank</label>
+          <input type="text" id="receipt-cheque-info" class="field-input" placeholder="123456 - MAYBANK" style="padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--background); transition: all 0.2s ease; font-size: 13px;">
+        </div>
+        
+        <small style="color: var(--muted-foreground); font-size: 11px; display: block; margin-bottom: 16px;">Muat naik imej atau PDF slip pembayaran. Fail ini akan disimpan sebagai bukti pembayaran dan diproses dengan OCR.</small>
         
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
           <div class="field-grp">
@@ -371,39 +402,6 @@ function showReceiptsPage() {
           <input type="text" id="receipt-description" class="field-input" placeholder="Penerangan pembayaran..." style="padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--background); transition: all 0.2s ease; font-size: 13px;">
         </div>
         
-        <div style="display: grid; grid-template-columns: 120px 1fr 1fr; gap: 12px; margin-bottom: 16px; align-items: end;">
-          <div class="field-grp">
-            <label class="field-label" style="font-weight: 500; color: var(--foreground); margin-bottom: 6px; display: block; font-size: 13px;">Jumlah (RM)</label>
-            <input type="number" id="receipt-amount" class="field-input" placeholder="0.00" step="0.01" style="padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--background); font-weight: 600; font-size: 14px; transition: all 0.2s ease;">
-          </div>
-          <div class="field-grp">
-            <label class="field-label" style="font-weight: 500; color: var(--foreground); margin-bottom: 6px; display: block; font-size: 13px;">Kaedah Pembayaran</label>
-            <div class="payment-method-checkboxes" style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px;">
-              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 500; padding: 6px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--background); transition: all 0.2s ease; font-size: 12px;">
-                <input type="checkbox" id="receipt-pm-cash" class="receipt-pm-checkbox" data-method="cash" style="accent-color: var(--primary);">
-                Tunai
-              </label>
-              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 500; padding: 6px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--background); transition: all 0.2s ease; font-size: 12px;">
-                <input type="checkbox" id="receipt-pm-online" class="receipt-pm-checkbox" data-method="online" style="accent-color: var(--primary);">
-                Online
-              </label>
-              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 500; padding: 6px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--background); transition: all 0.2s ease; font-size: 12px;">
-                <input type="checkbox" id="receipt-pm-cheque" class="receipt-pm-checkbox" data-method="cheque" style="accent-color: var(--primary);">
-                Cek
-              </label>
-            </div>
-          </div>
-          <div class="field-grp" id="receipt-cheque-info-grp" style="display: none;">
-            <label class="field-label" style="font-weight: 500; color: var(--foreground); margin-bottom: 6px; display: block; font-size: 13px;">No. Cek / Bank</label>
-            <input type="text" id="receipt-cheque-info" class="field-input" placeholder="123456 - MAYBANK" style="padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--background); transition: all 0.2s ease; font-size: 13px;">
-          </div>
-        </div>
-        
-        <div class="field-grp" style="margin-bottom: 16px;">
-          <label class="field-label" style="font-weight: 500; color: var(--foreground); margin-bottom: 6px; display: block; font-size: 13px;">Tarikh Pembayaran</label>
-          <input type="date" id="receipt-payment-date" class="field-input" style="padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--background); transition: all 0.2s ease; font-size: 13px;">
-        </div>
-        
         <div id="ocr-status" class="alert" style="display: none; padding: 10px 12px; border-radius: var(--radius-md); margin-bottom: 12px; font-size: 12px;">
           <span id="ocr-status-text"></span>
         </div>
@@ -412,7 +410,9 @@ function showReceiptsPage() {
           <strong style="color: var(--success);">ID Transaksi:</strong> <span id="transaction-id-text" style="font-weight: 600;"></span>
         </div>
         
-        <button onclick="handleGenerateReceipt()" class="btn btn-primary btn-shine" style="width: 100%; padding: 10px 16px; font-size: 13px; font-weight: 600; border-radius: var(--radius-md); letter-spacing: 0.3px;">Jana Resit</button>
+        <div style="display: flex; justify-content: flex-end;">
+          <button onclick="handleGenerateReceipt()" class="btn btn-primary btn-shine" style="padding: 10px 24px; font-size: 13px; font-weight: 600; border-radius: var(--radius-md); letter-spacing: 0.3px; background: var(--primary); color: var(--primary-foreground); border: none; cursor: pointer; transition: all 0.2s ease;">Jana Resit</button>
+        </div>
       </div>
     </div>
     
