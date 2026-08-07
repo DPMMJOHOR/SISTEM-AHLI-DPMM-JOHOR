@@ -339,11 +339,11 @@ function showReceiptsPage() {
       <div class="sec-body" style="padding: 16px;">
         <div style="display: grid; grid-template-columns: 1fr 120px 1fr 1fr; gap: 12px; margin-bottom: 16px; align-items: end;">
           <div class="field-grp input-wrapper">
-            <input type="file" id="receipt-payment-slip" class="field-input" accept="image/*,application/pdf" placeholder=" ">
+            <input type="file" id="receipt-payment-slip" class="field-input floating-input" accept="image/*,application/pdf" placeholder=" ">
             <label class="floating-label">Slip Pembayaran / Bukti Pembayaran (pilihan)</label>
           </div>
           <div class="field-grp input-wrapper">
-            <input type="number" id="receipt-amount" class="field-input" placeholder=" " step="0.01">
+            <input type="number" id="receipt-amount" class="field-input floating-input" placeholder=" " step="0.01">
             <label class="floating-label">Jumlah (RM)</label>
           </div>
           <div class="field-grp">
@@ -385,13 +385,13 @@ function showReceiptsPage() {
             </div>
           </div>
           <div class="field-grp input-wrapper">
-            <input type="date" id="receipt-payment-date" class="field-input" placeholder=" ">
+            <input type="date" id="receipt-payment-date" class="field-input floating-input" placeholder=" ">
             <label class="floating-label">Tarikh Pembayaran</label>
           </div>
         </div>
         
         <div class="field-grp input-wrapper" id="receipt-cheque-info-grp" style="display: none; margin-bottom: 16px;">
-          <input type="text" id="receipt-cheque-info" class="field-input" placeholder=" ">
+          <input type="text" id="receipt-cheque-info" class="field-input floating-input" placeholder=" ">
           <label class="floating-label">No. Cek / Bank</label>
         </div>
         
@@ -409,7 +409,7 @@ function showReceiptsPage() {
         </div>
         
         <div class="field-grp input-wrapper" style="margin-bottom: 16px;">
-          <input type="text" id="receipt-description" class="field-input" placeholder=" ">
+          <input type="text" id="receipt-description" class="field-input floating-input" placeholder=" ">
           <label class="floating-label">Penerangan Pembayaran</label>
         </div>
         
@@ -536,22 +536,22 @@ function showVouchersPage() {
       </div>
       <div class="sec-body" style="padding: 16px;">
         <div class="field-grp input-wrapper" style="margin-bottom: 16px;">
-          <input type="text" id="voucher-payable-to" class="field-input" placeholder=" ">
+          <input type="text" id="voucher-payable-to" class="field-input floating-input" placeholder=" ">
           <label class="floating-label">Dibayar Kepada</label>
         </div>
         
         <div class="field-grp input-wrapper" style="margin-bottom: 16px;">
-          <textarea id="voucher-purpose" class="field-input" rows="3" placeholder=" "></textarea>
+          <textarea id="voucher-purpose" class="field-input floating-input" rows="3" placeholder=" "></textarea>
           <label class="floating-label">Tujuan Pembayaran</label>
         </div>
         
         <div class="field-grp input-wrapper" style="margin-bottom: 16px;">
-          <input type="number" id="voucher-amount" class="field-input" placeholder=" " step="0.01">
+          <input type="number" id="voucher-amount" class="field-input floating-input" placeholder=" " step="0.01">
           <label class="floating-label">Jumlah (RM)</label>
         </div>
         
         <div class="field-grp input-wrapper" style="margin-bottom: 16px;">
-          <select id="voucher-payment-method" class="field-input" placeholder=" ">
+          <select id="voucher-payment-method" class="field-input floating-input" placeholder=" ">
             <option value="">Pilih kaedah...</option>
             <option value="cash">Tunai</option>
             <option value="cheque">Cek</option>

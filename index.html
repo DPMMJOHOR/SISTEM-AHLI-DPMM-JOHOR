@@ -932,10 +932,7 @@ small {
   }
 }
 
-/* Uiverse-style floating label input with DPMM colors */
-.input-wrapper {
-  position: relative;
-}
+/* Uiverse-style floating label input with DPMM colors - SCOPED to receipt-pv-ui only */
 .input-wrapper .floating-label {
   transition: all 0.1s ease-in-out;
   color: var(--muted-foreground);
@@ -948,7 +945,7 @@ small {
   font-size: 13px;
   font-weight: 500;
 }
-.input-wrapper .field-input {
+.input-wrapper .field-input.floating-input {
   border-radius: var(--radius-md);
   transition: outline 0.2s ease;
   font-size: 13px;
@@ -958,12 +955,12 @@ small {
   width: 100%;
   background: var(--background);
 }
-.input-wrapper .field-input:focus {
+.input-wrapper .field-input.floating-input:focus {
   box-shadow: 0 0 0 1px var(--primary-lt), 0 0 0 3px var(--primary);
   border-color: var(--primary);
 }
-.input-wrapper .field-input:focus ~ .floating-label,
-.input-wrapper .field-input:not(:placeholder-shown) ~ .floating-label {
+.input-wrapper .field-input.floating-input:focus ~ .floating-label,
+.input-wrapper .field-input.floating-input:not(:placeholder-shown) ~ .floating-label {
   top: -8px !important;
   left: 8px !important;
   transform: scale(0.75);
