@@ -336,14 +336,6 @@ function showReceiptsPage() {
   if (!container) return;
   container.innerHTML = `
     <div class="sec-card" style="border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--card); box-shadow: var(--shadow-sm);">
-      <div class="sec-head" style="padding: 16px; border-bottom: 1px solid var(--border); background: var(--muted)/30;">
-        <div style="display: flex; align-items: center; justify-content: space-between;">
-          <div>
-            <h3 style="color: var(--foreground); margin: 0; font-size: 16px; font-weight: 600; letter-spacing: 0.3px;">JANA RESIT BARU</h3>
-            <p style="color: var(--muted-foreground); margin: 2px 0 0 0; font-size: 12px; font-weight: 400;">Isi borang di bawah untuk menjana resit pembayaran</p>
-          </div>
-        </div>
-      </div>
       <div class="sec-body" style="padding: 16px;">
         <div style="display: grid; grid-template-columns: 1fr 120px 1fr 1fr; gap: 12px; margin-bottom: 16px; align-items: end;">
           <div class="field-grp">
