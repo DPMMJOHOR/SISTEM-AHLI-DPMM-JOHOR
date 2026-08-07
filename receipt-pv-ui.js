@@ -335,91 +335,93 @@ function showReceiptsPage() {
   const container = document.getElementById('receipts-list');
   if (!container) return;
   container.innerHTML = `
-    <div class="sec-card">
-      <div class="sec-head">
-        <h3>JANA RESIT BARU</h3>
+    <div class="sec-card premium-glass" style="background: linear-gradient(135deg, rgba(29, 60, 150, 0.05) 0%, rgba(29, 60, 150, 0.02) 100%); border: 1px solid rgba(29, 60, 150, 0.1);">
+      <div class="sec-head" style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dk) 100%); padding: 20px 24px; border-radius: 12px 12px 0 0;">
+        <h3 style="color: white; margin: 0; font-size: 18px; font-weight: 700; letter-spacing: 0.5px;">JANA RESIT BARU</h3>
+        <p style="color: rgba(255, 255, 255, 0.8); margin: 6px 0 0 0; font-size: 13px; font-weight: 400;">Isi borang di bawah untuk menjana resit pembayaran</p>
       </div>
-      <div class="sec-body">
-        <div class="field-grp">
-          <label class="field-label">Slip Pembayaran / Bukti Pembayaran (pilihan)</label>
-          <input type="file" id="receipt-payment-slip" class="field-input" accept="image/*,application/pdf">
-          <small style="color: var(--muted); font-size: 12px;">Muat naik imej atau PDF slip pembayaran. Fail ini akan disimpan sebagai bukti pembayaran dan diproses dengan OCR.</small>
+      <div class="sec-body" style="padding: 24px;">
+        <div class="field-grp" style="margin-bottom: 20px;">
+          <label class="field-label" style="font-weight: 600; color: var(--primary); margin-bottom: 8px; display: block;">Slip Pembayaran / Bukti Pembayaran (pilihan)</label>
+          <div style="position: relative;">
+            <input type="file" id="receipt-payment-slip" class="field-input" accept="image/*,application/pdf" style="padding: 12px 16px; border: 2px dashed rgba(29, 60, 150, 0.3); border-radius: 8px; background: rgba(240, 248, 255, 0.5); cursor: pointer; transition: all 0.3s ease;">
+            <small style="color: var(--muted); font-size: 12px; display: block; margin-top: 6px;">Muat naik imej atau PDF slip pembayaran. Fail ini akan disimpan sebagai bukti pembayaran dan diproses dengan OCR.</small>
+          </div>
         </div>
         
-        <div style="display: flex; gap: 12px; margin-bottom: 16px;">
-          <div class="field-grp" style="flex: 1;">
-            <label class="field-label">Ahli (untuk yuran keahlian)</label>
-            <select id="receipt-member-select" class="field-input">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+          <div class="field-grp">
+            <label class="field-label" style="font-weight: 600; color: var(--primary); margin-bottom: 8px; display: block;">Ahli (untuk yuran keahlian)</label>
+            <select id="receipt-member-select" class="field-input" style="padding: 12px 16px; border: 1px solid rgba(29, 60, 150, 0.2); border-radius: 8px; background: white; transition: all 0.3s ease;">
               <option value="">Pilih ahli...</option>
             </select>
           </div>
-          <div class="field-grp" style="flex: 1;">
-            <label class="field-label">Nama Penerima (jika bukan ahli)</label>
-            <input type="text" id="manual-payee-name" class="field-input" placeholder="Masukkan nama penerima...">
+          <div class="field-grp">
+            <label class="field-label" style="font-weight: 600; color: var(--primary); margin-bottom: 8px; display: block;">Nama Penerima (jika bukan ahli)</label>
+            <input type="text" id="manual-payee-name" class="field-input" placeholder="Masukkan nama penerima..." style="padding: 12px 16px; border: 1px solid rgba(29, 60, 150, 0.2); border-radius: 8px; background: white; transition: all 0.3s ease;">
           </div>
         </div>
         
-        <div class="field-grp">
-          <label class="field-label">Penerangan Pembayaran</label>
-          <input type="text" id="receipt-description" class="field-input" placeholder="Penerangan pembayaran...">
+        <div class="field-grp" style="margin-bottom: 20px;">
+          <label class="field-label" style="font-weight: 600; color: var(--primary); margin-bottom: 8px; display: block;">Penerangan Pembayaran</label>
+          <input type="text" id="receipt-description" class="field-input" placeholder="Penerangan pembayaran..." style="padding: 12px 16px; border: 1px solid rgba(29, 60, 150, 0.2); border-radius: 8px; background: white; transition: all 0.3s ease;">
         </div>
         
-        <div style="display: flex; gap: 12px; align-items: flex-end; margin-bottom: 16px;">
-          <div class="field-grp" style="flex: 0 0 140px;">
-            <label class="field-label">Jumlah (RM)</label>
-            <input type="number" id="receipt-amount" class="field-input" placeholder="0.00" step="0.01">
+        <div style="display: grid; grid-template-columns: 140px 1fr 1fr; gap: 16px; margin-bottom: 20px; align-items: end;">
+          <div class="field-grp">
+            <label class="field-label" style="font-weight: 600; color: var(--primary); margin-bottom: 8px; display: block;">Jumlah (RM)</label>
+            <input type="number" id="receipt-amount" class="field-input" placeholder="0.00" step="0.01" style="padding: 12px 16px; border: 1px solid rgba(29, 60, 150, 0.2); border-radius: 8px; background: white; font-weight: 600; font-size: 16px; transition: all 0.3s ease;">
           </div>
-          <div class="field-grp" style="flex: 1;">
-            <label class="field-label">Kaedah Pembayaran</label>
-            <div class="payment-method-checkboxes" style="display:flex; gap:16px; flex-wrap:wrap; margin-top:6px;">
-              <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-weight:normal;">
-                <input type="checkbox" id="receipt-pm-cash" class="receipt-pm-checkbox" data-method="cash">
+          <div class="field-grp">
+            <label class="field-label" style="font-weight: 600; color: var(--primary); margin-bottom: 8px; display: block;">Kaedah Pembayaran</label>
+            <div class="payment-method-checkboxes" style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px;">
+              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500; padding: 8px 16px; border: 1px solid rgba(29, 60, 150, 0.2); border-radius: 6px; background: white; transition: all 0.3s ease;">
+                <input type="checkbox" id="receipt-pm-cash" class="receipt-pm-checkbox" data-method="cash" style="accent-color: var(--primary);">
                 Tunai
               </label>
-              <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-weight:normal;">
-                <input type="checkbox" id="receipt-pm-online" class="receipt-pm-checkbox" data-method="online">
+              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500; padding: 8px 16px; border: 1px solid rgba(29, 60, 150, 0.2); border-radius: 6px; background: white; transition: all 0.3s ease;">
+                <input type="checkbox" id="receipt-pm-online" class="receipt-pm-checkbox" data-method="online" style="accent-color: var(--primary);">
                 Online
               </label>
-              <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-weight:normal;">
-                <input type="checkbox" id="receipt-pm-cheque" class="receipt-pm-checkbox" data-method="cheque">
+              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500; padding: 8px 16px; border: 1px solid rgba(29, 60, 150, 0.2); border-radius: 6px; background: white; transition: all 0.3s ease;">
+                <input type="checkbox" id="receipt-pm-cheque" class="receipt-pm-checkbox" data-method="cheque" style="accent-color: var(--primary);">
                 Cek
               </label>
             </div>
           </div>
-          <div class="field-grp" id="receipt-cheque-info-grp" style="flex: 1; display:none;">
-            <label class="field-label">No. Cek / Bank</label>
-            <input type="text" id="receipt-cheque-info" class="field-input" placeholder="123456 - MAYBANK">
+          <div class="field-grp" id="receipt-cheque-info-grp" style="display: none;">
+            <label class="field-label" style="font-weight: 600; color: var(--primary); margin-bottom: 8px; display: block;">No. Cek / Bank</label>
+            <input type="text" id="receipt-cheque-info" class="field-input" placeholder="123456 - MAYBANK" style="padding: 12px 16px; border: 1px solid rgba(29, 60, 150, 0.2); border-radius: 8px; background: white; transition: all 0.3s ease;">
           </div>
         </div>
         
-        <div style="display: flex; gap: 12px; margin-bottom: 16px;">
-          <div class="field-grp" style="flex: 0 0 auto;">
-            <label class="field-label">Tarikh Pembayaran</label>
-            <input type="date" id="receipt-payment-date" class="field-input">
-          </div>
+        <div class="field-grp" style="margin-bottom: 20px;">
+          <label class="field-label" style="font-weight: 600; color: var(--primary); margin-bottom: 8px; display: block;">Tarikh Pembayaran</label>
+          <input type="date" id="receipt-payment-date" class="field-input" style="padding: 12px 16px; border: 1px solid rgba(29, 60, 150, 0.2); border-radius: 8px; background: white; transition: all 0.3s ease;">
         </div>
         
-        <div id="ocr-status" class="alert" style="display:none;">
+        <div id="ocr-status" class="alert" style="display: none; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px;">
           <span id="ocr-status-text"></span>
         </div>
         
-        <div id="transaction-id-display" class="alert alert-ok" style="display:none;">
-          <strong>ID Transaksi:</strong> <span id="transaction-id-text"></span>
+        <div id="transaction-id-display" class="alert alert-ok" style="display: none; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3);">
+          <strong style="color: var(--success);">ID Transaksi:</strong> <span id="transaction-id-text" style="font-weight: 600;"></span>
         </div>
         
-        <button onclick="handleGenerateReceipt()" class="btn btn-primary">Jana Resit</button>
+        <button onclick="handleGenerateReceipt()" class="btn btn-primary btn-shine" style="width: 100%; padding: 14px 24px; font-size: 16px; font-weight: 700; border-radius: 8px; text-transform: uppercase; letter-spacing: 1px;">Jana Resit</button>
       </div>
     </div>
     
-    <div class="sec-card">
-      <div class="sec-head">
-        <h3>SEJARAH RESIT</h3>
+    <div class="sec-card premium-glass" style="background: linear-gradient(135deg, rgba(29, 60, 150, 0.05) 0%, rgba(29, 60, 150, 0.02) 100%); border: 1px solid rgba(29, 60, 150, 0.1); margin-top: 24px;">
+      <div class="sec-head" style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dk) 100%); padding: 20px 24px; border-radius: 12px 12px 0 0;">
+        <h3 style="color: white; margin: 0; font-size: 18px; font-weight: 700; letter-spacing: 0.5px;">SEJARAH RESIT</h3>
+        <p style="color: rgba(255, 255, 255, 0.8); margin: 6px 0 0 0; font-size: 13px; font-weight: 400;">Lihat dan uruskan semua resit yang telah dijana</p>
       </div>
-      <div class="sec-body">
-        <div style="display: flex; gap: 10px; align-items: flex-end; margin-bottom: 15px; flex-wrap: wrap;">
-          <div class="field-grp" style="flex: 0 0 auto;">
-            <label class="field-label">Bulan</label>
-            <select id="report-month" class="field-input" style="min-width: 120px;">
+      <div class="sec-body" style="padding: 24px;">
+        <div style="display: flex; gap: 12px; align-items: flex-end; margin-bottom: 20px; flex-wrap: wrap; background: rgba(240, 248, 255, 0.5); padding: 16px; border-radius: 8px; border: 1px solid rgba(29, 60, 150, 0.1);">
+          <div class="field-grp" style="flex: 0 0 auto; margin-bottom: 0;">
+            <label class="field-label" style="font-weight: 600; color: var(--primary); margin-bottom: 6px; display: block; font-size: 13px;">Bulan</label>
+            <select id="report-month" class="field-input" style="min-width: 140px; padding: 10px 14px; border: 1px solid rgba(29, 60, 150, 0.2); border-radius: 6px; background: white; font-weight: 500;">
               <option value="">Semua Bulan</option>
               <option value="1">Januari</option>
               <option value="2">Februari</option>
@@ -435,31 +437,31 @@ function showReceiptsPage() {
               <option value="12">Disember</option>
             </select>
           </div>
-          <div class="field-grp" style="flex: 0 0 auto;">
-            <label class="field-label">Tahun</label>
-            <select id="report-year" class="field-input" style="min-width: 100px;">
+          <div class="field-grp" style="flex: 0 0 auto; margin-bottom: 0;">
+            <label class="field-label" style="font-weight: 600; color: var(--primary); margin-bottom: 6px; display: block; font-size: 13px;">Tahun</label>
+            <select id="report-year" class="field-input" style="min-width: 120px; padding: 10px 14px; border: 1px solid rgba(29, 60, 150, 0.2); border-radius: 6px; background: white; font-weight: 500;">
               <option value="">Semua Tahun</option>
             </select>
           </div>
-          <button onclick="generateReceiptReport()" class="btn btn-primary" style="flex: 0 0 auto;">Jana Laporan</button>
+          <button onclick="generateReceiptReport()" class="btn btn-primary btn-shine" style="flex: 0 0 auto; padding: 10px 20px; font-weight: 600; border-radius: 6px;">Jana Laporan</button>
         </div>
-        <div class="table-wrap">
-          <table class="table">
-            <thead>
+        <div class="table-wrap" style="border-radius: 8px; overflow: hidden; border: 1px solid rgba(29, 60, 150, 0.1);">
+          <table class="table" style="margin: 0;">
+            <thead style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dk) 100%);">
               <tr>
-                <th>Nombor Resit</th>
-                <th>Tarikh</th>
-                <th>Ahli</th>
-                <th>Jumlah</th>
-                <th>Kaedah</th>
-                <th>ID Transaksi</th>
-                <th>Bukti Pembayaran</th>
-                <th>Tindakan</th>
+                <th style="color: white; font-weight: 600; padding: 14px 16px; font-size: 13px; letter-spacing: 0.5px;">Nombor Resit</th>
+                <th style="color: white; font-weight: 600; padding: 14px 16px; font-size: 13px; letter-spacing: 0.5px;">Tarikh</th>
+                <th style="color: white; font-weight: 600; padding: 14px 16px; font-size: 13px; letter-spacing: 0.5px;">Ahli</th>
+                <th style="color: white; font-weight: 600; padding: 14px 16px; font-size: 13px; letter-spacing: 0.5px;">Jumlah</th>
+                <th style="color: white; font-weight: 600; padding: 14px 16px; font-size: 13px; letter-spacing: 0.5px;">Kaedah</th>
+                <th style="color: white; font-weight: 600; padding: 14px 16px; font-size: 13px; letter-spacing: 0.5px;">ID Transaksi</th>
+                <th style="color: white; font-weight: 600; padding: 14px 16px; font-size: 13px; letter-spacing: 0.5px;">Bukti Pembayaran</th>
+                <th style="color: white; font-weight: 600; padding: 14px 16px; font-size: 13px; letter-spacing: 0.5px;">Tindakan</th>
               </tr>
             </thead>
             <tbody id="receipts-table-body">
               <tr>
-                <td colspan="8" style="text-align: center; color: var(--muted);">Memuatkan resit...</td>
+                <td colspan="8" style="text-align: center; color: var(--muted); padding: 40px 16px; font-size: 14px;">Memuatkan resit...</td>
               </tr>
             </tbody>
           </table>
@@ -504,29 +506,30 @@ function showVouchersPage() {
   const container = document.getElementById('vouchers-list');
   if (!container) return;
   container.innerHTML = `
-    <div class="sec-card">
-      <div class="sec-head">
-        <h3>CIPTA BAUCAR PEMBAYARAN</h3>
+    <div class="sec-card premium-glass" style="background: linear-gradient(135deg, rgba(29, 60, 150, 0.05) 0%, rgba(29, 60, 150, 0.02) 100%); border: 1px solid rgba(29, 60, 150, 0.1);">
+      <div class="sec-head" style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dk) 100%); padding: 20px 24px; border-radius: 12px 12px 0 0;">
+        <h3 style="color: white; margin: 0; font-size: 18px; font-weight: 700; letter-spacing: 0.5px;">CIPTA BAUCAR PEMBAYARAN</h3>
+        <p style="color: rgba(255, 255, 255, 0.8); margin: 6px 0 0 0; font-size: 13px; font-weight: 400;">Isi borang di bawah untuk mencipta baucar pembayaran baru</p>
       </div>
-      <div class="sec-body">
-        <div class="field-grp">
-          <label class="field-label">Dibayar Kepada</label>
-          <input type="text" id="voucher-payable-to" class="field-input" placeholder="Nama syarikat atau individu">
+      <div class="sec-body" style="padding: 24px;">
+        <div class="field-grp" style="margin-bottom: 20px;">
+          <label class="field-label" style="font-weight: 600; color: var(--primary); margin-bottom: 8px; display: block;">Dibayar Kepada</label>
+          <input type="text" id="voucher-payable-to" class="field-input" placeholder="Nama syarikat atau individu" style="padding: 12px 16px; border: 1px solid rgba(29, 60, 150, 0.2); border-radius: 8px; background: white; transition: all 0.3s ease;">
         </div>
         
-        <div class="field-grp">
-          <label class="field-label">Tujuan Pembayaran</label>
-          <textarea id="voucher-purpose" class="field-input" rows="3" placeholder="Penerangan pembayaran"></textarea>
+        <div class="field-grp" style="margin-bottom: 20px;">
+          <label class="field-label" style="font-weight: 600; color: var(--primary); margin-bottom: 8px; display: block;">Tujuan Pembayaran</label>
+          <textarea id="voucher-purpose" class="field-input" rows="3" placeholder="Penerangan pembayaran" style="padding: 12px 16px; border: 1px solid rgba(29, 60, 150, 0.2); border-radius: 8px; background: white; transition: all 0.3s ease; resize: vertical;"></textarea>
         </div>
         
-        <div class="field-grp">
-          <label class="field-label">Jumlah (RM)</label>
-          <input type="number" id="voucher-amount" class="field-input" placeholder="0.00" step="0.01">
+        <div class="field-grp" style="margin-bottom: 20px;">
+          <label class="field-label" style="font-weight: 600; color: var(--primary); margin-bottom: 8px; display: block;">Jumlah (RM)</label>
+          <input type="number" id="voucher-amount" class="field-input" placeholder="0.00" step="0.01" style="padding: 12px 16px; border: 1px solid rgba(29, 60, 150, 0.2); border-radius: 8px; background: white; font-weight: 600; font-size: 16px; transition: all 0.3s ease;">
         </div>
         
-        <div class="field-grp">
-          <label class="field-label">Kaedah Pembayaran</label>
-          <select id="voucher-payment-method" class="field-input">
+        <div class="field-grp" style="margin-bottom: 20px;">
+          <label class="field-label" style="font-weight: 600; color: var(--primary); margin-bottom: 8px; display: block;">Kaedah Pembayaran</label>
+          <select id="voucher-payment-method" class="field-input" style="padding: 12px 16px; border: 1px solid rgba(29, 60, 150, 0.2); border-radius: 8px; background: white; transition: all 0.3s ease;">
             <option value="cash">Tunai</option>
             <option value="cheque">Cek</option>
             <option value="online">Pindahan Dalam Talian</option>
@@ -534,32 +537,33 @@ function showVouchersPage() {
           </select>
         </div>
         
-        <button onclick="createPaymentVoucher()" class="btn btn-primary">Cipta Baucar</button>
+        <button onclick="createPaymentVoucher()" class="btn btn-primary btn-shine" style="width: 100%; padding: 14px 24px; font-size: 16px; font-weight: 700; border-radius: 8px; text-transform: uppercase; letter-spacing: 1px;">Cipta Baucar</button>
       </div>
     </div>
     
-    <div class="sec-card">
-      <div class="sec-head">
-        <h3>SENARAI BAUCAR PEMBAYARAN</h3>
+    <div class="sec-card premium-glass" style="background: linear-gradient(135deg, rgba(29, 60, 150, 0.05) 0%, rgba(29, 60, 150, 0.02) 100%); border: 1px solid rgba(29, 60, 150, 0.1); margin-top: 24px;">
+      <div class="sec-head" style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dk) 100%); padding: 20px 24px; border-radius: 12px 12px 0 0;">
+        <h3 style="color: white; margin: 0; font-size: 18px; font-weight: 700; letter-spacing: 0.5px;">SENARAI BAUCAR PEMBAYARAN</h3>
+        <p style="color: rgba(255, 255, 255, 0.8); margin: 6px 0 0 0; font-size: 13px; font-weight: 400;">Lihat dan uruskan semua baucar pembayaran</p>
       </div>
-      <div class="sec-body">
-        <div class="table-wrap">
-          <table class="table">
-            <thead>
+      <div class="sec-body" style="padding: 24px;">
+        <div class="table-wrap" style="border-radius: 8px; overflow: hidden; border: 1px solid rgba(29, 60, 150, 0.1);">
+          <table class="table" style="margin: 0;">
+            <thead style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dk) 100%);">
               <tr>
-                <th>Nombor Baucar</th>
-                <th>Tarikh</th>
-                <th>Dibayar Kepada</th>
-                <th>Tujuan</th>
-                <th>Jumlah</th>
-                <th>Kaedah</th>
-                <th>Status</th>
-                <th>Tindakan</th>
+                <th style="color: white; font-weight: 600; padding: 14px 16px; font-size: 13px; letter-spacing: 0.5px;">Nombor Baucar</th>
+                <th style="color: white; font-weight: 600; padding: 14px 16px; font-size: 13px; letter-spacing: 0.5px;">Tarikh</th>
+                <th style="color: white; font-weight: 600; padding: 14px 16px; font-size: 13px; letter-spacing: 0.5px;">Dibayar Kepada</th>
+                <th style="color: white; font-weight: 600; padding: 14px 16px; font-size: 13px; letter-spacing: 0.5px;">Tujuan</th>
+                <th style="color: white; font-weight: 600; padding: 14px 16px; font-size: 13px; letter-spacing: 0.5px;">Jumlah</th>
+                <th style="color: white; font-weight: 600; padding: 14px 16px; font-size: 13px; letter-spacing: 0.5px;">Kaedah</th>
+                <th style="color: white; font-weight: 600; padding: 14px 16px; font-size: 13px; letter-spacing: 0.5px;">Status</th>
+                <th style="color: white; font-weight: 600; padding: 14px 16px; font-size: 13px; letter-spacing: 0.5px;">Tindakan</th>
               </tr>
             </thead>
             <tbody id="vouchers-table-body">
               <tr>
-                <td colspan="8" style="text-align: center; color: var(--muted);">Memuatkan baucar...</td>
+                <td colspan="8" style="text-align: center; color: var(--muted); padding: 40px 16px; font-size: 14px;">Memuatkan baucar...</td>
               </tr>
             </tbody>
           </table>
@@ -1504,14 +1508,14 @@ function addReceiptPVNavigation() {
   // Create nav items once (guard against duplicates)
   if (!document.getElementById('receipt-nav-item')) {
     const navItems = `
-      <div class="nav-item" onclick="showPage('receipts')" id="receipt-nav-item" style="display:none;">
-        <span class="nav-text">RESIT</span>
+      <div class="nav-item" onclick="showPage('receipts')" id="receipt-nav-item" style="display:none; background: linear-gradient(135deg, rgba(29, 60, 150, 0.1) 0%, rgba(29, 60, 150, 0.05) 100%); border: 1px solid rgba(29, 60, 150, 0.2); border-radius: 8px; padding: 12px 16px; margin-bottom: 8px; cursor: pointer; transition: all 0.3s ease;">
+        <span class="nav-text" style="font-weight: 600; color: var(--primary); font-size: 13px; letter-spacing: 0.5px;">RESIT</span>
       </div>
-      <div class="nav-item" onclick="showPage('vouchers')" id="voucher-nav-item" style="display:none;">
-        <span class="nav-text">BAUCAR</span>
+      <div class="nav-item" onclick="showPage('vouchers')" id="voucher-nav-item" style="display:none; background: linear-gradient(135deg, rgba(29, 60, 150, 0.1) 0%, rgba(29, 60, 150, 0.05) 100%); border: 1px solid rgba(29, 60, 150, 0.2); border-radius: 8px; padding: 12px 16px; margin-bottom: 8px; cursor: pointer; transition: all 0.3s ease;">
+        <span class="nav-text" style="font-weight: 600; color: var(--primary); font-size: 13px; letter-spacing: 0.5px;">BAUCAR</span>
       </div>
-      <div class="nav-item" onclick="showPage('approvals')" id="approval-nav-item" style="display:none;">
-        <span class="nav-text">KELULUSAN</span>
+      <div class="nav-item" onclick="showPage('approvals')" id="approval-nav-item" style="display:none; background: linear-gradient(135deg, rgba(29, 60, 150, 0.1) 0%, rgba(29, 60, 150, 0.05) 100%); border: 1px solid rgba(29, 60, 150, 0.2); border-radius: 8px; padding: 12px 16px; margin-bottom: 8px; cursor: pointer; transition: all 0.3s ease;">
+        <span class="nav-text" style="font-weight: 600; color: var(--primary); font-size: 13px; letter-spacing: 0.5px;">KELULUSAN</span>
       </div>
     `;
     
@@ -1522,6 +1526,28 @@ function addReceiptPVNavigation() {
     } else {
       navContainer.insertAdjacentHTML('beforeend', navItems);
     }
+    
+    // Add hover effects after insertion
+    setTimeout(() => {
+      const receiptNav = document.getElementById('receipt-nav-item');
+      const voucherNav = document.getElementById('voucher-nav-item');
+      const approvalNav = document.getElementById('approval-nav-item');
+      
+      [receiptNav, voucherNav, approvalNav].forEach(nav => {
+        if (nav) {
+          nav.addEventListener('mouseenter', () => {
+            nav.style.background = 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dk) 100%)';
+            nav.style.borderColor = 'var(--primary)';
+            nav.querySelector('.nav-text').style.color = 'white';
+          });
+          nav.addEventListener('mouseleave', () => {
+            nav.style.background = 'linear-gradient(135deg, rgba(29, 60, 150, 0.1) 0%, rgba(29, 60, 150, 0.05) 100%)';
+            nav.style.borderColor = 'rgba(29, 60, 150, 0.2)';
+            nav.querySelector('.nav-text').style.color = 'var(--primary)';
+          });
+        }
+      });
+    }, 100);
   }
   
   // Always refresh visibility based on the current user's role
