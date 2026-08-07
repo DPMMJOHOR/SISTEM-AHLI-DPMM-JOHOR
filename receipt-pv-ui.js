@@ -44,13 +44,13 @@ function showReceiptActions(receiptData) {
   actionsDiv.innerHTML = `
     <h4 style="margin: 0 0 16px 0; color: #1a365d; font-weight: 700; font-size: 15px; letter-spacing: 0.3px;">Tindakan Resit</h4>
     <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-      <button id="download-receipt-btn" class="btn btn-primary btn-shine" style="flex: 1; min-width: 150px; padding: 12px 20px; font-weight: 600; border-radius: 8px; transition: all 0.2s;">
+      <button id="download-receipt-btn" class="btn-pill" style="flex: 1; min-width: 150px;">
         Muat Turun PDF
       </button>
-      <button id="print-receipt-template-btn" class="btn btn-outline" style="flex: 1; min-width: 150px; padding: 12px 20px; font-weight: 600; border-radius: 8px; transition: all 0.2s;">
+      <button id="print-receipt-template-btn" class="btn-pill" style="flex: 1; min-width: 150px;">
         Cetak Resit
       </button>
-      <button id="whatsapp-receipt-btn" class="btn btn-success" style="flex: 1; min-width: 150px; background: #25D366; padding: 12px 20px; font-weight: 600; border-radius: 8px; transition: all 0.2s; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);">
+      <button id="whatsapp-receipt-btn" class="btn-pill" style="flex: 1; min-width: 150px; color: #25D366; border-color: #25D366; box-shadow: 0px 6px #128C7E;">
         Hantar WhatsApp
       </button>
     </div>
@@ -314,9 +314,9 @@ async function showReceiptDetailModal(receipt, slip) {
   `;
   document.getElementById('receipt-detail-fields').innerHTML = fieldsHtml;
   
-  let actionsHtml = `<button class="btn btn-outline" id="receipt-detail-print-btn">Lihat/Cetak Resit</button>`;
+  let actionsHtml = `<button class="btn-pill" id="receipt-detail-print-btn">Lihat/Cetak Resit</button>`;
   if (slip && slip.slip_image_url) {
-    actionsHtml += `<button class="btn btn-primary" id="receipt-detail-view-proof-btn">Lihat Bukti Pembayaran</button>`;
+    actionsHtml += `<button class="btn-pill" id="receipt-detail-view-proof-btn">Lihat Bukti Pembayaran</button>`;
   }
   document.getElementById('receipt-detail-actions').innerHTML = actionsHtml;
   
@@ -403,7 +403,7 @@ function showReceiptsPage() {
         </div>
         
         <div style="display: flex; justify-content: flex-end;">
-          <button onclick="handleGenerateReceipt()" class="btn btn-primary btn-shine" style="padding: 10px 24px; font-size: 13px; font-weight: 600; border-radius: var(--radius-md); letter-spacing: 0.3px; background: var(--primary); color: var(--primary-foreground); border: none; cursor: pointer; transition: all 0.2s ease;">Jana Resit</button>
+          <button onclick="handleGenerateReceipt()" class="btn-pill">Jana Resit</button>
         </div>
       </div>
     </div>
@@ -443,7 +443,7 @@ function showReceiptsPage() {
               <option value="">Semua Tahun</option>
             </select>
           </div>
-          <button onclick="generateReceiptReport()" class="btn btn-primary btn-shine" style="flex: 0 0 auto; padding: 6px 12px; font-weight: 600; border-radius: var(--radius-md); font-size: 12px;">Jana Laporan</button>
+          <button onclick="generateReceiptReport()" class="btn-pill" style="flex: 0 0 auto; padding: 0.4em 1.5em; font-size: 12px;">Jana Laporan</button>
         </div>
         <div class="table-wrap" style="border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--border);">
           <table class="table" style="margin: 0;">
@@ -541,7 +541,7 @@ function showVouchersPage() {
           </select>
         </div>
         
-        <button onclick="createPaymentVoucher()" class="btn btn-primary btn-shine" style="width: 100%; padding: 10px 16px; font-size: 13px; font-weight: 600; border-radius: var(--radius-md); letter-spacing: 0.3px;">Cipta Baucar</button>
+        <button onclick="createPaymentVoucher()" class="btn-pill" style="width: 100%;">Cipta Baucar</button>
       </div>
     </div>
     
