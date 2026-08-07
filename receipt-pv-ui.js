@@ -348,19 +348,40 @@ function showReceiptsPage() {
           </div>
           <div class="field-grp">
             <label class="field-label" style="font-weight: 500; color: var(--foreground); margin-bottom: 6px; display: block; font-size: 13px;">Kaedah Pembayaran</label>
-            <div class="payment-method-checkboxes" style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px;">
-              <label style="display: flex; align-items: center; gap: 4px; cursor: pointer; font-weight: 500; padding: 4px 8px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--background); transition: all 0.2s ease; font-size: 11px;">
-                <input type="checkbox" id="receipt-pm-cash" class="receipt-pm-checkbox" data-method="cash" style="accent-color: var(--primary);">
-                Tunai
-              </label>
-              <label style="display: flex; align-items: center; gap: 4px; cursor: pointer; font-weight: 500; padding: 4px 8px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--background); transition: all 0.2s ease; font-size: 11px;">
-                <input type="checkbox" id="receipt-pm-online" class="receipt-pm-checkbox" data-method="online" style="accent-color: var(--primary);">
-                Online
-              </label>
-              <label style="display: flex; align-items: center; gap: 4px; cursor: pointer; font-weight: 500; padding: 4px 8px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--background); transition: all 0.2s ease; font-size: 11px;">
-                <input type="checkbox" id="receipt-pm-cheque" class="receipt-pm-checkbox" data-method="cheque" style="accent-color: var(--primary);">
-                Cek
-              </label>
+            <div class="payment-method-checkboxes" style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 6px;">
+              <div class="checkbox-wrapper">
+                <input type="checkbox" id="receipt-pm-cash" class="inp-cbx receipt-pm-checkbox" data-method="cash">
+                <label class="cbx" for="receipt-pm-cash">
+                  <span>
+                    <svg width="12px" height="10px" viewBox="0 0 12 10">
+                      <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
+                    </svg>
+                  </span>
+                  <span style="font-size: 12px; font-weight: 500;">Tunai</span>
+                </label>
+              </div>
+              <div class="checkbox-wrapper">
+                <input type="checkbox" id="receipt-pm-online" class="inp-cbx receipt-pm-checkbox" data-method="online">
+                <label class="cbx" for="receipt-pm-online">
+                  <span>
+                    <svg width="12px" height="10px" viewBox="0 0 12 10">
+                      <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
+                    </svg>
+                  </span>
+                  <span style="font-size: 12px; font-weight: 500;">Online</span>
+                </label>
+              </div>
+              <div class="checkbox-wrapper">
+                <input type="checkbox" id="receipt-pm-cheque" class="inp-cbx receipt-pm-checkbox" data-method="cheque">
+                <label class="cbx" for="receipt-pm-cheque">
+                  <span>
+                    <svg width="12px" height="10px" viewBox="0 0 12 10">
+                      <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
+                    </svg>
+                  </span>
+                  <span style="font-size: 12px; font-weight: 500;">Cek</span>
+                </label>
+              </div>
             </div>
           </div>
           <div class="field-grp">
