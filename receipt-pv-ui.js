@@ -1537,13 +1537,13 @@ function addReceiptPVNavigation() {
   if (!document.getElementById('receipt-nav-item')) {
     const navItems = `
       <div class="nav-item" onclick="showPage('receipts')" id="receipt-nav-item" style="display:none; padding: 8px 12px; margin-bottom: 4px; cursor: pointer; border-radius: var(--radius-sm); transition: all 0.2s ease;">
-        <span class="nav-text" style="font-weight: 500; color: var(--muted-foreground); font-size: 12px; letter-spacing: 0.2px;">RESIT</span>
+        <span class="nav-text" style="font-weight: 800; color: var(--muted-foreground); font-size: 12px; letter-spacing: 1px; text-transform: uppercase;">RESIT</span>
       </div>
       <div class="nav-item" onclick="showPage('vouchers')" id="voucher-nav-item" style="display:none; padding: 8px 12px; margin-bottom: 4px; cursor: pointer; border-radius: var(--radius-sm); transition: all 0.2s ease;">
-        <span class="nav-text" style="font-weight: 500; color: var(--muted-foreground); font-size: 12px; letter-spacing: 0.2px;">BAUCAR</span>
+        <span class="nav-text" style="font-weight: 800; color: var(--muted-foreground); font-size: 12px; letter-spacing: 1px; text-transform: uppercase;">BAUCAR</span>
       </div>
       <div class="nav-item" onclick="showPage('approvals')" id="approval-nav-item" style="display:none; padding: 8px 12px; margin-bottom: 4px; cursor: pointer; border-radius: var(--radius-sm); transition: all 0.2s ease;">
-        <span class="nav-text" style="font-weight: 500; color: var(--muted-foreground); font-size: 12px; letter-spacing: 0.2px;">KELULUSAN</span>
+        <span class="nav-text" style="font-weight: 800; color: var(--muted-foreground); font-size: 12px; letter-spacing: 1px; text-transform: uppercase;">KELULUSAN</span>
       </div>
     `;
     
