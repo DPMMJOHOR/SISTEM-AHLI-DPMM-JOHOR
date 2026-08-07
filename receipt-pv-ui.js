@@ -337,62 +337,62 @@ function showReceiptsPage() {
   container.innerHTML = `
     <div class="sec-card" style="border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--card); box-shadow: var(--shadow-sm);">
       <div class="sec-body" style="padding: 16px;">
-        <div style="display: grid; grid-template-columns: 1fr 120px 1fr 1fr; gap: 12px; margin-bottom: 16px; align-items: end;">
+        <div style="display: grid; grid-template-columns: 1fr 140px auto auto; gap: 12px; margin-bottom: 16px; align-items: end;">
           <div class="field-grp input-wrapper">
             <input type="file" id="receipt-payment-slip" class="field-input floating-input" accept="image/*,application/pdf" placeholder=" ">
-            <label class="floating-label">Slip Pembayaran / Bukti Pembayaran (pilihan)</label>
+            <label class="floating-label">Slip / Bukti Pembayaran</label>
           </div>
           <div class="field-grp input-wrapper">
-            <input type="number" id="receipt-amount" class="field-input floating-input" placeholder=" " step="0.01">
+            <input type="number" id="receipt-amount" class="field-input floating-input" placeholder=" " step="0.01" style="font-family: var(--mono);">
             <label class="floating-label">Jumlah (RM)</label>
           </div>
-          <div class="field-grp">
-            <label class="field-label" style="font-weight: 500; color: var(--foreground); margin-bottom: 6px; display: block; font-size: 13px;">Kaedah Pembayaran</label>
-            <div class="payment-method-checkboxes" style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 6px;">
-              <div class="checkbox-wrapper">
-                <input type="checkbox" id="receipt-pm-cash" class="inp-cbx receipt-pm-checkbox" data-method="cash">
-                <label class="cbx" for="receipt-pm-cash">
-                  <span>
-                    <svg width="12px" height="10px" viewBox="0 0 12 10">
-                      <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
-                    </svg>
-                  </span>
-                  <span style="font-size: 12px; font-weight: 500;">Tunai</span>
-                </label>
-              </div>
-              <div class="checkbox-wrapper">
-                <input type="checkbox" id="receipt-pm-online" class="inp-cbx receipt-pm-checkbox" data-method="online">
-                <label class="cbx" for="receipt-pm-online">
-                  <span>
-                    <svg width="12px" height="10px" viewBox="0 0 12 10">
-                      <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
-                    </svg>
-                  </span>
-                  <span style="font-size: 12px; font-weight: 500;">Online</span>
-                </label>
-              </div>
-              <div class="checkbox-wrapper">
-                <input type="checkbox" id="receipt-pm-cheque" class="inp-cbx receipt-pm-checkbox" data-method="cheque">
-                <label class="cbx" for="receipt-pm-cheque">
-                  <span>
-                    <svg width="12px" height="10px" viewBox="0 0 12 10">
-                      <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
-                    </svg>
-                  </span>
-                  <span style="font-size: 12px; font-weight: 500;">Cek</span>
-                </label>
-              </div>
-            </div>
+          <div class="checkbox-wrapper" style="display: flex; align-items: center;">
+            <input type="checkbox" id="receipt-pm-cash" class="inp-cbx receipt-pm-checkbox" data-method="cash">
+            <label class="cbx" for="receipt-pm-cash">
+              <span>
+                <svg width="12px" height="10px" viewBox="0 0 12 10">
+                  <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
+                </svg>
+              </span>
+              <span style="font-size: 12px; font-weight: 500;">Tunai</span>
+            </label>
           </div>
-          <div class="field-grp input-wrapper">
-            <input type="date" id="receipt-payment-date" class="field-input floating-input" placeholder=" ">
-            <label class="floating-label">Tarikh Pembayaran</label>
+          <div class="checkbox-wrapper" style="display: flex; align-items: center;">
+            <input type="checkbox" id="receipt-pm-online" class="inp-cbx receipt-pm-checkbox" data-method="online">
+            <label class="cbx" for="receipt-pm-online">
+              <span>
+                <svg width="12px" height="10px" viewBox="0 0 12 10">
+                  <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
+                </svg>
+              </span>
+              <span style="font-size: 12px; font-weight: 500;">Online</span>
+            </label>
           </div>
         </div>
         
-        <div class="field-grp input-wrapper" id="receipt-cheque-info-grp" style="display: none; margin-bottom: 16px;">
-          <input type="text" id="receipt-cheque-info" class="field-input floating-input" placeholder=" ">
-          <label class="floating-label">No. Cek / Bank</label>
+        <div style="display: grid; grid-template-columns: auto auto 1fr auto; gap: 12px; margin-bottom: 16px; align-items: end;">
+          <div class="field-grp" style="display: flex; align-items: center; padding-bottom: 12px;">
+            <label class="field-label" style="font-weight: 500; color: var(--foreground); margin: 0; font-size: 13px;">Kaedah Pembayaran</label>
+          </div>
+          <div class="checkbox-wrapper" style="display: flex; align-items: center;">
+            <input type="checkbox" id="receipt-pm-cheque" class="inp-cbx receipt-pm-checkbox" data-method="cheque">
+            <label class="cbx" for="receipt-pm-cheque">
+              <span>
+                <svg width="12px" height="10px" viewBox="0 0 12 10">
+                  <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
+                </svg>
+              </span>
+              <span style="font-size: 12px; font-weight: 500;">Cek</span>
+            </label>
+          </div>
+          <div class="field-grp input-wrapper" id="receipt-cheque-info-grp" style="display: none;">
+            <input type="text" id="receipt-cheque-info" class="field-input floating-input" placeholder=" ">
+            <label class="floating-label">No. Cek / Bank</label>
+          </div>
+          <div class="field-grp input-wrapper">
+            <input type="date" id="receipt-payment-date" class="field-input floating-input" placeholder=" " style="padding: 8px 12px;">
+            <label class="floating-label">Tarikh Pembayaran</label>
+          </div>
         </div>
         
         <small style="color: var(--muted-foreground); font-size: 11px; display: block; margin-bottom: 16px;">Muat naik imej atau PDF slip pembayaran. Fail ini akan disimpan sebagai bukti pembayaran dan diproses dengan OCR.</small>
@@ -992,7 +992,8 @@ async function loadPendingApprovals() {
 async function handleGenerateReceipt() {
   const memberSelect = document.getElementById('receipt-member-select');
   const memberId = memberSelect.value;
-  const amount = document.getElementById('receipt-amount').value;
+  const amountInput = document.getElementById('receipt-amount');
+  const amount = parseFloat(amountInput.value).toFixed(2);
   const paymentMethod = getSelectedReceiptPaymentMethod();
   const paymentDate = document.getElementById('receipt-payment-date').value;
   const slipFile = document.getElementById('receipt-payment-slip').files[0];
