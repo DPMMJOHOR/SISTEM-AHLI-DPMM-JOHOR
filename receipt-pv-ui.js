@@ -336,6 +336,14 @@ function showReceiptsPage() {
   if (!container) return;
   container.innerHTML = `
     <div class="sec-card" style="border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--card); box-shadow: var(--shadow-sm);">
+      <div class="sec-head" style="padding: 16px; border-bottom: 1px solid var(--border); background: var(--muted)/30;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <div>
+            <h3 style="color: var(--foreground); margin: 0; font-size: 16px; font-weight: 600; letter-spacing: 0.3px;">JANA RESIT BAYARAN</h3>
+            <p style="color: var(--muted-foreground); margin: 2px 0 0 0; font-size: 12px; font-weight: 400;">Isi borang di bawah untuk menjana resit pembayaran baru</p>
+          </div>
+        </div>
+      </div>
       <div class="sec-body" style="padding: 16px;">
         <div style="display: grid; grid-template-columns: 1fr 140px auto auto; gap: 12px; margin-bottom: 16px; align-items: end;">
           <div class="field-grp input-wrapper">
@@ -535,19 +543,20 @@ function showVouchersPage() {
         </div>
       </div>
       <div class="sec-body" style="padding: 16px;">
-        <div class="field-grp input-wrapper" style="margin-bottom: 16px;">
-          <input type="text" id="voucher-payable-to" class="field-input floating-input" placeholder=" ">
-          <label class="floating-label">Dibayar Kepada</label>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+          <div class="field-grp input-wrapper">
+            <input type="text" id="voucher-payable-to" class="field-input floating-input" placeholder=" ">
+            <label class="floating-label">Dibayar Kepada</label>
+          </div>
+          <div class="field-grp input-wrapper">
+            <input type="number" id="voucher-amount" class="field-input floating-input" placeholder=" " step="0.01" style="font-family: var(--mono);">
+            <label class="floating-label">Jumlah (RM)</label>
+          </div>
         </div>
         
         <div class="field-grp input-wrapper" style="margin-bottom: 16px;">
           <textarea id="voucher-purpose" class="field-input floating-input" rows="3" placeholder=" "></textarea>
           <label class="floating-label">Tujuan Pembayaran</label>
-        </div>
-        
-        <div class="field-grp input-wrapper" style="margin-bottom: 16px;">
-          <input type="number" id="voucher-amount" class="field-input floating-input" placeholder=" " step="0.01">
-          <label class="floating-label">Jumlah (RM)</label>
         </div>
         
         <div class="field-grp input-wrapper" style="margin-bottom: 16px;">
@@ -561,7 +570,9 @@ function showVouchersPage() {
           <label class="floating-label">Kaedah Pembayaran</label>
         </div>
         
-        <button onclick="createPaymentVoucher()" class="btn-pill" style="width: 100%;">Cipta Baucar</button>
+        <div style="display: flex; justify-content: flex-end;">
+          <button onclick="createPaymentVoucher()" class="btn-pill">Cipta Baucar</button>
+        </div>
       </div>
     </div>
     
@@ -608,27 +619,32 @@ function showApprovalsPage() {
   const container = document.getElementById('approvals-list');
   if (!container) return;
   container.innerHTML = `
-    <div class="sec-card">
-      <div class="sec-head">
-        <h3>KELULUSAN TERTUNDA</h3>
+    <div class="sec-card" style="border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--card); box-shadow: var(--shadow-sm);">
+      <div class="sec-head" style="padding: 16px; border-bottom: 1px solid var(--border); background: var(--muted)/30;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <div>
+            <h3 style="color: var(--foreground); margin: 0; font-size: 16px; font-weight: 600; letter-spacing: 0.3px;">KELULUSAN TERTUNDA</h3>
+            <p style="color: var(--muted-foreground); margin: 2px 0 0 0; font-size: 12px; font-weight: 400;">Semak dan luluskan baucar pembayaran yang menunggu kelulusan</p>
+          </div>
+        </div>
       </div>
-      <div class="sec-body">
-        <div class="table-wrap">
-          <table class="table">
-            <thead>
+      <div class="sec-body" style="padding: 16px;">
+        <div class="table-wrap" style="border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--border);">
+          <table class="table" style="margin: 0;">
+            <thead style="background: var(--muted)/50;">
               <tr>
-                <th>Nombor Baucar</th>
-                <th>Tarikh</th>
-                <th>Dibayar Kepada</th>
-                <th>Tujuan</th>
-                <th>Jumlah</th>
-                <th>Disediakan Oleh</th>
-                <th>Tindakan</th>
+                <th style="color: var(--foreground); font-weight: 600; padding: 10px 12px; font-size: 12px; letter-spacing: 0.3px;">Nombor Baucar</th>
+                <th style="color: var(--foreground); font-weight: 600; padding: 10px 12px; font-size: 12px; letter-spacing: 0.3px;">Tarikh</th>
+                <th style="color: var(--foreground); font-weight: 600; padding: 10px 12px; font-size: 12px; letter-spacing: 0.3px;">Dibayar Kepada</th>
+                <th style="color: var(--foreground); font-weight: 600; padding: 10px 12px; font-size: 12px; letter-spacing: 0.3px;">Tujuan</th>
+                <th style="color: var(--foreground); font-weight: 600; padding: 10px 12px; font-size: 12px; letter-spacing: 0.3px;">Jumlah</th>
+                <th style="color: var(--foreground); font-weight: 600; padding: 10px 12px; font-size: 12px; letter-spacing: 0.3px;">Disediakan Oleh</th>
+                <th style="color: var(--foreground); font-weight: 600; padding: 10px 12px; font-size: 12px; letter-spacing: 0.3px;">Tindakan</th>
               </tr>
             </thead>
             <tbody id="approvals-table-body">
               <tr>
-                <td colspan="7" style="text-align: center; color: var(--muted);">Memuatkan kelulusan...</td>
+                <td colspan="7" style="text-align: center; color: var(--muted-foreground); padding: 32px 12px; font-size: 12px;">Memuatkan kelulusan...</td>
               </tr>
             </tbody>
           </table>
