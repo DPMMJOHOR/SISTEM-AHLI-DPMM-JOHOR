@@ -338,13 +338,13 @@ function showReceiptsPage() {
     <div class="sec-card" style="border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--card); box-shadow: var(--shadow-sm);">
       <div class="sec-body" style="padding: 16px;">
         <div style="display: grid; grid-template-columns: 1fr 120px 1fr 1fr; gap: 12px; margin-bottom: 16px; align-items: end;">
-          <div class="field-grp">
-            <label class="field-label" style="font-weight: 500; color: var(--foreground); margin-bottom: 6px; display: block; font-size: 13px;">Slip Pembayaran / Bukti Pembayaran (pilihan)</label>
-            <input type="file" id="receipt-payment-slip" class="field-input" accept="image/*,application/pdf" style="padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--background); cursor: pointer; transition: all 0.2s ease; font-size: 13px;">
+          <div class="field-grp input-wrapper">
+            <input type="file" id="receipt-payment-slip" class="field-input" accept="image/*,application/pdf" placeholder=" ">
+            <label class="floating-label">Slip Pembayaran / Bukti Pembayaran (pilihan)</label>
           </div>
-          <div class="field-grp">
-            <label class="field-label" style="font-weight: 500; color: var(--foreground); margin-bottom: 6px; display: block; font-size: 13px;">Jumlah (RM)</label>
-            <input type="number" id="receipt-amount" class="field-input" placeholder="0.00" step="0.01" style="padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--background); font-weight: 600; font-size: 14px; transition: all 0.2s ease;">
+          <div class="field-grp input-wrapper">
+            <input type="number" id="receipt-amount" class="field-input" placeholder=" " step="0.01">
+            <label class="floating-label">Jumlah (RM)</label>
           </div>
           <div class="field-grp">
             <label class="field-label" style="font-weight: 500; color: var(--foreground); margin-bottom: 6px; display: block; font-size: 13px;">Kaedah Pembayaran</label>
@@ -384,15 +384,15 @@ function showReceiptsPage() {
               </div>
             </div>
           </div>
-          <div class="field-grp">
-            <label class="field-label" style="font-weight: 500; color: var(--foreground); margin-bottom: 6px; display: block; font-size: 13px;">Tarikh Pembayaran</label>
-            <input type="date" id="receipt-payment-date" class="field-input" style="padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--background); transition: all 0.2s ease; font-size: 13px;">
+          <div class="field-grp input-wrapper">
+            <input type="date" id="receipt-payment-date" class="field-input" placeholder=" ">
+            <label class="floating-label">Tarikh Pembayaran</label>
           </div>
         </div>
         
-        <div class="field-grp" id="receipt-cheque-info-grp" style="display: none; margin-bottom: 16px;">
-          <label class="field-label" style="font-weight: 500; color: var(--foreground); margin-bottom: 6px; display: block; font-size: 13px;">No. Cek / Bank</label>
-          <input type="text" id="receipt-cheque-info" class="field-input" placeholder="123456 - MAYBANK" style="padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--background); transition: all 0.2s ease; font-size: 13px;">
+        <div class="field-grp input-wrapper" id="receipt-cheque-info-grp" style="display: none; margin-bottom: 16px;">
+          <input type="text" id="receipt-cheque-info" class="field-input" placeholder=" ">
+          <label class="floating-label">No. Cek / Bank</label>
         </div>
         
         <small style="color: var(--muted-foreground); font-size: 11px; display: block; margin-bottom: 16px;">Muat naik imej atau PDF slip pembayaran. Fail ini akan disimpan sebagai bukti pembayaran dan diproses dengan OCR.</small>
@@ -405,14 +405,12 @@ function showReceiptsPage() {
             </select>
           </div>
           <div class="field-grp">
-            <label class="field-label" style="font-weight: 500; color: var(--foreground); margin-bottom: 6px; display: block; font-size: 13px;">Nama Penerima (jika bukan ahli)</label>
-            <input type="text" id="manual-payee-name" class="field-input" placeholder="Masukkan nama penerima..." style="padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--background); transition: all 0.2s ease; font-size: 13px;">
           </div>
         </div>
         
-        <div class="field-grp" style="margin-bottom: 16px;">
-          <label class="field-label" style="font-weight: 500; color: var(--foreground); margin-bottom: 6px; display: block; font-size: 13px;">Penerangan Pembayaran</label>
-          <input type="text" id="receipt-description" class="field-input" placeholder="Penerangan pembayaran..." style="padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--background); transition: all 0.2s ease; font-size: 13px;">
+        <div class="field-grp input-wrapper" style="margin-bottom: 16px;">
+          <input type="text" id="receipt-description" class="field-input" placeholder=" ">
+          <label class="floating-label">Penerangan Pembayaran</label>
         </div>
         
         <div id="ocr-status" class="alert" style="display: none; padding: 10px 12px; border-radius: var(--radius-md); margin-bottom: 12px; font-size: 12px;">
@@ -537,29 +535,30 @@ function showVouchersPage() {
         </div>
       </div>
       <div class="sec-body" style="padding: 16px;">
-        <div class="field-grp" style="margin-bottom: 16px;">
-          <label class="field-label" style="font-weight: 500; color: var(--foreground); margin-bottom: 6px; display: block; font-size: 13px;">Dibayar Kepada</label>
-          <input type="text" id="voucher-payable-to" class="field-input" placeholder="Nama syarikat atau individu" style="padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--background); transition: all 0.2s ease; font-size: 13px;">
+        <div class="field-grp input-wrapper" style="margin-bottom: 16px;">
+          <input type="text" id="voucher-payable-to" class="field-input" placeholder=" ">
+          <label class="floating-label">Dibayar Kepada</label>
         </div>
         
-        <div class="field-grp" style="margin-bottom: 16px;">
-          <label class="field-label" style="font-weight: 500; color: var(--foreground); margin-bottom: 6px; display: block; font-size: 13px;">Tujuan Pembayaran</label>
-          <textarea id="voucher-purpose" class="field-input" rows="3" placeholder="Penerangan pembayaran" style="padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--background); transition: all 0.2s ease; resize: vertical; font-size: 13px;"></textarea>
+        <div class="field-grp input-wrapper" style="margin-bottom: 16px;">
+          <textarea id="voucher-purpose" class="field-input" rows="3" placeholder=" "></textarea>
+          <label class="floating-label">Tujuan Pembayaran</label>
         </div>
         
-        <div class="field-grp" style="margin-bottom: 16px;">
-          <label class="field-label" style="font-weight: 500; color: var(--foreground); margin-bottom: 6px; display: block; font-size: 13px;">Jumlah (RM)</label>
-          <input type="number" id="voucher-amount" class="field-input" placeholder="0.00" step="0.01" style="padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--background); font-weight: 600; font-size: 14px; transition: all 0.2s ease;">
+        <div class="field-grp input-wrapper" style="margin-bottom: 16px;">
+          <input type="number" id="voucher-amount" class="field-input" placeholder=" " step="0.01">
+          <label class="floating-label">Jumlah (RM)</label>
         </div>
         
-        <div class="field-grp" style="margin-bottom: 16px;">
-          <label class="field-label" style="font-weight: 500; color: var(--foreground); margin-bottom: 6px; display: block; font-size: 13px;">Kaedah Pembayaran</label>
-          <select id="voucher-payment-method" class="field-input" style="padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--background); transition: all 0.2s ease; font-size: 13px;">
+        <div class="field-grp input-wrapper" style="margin-bottom: 16px;">
+          <select id="voucher-payment-method" class="field-input" placeholder=" ">
+            <option value="">Pilih kaedah...</option>
             <option value="cash">Tunai</option>
             <option value="cheque">Cek</option>
             <option value="online">Pindahan Dalam Talian</option>
             <option value="other">Lain-lain</option>
           </select>
+          <label class="floating-label">Kaedah Pembayaran</label>
         </div>
         
         <button onclick="createPaymentVoucher()" class="btn-pill" style="width: 100%;">Cipta Baucar</button>

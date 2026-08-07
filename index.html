@@ -931,6 +931,47 @@ small {
     transform: scale(0.9);
   }
 }
+
+/* Uiverse-style floating label input with DPMM colors */
+.input-wrapper {
+  position: relative;
+}
+.input-wrapper .floating-label {
+  transition: all 0.1s ease-in-out;
+  color: var(--muted-foreground);
+  position: absolute;
+  top: 35%;
+  left: 14px;
+  transform: scale(0.95);
+  opacity: 1;
+  pointer-events: none;
+  font-size: 13px;
+  font-weight: 500;
+}
+.input-wrapper .field-input {
+  border-radius: var(--radius-md);
+  transition: outline 0.2s ease;
+  font-size: 13px;
+  outline: unset;
+  border: 1px solid var(--border);
+  padding: 14px 12px 8px 14px;
+  width: 100%;
+  background: var(--background);
+}
+.input-wrapper .field-input:focus {
+  box-shadow: 0 0 0 1px var(--primary-lt), 0 0 0 3px var(--primary);
+  border-color: var(--primary);
+}
+.input-wrapper .field-input:focus ~ .floating-label,
+.input-wrapper .field-input:not(:placeholder-shown) ~ .floating-label {
+  top: -8px !important;
+  left: 8px !important;
+  transform: scale(0.75);
+  background: var(--card);
+  color: var(--primary);
+  padding: 0 6px;
+  opacity: 1;
+}
 .dok-tb-btn {
   padding: 3px 8px; font-size: 11.5px; border: 1px solid var(--gray2);
   border-radius: 3px; background: #fff; cursor: pointer; color: var(--text);
