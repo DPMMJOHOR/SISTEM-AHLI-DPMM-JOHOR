@@ -336,25 +336,27 @@ function showReceiptsPage() {
   if (!container) return;
   container.innerHTML = `
     <div class="sec-card" style="border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--card); box-shadow: var(--shadow-sm);">
-      <div class="sec-head" style="padding: 16px; border-bottom: 1px solid var(--border); background: var(--muted)/30;">
+      <div class="sec-head" style="padding: 20px 24px; border-bottom: 1px solid var(--border); background: var(--muted)/30;">
         <div style="display: flex; align-items: center; justify-content: space-between;">
           <div>
-            <h3 style="color: var(--foreground); margin: 0; font-size: 16px; font-weight: 600; letter-spacing: 0.3px;">JANA RESIT BAYARAN</h3>
-            <p style="color: var(--muted-foreground); margin: 2px 0 0 0; font-size: 12px; font-weight: 400;">Isi borang di bawah untuk menjana resit pembayaran baru</p>
+            <h3 style="color: var(--foreground); margin: 0; font-size: 18px; font-weight: 700; letter-spacing: 0.5px;">JANA RESIT BAYARAN</h3>
+            <p style="color: var(--muted-foreground); margin: 4px 0 0 0; font-size: 13px; font-weight: 400;">Isi borang di bawah untuk menjana resit pembayaran baru</p>
           </div>
         </div>
       </div>
-      <div class="sec-body" style="padding: 16px;">
-        <div style="display: grid; grid-template-columns: 1fr 140px auto auto; gap: 12px; margin-bottom: 16px; align-items: end;">
-          <div class="field-grp input-wrapper">
-            <input type="file" id="receipt-payment-slip" class="field-input floating-input" accept="image/*,application/pdf" placeholder=" ">
-            <label class="floating-label">Slip / Bukti Pembayaran</label>
+      <div class="sec-body" style="padding: 24px;">
+        <div style="display: grid; grid-template-columns: 2fr 180px auto auto; gap: 16px; margin-bottom: 20px; align-items: end;">
+          <div class="field-grp input-wrapper" style="position: relative;">
+            <div style="position: absolute; inset: 0; border-radius: var(--radius-md); background: linear-gradient(135deg, var(--primary-lt) 0%, transparent 50%); opacity: 0; transition: opacity 0.3s ease;"></div>
+            <input type="file" id="receipt-payment-slip" class="field-input floating-input" accept="image/*,application/pdf" placeholder=" " style="position: relative; z-index: 1;">
+            <label class="floating-label" style="position: relative; z-index: 2;">Slip / Bukti Pembayaran</label>
           </div>
-          <div class="field-grp input-wrapper">
-            <input type="number" id="receipt-amount" class="field-input floating-input" placeholder=" " step="0.01" style="font-family: var(--mono);">
-            <label class="floating-label">Jumlah (RM)</label>
+          <div class="field-grp input-wrapper" style="position: relative;">
+            <div style="position: absolute; inset: 0; border-radius: var(--radius-md); background: linear-gradient(135deg, var(--primary-lt) 0%, transparent 50%); opacity: 0; transition: opacity 0.3s ease;"></div>
+            <input type="number" id="receipt-amount" class="field-input floating-input" placeholder=" " step="0.01" style="font-family: var(--mono); position: relative; z-index: 1;">
+            <label class="floating-label" style="position: relative; z-index: 2;">Jumlah (RM)</label>
           </div>
-          <div class="checkbox-wrapper" style="display: flex; align-items: center;">
+          <div class="checkbox-wrapper" style="display: flex; align-items: center; padding: 0 8px;">
             <input type="checkbox" id="receipt-pm-cash" class="inp-cbx receipt-pm-checkbox" data-method="cash">
             <label class="cbx" for="receipt-pm-cash">
               <span>
@@ -362,10 +364,10 @@ function showReceiptsPage() {
                   <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
                 </svg>
               </span>
-              <span style="font-size: 12px; font-weight: 500;">Tunai</span>
+              <span style="font-size: 13px; font-weight: 600;">Tunai</span>
             </label>
           </div>
-          <div class="checkbox-wrapper" style="display: flex; align-items: center;">
+          <div class="checkbox-wrapper" style="display: flex; align-items: center; padding: 0 8px;">
             <input type="checkbox" id="receipt-pm-online" class="inp-cbx receipt-pm-checkbox" data-method="online">
             <label class="cbx" for="receipt-pm-online">
               <span>
@@ -373,16 +375,16 @@ function showReceiptsPage() {
                   <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
                 </svg>
               </span>
-              <span style="font-size: 12px; font-weight: 500;">Online</span>
+              <span style="font-size: 13px; font-weight: 600;">Online</span>
             </label>
           </div>
         </div>
         
-        <div style="display: grid; grid-template-columns: auto auto 1fr auto; gap: 12px; margin-bottom: 16px; align-items: end;">
-          <div class="field-grp" style="display: flex; align-items: center; padding-bottom: 12px;">
-            <label class="field-label" style="font-weight: 500; color: var(--foreground); margin: 0; font-size: 13px;">Kaedah Pembayaran</label>
+        <div style="display: grid; grid-template-columns: auto auto 1fr auto; gap: 16px; margin-bottom: 20px; align-items: end;">
+          <div class="field-grp" style="display: flex; align-items: center; padding-bottom: 14px;">
+            <label class="field-label" style="font-weight: 600; color: var(--foreground); margin: 0; font-size: 14px;">Kaedah Pembayaran</label>
           </div>
-          <div class="checkbox-wrapper" style="display: flex; align-items: center;">
+          <div class="checkbox-wrapper" style="display: flex; align-items: center; padding: 0 8px;">
             <input type="checkbox" id="receipt-pm-cheque" class="inp-cbx receipt-pm-checkbox" data-method="cheque">
             <label class="cbx" for="receipt-pm-cheque">
               <span>
@@ -390,7 +392,7 @@ function showReceiptsPage() {
                   <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
                 </svg>
               </span>
-              <span style="font-size: 12px; font-weight: 500;">Cek</span>
+              <span style="font-size: 13px; font-weight: 600;">Cek</span>
             </label>
           </div>
           <div class="field-grp input-wrapper" id="receipt-cheque-info-grp" style="display: none;">
@@ -398,17 +400,19 @@ function showReceiptsPage() {
             <label class="floating-label">No. Cek / Bank</label>
           </div>
           <div class="field-grp input-wrapper">
-            <input type="date" id="receipt-payment-date" class="field-input floating-input" placeholder=" " style="padding: 8px 12px;">
+            <input type="date" id="receipt-payment-date" class="field-input floating-input" placeholder=" " style="padding: 10px 14px;">
             <label class="floating-label">Tarikh Pembayaran</label>
           </div>
         </div>
         
-        <small style="color: var(--muted-foreground); font-size: 11px; display: block; margin-bottom: 16px;">Muat naik imej atau PDF slip pembayaran. Fail ini akan disimpan sebagai bukti pembayaran dan diproses dengan OCR.</small>
+        <div style="background: var(--muted)/10; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px 16px; margin-bottom: 20px;">
+          <small style="color: var(--muted-foreground); font-size: 12px; display: block; line-height: 1.5;">Muat naik imej atau PDF slip pembayaran. Fail ini akan disimpan sebagai bukti pembayaran dan diproses dengan OCR.</small>
+        </div>
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
           <div class="field-grp">
-            <label class="field-label" style="font-weight: 500; color: var(--foreground); margin-bottom: 6px; display: block; font-size: 13px;">Ahli (untuk yuran keahlian)</label>
-            <select id="receipt-member-select" class="field-input" style="padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--background); transition: all 0.2s ease; font-size: 13px;">
+            <label class="field-label" style="font-weight: 600; color: var(--foreground); margin-bottom: 8px; display: block; font-size: 14px;">Ahli (untuk yuran keahlian)</label>
+            <select id="receipt-member-select" class="field-input" style="padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--background); transition: all 0.3s cubic-bezier(0.32, 0.72, 0, 1); font-size: 14px;">
               <option value="">Pilih ahli...</option>
             </select>
           </div>
@@ -416,21 +420,21 @@ function showReceiptsPage() {
           </div>
         </div>
         
-        <div class="field-grp input-wrapper" style="margin-bottom: 16px;">
+        <div class="field-grp input-wrapper" style="margin-bottom: 20px;">
           <input type="text" id="receipt-description" class="field-input floating-input" placeholder=" ">
           <label class="floating-label">Penerangan Pembayaran</label>
         </div>
         
-        <div id="ocr-status" class="alert" style="display: none; padding: 10px 12px; border-radius: var(--radius-md); margin-bottom: 12px; font-size: 12px;">
+        <div id="ocr-status" class="alert" style="display: none; padding: 12px 16px; border-radius: var(--radius-md); margin-bottom: 16px; font-size: 13px;">
           <span id="ocr-status-text"></span>
         </div>
         
-        <div id="transaction-id-display" class="alert alert-ok" style="display: none; padding: 10px 12px; border-radius: var(--radius-md); margin-bottom: 12px; background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); font-size: 12px;">
+        <div id="transaction-id-display" class="alert alert-ok" style="display: none; padding: 12px 16px; border-radius: var(--radius-md); margin-bottom: 16px; background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); font-size: 13px;">
           <strong style="color: var(--success);">ID Transaksi:</strong> <span id="transaction-id-text" style="font-weight: 600;"></span>
         </div>
         
-        <div style="display: flex; justify-content: flex-end;">
-          <button onclick="handleGenerateReceipt()" class="btn-pill">Jana Resit</button>
+        <div style="display: flex; justify-content: flex-end; gap: 12px;">
+          <button onclick="handleGenerateReceipt()" class="btn-pill" style="padding: 12px 32px; font-size: 14px; font-weight: 600; transition: all 0.3s cubic-bezier(0.32, 0.72, 0, 1);">Jana Resit</button>
         </div>
       </div>
     </div>
@@ -534,33 +538,35 @@ function showVouchersPage() {
   if (!container) return;
   container.innerHTML = `
     <div class="sec-card" style="border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--card); box-shadow: var(--shadow-sm);">
-      <div class="sec-head" style="padding: 16px; border-bottom: 1px solid var(--border); background: var(--muted)/30;">
+      <div class="sec-head" style="padding: 20px 24px; border-bottom: 1px solid var(--border); background: var(--muted)/30;">
         <div style="display: flex; align-items: center; justify-content: space-between;">
           <div>
-            <h3 style="color: var(--foreground); margin: 0; font-size: 16px; font-weight: 600; letter-spacing: 0.3px;">CIPTA BAUCAR PEMBAYARAN</h3>
-            <p style="color: var(--muted-foreground); margin: 2px 0 0 0; font-size: 12px; font-weight: 400;">Isi borang di bawah untuk mencipta baucar pembayaran baru</p>
+            <h3 style="color: var(--foreground); margin: 0; font-size: 18px; font-weight: 700; letter-spacing: 0.5px;">CIPTA BAUCAR PEMBAYARAN</h3>
+            <p style="color: var(--muted-foreground); margin: 4px 0 0 0; font-size: 13px; font-weight: 400;">Isi borang di bawah untuk mencipta baucar pembayaran baru</p>
           </div>
         </div>
       </div>
-      <div class="sec-body" style="padding: 16px;">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
-          <div class="field-grp input-wrapper">
-            <input type="text" id="voucher-payable-to" class="field-input floating-input" placeholder=" ">
-            <label class="floating-label">Dibayar Kepada</label>
+      <div class="sec-body" style="padding: 24px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+          <div class="field-grp input-wrapper" style="position: relative;">
+            <div style="position: absolute; inset: 0; border-radius: var(--radius-md); background: linear-gradient(135deg, var(--primary-lt) 0%, transparent 50%); opacity: 0; transition: opacity 0.3s ease;"></div>
+            <input type="text" id="voucher-payable-to" class="field-input floating-input" placeholder=" " style="position: relative; z-index: 1;">
+            <label class="floating-label" style="position: relative; z-index: 2;">Dibayar Kepada</label>
           </div>
-          <div class="field-grp input-wrapper">
-            <input type="number" id="voucher-amount" class="field-input floating-input" placeholder=" " step="0.01" style="font-family: var(--mono);">
-            <label class="floating-label">Jumlah (RM)</label>
+          <div class="field-grp input-wrapper" style="position: relative;">
+            <div style="position: absolute; inset: 0; border-radius: var(--radius-md); background: linear-gradient(135deg, var(--primary-lt) 0%, transparent 50%); opacity: 0; transition: opacity 0.3s ease;"></div>
+            <input type="number" id="voucher-amount" class="field-input floating-input" placeholder=" " step="0.01" style="font-family: var(--mono); position: relative; z-index: 1;">
+            <label class="floating-label" style="position: relative; z-index: 2;">Jumlah (RM)</label>
           </div>
         </div>
         
-        <div class="field-grp input-wrapper" style="margin-bottom: 16px;">
-          <textarea id="voucher-purpose" class="field-input floating-input" rows="3" placeholder=" "></textarea>
+        <div class="field-grp input-wrapper" style="margin-bottom: 20px;">
+          <textarea id="voucher-purpose" class="field-input floating-input" rows="3" placeholder=" " style="transition: all 0.3s cubic-bezier(0.32, 0.72, 0, 1);"></textarea>
           <label class="floating-label">Tujuan Pembayaran</label>
         </div>
         
-        <div class="field-grp input-wrapper" style="margin-bottom: 16px;">
-          <select id="voucher-payment-method" class="field-input floating-input" placeholder=" ">
+        <div class="field-grp input-wrapper" style="margin-bottom: 20px;">
+          <select id="voucher-payment-method" class="field-input floating-input" placeholder=" " style="transition: all 0.3s cubic-bezier(0.32, 0.72, 0, 1);">
             <option value="">Pilih kaedah...</option>
             <option value="cash">Tunai</option>
             <option value="cheque">Cek</option>
@@ -570,8 +576,8 @@ function showVouchersPage() {
           <label class="floating-label">Kaedah Pembayaran</label>
         </div>
         
-        <div style="display: flex; justify-content: flex-end;">
-          <button onclick="createPaymentVoucher()" class="btn-pill">Cipta Baucar</button>
+        <div style="display: flex; justify-content: flex-end; gap: 12px;">
+          <button onclick="createPaymentVoucher()" class="btn-pill" style="padding: 12px 32px; font-size: 14px; font-weight: 600; transition: all 0.3s cubic-bezier(0.32, 0.72, 0, 1);">Cipta Baucar</button>
         </div>
       </div>
     </div>
@@ -620,31 +626,31 @@ function showApprovalsPage() {
   if (!container) return;
   container.innerHTML = `
     <div class="sec-card" style="border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--card); box-shadow: var(--shadow-sm);">
-      <div class="sec-head" style="padding: 16px; border-bottom: 1px solid var(--border); background: var(--muted)/30;">
+      <div class="sec-head" style="padding: 20px 24px; border-bottom: 1px solid var(--border); background: var(--muted)/30;">
         <div style="display: flex; align-items: center; justify-content: space-between;">
           <div>
-            <h3 style="color: var(--foreground); margin: 0; font-size: 16px; font-weight: 600; letter-spacing: 0.3px;">KELULUSAN TERTUNDA</h3>
-            <p style="color: var(--muted-foreground); margin: 2px 0 0 0; font-size: 12px; font-weight: 400;">Semak dan luluskan baucar pembayaran yang menunggu kelulusan</p>
+            <h3 style="color: var(--foreground); margin: 0; font-size: 18px; font-weight: 700; letter-spacing: 0.5px;">KELULUSAN TERTUNDA</h3>
+            <p style="color: var(--muted-foreground); margin: 4px 0 0 0; font-size: 13px; font-weight: 400;">Semak dan luluskan baucar pembayaran yang menunggu kelulusan</p>
           </div>
         </div>
       </div>
-      <div class="sec-body" style="padding: 16px;">
+      <div class="sec-body" style="padding: 24px;">
         <div class="table-wrap" style="border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--border);">
           <table class="table" style="margin: 0;">
             <thead style="background: var(--muted)/50;">
               <tr>
-                <th style="color: var(--foreground); font-weight: 600; padding: 10px 12px; font-size: 12px; letter-spacing: 0.3px;">Nombor Baucar</th>
-                <th style="color: var(--foreground); font-weight: 600; padding: 10px 12px; font-size: 12px; letter-spacing: 0.3px;">Tarikh</th>
-                <th style="color: var(--foreground); font-weight: 600; padding: 10px 12px; font-size: 12px; letter-spacing: 0.3px;">Dibayar Kepada</th>
-                <th style="color: var(--foreground); font-weight: 600; padding: 10px 12px; font-size: 12px; letter-spacing: 0.3px;">Tujuan</th>
-                <th style="color: var(--foreground); font-weight: 600; padding: 10px 12px; font-size: 12px; letter-spacing: 0.3px;">Jumlah</th>
-                <th style="color: var(--foreground); font-weight: 600; padding: 10px 12px; font-size: 12px; letter-spacing: 0.3px;">Disediakan Oleh</th>
-                <th style="color: var(--foreground); font-weight: 600; padding: 10px 12px; font-size: 12px; letter-spacing: 0.3px;">Tindakan</th>
+                <th style="color: var(--foreground); font-weight: 600; padding: 12px 16px; font-size: 13px; letter-spacing: 0.3px;">Nombor Baucar</th>
+                <th style="color: var(--foreground); font-weight: 600; padding: 12px 16px; font-size: 13px; letter-spacing: 0.3px;">Tarikh</th>
+                <th style="color: var(--foreground); font-weight: 600; padding: 12px 16px; font-size: 13px; letter-spacing: 0.3px;">Dibayar Kepada</th>
+                <th style="color: var(--foreground); font-weight: 600; padding: 12px 16px; font-size: 13px; letter-spacing: 0.3px;">Tujuan</th>
+                <th style="color: var(--foreground); font-weight: 600; padding: 12px 16px; font-size: 13px; letter-spacing: 0.3px;">Jumlah</th>
+                <th style="color: var(--foreground); font-weight: 600; padding: 12px 16px; font-size: 13px; letter-spacing: 0.3px;">Disediakan Oleh</th>
+                <th style="color: var(--foreground); font-weight: 600; padding: 12px 16px; font-size: 13px; letter-spacing: 0.3px;">Tindakan</th>
               </tr>
             </thead>
             <tbody id="approvals-table-body">
               <tr>
-                <td colspan="7" style="text-align: center; color: var(--muted-foreground); padding: 32px 12px; font-size: 12px;">Memuatkan kelulusan...</td>
+                <td colspan="7" style="text-align: center; color: var(--muted-foreground); padding: 32px 12px; font-size: 13px;">Memuatkan kelulusan...</td>
               </tr>
             </tbody>
           </table>
