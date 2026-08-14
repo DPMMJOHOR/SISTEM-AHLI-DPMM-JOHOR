@@ -6916,6 +6916,19 @@ function generatePermohonanDocReport() {
     return (a.ref_id || '').localeCompare(b.ref_id || '');
   });
 
+  // Fixed column widths (mm) tuned to fit A4 landscape usable width
+  // (297mm page - 2x10mm margin = 277mm): 16+20+50+22 = 108mm fixed cols,
+  // remaining 169mm / 19 doc columns = ~8.9mm each.
+  var COL_NUM = '16mm', COL_REF = '20mm', COL_NAMA = '50mm', COL_STATUS = '22mm', COL_DOC = '8.9mm';
+
+  var colgroup = '<colgroup>'
+    + '<col style="width:' + COL_NUM + ';">'
+    + '<col style="width:' + COL_REF + ';">'
+    + '<col style="width:' + COL_NAMA + ';">'
+    + '<col style="width:' + COL_STATUS + ';">'
+    + PERMOHONAN_DOC_CHECKLIST.map(function(){ return '<col style="width:' + COL_DOC + ';">'; }).join('')
+    + '</colgroup>';
+
   var headCols = PERMOHONAN_DOC_CHECKLIST.map(function(d){
     return '<th class="doc-col"><div class="doc-col-label">' + d.label + '</div></th>';
   }).join('');
@@ -6928,41 +6941,45 @@ function generatePermohonanDocReport() {
     }).join('');
     return '<tr' + (i % 2 === 0 ? ' style="background:#f5f5f5;"' : '') + '>'
       + '<td style="text-align:center;">' + (i+1) + '</td>'
-      + '<td style="font-family:monospace;font-weight:700;white-space:nowrap;">' + (p.ref_id || '—') + '</td>'
-      + '<td style="font-weight:600;">' + (p.nama_perniagaan || '—') + '</td>'
-      + '<td style="white-space:nowrap;"><span style="display:inline-block;padding:1px 7px;border-radius:10px;font-size:10px;font-weight:700;color:#fff;background:' + cfg.color + ';">' + cfg.label + '</span></td>'
+      + '<td style="font-family:monospace;font-weight:700;white-space:nowrap;">' + ((p.ref_id || '—').toUpperCase()) + '</td>'
+      + '<td style="font-weight:600;text-transform:uppercase;word-break:break-word;">' + ((p.nama_perniagaan || '—').toUpperCase()) + '</td>'
+      + '<td style="white-space:nowrap;"><span style="display:inline-block;padding:1px 7px;border-radius:10px;font-size:9.5px;font-weight:700;color:#fff;background:' + cfg.color + ';">' + cfg.label.toUpperCase() + '</span></td>'
       + cells
       + '</tr>';
   }).join('');
 
-  var css = '@page{size:A4 landscape;margin:6mm 8mm}'
+  var css = '@page{size:A4 landscape;margin:10mm}'
     + '*{box-sizing:border-box;margin:0;padding:0}'
+    + 'html,body{width:277mm;}'
     + 'body{font-family:var(--sans),Arial,sans-serif;font-size:11px;color:#1a1a2e;-webkit-print-color-adjust:exact;print-color-adjust:exact;line-height:1.4}'
-    + 'table{width:100%;border-collapse:collapse;table-layout:auto}'
-    + 'th{background:#1a3f7a;color:#fff;padding:4px 3px;text-align:left;font-size:10px;font-weight:700;vertical-align:bottom;}'
-    + 'th.doc-col{text-align:center;width:1%;white-space:nowrap;}'
-    + '.doc-col-label{writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap;margin:0 auto;font-size:9.5px;letter-spacing:.2px;height:90px;display:flex;align-items:center;justify-content:center;}'
-    + 'td{padding:3px 6px;border-bottom:1px solid #e0e0e0;vertical-align:middle;font-size:11px;}'
-    + 'td.doc-col{padding:3px 0;width:1%;}'
+    + 'table{width:277mm;table-layout:fixed;border-collapse:collapse;}'
+    + 'th{background:#1a3f7a;color:#fff;padding:4px 2px;text-align:left;font-size:10px;font-weight:700;vertical-align:bottom;overflow:hidden;}'
+    + 'th.doc-col{text-align:center;padding:4px 0;}'
+    + '.doc-col-label{writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap;margin:0 auto;font-size:9px;letter-spacing:.2px;height:92px;display:flex;align-items:center;justify-content:center;}'
+    + 'td{padding:3px 5px;border-bottom:1px solid #e0e0e0;vertical-align:middle;font-size:10.5px;overflow:hidden;}'
+    + 'td.doc-col{padding:3px 0;}'
     + 'tr:last-child td{border-bottom:none}'
     + '.chk{color:#0CA678;font-weight:900;font-size:13px;}'
-    + '.box{display:inline-block;width:11px;height:11px;border:1.5px solid #999;border-radius:2px;}'
-    + '.lhd{border-bottom:2px solid #1a3f7a;padding-bottom:5px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:flex-end}'
-    + '.lhd-l h1{font-size:16px;font-weight:900;color:#1a3f7a;}'
-    + '.lhd-l p{font-size:11px;color:#555;margin-top:2px}'
-    + '.lhd-r{text-align:right;font-size:10.5px;color:#555;line-height:1.6}'
+    + '.box{display:inline-block;width:10px;height:10px;border:1.5px solid #999;border-radius:2px;}'
+    + '.lhd{border-bottom:2px solid #1a3f7a;padding-bottom:6px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:14px;}'
+    + '.lhd-logo{height:52px;width:52px;object-fit:contain;flex-shrink:0;}'
+    + '.lhd-l{display:flex;align-items:center;gap:12px;}'
+    + '.lhd-l h1{font-size:15px;font-weight:900;color:#1a3f7a;letter-spacing:.2px;}'
+    + '.lhd-l p{font-size:10.5px;color:#555;margin-top:2px}'
+    + '.lhd-r{text-align:right;font-size:10px;color:#555;line-height:1.6;flex-shrink:0;}'
     + '.lhd-r strong{color:#1a1a2e}'
-    + '.footer{font-size:10px;color:#888;text-align:center;border-top:1px solid #ddd;padding-top:5px;margin-top:8px}';
+    + '.footer{font-size:9.5px;color:#888;text-align:center;border-top:1px solid #ddd;padding-top:5px;margin-top:8px}';
 
   var html = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Laporan Dokumen Permohonan Ahli</title><style>' + css + '</style></head><body>'
-    + '<div class="lhd"><div class="lhd-l"><h1>DEWAN PERNIAGAAN MELAYU MALAYSIA NEGERI JOHOR</h1>'
-    + '<p>Laporan Semakan Dokumen Permohonan Ahli &mdash; ' + sorted.length + ' Permohonan</p></div>'
+    + '<div class="lhd">'
+    + '<div class="lhd-l"><img class="lhd-logo" src="' + DPMM_LOGO + '" alt="Logo DPMM"><div><h1>DEWAN PERNIAGAAN MELAYU MALAYSIA NEGERI JOHOR</h1>'
+    + '<p>Laporan Semakan Dokumen Permohonan Ahli &mdash; ' + sorted.length + ' Permohonan</p></div></div>'
     + '<div class="lhd-r"><strong>SULIT &mdash; UNTUK KEGUNAAN DALAMAN SAHAJA</strong><br>Dijana: ' + dateStr + ', ' + timeStr + '</div></div>'
-    + '<table><thead><tr>'
-    + '<th style="width:1%;">#</th>'
-    + '<th>Ref ID</th>'
-    + '<th>Nama Perniagaan</th>'
-    + '<th>Status</th>'
+    + '<table>' + colgroup + '<thead><tr>'
+    + '<th>#</th>'
+    + '<th>REF ID</th>'
+    + '<th>NAMA PERNIAGAAN</th>'
+    + '<th>STATUS</th>'
     + headCols
     + '</tr></thead><tbody>' + rows + '</tbody></table>'
     + '<div class="footer">DEWAN PERNIAGAAN MELAYU MALAYSIA NEGERI JOHOR &nbsp;&mdash;&nbsp; Laporan Dokumen Permohonan Ahli &nbsp;&mdash;&nbsp; ' + dateStr + ', ' + timeStr + ' &nbsp;&mdash;&nbsp; SULIT / UNTUK KEGUNAAN DALAMAN SAHAJA</div>'
