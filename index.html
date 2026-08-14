@@ -2820,9 +2820,9 @@ tr.row-unpaid { background: #fff0f0 !important; }
 <!-- ══ PERMOHONAN AHLI ══ -->
 <div id="page-permohonan" class="page">
     <!-- SUMMARY BAR -->
-    <div id="perm-summary-bar" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px;padding:10px 16px;background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow-sm);border:1px solid var(--gray1);min-height:42px;"></div>
+    <div id="perm-summary-bar" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px;padding:8px 16px;background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow-sm);border:1px solid var(--gray1);min-height:36px;"></div>
     <!-- KPI CARDS -->
-    <div class="statsbar" id="permohonan-kpi" style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:20px;"></div>
+    <div class="statsbar" id="permohonan-kpi" style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:16px;"></div>
 
     <!-- SUB-TAB NAV -->
     <div style="display:flex;gap:0;margin-bottom:16px;background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden;border:1px solid var(--gray1);flex-wrap:wrap;">
@@ -6876,6 +6876,36 @@ function buildTabSaham(p) {
        + tableSection('Ahli Lembaga / Pengurusan', p.ahli_lembaga);
 }
 
+/* ── VIEW APPLICANT DOCUMENT (photos, SSM cert, payment slip, etc.) ──────
+   Bucket "permohonan-dokumen" is private, so these must always be opened
+   via a freshly-signed URL. Handles both the new storage-path format and
+   legacy broken public URLs (extracts the path after the bucket name so
+   documents uploaded before this fix remain viewable). ─────────────────── */
+function viewAdminDokumen(rawPathOrUrl) {
+  if (!rawPathOrUrl) { alert('Dokumen tidak tersedia.'); return; }
+  var path = rawPathOrUrl;
+  var marker = '/permohonan-dokumen/';
+  var idx = path.indexOf(marker);
+  if (idx !== -1) path = path.substring(idx + marker.length);
+  path = path.replace(/^permohonan-dokumen\//, '');
+
+  supabaseClient.storage
+    .from('permohonan-dokumen')
+    .createSignedUrl(path, 3600)
+    .then(function(response) {
+      if (response.error || !response.data) {
+        console.error('Failed to create signed URL for document:', response.error);
+        alert('Ralat membuka dokumen: ' + (response.error ? response.error.message : 'Tidak diketahui'));
+        return;
+      }
+      window.open(response.data.signedUrl, '_blank');
+    })
+    .catch(function(err) {
+      console.error('Exception generating signed URL for document:', err);
+      alert('Ralat membuka dokumen: ' + err.message);
+    });
+}
+
 /* ── TAB: DOKUMEN ────────────────────────────────────────── */
 function buildTabDokumen(p) {
   var docs = [
@@ -6907,7 +6937,7 @@ function buildTabDokumen(p) {
       if (d.isPdf) {
         action = '<button onclick="viewAdminPDF(\'' + p.ref_id + '\')" style="padding:5px 14px;border-radius:6px;background:var(--primary-lt);color:var(--primary);font-size:12px;font-weight:700;cursor:pointer;border:none;">👁 Lihat Borang</button>';
       } else {
-        action = '<a href="' + d.url + '" target="_blank" style="padding:5px 14px;border-radius:6px;background:var(--primary-lt);color:var(--primary);font-size:12px;font-weight:700;text-decoration:none;">👁 Lihat</a>';
+        action = '<button data-action="view-dokumen" data-path="' + d.url.replace(/"/g, '&quot;') + '" style="padding:5px 14px;border-radius:6px;background:var(--primary-lt);color:var(--primary);font-size:12px;font-weight:700;cursor:pointer;border:none;">👁 Lihat</button>';
       }
     } else {
       action = '<span style="font-size:11px;color:var(--muted);">Tiada</span>';
@@ -6928,7 +6958,7 @@ function buildTabBayaran(p) {
 
   var isAdm   = currentUser && currentUser.role === 'admin';
   var slipHtml = p.url_bukti_bayaran
-    ? '<a href="' + p.url_bukti_bayaran + '" target="_blank" style="display:inline-block;margin-top:10px;padding:8px 20px;border-radius:7px;background:var(--primary-lt);color:var(--primary);font-size:12px;font-weight:700;text-decoration:none;">👁 Lihat Slip Bayaran</a>'
+    ? '<button data-action="view-dokumen" data-path="' + p.url_bukti_bayaran.replace(/"/g, '&quot;') + '" style="display:inline-block;margin-top:10px;padding:8px 20px;border-radius:7px;background:var(--primary-lt);color:var(--primary);font-size:12px;font-weight:700;border:none;cursor:pointer;">👁 Lihat Slip Bayaran</button>'
     : '<span style="color:var(--danger);font-size:12px;">Slip belum dimuat naik</span>';
 
   var sahkanHtml = '';
@@ -7483,6 +7513,8 @@ document.addEventListener('DOMContentLoaded', function(){
       closePermohonanModal();
     } else if (action === 'delete-permohonan') {
       deletePermohonan(id);
+    } else if (action === 'view-dokumen') {
+      viewAdminDokumen(target.getAttribute('data-path'));
     } else if (action === 'open-tolak') {
       openTolakModal(id);
     } else if (action === 'open-lulus') {

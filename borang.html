@@ -4353,10 +4353,11 @@ async function _doSubmit() {
             throw new Error(errorMsg);
           }
           
-          const { data: urlData } = window.sb.storage.from('permohonan-dokumen').getPublicUrl(path);
-          uploadedUrls[key] = urlData.publicUrl;
+          // Bucket is private — store the storage path (not a public URL, which
+          // always 404s for private buckets). Admin panel signs it on view.
+          uploadedUrls[key] = path;
           uploadSuccess = true;
-          console.log(`Successfully uploaded ${key} to: ${urlData.publicUrl}`);
+          console.log(`Successfully uploaded ${key} to path: ${path}`);
           
         } catch (err) {
           console.error('Upload attempt failed:', err);
@@ -4392,9 +4393,10 @@ async function _doSubmit() {
             throw new Error('Signed URL upload failed: ' + uploadResponse.statusText);
           }
           
-          const { data: urlData } = window.sb.storage.from('permohonan-dokumen').getPublicUrl(path);
-          uploadedUrls[key] = urlData.publicUrl;
-          console.log(`Successfully uploaded ${key} via signed URL: ${urlData.publicUrl}`);
+          // Bucket is private — store the storage path (not a public URL, which
+          // always 404s for private buckets). Admin panel signs it on view.
+          uploadedUrls[key] = path;
+          console.log(`Successfully uploaded ${key} via signed URL to path: ${path}`);
           
         } catch (signedErr) {
           console.error('Signed URL upload also failed:', signedErr);
