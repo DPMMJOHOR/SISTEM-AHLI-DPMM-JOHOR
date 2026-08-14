@@ -100,6 +100,42 @@ README.md              ← Dokumentasi ini
 
 ## 📝 Perubahan Terkini (Ogos 2026)
 
+### Permohonan Ahli — RLS Fix, Document Viewer & Checklist Report (15 Ogos 2026)
+- **RLS Policy Fix (`permohonan-dokumen` bucket):**
+  - Migration `supabase/migrations/20260815000000_fix_permohonan_dokumen_rls.sql` fixes broken storage RLS policies blocking admin access to applicant documents
+- **Delete Button Fix (Permohonan Ahli tab):**
+  - Fixed delete action for permohonan records that was silently failing
+- **Document/Photo/Slip Viewer Fix:**
+  - `viewAdminDokumen()` now always opens via a freshly-signed Supabase Storage URL
+  - Handles both the new storage-path format and legacy broken public URLs (extracts path after bucket name so older uploads remain viewable)
+- **New: Document Checklist Report ("Jana Laporan" button):**
+  - Added to Permohonan Ahli topbar next to "QR Borang"
+  - `generatePermohonanDocReport()` prints an A4-landscape checklist — one row per applicant, one column per required document (Borang PDF, gambar, SSM sijil, M&AA, Borang 9/24/49, sijil profesional, slip bayaran, etc.), with a checkmark if uploaded
+  - Fixed mm-based column widths (`<colgroup>`) so all 23 columns fit exactly within A4 landscape printable width
+  - Applicant Ref ID, business name, and status rendered in uppercase
+  - Official DPMM logo included in the report header (reuses `DPMM_LOGO` constant)
+- **Known issue (unresolved):** A large vertical gap appears between the page topbar and the summary bar/KPI cards on the Permohonan Ahli page; root cause not yet identified from static code review — pending live DevTools inspection.
+
+### UI/UX Enhancements & OCR Improvements (7 Ogos 2026)
+- **Perakaunan Tab UI Fixes:**
+  - Reduced counter font size from 38px to 24px for better visual hierarchy
+  - Reduced sidebar navigation font size from 10px to 9px
+  - Increased organization logo size from 50px to 70px
+  - Increased organization name font size from 14px to 18px
+- **Accounting Tab Delete Functionality:**
+  - Added delete button for pending accounting entries
+  - Delete function with confirmation dialog
+  - Only visible to users with write permissions (admin, bendahari)
+- **OCR Enhancements for Bank Statements:**
+  - Multi-page PDF processing (processes ALL pages, not just first page)
+  - Extracts ALL transactions (both IN and OUT) from bank statements
+  - Auto-selects largest transaction when multiple found
+  - Stores extracted transactions globally for future use
+  - Progress tracking across all pages
+- **Data Cleanup:**
+  - Removed test 250k bank statement entry
+- **Status:** All changes committed and pushed to GitHub (commit 7c35e80)
+
 ### Comprehensive System Upgrade (6 Ogos 2026)
 - **Security Enhancement (U11):**
   - RLS Policy Migration: Replace anon role with authenticated in accounting tables
