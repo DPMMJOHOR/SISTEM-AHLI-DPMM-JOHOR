@@ -3772,7 +3772,8 @@ function showPage(id) {
     if (id === 'dashboard') {
       ta.innerHTML = '<button class="btn btn-outline btn-sm" onclick="showPage(\'followup\')">&#x1F514;&nbsp;FOLLOW UP</button>';
     } else if (id === 'permohonan') {
-      ta.innerHTML = '<button class="btn btn-outline btn-sm" onclick="openQRModal()" style="font-size:12px;">&#x1F4F2;&nbsp;QR Borang</button>';
+      ta.innerHTML = '<button class="btn btn-outline btn-sm" onclick="generatePermohonanDocReport()" style="font-size:12px;">&#x1F4CB;&nbsp;Jana Laporan</button>'
+        + '<button class="btn btn-outline btn-sm" onclick="openQRModal()" style="font-size:12px;">&#x1F4F2;&nbsp;QR Borang</button>';
     } else {
       ta.innerHTML = '';
     }
@@ -6874,6 +6875,106 @@ function buildTabSaham(p) {
   }
   return tableSection('Pemegang Saham', p.pemegang_saham)
        + tableSection('Ahli Lembaga / Pengurusan', p.ahli_lembaga);
+}
+
+/* ── GENERATE DOCUMENT CHECKLIST REPORT (all applicants) ─────────────────
+   Prints an A4-landscape checklist: one row per applicant, one column per
+   document type, ✔ if the applicant uploaded it, blank box if not. ────── */
+var PERMOHONAN_DOC_CHECKLIST = [
+  { key: 'pdf_url',               label: 'Borang PDF' },
+  { key: 'url_gambar_1',          label: 'Gambar Passport 1' },
+  { key: 'url_gambar_2',          label: 'Gambar Passport 2' },
+  { key: 'url_insolvensi_entiti', label: 'Insolvensi Entiti' },
+  { key: 'url_insolvensi_pemohon',label: 'Insolvensi Pemohon' },
+  { key: 'url_ssm_sijil',         label: 'Sijil SSM' },
+  { key: 'url_m_aa',              label: 'M&AA' },
+  { key: 'url_borang_9',          label: 'Borang 9/13' },
+  { key: 'url_borang_24',         label: 'Borang 24' },
+  { key: 'url_borang_49',         label: 'Borang 49' },
+  { key: 'url_sijil_profesional', label: 'Sijil Profesional' },
+  { key: 'url_surat_kebenaran',   label: 'Surat Kebenaran' },
+  { key: 'url_sijil_perbadanan',  label: 'Sijil Pemerbadanan' },
+  { key: 'url_surat_pelantikan',  label: 'Surat Pelantikan' },
+  { key: 'url_sijil_koperasi',    label: 'Sijil Koperasi' },
+  { key: 'url_senarai_lembaga',   label: 'Senarai Ahli Lembaga' },
+  { key: 'url_surat_proksi',      label: 'Surat Proksi' },
+  { key: 'url_dokumen_tambahan',  label: 'Dokumen Tambahan' },
+  { key: 'url_bukti_bayaran',     label: 'Slip Bayaran' },
+];
+
+function generatePermohonanDocReport() {
+  if (!permohonanData || permohonanData.length === 0) {
+    alert('Tiada data permohonan untuk dijana laporan.');
+    return;
+  }
+
+  var now = new Date();
+  var dateStr = now.toLocaleDateString('ms-MY', {day:'2-digit', month:'long', year:'numeric'});
+  var timeStr = now.toLocaleTimeString('ms-MY', {hour:'2-digit', minute:'2-digit'});
+
+  var sorted = permohonanData.slice().sort(function(a,b){
+    return (a.ref_id || '').localeCompare(b.ref_id || '');
+  });
+
+  var headCols = PERMOHONAN_DOC_CHECKLIST.map(function(d){
+    return '<th class="doc-col"><div class="doc-col-label">' + d.label + '</div></th>';
+  }).join('');
+
+  var rows = sorted.map(function(p, i){
+    var cfg = P_STATUS[p.status] || { label: p.status, color:'#888' };
+    var cells = PERMOHONAN_DOC_CHECKLIST.map(function(d){
+      var has = !!p[d.key];
+      return '<td class="doc-col" style="text-align:center;">' + (has ? '<span class="chk">&#10003;</span>' : '<span class="box">&nbsp;</span>') + '</td>';
+    }).join('');
+    return '<tr' + (i % 2 === 0 ? ' style="background:#f5f5f5;"' : '') + '>'
+      + '<td style="text-align:center;">' + (i+1) + '</td>'
+      + '<td style="font-family:monospace;font-weight:700;white-space:nowrap;">' + (p.ref_id || '—') + '</td>'
+      + '<td style="font-weight:600;">' + (p.nama_perniagaan || '—') + '</td>'
+      + '<td style="white-space:nowrap;"><span style="display:inline-block;padding:1px 7px;border-radius:10px;font-size:10px;font-weight:700;color:#fff;background:' + cfg.color + ';">' + cfg.label + '</span></td>'
+      + cells
+      + '</tr>';
+  }).join('');
+
+  var css = '@page{size:A4 landscape;margin:6mm 8mm}'
+    + '*{box-sizing:border-box;margin:0;padding:0}'
+    + 'body{font-family:var(--sans),Arial,sans-serif;font-size:11px;color:#1a1a2e;-webkit-print-color-adjust:exact;print-color-adjust:exact;line-height:1.4}'
+    + 'table{width:100%;border-collapse:collapse;table-layout:auto}'
+    + 'th{background:#1a3f7a;color:#fff;padding:4px 3px;text-align:left;font-size:10px;font-weight:700;vertical-align:bottom;}'
+    + 'th.doc-col{text-align:center;width:1%;white-space:nowrap;}'
+    + '.doc-col-label{writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap;margin:0 auto;font-size:9.5px;letter-spacing:.2px;height:90px;display:flex;align-items:center;justify-content:center;}'
+    + 'td{padding:3px 6px;border-bottom:1px solid #e0e0e0;vertical-align:middle;font-size:11px;}'
+    + 'td.doc-col{padding:3px 0;width:1%;}'
+    + 'tr:last-child td{border-bottom:none}'
+    + '.chk{color:#0CA678;font-weight:900;font-size:13px;}'
+    + '.box{display:inline-block;width:11px;height:11px;border:1.5px solid #999;border-radius:2px;}'
+    + '.lhd{border-bottom:2px solid #1a3f7a;padding-bottom:5px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:flex-end}'
+    + '.lhd-l h1{font-size:16px;font-weight:900;color:#1a3f7a;}'
+    + '.lhd-l p{font-size:11px;color:#555;margin-top:2px}'
+    + '.lhd-r{text-align:right;font-size:10.5px;color:#555;line-height:1.6}'
+    + '.lhd-r strong{color:#1a1a2e}'
+    + '.footer{font-size:10px;color:#888;text-align:center;border-top:1px solid #ddd;padding-top:5px;margin-top:8px}';
+
+  var html = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Laporan Dokumen Permohonan Ahli</title><style>' + css + '</style></head><body>'
+    + '<div class="lhd"><div class="lhd-l"><h1>DEWAN PERNIAGAAN MELAYU MALAYSIA NEGERI JOHOR</h1>'
+    + '<p>Laporan Semakan Dokumen Permohonan Ahli &mdash; ' + sorted.length + ' Permohonan</p></div>'
+    + '<div class="lhd-r"><strong>SULIT &mdash; UNTUK KEGUNAAN DALAMAN SAHAJA</strong><br>Dijana: ' + dateStr + ', ' + timeStr + '</div></div>'
+    + '<table><thead><tr>'
+    + '<th style="width:1%;">#</th>'
+    + '<th>Ref ID</th>'
+    + '<th>Nama Perniagaan</th>'
+    + '<th>Status</th>'
+    + headCols
+    + '</tr></thead><tbody>' + rows + '</tbody></table>'
+    + '<div class="footer">DEWAN PERNIAGAAN MELAYU MALAYSIA NEGERI JOHOR &nbsp;&mdash;&nbsp; Laporan Dokumen Permohonan Ahli &nbsp;&mdash;&nbsp; ' + dateStr + ', ' + timeStr + ' &nbsp;&mdash;&nbsp; SULIT / UNTUK KEGUNAAN DALAMAN SAHAJA</div>'
+    + '</body></html>';
+
+  var win = window.open('', '_blank');
+  if (!win) { alert('Sila benarkan pop-up untuk mencetak laporan.'); return; }
+  win.document.write(html);
+  win.document.close();
+  win.focus();
+  setTimeout(function(){ win.print(); }, 600);
+  addLog && addLog('Generate Report: Dokumen Permohonan Ahli, ' + dateStr);
 }
 
 /* ── VIEW APPLICANT DOCUMENT (photos, SSM cert, payment slip, etc.) ──────
