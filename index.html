@@ -1064,7 +1064,7 @@ small {
 /* ══════════════════════════════════════════
    PAGE CONTENT
 ══════════════════════════════════════════ */
-.page { display: none; padding: 16px 28px; flex: 1; position: relative; z-index: 1; }
+.page { display: none; padding: 12px 28px; flex: 1; position: relative; z-index: 1; }
 .page.active { display: block; }
 
 /* ── KPI CARDS ── */
@@ -1896,7 +1896,7 @@ tr.row-unpaid { background: #fff0f0 !important; }
 
   <!-- ══ DASHBOARD ══ -->
   <div id="page-dashboard" class="page active">
-    <div style="display:flex;justify-content:flex-end;align-items:center;margin-bottom:10px;gap:6px;" class="no-print">
+    <div style="display:flex;justify-content:flex-end;align-items:center;margin-bottom:0px;gap:6px;" class="no-print">
       <span style="font-size:10px;color:var(--muted);font-family:var(--mono);">Dikemaskini:</span>
       <span id="dash-last-updated" style="font-size:10px;font-weight:700;color:var(--primary);font-family:var(--mono);">—</span>
     </div>
@@ -1996,7 +1996,7 @@ tr.row-unpaid { background: #fff0f0 !important; }
 
   <!-- ══ DAERAH ══ -->
   <div id="page-daerah" class="page">
-    <div class="no-print" style="display:flex;justify-content:flex-end;margin-bottom:12px;"><div class="page-export-wrap" style="position:relative;"><button class="page-export-btn" onclick="togglePageExport(this,event)">Eksport ▾</button><div class="page-export-dd"><div class="page-export-item" onclick="pageExport('daerah','csv')">CSV / Excel</div><div class="page-export-item" onclick="pageExport('daerah','pdf')">PDF (A4)</div><div class="page-export-item" onclick="pageExport('daerah','image')">Imej (A4)</div></div></div></div>
+    <div class="no-print" style="display:flex;justify-content:flex-end;margin-bottom:0px;"><div class="page-export-wrap" style="position:relative;"><button class="page-export-btn" onclick="togglePageExport(this,event)">Eksport ▾</button><div class="page-export-dd"><div class="page-export-item" onclick="pageExport('daerah','csv')">CSV / Excel</div><div class="page-export-item" onclick="pageExport('daerah','pdf')">PDF (A4)</div><div class="page-export-item" onclick="pageExport('daerah','image')">Imej (A4)</div></div></div></div>
 
     <div class="district-grid" id="district-grid"></div>
     <div id="district-tables"></div>
@@ -2076,7 +2076,7 @@ tr.row-unpaid { background: #fff0f0 !important; }
 
   <!-- ══ SSM TRACKER ══ -->
   <div id="page-ssm" class="page">
-    <div class="no-print" style="display:flex;justify-content:flex-end;margin-bottom:12px;"><div class="page-export-wrap" style="position:relative;"><button class="page-export-btn" onclick="togglePageExport(this,event)">Eksport ▾</button><div class="page-export-dd"><div class="page-export-item" onclick="pageExport('ssm','csv')">CSV / Excel</div><div class="page-export-item" onclick="pageExport('ssm','pdf')">PDF (A4)</div><div class="page-export-item" onclick="pageExport('ssm','image')">Imej (A4)</div></div></div></div>
+    <div class="no-print" style="display:flex;justify-content:flex-end;margin-bottom:0px;"><div class="page-export-wrap" style="position:relative;"><button class="page-export-btn" onclick="togglePageExport(this,event)">Eksport ▾</button><div class="page-export-dd"><div class="page-export-item" onclick="pageExport('ssm','csv')">CSV / Excel</div><div class="page-export-item" onclick="pageExport('ssm','pdf')">PDF (A4)</div><div class="page-export-item" onclick="pageExport('ssm','image')">Imej (A4)</div></div></div></div>
 
     <div class="kpi-grid kpi-3">
       <div class="modern-kpi-card modern-kpi-danger">
@@ -2107,7 +2107,7 @@ tr.row-unpaid { background: #fff0f0 !important; }
 
   <!-- ══ FOLLOW UP ══ -->
   <div id="page-followup" class="page">
-    <div class="no-print" style="display:flex;justify-content:flex-end;margin-bottom:12px;"><div class="page-export-wrap" style="position:relative;"><button class="page-export-btn" onclick="togglePageExport(this,event)">Eksport ▾</button><div class="page-export-dd"><div class="page-export-item" onclick="pageExport('followup','csv')">CSV / Excel</div><div class="page-export-item" onclick="pageExport('followup','pdf')">PDF (A4)</div><div class="page-export-item" onclick="pageExport('followup','image')">Imej (A4)</div></div></div></div>
+    <div class="no-print" style="display:flex;justify-content:flex-end;margin-bottom:0px;"><div class="page-export-wrap" style="position:relative;"><button class="page-export-btn" onclick="togglePageExport(this,event)">Eksport ▾</button><div class="page-export-dd"><div class="page-export-item" onclick="pageExport('followup','csv')">CSV / Excel</div><div class="page-export-item" onclick="pageExport('followup','pdf')">PDF (A4)</div><div class="page-export-item" onclick="pageExport('followup','image')">Imej (A4)</div></div></div></div>
 
     <div class="fu-counters">
       <div class="fu-counter"><div class="fu-count" id="fu-count-yuran">0</div><div class="fu-label">Yuran Belum Bayar</div></div>
@@ -2146,7 +2146,7 @@ tr.row-unpaid { background: #fff0f0 !important; }
 
   <!-- ══ TEMPLATES ══ -->
   <div id="page-templates" class="page">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0px;">
       <div>
         <div style="font-size:13px;color:var(--muted);margin-top:2px;">Template digunakan di WhatsApp modal dan Follow Up. Placeholder: <strong>[NAMA PIC]</strong>, <strong>[NO. AHLI]</strong>, <strong>[NAMA SYARIKAT]</strong>, <strong>[TARIKH LUPUT SSM]</strong></div>
       </div>
@@ -2287,7 +2287,7 @@ tr.row-unpaid { background: #fff0f0 !important; }
   <div id="page-dokumen" class="page">
 
     <!-- TOP TOOLBAR -->
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0px;flex-wrap:wrap;gap:10px;">
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
         <button class="btn btn-primary btn-sm btn-shine" onclick="dokOpenCompose(null)">&#x270F; Cipta Dokumen Baru</button>
         <div style="position:relative;display:inline-block;">
@@ -2436,7 +2436,7 @@ tr.row-unpaid { background: #fff0f0 !important; }
     <div style="max-width:860px;margin:0 auto;">
 
       <!-- Quick Reference Cards -->
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px;">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:0px;">
         <div class="sec-card" style="border-top:3px solid var(--primary);text-align:center;padding:16px;">
           <div style="font-size:28px;">&nbsp;</div>
           <div style="font-weight:800;color:var(--primary);font-size:13px;margin-top:6px;">Urus Ahli</div>
@@ -2820,12 +2820,12 @@ tr.row-unpaid { background: #fff0f0 !important; }
 <!-- ══ PERMOHONAN AHLI ══ -->
 <div id="page-permohonan" class="page">
     <!-- SUMMARY BAR -->
-    <div id="perm-summary-bar" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px;padding:8px 16px;background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow-sm);border:1px solid var(--gray1);min-height:36px;"></div>
+    <div id="perm-summary-bar" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:0px;padding:8px 16px;background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow-sm);border:1px solid var(--gray1);min-height:36px;"></div>
     <!-- KPI CARDS -->
-    <div class="statsbar" id="permohonan-kpi" style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:16px;"></div>
+    <div class="statsbar" id="permohonan-kpi" style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:0px;"></div>
 
     <!-- SUB-TAB NAV -->
-    <div style="display:flex;gap:0;margin-bottom:16px;background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden;border:1px solid var(--gray1);flex-wrap:wrap;">
+    <div style="display:flex;gap:0;margin-bottom:0px;background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden;border:1px solid var(--gray1);flex-wrap:wrap;">
       <button id="ptab-BARU"                   class="ptab-btn active" onclick="switchPermohonanTab('BARU')"                   style="flex:1;min-width:120px;padding:12px 8px;border:none;background:none;font-family:var(--sans);font-size:12px;font-weight:700;letter-spacing:.06em;cursor:pointer;border-bottom:3px solid transparent;color:var(--muted);transition:all .2s;">BARU</button>
       <button id="ptab-DOKUMEN_LENGKAP"        class="ptab-btn"       onclick="switchPermohonanTab('DOKUMEN_LENGKAP')"        style="flex:1;min-width:120px;padding:12px 8px;border:none;background:none;font-family:var(--sans);font-size:12px;font-weight:700;letter-spacing:.06em;cursor:pointer;border-bottom:3px solid transparent;color:var(--muted);transition:all .2s;">LENGKAP</button>
       <button id="ptab-DOKUMEN_TIDAK_LENGKAP"  class="ptab-btn"       onclick="switchPermohonanTab('DOKUMEN_TIDAK_LENGKAP')"  style="flex:1;min-width:120px;padding:12px 8px;border:none;background:none;font-family:var(--sans);font-size:12px;font-weight:700;letter-spacing:.06em;cursor:pointer;border-bottom:3px solid transparent;color:var(--muted);transition:all .2s;">TIDAK LENGKAP</button>
