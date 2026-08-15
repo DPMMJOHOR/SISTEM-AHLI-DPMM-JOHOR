@@ -7626,12 +7626,6 @@ document.addEventListener('DOMContentLoaded', function(){
     
     if (action === 'open-permohonan') {
       openPermohonanModal(id);
-    } else if (action === 'change-status') {
-      var select = e.target;
-      if (select.value) {
-        updatePermohonanStatus(id, select.value);
-        select.value = '';
-      }
     } else if (action === 'update-status') {
       updatePermohonanStatus(id, status);
     } else if (action === 'update-status-close') {
@@ -7670,6 +7664,20 @@ document.addEventListener('DOMContentLoaded', function(){
       saveBayaranSahkan(id);
     } else if (action === 'save-nota') {
       saveAdminNota(id);
+    }
+  });
+
+  // Status dropdown uses a native <select> — selecting an option fires
+  // 'change', not a reliable 'click' on the element, so it needs its own
+  // delegated listener (was previously wired to the click listener above,
+  // which never fired).
+  document.body.addEventListener('change', function(e){
+    var target = e.target;
+    if (target.getAttribute('data-action') !== 'change-status') return;
+    var id = parseInt(target.getAttribute('data-id'));
+    if (target.value) {
+      updatePermohonanStatus(id, target.value);
+      target.value = '';
     }
   });
 });
