@@ -6888,7 +6888,9 @@ var PERMOHONAN_DOC_CHECKLIST = [
   { key: 'url_gambar_2',          label: 'Gambar Passport 2' },
   { key: 'url_insolvensi_entiti', label: 'Insolvensi Entiti' },
   { key: 'url_insolvensi_pemohon',label: 'Insolvensi Pemohon' },
+  { key: 'url_profil_ssm',        label: 'Profil SSM' },
   { key: 'url_ssm_sijil',         label: 'Sijil SSM' },
+  { key: 'url_ssm_maklumat',      label: 'Maklumat SSM' },
   { key: 'url_m_aa',              label: 'M&AA' },
   { key: 'url_borang_9',          label: 'Borang 9/13' },
   { key: 'url_borang_24',         label: 'Borang 24' },
@@ -6920,8 +6922,8 @@ function generatePermohonanDocReport() {
 
   // Fixed column widths (mm) tuned to fit A4 landscape usable width
   // (297mm page - 2x10mm margin = 277mm): 16+20+50+22 = 108mm fixed cols,
-  // remaining 169mm / 21 doc columns = ~8.05mm each.
-  var COL_NUM = '16mm', COL_REF = '20mm', COL_NAMA = '50mm', COL_STATUS = '22mm', COL_DOC = '8.05mm';
+  // remaining 169mm / 23 doc columns = ~7.35mm each.
+  var COL_NUM = '16mm', COL_REF = '20mm', COL_NAMA = '50mm', COL_STATUS = '22mm', COL_DOC = '7.35mm';
 
   var colgroup = '<colgroup>'
     + '<col style="width:' + COL_NUM + ';">'
@@ -7036,7 +7038,9 @@ function buildTabDokumen(p) {
     { label: 'Gambar Passport 2',         url: p.url_gambar_2 },
     { label: 'Insolvensi Entiti',         url: p.url_insolvensi_entiti },
     { label: 'Insolvensi Pemohon',        url: p.url_insolvensi_pemohon },
+    { label: 'Profil SSM',                url: p.url_profil_ssm },
     { label: 'Sijil SSM',                 url: p.url_ssm_sijil },
+    { label: 'Maklumat SSM',              url: p.url_ssm_maklumat },
     { label: 'M&AA',                      url: p.url_m_aa },
     { label: 'Borang 9/13',              url: p.url_borang_9 },
     { label: 'Borang 24',                url: p.url_borang_24 },
