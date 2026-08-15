@@ -5292,7 +5292,7 @@ function downloadPDFWithJsPDF() {
   y += 5;
 
   // Pemegang Saham table
-  const psSizes = [8, 85, 20, 25];
+  const psSizes = [10, 95, 25, 30];
   const psCols = ['#', 'Nama Pemegang Saham', '% Saham', 'Bangsa'];
   let x2 = margin;
   
@@ -5787,21 +5787,21 @@ function overlayPage1Data(pdf, width, height) {
   pdf.text('1. SALINAN SSM:', 50, y);
   y -= 22;
   
-  pdf.text(isSdnBhd ? '[√]' : '[ ]', 50, y);
+  pdf.text(isSdnBhd ? '☑' : '☐', 50, y);
   pdf.setFont('helvetica', 'normal');
   pdf.text('Sendirian Berhad (6.2.4)', 70, y);
   y -= 18;
-  pdf.text(isPerkongsian ? '[√]' : '[ ]', 50, y);
+  pdf.text(isPerkongsian ? '☑' : '☐', 50, y);
   pdf.text('Enterprise Perkongsian (6.2.1)', 70, y);
   y -= 18;
-  pdf.text(isPLT ? '[√]' : '[ ]', 50, y);
+  pdf.text(isPLT ? '☑' : '☐', 50, y);
   pdf.text('Pemunya Tunggal (6.2.1)', 70, y);
   y -= 28;
   
   pdf.setFont('helvetica', 'bold');
   pdf.text('2. Salinan Kad Pengenalan:', 50, y);
   y -= 20;
-  pdf.text('[√]', 50, y);
+  pdf.text('☑', 50, y);
   pdf.setFont('helvetica', 'normal');
   pdf.text('(Depan & Belakang)', 70, y);
   y -= 28;
@@ -5809,19 +5809,19 @@ function overlayPage1Data(pdf, width, height) {
   pdf.setFont('helvetica', 'bold');
   pdf.text('3. 2 Keping Gambar Passport:', 50, y);
   y -= 20;
-  pdf.text('[√]', 50, y);
+  pdf.text('☑', 50, y);
   y -= 28;
   
   pdf.setFont('helvetica', 'bold');
   pdf.text('4. Borang Keahlian Lengkap Diisi:', 50, y);
   y -= 20;
-  pdf.text('[√]', 50, y);
+  pdf.text('☑', 50, y);
   y -= 28;
   
   pdf.setFont('helvetica', 'bold');
   pdf.text('5. Borang Proksi:', 50, y);
   y -= 20;
-  pdf.text('[ ]', 50, y);
+  pdf.text('☐', 50, y);
   pdf.setFont('helvetica', 'normal');
   pdf.text('(Dicetak dalam Letterhead Pemohon)', 70, y);
   y -= 28;
@@ -5829,30 +5829,31 @@ function overlayPage1Data(pdf, width, height) {
   pdf.setFont('helvetica', 'bold');
   pdf.text('6. Borang Akuan Berkanun:', 50, y);
   y -= 20;
-  pdf.text('[ ]', 50, y);
+  pdf.text('☐', 50, y);
   pdf.text('telah dicop Pesuruhjaya Sumpah', 70, y);
   y -= 28;
   
   pdf.setFont('helvetica', 'bold');
   pdf.text('7. Bukti Bayaran Yuran:', 50, y);
   y -= 20;
-  pdf.text('[√]', 50, y);
+  pdf.text('☑', 50, y);
   y -= 40;
   
-  // Fee structure
+  // Fee structure - match template layout with proper spacing
   const isEnterprise = jenisEntiti === 'Perkongsian' || jenisEntiti === 'Pemunya Tunggal' || jenisEntiti === 'PLT';
   const regFee = isEnterprise ? 'RM50' : 'RM200';
   const memFee = isEnterprise ? 'RM150' : 'RM450';
   const total = isEnterprise ? 'RM200' : 'RM650';
   
   pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(10);
   pdf.text(`Pendaftaran: ${regFee}`, 50, y);
-  y -= 18;
+  y -= 15;
   pdf.text(`Keahlian (3 tahun): ${memFee}`, 50, y);
-  y -= 18;
+  y -= 15;
   pdf.setFontSize(11);
   pdf.text(`JUMLAH: ${total}`, 50, y);
-  y -= 45;
+  y -= 35;
   
   // Declaration
   pdf.setFontSize(10);
@@ -5950,14 +5951,14 @@ function overlayPage2Data(pdf, width, height) {
   pdf.text('Jenis Entiti:', 50, y);
   y -= 22;
   
-  pdf.text(isSdnBhd ? '[√]' : '[ ]', 50, y);
+  pdf.text(isSdnBhd ? '☑' : '☐', 50, y);
   pdf.setFont('helvetica', 'normal');
   pdf.text('Sendirian Berhad (Sdn Bhd)', 70, y);
   y -= 18;
-  pdf.text(isPerkongsian ? '[√]' : '[ ]', 50, y);
+  pdf.text(isPerkongsian ? '☑' : '☐', 50, y);
   pdf.text('Enterprise Perkongsian', 70, y);
   y -= 18;
-  pdf.text(isPLT ? '[√]' : '[ ]', 50, y);
+  pdf.text(isPLT ? '☑' : '☐', 50, y);
   pdf.text('Pemunya Tunggal (PLT)', 70, y);
 }
 
@@ -6019,13 +6020,13 @@ function overlayPage5Data(pdf, width, height, isPerkongsianOrSdnBhd) {
   y -= 30;
   
   // Tick A: Enterprise Milikan Tunggal (PLT)
-  pdf.text('[ ]', 50, y);
+  pdf.text('☐', 50, y);
   pdf.setFont('helvetica', 'normal');
   pdf.text('A. Enterprise Milikan Tunggal', 70, y);
   y -= 20;
   
   // Tick B: Enterprise Milikan Bersama / Sdn Bhd
-  pdf.text('[ ]', 50, y);
+  pdf.text('☐', 50, y);
   pdf.text('B. Enterprise Milikan Bersama / Sdn Bhd', 70, y);
   y -= 40;
   
@@ -6034,11 +6035,11 @@ function overlayPage5Data(pdf, width, height, isPerkongsianOrSdnBhd) {
   if (!isPerkongsianOrSdnBhd) {
     // PLT - Tick A
     pdf.setFontSize(10);
-    pdf.text('[√]', 50, y + 80);
+    pdf.text('☑', 50, y + 80);
   } else {
     // Perkongsian/Sdn Bhd - Tick B
     pdf.setFontSize(10);
-    pdf.text('[√]', 50, y + 60);
+    pdf.text('☑', 50, y + 60);
   }
   
   // Add company name and MyKAD

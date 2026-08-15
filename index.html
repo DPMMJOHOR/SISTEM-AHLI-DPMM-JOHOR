@@ -6556,6 +6556,9 @@ function buildPermohonanActionBtns(p) {
   var isAdm = currentUser && currentUser.role === 'admin';
   var html = '<button data-action="open-permohonan" data-id="' + id + '" style="padding:8px 16px;border-radius:6px;border:1.5px solid var(--gray2);background:var(--white);font-size:13px;font-weight:600;cursor:pointer;margin-right:8px;transition:all 0.2s ease;">👁 Semak</button>';
 
+  // Generate PDF from database record button
+  html += '<button onclick="generatePDFFromRecord(' + id + ')" style="padding:8px 16px;border-radius:6px;border:1.5px solid var(--gray2);background:var(--white);font-size:13px;font-weight:600;cursor:pointer;margin-right:8px;transition:all 0.2s ease;" title="Jana PDF dari rekod pangkalan data">📄 Jana PDF</button>';
+
   // Print and WhatsApp buttons for BARU status
   if (st === 'BARU' && p.pdf_url) {
     html += '<button onclick="printPermohonanPDF(' + id + ')" style="padding:8px 16px;border-radius:6px;border:1.5px solid var(--gray2);background:var(--white);font-size:13px;font-weight:600;cursor:pointer;margin-right:8px;transition:all 0.2s ease;" title="Cetak PDF">📥 Cetak</button>';
@@ -7209,6 +7212,431 @@ async function deletePermohonan(id) {
   
   await renderPermohonanPage();
   showSnack && showSnack('Permohonan telah dipadam.');
+}
+
+/* ── GENERATE PDF FROM DATABASE RECORD ─────────────────────────── */
+async function generatePDFFromRecord(recordId) {
+  var p = permohonanData.find(function(x){ return x.id === recordId; });
+  if (!p) {
+    alert('Rekod tidak dijumpai.');
+    return;
+  }
+
+  try {
+    // Load jsPDF library dynamically
+    if (!window.jspdf) {
+      var script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+      script.onload = function() {
+        window.jspdf = window.jspdf.jsPDF;
+        generatePDFFromRecordInternal(p);
+      };
+      document.head.appendChild(script);
+    } else {
+      generatePDFFromRecordInternal(p);
+    }
+  } catch (e) {
+    console.error('[PDF Generation] Error:', e);
+    alert('Ralat menjana PDF: ' + e.message);
+  }
+}
+
+async function generatePDFFromRecordInternal(data) {
+  const { jsPDF } = window.jspdf;
+  
+  // Create PDF document (A4 size)
+  const pdf = new jsPDF('p', 'pt', 'a4');
+  const pageWidth = 595.28;
+  const pageHeight = 841.89;
+  
+  // Template image paths
+  const baseUrl = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
+  const templateImages = [
+    `${baseUrl}/public/templates/Borang Keahlian Baru_Perkongsian SDN BHD conv 0.jpeg`,
+    `${baseUrl}/public/templates/Borang Keahlian Baru_Perkongsian SDN BHD conv 1.jpeg`,
+    `${baseUrl}/public/templates/Borang Keahlian Baru_Perkongsian SDN BHD conv 2.jpeg`,
+    `${baseUrl}/public/templates/Borang Keahlian Baru_Perkongsian SDN BHD conv 3.jpeg`,
+    `${baseUrl}/public/templates/Borang Keahlian Baru_Perkongsian SDN BHD conv 4.jpeg`,
+    `${baseUrl}/public/templates/Borang Keahlian Baru_Perkongsian SDN BHD conv 5.jpeg`
+  ];
+  
+  // Determine pages based on entity type
+  const jenisEntiti = data.jenis_entiti || 'Sdn Bhd';
+  const isPerkongsianOrSdnBhd = jenisEntiti === 'Perkongsian' || jenisEntiti === 'Sdn Bhd';
+  const pagesToInclude = isPerkongsianOrSdnBhd ? [0, 1, 2, 3, 4, 5] : [0, 1, 2, 3, 4];
+  
+  // Helper function to get field value
+  function val(field) {
+    return data[field] || '';
+  }
+  
+  // Helper to determine checkbox state
+  const isSdnBhd = jenisEntiti === 'Sdn Bhd';
+  const isPerkongsian = jenisEntiti === 'Perkongsian';
+  const isPLT = jenisEntiti === 'Pemunya Tunggal' || jenisEntiti === 'PLT';
+  
+  for (let i = 0; i < pagesToInclude.length; i++) {
+    const pageNum = pagesToInclude[i];
+    const imgPath = templateImages[pageNum];
+    
+    // Load image
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    
+    await new Promise((resolve, reject) => {
+      img.onload = resolve;
+      img.onerror = reject;
+      img.src = imgPath;
+    });
+    
+    // Add new page (except first page)
+    if (i > 0) {
+      pdf.addPage();
+    }
+    
+    // Draw image on PDF
+    pdf.addImage(img, 'JPEG', 0, 0, pageWidth, pageHeight);
+    
+    // Add online submission header (top right)
+    pdf.setFontSize(7);
+    pdf.setTextColor(128, 128, 128);
+    pdf.text('https://dpmmjohor.github.io/SISTEM-AHLI-DPMM-JOHOR/borang.html', pageWidth - 20, 30);
+    
+    // Overlay form data based on page
+    pdf.setTextColor(0, 0, 0);
+    pdf.setFontSize(10);
+    
+    if (pageNum === 0) {
+      overlayPage1DataFromRecord(pdf, pageWidth, pageHeight, data, isSdnBhd, isPerkongsian, isPLT, val);
+    } else if (pageNum === 1) {
+      overlayPage2DataFromRecord(pdf, pageWidth, pageHeight, data, isSdnBhd, isPerkongsian, isPLT, val);
+    } else if (pageNum === 2) {
+      overlayPage3DataFromRecord(pdf, pageWidth, pageHeight, data, val);
+    } else if (pageNum === 3) {
+      overlayPage4DataFromRecord(pdf, pageWidth, pageHeight, data, val);
+    } else if (pageNum === 4) {
+      overlayPage5DataFromRecord(pdf, pageWidth, pageHeight, data, isPerkongsianOrSdnBhd, val);
+    } else if (pageNum === 5) {
+      overlayPage6DataFromRecord(pdf, pageWidth, pageHeight, data, val);
+    }
+  }
+  
+  // Save PDF
+  const fileName = 'Borang_Permohonan_' + (data.ref_id || 'TEMP') + '.pdf';
+  pdf.save(fileName);
+  showSnack && showSnack('PDF berjaya dijana: ' + fileName);
+}
+
+/* ── OVERLAY FUNCTIONS FOR DATABASE RECORDS ─────────────────── */
+function overlayPage1DataFromRecord(pdf, width, height, data, isSdnBhd, isPerkongsian, isPLT, val) {
+  let y = height - 200;
+  
+  pdf.setFontSize(11);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Nama Pemohon:', 50, y);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text(val('nama_lengkap_pemohon') || '', 160, y);
+  y -= 25;
+  
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Nama Syarikat:', 50, y);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text(val('nama_perniagaan') || '', 160, y);
+  y -= 40;
+  
+  // Document checklist
+  pdf.setFontSize(10);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('1. SALINAN SSM:', 50, y);
+  y -= 22;
+  
+  pdf.text(isSdnBhd ? '☑' : '☐', 50, y);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text('Sendirian Berhad (6.2.4)', 70, y);
+  y -= 18;
+  pdf.text(isPerkongsian ? '☑' : '☐', 50, y);
+  pdf.text('Enterprise Perkongsian (6.2.1)', 70, y);
+  y -= 18;
+  pdf.text(isPLT ? '☑' : '☐', 50, y);
+  pdf.text('Pemunya Tunggal (6.2.1)', 70, y);
+  y -= 28;
+  
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('2. Salinan Kad Pengenalan:', 50, y);
+  y -= 20;
+  pdf.text('☑', 50, y);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text('(Depan & Belakang)', 70, y);
+  y -= 28;
+  
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('3. 2 Keping Gambar Passport:', 50, y);
+  y -= 20;
+  pdf.text('☑', 50, y);
+  y -= 28;
+  
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('4. Borang Keahlian Lengkap Diisi:', 50, y);
+  y -= 20;
+  pdf.text('☑', 50, y);
+  y -= 28;
+  
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('5. Borang Proksi:', 50, y);
+  y -= 20;
+  pdf.text('☐', 50, y);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text('(Dicetak dalam Letterhead Pemohon)', 70, y);
+  y -= 28;
+  
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('6. Borang Akuan Berkanun:', 50, y);
+  y -= 20;
+  pdf.text('☐', 50, y);
+  pdf.text('telah dicop Pesuruhjaya Sumpah', 70, y);
+  y -= 28;
+  
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('7. Bukti Bayaran Yuran:', 50, y);
+  y -= 20;
+  pdf.text('☑', 50, y);
+  y -= 40;
+  
+  // Fee structure
+  const isEnterprise = isPerkongsian || isPLT;
+  const regFee = isEnterprise ? 'RM50' : 'RM200';
+  const memFee = isEnterprise ? 'RM150' : 'RM450';
+  const total = isEnterprise ? 'RM200' : 'RM650';
+  
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(10);
+  pdf.text(`Pendaftaran: ${regFee}`, 50, y);
+  y -= 15;
+  pdf.text(`Keahlian (3 tahun): ${memFee}`, 50, y);
+  y -= 15;
+  pdf.setFontSize(11);
+  pdf.text(`JUMLAH: ${total}`, 50, y);
+  y -= 35;
+  
+  // Declaration
+  pdf.setFontSize(10);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Nama Pemohon:', 50, y);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text(val('nama_lengkap_pemohon') || '', 160, y);
+  y -= 22;
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Tarikh:', 50, y);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text(new Date().toLocaleDateString('ms-MY'), 100, y);
+  y -= 22;
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Cop Rasmi:', 50, y);
+}
+
+function overlayPage2DataFromRecord(pdf, width, height, data, isSdnBhd, isPerkongsian, isPLT, val) {
+  let y = height - 150;
+  
+  pdf.setFontSize(10);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Nama Perniagaan:', 50, y);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text(val('nama_perniagaan') || '', 220, y);
+  y -= 20;
+  
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('No. Pendaftaran:', 50, y);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text(val('no_pendaftaran') || '', 220, y);
+  y -= 20;
+  
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Alamat Pejabat/Premis:', 50, y);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text(val('alamat') || '', 220, y);
+  y -= 20;
+  
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Poskod:', 50, y);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text(val('poskod') || '', 150, y);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Bandar:', 200, y);
+  pdf.text(val('bandar') || '', 260, y);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Negeri:', 380, y);
+  pdf.text(val('negeri') || 'Johor', 440, y);
+  y -= 20;
+  
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Tarikh Daftar:', 50, y);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text(val('tarikh_daftar') || '', 150, y);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Tarikh Luput SSM:', 300, y);
+  pdf.text(val('tarikh_luput') || '', 440, y);
+  y -= 20;
+  
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('No. Tel:', 50, y);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text(val('no_tel_syarikat') || '', 150, y);
+  y -= 20;
+  
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('E-mail:', 50, y);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text(val('emel_syarikat') || '', 150, y);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('URL/Web:', 300, y);
+  pdf.text(val('url_syarikat') || '', 360, y);
+  y -= 20;
+  
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Modal Berbayar:', 50, y);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text('RM ' + (val('modal_berbayar') || ''), 170, y);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Modal Pusingan:', 300, y);
+  pdf.text('RM ' + (val('modal_pusingan') || ''), 420, y);
+  y -= 40;
+  
+  // Entity type checkboxes
+  pdf.setFontSize(10);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Jenis Entiti:', 50, y);
+  y -= 22;
+  
+  pdf.text(isSdnBhd ? '☑' : '☐', 50, y);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text('Sendirian Berhad (Sdn Bhd)', 70, y);
+  y -= 18;
+  pdf.text(isPerkongsian ? '☑' : '☐', 50, y);
+  pdf.text('Enterprise Perkongsian', 70, y);
+  y -= 18;
+  pdf.text(isPLT ? '☑' : '☐', 50, y);
+  pdf.text('Pemunya Tunggal (PLT)', 70, y);
+}
+
+function overlayPage3DataFromRecord(pdf, width, height, data, val) {
+  let y = height - 150;
+  
+  pdf.setFontSize(10);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Nama Pemohon:', 50, y);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text(val('nama_lengkap_pemohon') || '', 160, y);
+  y -= 20;
+  
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('No. MyKad:', 50, y);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text(val('no_kad_pengenal') || '', 150, y);
+  y -= 20;
+  
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Cop Syarikat:', 50, y);
+}
+
+function overlayPage4DataFromRecord(pdf, width, height, data, val) {
+  let y = height - 200;
+  
+  pdf.setFontSize(10);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Nama Penandatangan:', 50, y);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text(val('nama_lengkap_pemohon') || '', 200, y);
+  y -= 20;
+  
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('No. MyKad:', 50, y);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text(val('no_kad_pengenal') || '', 150, y);
+  y -= 20;
+  
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Di:', 50, y);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text(val('bandar') || '', 80, y);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Pada Tarikh:', 200, y);
+  pdf.text(new Date().toLocaleDateString('ms-MY'), 300, y);
+}
+
+function overlayPage5DataFromRecord(pdf, width, height, data, isPerkongsianOrSdnBhd, val) {
+  let y = height - 200;
+  
+  pdf.setFontSize(10);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('BORANG AKUAN BERKANUN', 50, y);
+  y -= 30;
+  
+  pdf.text('☐', 50, y);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text('A. Enterprise Milikan Tunggal', 70, y);
+  y -= 20;
+  
+  pdf.text('☐', 50, y);
+  pdf.text('B. Enterprise Milikan Bersama / Sdn Bhd', 70, y);
+  y -= 40;
+  
+  y -= 60;
+  if (!isPerkongsianOrSdnBhd) {
+    pdf.setFontSize(10);
+    pdf.text('☑', 50, y + 80);
+  } else {
+    pdf.setFontSize(10);
+    pdf.text('☑', 50, y + 60);
+  }
+  
+  y = height - 300;
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Nama Syarikat:', 50, y);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text(val('nama_perniagaan') || '', 160, y);
+  y -= 20;
+  
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('No. Pendaftaran:', 50, y);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text(val('no_pendaftaran') || '', 160, y);
+  y -= 20;
+  
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('No. MyKAD Pemohon:', 50, y);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text(val('no_kad_pengenal') || '', 160, y);
+  y -= 20;
+  
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Tarikh:', 50, y);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text(new Date().toLocaleDateString('ms-MY'), 100, y);
+  y -= 40;
+  
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Tandatangan:', 50, y);
+  y -= 20;
+  pdf.setFont('helvetica', 'normal');
+  pdf.text('_________________________', 50, y);
+}
+
+function overlayPage6DataFromRecord(pdf, width, height, data, val) {
+  let y = height - 250;
+  
+  pdf.setFontSize(10);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Nama & Jawatan (Selain Penama Proksi)', 50, y);
+  y -= 60;
+  
+  pdf.text('Cop Rasmi Syarikat', 50, y);
+  y -= 100;
+  
+  pdf.text('_________________________', 50, y);
+  y -= 20;
+  pdf.text('Tandatangan', 50, y);
+  y -= 20;
+  pdf.text('Nama:', 50, y);
 }
 
 /* ── LULUS MODAL ─────────────────────────────────────────── */
