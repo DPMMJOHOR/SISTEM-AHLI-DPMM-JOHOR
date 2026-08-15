@@ -1064,11 +1064,11 @@ small {
 /* ══════════════════════════════════════════
    PAGE CONTENT
 ══════════════════════════════════════════ */
-.page { display: none; padding: 24px 28px; flex: 1; position: relative; z-index: 1; }
+.page { display: none; padding: 16px 28px; flex: 1; position: relative; z-index: 1; }
 .page.active { display: block; }
 
 /* ── KPI CARDS ── */
-.kpi-grid { display: grid; gap: 18px; margin-bottom: 24px; }
+.kpi-grid { display: grid; gap: 18px; margin-bottom: 16px; }
 .kpi-4 { grid-template-columns: repeat(4,1fr); }
 .kpi-3 { grid-template-columns: repeat(3,1fr); }
 .kpi-2 { grid-template-columns: repeat(2,1fr); }
@@ -7393,7 +7393,8 @@ function overlayPage1DataFromRecord(pdf, width, height, data, isSdnBhd, isPerkon
   pdf.text('6. Borang Akuan Berkanun:', 50, y);
   y -= 20;
   pdf.text('☐', 50, y);
-  pdf.text('telah dicop Pesuruhjaya Sumpah', 70, y);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text('(telah dicopy Pesuruhjaya Sumpah)', 70, y);
   y -= 28;
   
   pdf.setFont('helvetica', 'bold');
@@ -7536,6 +7537,103 @@ function overlayPage3DataFromRecord(pdf, width, height, data, val) {
   
   pdf.setFont('helvetica', 'bold');
   pdf.text('Cop Syarikat:', 50, y);
+  y -= 40;
+  
+  // Pemegang Saham table
+  const psSizes = [10, 95, 25, 30];
+  const psCols = ['#', 'Nama Pemegang Saham', '% Saham', 'Bangsa'];
+  const margin = 50;
+  let x2 = margin;
+  
+  pdf.setFillColor(245, 245, 245);
+  pdf.rect(margin, y, width - margin * 2, 8, 'F');
+  pdf.setDrawColor(0, 0, 0);
+  pdf.setLineWidth(0.5);
+  pdf.rect(margin, y, width - margin * 2, 8, 'S');
+  
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(9);
+  pdf.setTextColor(0, 0, 0);
+  psCols.forEach((c, i) => {
+    pdf.text(c, x2 + 2, y + 5);
+    x2 += psSizes[i];
+  });
+  y += 9;
+  
+  const pemegangSaham = data.pemegang_saham || [];
+  for (let i = 0; i < Math.min(pemegangSaham.length, 5); i++) {
+    const ps = pemegangSaham[i];
+    const n = ps.nama || '';
+    const p = ps.peratus_saham || '';
+    const b = ps.bangsa || '';
+    
+    if (i % 2 === 0) {
+      pdf.setFillColor(248, 249, 250);
+      pdf.rect(margin, y, width - margin * 2, 7, 'F');
+    }
+    
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(9);
+    pdf.setDrawColor(0, 0, 0);
+    pdf.setLineWidth(0.3);
+    pdf.rect(margin, y, width - margin * 2, 7, 'S');
+    
+    x2 = margin;
+    pdf.setTextColor(0, 0, 0);
+    [i + 1, n, p + '%', b].forEach((v, idx) => {
+      pdf.text(String(v), x2 + 2, y + 4.5);
+      x2 += psSizes[idx];
+    });
+    y += 7;
+  }
+  y += 5;
+  
+  // Ahli Lembaga table
+  y -= 10;
+  const alCols = ['#', 'Nama Ahli Lembaga', '%', 'Bangsa'];
+  x2 = margin;
+  
+  pdf.setFillColor(245, 245, 245);
+  pdf.rect(margin, y, width - margin * 2, 8, 'F');
+  pdf.setDrawColor(0, 0, 0);
+  pdf.setLineWidth(0.5);
+  pdf.rect(margin, y, width - margin * 2, 8, 'S');
+  
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(9);
+  pdf.setTextColor(0, 0, 0);
+  alCols.forEach((c, i) => {
+    pdf.text(c, x2 + 2, y + 5);
+    x2 += psSizes[i];
+  });
+  y += 9;
+  
+  const ahliLembaga = data.ahli_lembaga || [];
+  for (let i = 0; i < Math.min(ahliLembaga.length, 5); i++) {
+    const al = ahliLembaga[i];
+    const n = al.nama || '';
+    const p = al.peratus || '';
+    const b = al.bangsa || '';
+    
+    if (i % 2 === 0) {
+      pdf.setFillColor(248, 249, 250);
+      pdf.rect(margin, y, width - margin * 2, 7, 'F');
+    }
+    
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(9);
+    pdf.setDrawColor(0, 0, 0);
+    pdf.setLineWidth(0.3);
+    pdf.rect(margin, y, width - margin * 2, 7, 'S');
+    
+    x2 = margin;
+    pdf.setTextColor(0, 0, 0);
+    [i + 1, n, p + '%', b].forEach((v, idx) => {
+      pdf.text(String(v), x2 + 2, y + 4.5);
+      x2 += psSizes[idx];
+    });
+    y += 7;
+  }
 }
 
 function overlayPage4DataFromRecord(pdf, width, height, data, val) {

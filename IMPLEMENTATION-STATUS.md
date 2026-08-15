@@ -15,6 +15,30 @@ All 22 implementation units completed successfully on **26 Julai 2026**. Merged 
 
 ---
 
+## Latest Updates (7 Ogos 2026)
+
+### UI/UX Enhancements & OCR Improvements
+- **Perakaunan Tab UI Fixes:**
+  - Reduced counter font size from 38px to 24px for better visual hierarchy
+  - Reduced sidebar navigation font size from 10px to 9px
+  - Increased organization logo size from 50px to 70px
+  - Increased organization name font size from 14px to 18px
+- **Accounting Tab Delete Functionality:**
+  - Added delete button for pending accounting entries
+  - Delete function with confirmation dialog
+  - Only visible to users with write permissions (admin, bendahari)
+- **OCR Enhancements for Bank Statements:**
+  - Multi-page PDF processing (processes ALL pages, not just first page)
+  - Extracts ALL transactions (both IN and OUT) from bank statements
+  - Auto-selects largest transaction when multiple found
+  - Stores extracted transactions globally for future use
+  - Progress tracking across all pages
+- **Data Cleanup:**
+  - Removed test 250k bank statement entry
+- **Status:** All changes committed and pushed to GitHub (commit 7c35e80)
+
+---
+
 ## Comprehensive System Upgrade (6 Ogos 2026)
 
 **Status:** ✅ **COMPLETE**

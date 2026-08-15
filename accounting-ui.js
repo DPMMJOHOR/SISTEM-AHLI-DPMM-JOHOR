@@ -65,7 +65,7 @@ function showAccountingPage() {
   setTimeout(setupDragAndDrop, 100);
 
   dashEl.innerHTML =
-    '<div class="kpi-grid kpi-4" style="margin-bottom:24px;">' +
+    '<div class="kpi-grid kpi-4" style="margin-bottom:16px;">' +
       '<div class="modern-kpi-card premium-glass"><div class="modern-kpi-label">JUMLAH PENDAPATAN (BULAN INI)</div><div class="modern-kpi-val" id="acct-kpi-month-total">RM 0.00</div></div>' +
       '<div class="modern-kpi-card modern-kpi-danger premium-glass"><div class="modern-kpi-label">MENUNGGU KELULUSAN</div><div class="modern-kpi-val" id="acct-kpi-pending">0</div></div>' +
       '<div class="modern-kpi-card premium-glass"><div class="modern-kpi-label">BAKI BANK (SEMUA AKAUN)</div><div class="modern-kpi-val" id="acct-kpi-bank-balance">RM 0.00</div></div>' +
@@ -439,15 +439,18 @@ function extractBankStatementData(text) {
       }
     }
     
-    var dateMatch = text.match(/\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}/);
+    var dateMatch = text.match(/\b(0?[1-9]|[12][0-9]|3[01])[\/\-](0?[1-9]|1[0-2])[\/\-](19|20)\d{2}\b/);
     if (dateMatch) {
       var dateStr = dateMatch[0].replace(/\//g, '-');
       var parts = dateStr.split('-');
       if (parts.length === 3) {
-        var day = parts[0].padStart(2, '0');
-        var month = parts[1].padStart(2, '0');
-        var year = parts[2];
-        document.getElementById('acct-entry-date').value = year + '-' + month + '-' + day;
+        var day = parseInt(parts[0], 10);
+        var month = parseInt(parts[1], 10);
+        var year = parseInt(parts[2], 10);
+        // Validate date ranges
+        if (day >= 1 && day <= 31 && month >= 1 && month <= 12 && year >= 1900 && year <= 2100) {
+          document.getElementById('acct-entry-date').value = year + '-' + month.toString().padStart(2, '0') + '-' + day.toString().padStart(2, '0');
+        }
       }
     }
     
@@ -918,6 +921,7 @@ async function loadAccountingEntries() {
       tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);">Tiada rekod pendapatan.</td></tr>';
       return;
     }
+    var canWrite = accountingCanWrite();
     tbody.innerHTML = rows.map(function(e){
       var statusBadge = e.approval_status === 'approved'
         ? '<span style="color:var(--success);font-weight:700;">Diluluskan</span>'
@@ -1336,6 +1340,7 @@ async function filterAccountingEntries() {
       return;
     }
 
+    var canWrite = accountingCanWrite();
     tbody.innerHTML = rows.map(function(e){
       var statusBadge = e.approval_status === 'approved'
         ? '<span style="color:var(--success);font-weight:700;">Diluluskan</span>'

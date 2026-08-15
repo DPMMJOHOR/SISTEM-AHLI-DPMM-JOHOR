@@ -1,7 +1,7 @@
 # Panduan Pengguna Sistem Perakaunan — DPMM Negeri Johor
 
-**Versi:** 1.0  
-**Tarikh:** 5 Ogos 2026  
+**Versi:** 1.1  
+**Tarikh:** 7 Ogos 2026  
 **Audience:** Admin, Bendahari, AJK DPMM Negeri Johor
 
 ---
@@ -10,10 +10,10 @@
 
 **AMARAN**: Dokumen ini menerangkan ciri-ciri yang dirancang untuk modul perakaunan. Beberapa ciri yang diterangkan di bawah mungkin belum dilaksanakan sepenuhnya dalam pangkalan data semasa.
 
-**Status Semasa (6 Ogos 2026)**:
+**Status Semasa (7 Ogos 2026)**:
 - Akaun Tunai (cash_accounts): Tersedia (6 akaun aktif)
-- Akaun Bank (bank_accounts): BELUM dilaksanakan (0 akaun)
-- Rekod Pendapatan (accounting_entries): BELUM dilaksanakan (0 rekod)
+- Akaun Bank (bank_accounts): Tersedia (1 akaun aktif)
+- Rekod Pendapatan (accounting_entries): Tersedia
 - Chart of Accounts: Tersedia (40 akaun)
 - Journal Entries: BELUM dilaksanakan (0 rekod)
 - Receipts: BELUM dilaksanakan (0 rekod)
@@ -21,6 +21,10 @@
 - Spending Limits: Tersedia (6 konfigurasi)
 - Aliran Kerja Kelulusan: Bahagian tersedia
 - Laporan: KPI asas tersedia, eksport CSV belum dilaksanakan
+- **Ciri Baru (7 Ogos 2026):**
+  - Fungsi memadam rekod pendapatan (untuk status pending sahaja)
+  - OCR dipertingkat untuk pemprosesan multi-halaman PDF
+  - Ekstraksi semua transaksi (IN dan OUT) dari bank statement
 
 **Isu Keselamatan**:
 - dpmm_templates table: RLS dilumpuhkan (isu kritikal)
@@ -232,6 +236,58 @@ Beberapa medan akan muncul berdasarkan kategori yang dipilih:
 3. Tunggu muat naik selesai
 4. Nama fail akan dipaparkan
 
+### Memadam Rekod Pendapatan
+
+**PENTING:** Hanya rekod dengan status "Pending" boleh dipadam.
+
+1. Pergi ke bahagian **"Rekod Pendapatan"**
+2. Cari rekod dengan status **"Pending"**
+3. Klik butang **"Padam"** pada rekod (hanya kelihatan untuk Admin dan Bendahari)
+4. Sahkan pemadaman
+5. Rekod akan dipadam secara kekal
+
+**Nota:**
+- Rekod yang sudah diluluskan atau ditolak tidak boleh dipadam
+- Butang "Padam" hanya kelihatan untuk pengguna dengan keizinan tulis (Admin, Bendahari)
+- Tindakan pemadaman tidak boleh diundur
+
+---
+
+## Ciri OCR untuk Bank Statement
+
+### Pemprosesan Multi-Halaman PDF
+
+Sistem kini memproses SEMUA halaman bank statement, bukan hanya halaman pertama:
+- Setiap halaman PDF akan dirasterisasi dan diproses dengan OCR
+- Teks dari semua halaman akan digabungkan
+- Progress bar menunjukkan kemajuan keseluruhan merentasi semua halaman
+
+### Ekstraksi Transaksi
+
+Sistem mengekstrak SEMUA transaksi dari bank statement:
+- **Transaksi Masuk (IN):** Penerimaan ke akaun bank
+- **Transaksi Keluar (OUT):** Pembayaran dari akaun bank
+- Format transaksi dikenal pasti secara automatik
+- Semua transaksi disimpan dalam `window.extractedBankTransactions`
+
+### Auto-Isi Borang
+
+Apabila bank statement diproses:
+- Sistem akan memilih transaksi terbesar secara automatik
+- Borang akan diisi dengan:
+  - Tarikh transaksi
+  - Jumlah transaksi
+  - Nombor rujukan
+  - Penerangan
+- Pengguna boleh mengubah nilai jika perlu
+
+### Menggunakan Transaksi Lain
+
+Jika transaksi terbesar bukan yang diinginkan:
+1. Semak `window.extractedBankTransactions` dalam konsol browser
+2. Pilih transaksi yang diinginkan dari senarai
+3. Isi borang secara manual dengan nilai transaksi tersebut
+
 ### Menyimpan Rekod
 
 1. Semua medan wajib mesti diisi
@@ -335,7 +391,20 @@ Ciri eksport CSV akan ditambah dalam masa hadapan untuk:
 
 ### Q: Bolehkah saya memadam rekod pendapatan yang sudah diluluskan?
 
-**A:** Tidak. Rekod yang sudah diluluskan tidak boleh dipadam untuk integriti audit. Jika terdapat ralat, buat rekod pembetulan baru.
+**A:** Tidak. Rekod yang sudah diluluskan tidak boleh dipadam untuk integriti audit. Walau bagaimanapun, rekod dengan status "Pending" boleh dipadam oleh Admin dan Bendahari.
+
+### Q: Bagaimana cara memadam rekod pendapatan?
+
+**A:** Untuk memadam rekod pendapatan:
+1. Pergi ke bahagian "Rekod Pendapatan"
+2. Cari rekod dengan status "Pending"
+3. Klik butang "Padam" pada rekod (hanya kelihatan untuk Admin dan Bendahari)
+4. Sahkan pemadaman
+5. Rekod akan dipadam secara kekal
+
+### Q: Bolehkah AJK memadam rekod pendapatan?
+
+**A:** Tidak. AJK hanya boleh meluluskan atau menolak rekod yang sedia ada. Hanya Admin dan Bendahari boleh memadam rekod (hanya status pending).
 
 ### Q: Bagaimana cara mengemas kini baki akaun bank?
 
@@ -359,6 +428,18 @@ Ciri eksport CSV akan ditambah dalam masa hadapan untuk:
 ### Q: Berapa saiz maksimum fail untuk muat naik dokumen?
 
 **A:** Saiz maksimum adalah 5MB. Format yang disokong: PDF, PNG, JPG, JPEG.
+
+### Q: Adakah OCR memproses semua halaman bank statement?
+
+**A:** Ya. Sistem kini memproses SEMUA halaman bank statement, bukan hanya halaman pertama. Setiap halaman akan dirasterisasi dan diproses dengan OCR.
+
+### Q: Adakah semua transaksi diekstrak dari bank statement?
+
+**A:** Ya. Sistem mengekstrak SEMUA transaksi (baik IN dan OUT) dari bank statement. Semua transaksi disimpan dalam `window.extractedBankTransactions` untuk rujukan.
+
+### Q: Transaksi mana yang dipilih untuk auto-isi borang?
+
+**A:** Sistem akan memilih transaksi terbesar secara automatik untuk auto-isi borang. Pengguna boleh mengubah nilai jika perlu.
 
 ### Q: Adakah rekod pendapatan yang ditolak boleh diluluskan semula?
 
@@ -407,9 +488,14 @@ Jika menghadapi masalah teknikal:
 
 ## Versi
 
-- **Versi Semasa:** 1.0
+- **Versi Semasa:** 1.1
 - **Tarikh Keluaran:** 5 Ogos 2026
-- **Tarikh Kemas Kini Terakhir:** 5 Ogos 2026
+- **Tarikh Kemas Kini Terakhir:** 7 Ogos 2026
+- **Perubahan Versi 1.1:**
+  - Ditambah: Fungsi memadam rekod pendapatan (status pending)
+  - Ditambah: Ciri OCR multi-halaman PDF
+  - Ditambah: Ekstraksi semua transaksi (IN dan OUT)
+  - Dikemaskini: Status pelaksanaan akaun bank dan rekod pendapatan
 
 ---
 
