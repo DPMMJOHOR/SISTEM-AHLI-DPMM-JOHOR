@@ -6882,6 +6882,8 @@ function buildTabSaham(p) {
    document type, ✔ if the applicant uploaded it, blank box if not. ────── */
 var PERMOHONAN_DOC_CHECKLIST = [
   { key: 'pdf_url',               label: 'Borang PDF' },
+  { key: 'url_ic_pemohon_depan',    label: 'IC Depan' },
+  { key: 'url_ic_pemohon_belakang', label: 'IC Belakang' },
   { key: 'url_gambar_1',          label: 'Gambar Passport 1' },
   { key: 'url_gambar_2',          label: 'Gambar Passport 2' },
   { key: 'url_insolvensi_entiti', label: 'Insolvensi Entiti' },
@@ -6918,8 +6920,8 @@ function generatePermohonanDocReport() {
 
   // Fixed column widths (mm) tuned to fit A4 landscape usable width
   // (297mm page - 2x10mm margin = 277mm): 16+20+50+22 = 108mm fixed cols,
-  // remaining 169mm / 19 doc columns = ~8.9mm each.
-  var COL_NUM = '16mm', COL_REF = '20mm', COL_NAMA = '50mm', COL_STATUS = '22mm', COL_DOC = '8.9mm';
+  // remaining 169mm / 21 doc columns = ~8.05mm each.
+  var COL_NUM = '16mm', COL_REF = '20mm', COL_NAMA = '50mm', COL_STATUS = '22mm', COL_DOC = '8.05mm';
 
   var colgroup = '<colgroup>'
     + '<col style="width:' + COL_NUM + ';">'
@@ -7028,6 +7030,8 @@ function viewAdminDokumen(rawPathOrUrl) {
 function buildTabDokumen(p) {
   var docs = [
     { label: 'Borang Permohonan (PDF)', url: p.pdf_url, isPdf: true },
+    { label: 'Kad Pengenalan (Depan)',     url: p.url_ic_pemohon_depan },
+    { label: 'Kad Pengenalan (Belakang)',  url: p.url_ic_pemohon_belakang },
     { label: 'Gambar Passport 1',         url: p.url_gambar_1 },
     { label: 'Gambar Passport 2',         url: p.url_gambar_2 },
     { label: 'Insolvensi Entiti',         url: p.url_insolvensi_entiti },
